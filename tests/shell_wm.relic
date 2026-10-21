@@ -1,5 +1,5 @@
 # the desktop model in shell/wm.relic, driven by fake clicks and keys
-use ../../shell/wm
+use ../shell/wm
 let d = wm.new_desktop(640, 480, wm.default_apps())
 fun show(d)
     let names = []
