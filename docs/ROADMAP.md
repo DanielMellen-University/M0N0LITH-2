@@ -19,5 +19,6 @@ M0N0LITH-2 is the MONOLITH 2 desktop written in Relic. The language roadmap is i
 - [ ] File browser (started: browses the VFS)
 - [ ] Drawing app
 - [ ] At least one game
+- [ ] Relic IDE (planned, not started; moved here from Relic's roadmap. Needs Daniel's approval before any building starts)
 
 Next ideas carried over from Relic (not approved yet): Terminal scrollback, Editor open by path, host-backed mounts if needed.
