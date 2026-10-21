@@ -1,0 +1,23 @@
+name: CI
+on:
+  push:
+  pull_request:
+jobs:
+  build:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest, windows-latest]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: true
+      - name: Build Relic (pinned submodule)
+        run: |
+          cmake -S relic -B relic/build -DCMAKE_BUILD_TYPE=Release
+          cmake --build relic/build --config Release
+      - name: Configure
+        run: cmake -S . -B build
+      - name: Test
+        run: ctest --test-dir build -C Release --output-on-failure
