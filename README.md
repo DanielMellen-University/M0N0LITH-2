@@ -30,13 +30,15 @@ Needs a C++17 compiler and CMake 3.16 or newer (for Relic).
 ```
 git clone --recurse-submodules https://github.com/DanielMellen-University/M0N0LITH-2
 cd M0N0LITH-2
-cmake -S relic -B relic/build -DCMAKE_BUILD_TYPE=Release
+cmake -S relic -B relic/build -DCMAKE_BUILD_TYPE=Release -DRELIC_BUILD_HOST=ON
 cmake --build relic/build --config Release
 cmake -S . -B build
 ctest --test-dir build -C Release --output-on-failure
 ```
 
 Already cloned without submodules? Run `git submodule update --init`.
+
+`-DRELIC_BUILD_HOST=ON` matters. Since Relic 1.0.7 the default Relic build is C only and makes `relicc` (the compiler to C), not the `relic` program the tests and `relic check` use. The flag builds the C++ host that provides `relic`.
 
 The tests run `shell_wm` and `relic check` on every shell file. CI runs the same steps on Linux, macOS and Windows.
 

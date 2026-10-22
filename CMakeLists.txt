@@ -7,7 +7,7 @@ find_program(RELIC_EXE NAMES relic
   PATHS ${CMAKE_SOURCE_DIR}/relic/build/Release ${CMAKE_SOURCE_DIR}/relic/build
   NO_DEFAULT_PATH)
 if(NOT RELIC_EXE)
-  message(FATAL_ERROR "relic not found. Build it with: cmake -S relic -B relic/build && cmake --build relic/build")
+  message(FATAL_ERROR "relic not found. Build it with: cmake -S relic -B relic/build -DRELIC_BUILD_HOST=ON && cmake --build relic/build")
 endif()
 message(STATUS "Using relic: ${RELIC_EXE}")
 
