@@ -25,7 +25,7 @@ Relic is a git submodule at `relic/`, pinned to one commit. Building that commit
 
 ## Build and test
 
-Needs a C++17 compiler and CMake 3.16 or newer (for Relic).
+Needs a C compiler, a C++17 compiler (for Relic's host) and CMake 3.16 or newer.
 
 ```
 git clone --recurse-submodules https://github.com/DanielMellen-University/M0N0LITH-2
@@ -44,13 +44,15 @@ The tests run `shell_wm` and `relic check` on every shell file. CI runs the same
 
 ## Run the desktop
 
-The desktop needs Relic built with SDL2:
+The desktop needs Relic built with SDL2 (`apt install libsdl2-dev`, `brew install sdl2`, or vcpkg on Windows). `-DRELIC_SDL=ON` turns on the C++ host too, so `relic` gets built:
 
 ```
-cmake -S relic -B relic/build-sdl -DRELIC_SDL=ON
-cmake --build relic/build-sdl
+cmake -S relic -B relic/build-sdl -DCMAKE_BUILD_TYPE=Release -DRELIC_SDL=ON
+cmake --build relic/build-sdl --config Release
 relic/build-sdl/relic shell/desktop.relic
 ```
+
+With Visual Studio the program is `relic\build-sdl\Release\relic.exe`.
 
 Click Start, pick an app, click inside it or type. Drag a title bar to move a window, drag its bottom-right corner to resize. Escape quits.
 
