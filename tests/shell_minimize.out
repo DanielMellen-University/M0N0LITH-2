@@ -1,0 +1,27 @@
+launch launch launch
+["Clicker#1", "Notes#2", "Terminal#3"] focus Terminal
+minimize
+["Clicker#1", "Notes#2", "Terminal#3 (min)"] focus Notes
+a_
+desktop
+["Clicker#1", "Notes#2", "Terminal#3 (min)"] focus Notes
+tab
+["Clicker#1", "Notes#2", "Terminal#3"] focus Terminal
+false
+true true true
+minimize
+["Clicker#1", "Notes#2", "Terminal#3 (min)"] focus Notes
+tab
+["Notes#2", "Terminal#3 (min)", "Clicker#1"] focus Clicker
+minimize minimize
+["Notes#2 (min)", "Terminal#3 (min)", "Clicker#1 (min)"] focus none
+desktop
+tab
+["Terminal#3 (min)", "Clicker#1 (min)", "Notes#2"] focus Notes
+["Clicker#1 (min)", "Notes#2"] focus Notes
+no tab
+close
+["Clicker#1 (min)"] focus none
+title true
+none
+["Clicker#1 (min)", "Clicker#4 (min)"] focus none

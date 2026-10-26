@@ -7,6 +7,8 @@
 # lines() gives the text rows the desktop draws inside the window.
 # Drag and resize use press (via click), motion, and release. drag on the
 # desktop is none, or {id, mode, ox, oy} with mode "move" or "resize".
+# A minimized window stays in windows and on the taskbar but is not drawn,
+# takes no clicks or keys, and is never focused.
 
 use std/strings
 use std/time
@@ -50,21 +52,28 @@ fun tab_box(d, i) = [start_width + 4 + i * (tab_width + 4), bar_top(d) + 3, tab_
 
 fun close_box(w) = [w.x + w.width - title_height, w.y, title_height, title_height]
 
+# The _ box, just left of the x box. It minimizes the window.
+fun minimize_box(w) = [w.x + w.width - 2 * title_height, w.y, title_height, title_height]
+
 fun resize_box(w) = [w.x + w.width - grip, w.y + title_height + w.height - grip, grip, grip]
 
 fun _inside(b, x, y) = x >= b[0] and x < b[0] + b[2] and y >= b[1] and y < b[1] + b[3]
 
 fun launch(d, app)
     let n = len(d.windows)
-    let w = {id: d.next_id, app: app, state: app.init(), x: 40 + n * 24, y: 30 + n * 20, width: app.width, height: app.height}
+    let w = {id: d.next_id, app: app, state: app.init(), x: 40 + n * 24, y: 30 + n * 20, width: app.width, height: app.height, minimized: false}
     d.next_id = d.next_id + 1
     append(d.windows, w)
     return w
 
+# The top window that is not minimized, or none.
 fun focused(d)
-    if len(d.windows) == 0
-        return none
-    return d.windows[len(d.windows) - 1]
+    let i = len(d.windows) - 1
+    while i >= 0
+        if not d.windows[i].minimized
+            return d.windows[i]
+        i = i - 1
+    return none
 
 fun _raise(d, i)
     let w = d.windows[i]
@@ -83,6 +92,23 @@ fun close(d, id)
         remove(d.windows, i)
     if d.drag != none and d.drag.id == id
         d.drag = none
+
+# Hide a window. Focus goes to the next visible window down.
+fun minimize(d, id)
+    let i = _index_of(d, id)
+    if i < 0
+        return
+    d.windows[i].minimized = true
+    if d.drag != none and d.drag.id == id
+        d.drag = none
+
+# Show a window again and bring it to the front.
+fun restore(d, id)
+    let i = _index_of(d, id)
+    if i < 0
+        return
+    d.windows[i].minimized = false
+    _raise(d, i)
 
 # Keep enough of the title bar on screen so the window stays reachable.
 fun _clamp_pos(d, w)
@@ -145,18 +171,25 @@ fun click(d, x, y)
         let t = tabs(d)
         for i in 0..len(t)
             if _inside(tab_box(d, i), x, y)
-                _raise(d, _index_of(d, t[i].id))
+                let f = focused(d)
+                if f != none and f.id == t[i].id
+                    minimize(d, t[i].id)
+                    return "minimize"
+                restore(d, t[i].id)
                 return "tab"
         return "bar"
     let i = len(d.windows) - 1
     while i >= 0
         let w = d.windows[i]
-        if _inside([w.x, w.y, w.width, w.height + title_height], x, y)
+        if not w.minimized and _inside([w.x, w.y, w.width, w.height + title_height], x, y)
             _raise(d, i)
             w = d.windows[len(d.windows) - 1]
             if _inside(close_box(w), x, y)
                 close(d, w.id)
                 return "close"
+            if _inside(minimize_box(w), x, y)
+                minimize(d, w.id)
+                return "minimize"
             if y < w.y + title_height
                 _begin_drag(d, w, "move", x, y)
                 return "title"
