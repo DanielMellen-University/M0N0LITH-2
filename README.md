@@ -1,5 +1,5 @@
 # M0N0LITH-2
-M0N0LITH written in relic.
+M0N0LITH written in [Relic](https://github.com/DanielMellen-University/Relic).
 
 This repo is the MONOLITH 2 desktop environment: the window manager, taskbar, Start menu and the apps, all written in [Relic](https://github.com/DanielMellen-University/Relic). The language itself (host, std, self-host) lives in the Relic repo. Language changes go there, desktop and app changes go here.
 
