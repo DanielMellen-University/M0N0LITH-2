@@ -28,8 +28,7 @@ fun draw(d)
         graphics.text(cb[0] + 4, cb[1] + 2, "x", 255, 255, 255)
         let mb = wm.minimize_box(w)
         draw_box(mb, 110, 110, 125)
-        # A drawn bar, not text: the built-in font draws "_" blank.
-        draw_box([mb[0] + 4, mb[1] + 11, 8, 2], 255, 255, 255)
+        graphics.text(mb[0] + 4, mb[1] + 2, "_", 255, 255, 255)
         let row = 0
         for line in w.app.lines(w.state)
             graphics.text(w.x + 6, w.y + wm.title_height + 6 + row * 14, line, 20, 20, 20)
