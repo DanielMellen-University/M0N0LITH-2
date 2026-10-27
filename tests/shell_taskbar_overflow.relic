@@ -1,0 +1,154 @@
+# Taskbar overflow: past 13 windows the tabs that do not fit go behind a +N button
+use ../shell/wm
+let apps = wm.default_apps()
+
+fun fill(d, n)
+    while len(d.windows) < n
+        wm.launch(d, apps[len(d.windows) % len(apps)])
+
+fun names(list)
+    let out = []
+    for w in list
+        append(out, "{w.id}")
+    let text = ""
+    for i in 0..len(out)
+        if i > 0
+            text = text + ","
+        text = text + out[i]
+    return text
+
+fun has_tab(d, id)
+    for w in wm.shown_tabs(d)
+        if w.id == id
+            return true
+    return false
+
+# every tab and the button stay inside the desktop, the tabs never touch the button or each other
+fun report(d)
+    let shown = wm.shown_tabs(d)
+    let ob = wm.overflow_box(d)
+    let past = 0
+    let overlap = 0
+    for i in 0..len(shown)
+        let b = wm.tab_box(d, i)
+        if b[0] + b[2] > d.width or b[0] < wm.start_width
+            past = past + 1
+        if i > 0
+            let a = wm.tab_box(d, i - 1)
+            if a[0] + a[2] > b[0]
+                overlap = overlap + 1
+    let label = "no button"
+    if ob != none
+        let last = wm.tab_box(d, len(shown) - 1)
+        if last[0] + last[2] > ob[0]
+            overlap = overlap + 1
+        if ob[0] + ob[2] > d.width
+            past = past + 1
+        label = "button {wm.overflow_label(d)} at {ob[0]}"
+    print(len(d.windows), "windows:", len(shown), "tabs of width", wm.tab_width_for(d), "-", len(wm.hidden_tabs(d)), "hidden -", label, "- off the bar:", past, "overlaps:", overlap)
+
+let d = wm.new_desktop(640, 480, apps)
+for n in [1, 13, 14, 20, 21, 50]
+    fill(d, n)
+    report(d)
+
+# clicking a shown tab (its left and right edge pixels) brings that window to the front;
+# the pixel past it is the gap, not a tab. The last slot holds the focused window.
+fun tab_clicks(n, where)
+    let dd = wm.new_desktop(640, 480, apps)
+    fill(dd, n)
+    let shown = wm.shown_tabs(dd)
+    let ok = 0
+    for i in 0..len(shown) - 1
+        let b = wm.tab_box(dd, i)
+        let x = b[0]
+        if where == "right"
+            x = b[0] + b[2] - 1
+        if where == "center"
+            x = b[0] + int(b[2] / 2)
+        wm.click(dd, x, b[1] + 3)
+        if wm.focused(dd).id == shown[i].id
+            ok = ok + 1
+    return "{ok} of {len(shown) - 1}"
+print("left edges:", tab_clicks(50, "left"), "right edges:", tab_clicks(50, "right"), "centers:", tab_clicks(21, "center"))
+let gap = wm.new_desktop(640, 480, apps)
+fill(gap, 50)
+let g = wm.tab_box(gap, 0)
+print("gap after a tab:", wm.click(gap, g[0] + g[2], g[1] + 3), "focus unchanged:", wm.focused(gap).id == 50)
+
+# the button opens the list, a second press closes it
+let d3 = wm.new_desktop(640, 480, apps)
+fill(d3, 30)
+let ob = wm.overflow_box(d3)
+print("button", wm.click(d3, ob[0] + 1, ob[1] + 1), d3.overflow_open)
+print("again", wm.click(d3, ob[0] + ob[2] - 1, ob[1] + ob[3] - 1), d3.overflow_open)
+print("just left of it", wm.click(d3, ob[0] - 1, ob[1] + 1), d3.overflow_open)
+print("just right of it", wm.click(d3, ob[0] + ob[2], ob[1] + 1), d3.overflow_open)
+
+# the list names the hidden windows, in launch order; picking one focuses it and gives it a tab
+wm.click(d3, ob[0] + 1, ob[1] + 1)
+let hidden = wm.hidden_tabs(d3)
+print("hidden", names(hidden), "focus", wm.focused(d3).id, "shown", names(wm.shown_tabs(d3)))
+print("list: rows", wm.overflow_rows(d3), "columns", wm.overflow_cols(d3), "drawn", wm.overflow_shown(d3))
+let row = wm.overflow_item_box(d3, 3)
+let want = hidden[3].id
+print("pick row 3", wm.click(d3, row[0] + 2, row[1] + 2), d3.overflow_open, "focus is the picked one:", wm.focused(d3).id == want)
+let shown3 = wm.shown_tabs(d3)
+print("it has a tab:", shown3[len(shown3) - 1].id == want, "last shown", shown3[len(shown3) - 1].id, "hidden now", len(wm.hidden_tabs(d3)))
+
+# a minimized window picked from the list is restored
+let hid = wm.hidden_tabs(d3)[0]
+wm.minimize(d3, hid.id)
+wm.click(d3, ob[0] + 1, ob[1] + 1)
+let top = wm.overflow_item_box(d3, 0)
+wm.click(d3, top[0] + 2, top[1] + 2)
+print("a minimized hidden window comes back: still minimized", hid.minimized, "- focused", wm.focused(d3).id == hid.id, "- has a tab", has_tab(d3, hid.id))
+
+# a press anywhere else closes the list without picking
+wm.click(d3, ob[0] + 1, ob[1] + 1)
+print("desktop press", wm.click(d3, 5, 5), d3.overflow_open)
+wm.click(d3, ob[0] + 1, ob[1] + 1)
+print("tab press", wm.click(d3, wm.start_width + 6, wm.bar_top(d3) + 5), d3.overflow_open)
+wm.click(d3, ob[0] + 1, ob[1] + 1)
+print("start press", wm.click(d3, 10, wm.bar_top(d3) + 5), d3.overflow_open, d3.menu_open)
+print("start menu then button", wm.click(d3, ob[0] + 1, ob[1] + 1), d3.overflow_open, d3.menu_open)
+
+# the focused window always has a tab, even with every other one in front of it in launch order
+let d4 = wm.new_desktop(640, 480, apps)
+fill(d4, 50)
+let first = wm.tabs(d4)[0]
+wm.restore(d4, wm.tabs(d4)[40].id)
+let sh = wm.shown_tabs(d4)
+print("focus on window 41:", wm.focused(d4).id, "tab", sh[len(sh) - 1].id, "of", len(sh), "- first tab still", sh[0].id == first.id)
+wm.minimize(d4, wm.focused(d4).id)
+print("after minimizing it, focus", wm.focused(d4).id, "has a tab:", has_tab(d4, wm.focused(d4).id))
+
+# closing windows makes the button go away, and the list with it
+let d5 = wm.new_desktop(640, 480, apps)
+fill(d5, 16)
+let b5 = wm.overflow_box(d5)
+wm.click(d5, b5[0] + 1, b5[1] + 1)
+print("16 windows", wm.overflow_label(d5), d5.overflow_open)
+for i in 0..2
+    wm.close(d5, wm.tabs(d5)[0].id)
+print("14 windows", wm.overflow_label(d5), d5.overflow_open, len(wm.hidden_tabs(d5)))
+wm.close(d5, wm.tabs(d5)[0].id)
+print("13 windows", wm.overflow_box(d5), d5.overflow_open, len(wm.hidden_tabs(d5)), len(wm.shown_tabs(d5)))
+print("tab width", wm.tab_width_for(d5), "press where the button was (a tab now):", wm.click(d5, 600, wm.bar_top(d5) + 5))
+
+# a window's x box closes it from the list's neighbours without confusing the list
+let d6 = wm.new_desktop(640, 480, apps)
+fill(d6, 25)
+let w6 = wm.focused(d6)
+wm.click(d6, wm.close_box(w6)[0] + 2, wm.close_box(w6)[1] + 2)
+print("closed from the desktop:", len(d6.windows), wm.overflow_label(d6))
+
+# a narrow desktop and a very full one
+let small = wm.new_desktop(200, 300, apps)
+fill(small, 6)
+report(small)
+let big = wm.new_desktop(640, 480, apps)
+fill(big, 300)
+print("300 windows: hidden", len(wm.hidden_tabs(big)), "list rows", wm.overflow_rows(big), "columns", wm.overflow_cols(big), "drawn", wm.overflow_shown(big))
+let lb = wm.overflow_item_box(big, wm.overflow_shown(big) - 1)
+print("last drawn row at", lb[0], lb[1])

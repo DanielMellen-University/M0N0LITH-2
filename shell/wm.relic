@@ -12,6 +12,9 @@
 # through handle(d, e). Drag and resize use press (via click), motion, and
 # release. drag on the desktop is none, or {id, mode, ox, oy} with mode "move"
 # or "resize".
+# When the tabs would be narrower than min_tab, the ones that do not fit go
+# behind a "+N" button at the end of the bar. It opens a list of those windows
+# (d.overflow_open). The focused window always keeps a tab.
 # A minimized window stays in windows and on the taskbar but is not drawn,
 # takes no clicks or keys, and is never focused.
 
@@ -26,7 +29,9 @@ let title_height = 16   # window title bar
 let start_width = 56
 let menu_row = 18
 let tab_width = 90
-let min_tab = 24         # the narrowest a tab gets when many windows are open
+let min_tab = 40         # the narrowest a tab gets: four letters of the name
+let overflow_width = 40  # the "+N" button at the end of the tab strip
+let overflow_col = 80    # a column of the hidden-windows list
 let grip = 12           # bottom-right resize handle
 let min_width = 80
 let min_height = 40
@@ -50,7 +55,7 @@ fun _existing_dir(fs, p)
     return x
 
 fun new_desktop(width, height, apps)
-    return {width: width, height: height, apps: apps, windows: [], menu_open: false, next_id: 1, drag: none}
+    return {width: width, height: height, apps: apps, windows: [], menu_open: false, overflow_open: false, next_id: 1, drag: none}
 
 fun bar_top(d) = d.height - bar_height
 
@@ -59,17 +64,84 @@ fun menu_item_box(d, i)
     let n = len(d.apps)
     return [0, bar_top(d) - (n - i) * menu_row, 120, menu_row]
 
-# Taskbar button i: [x, y, w, h]. Buttons run left to right in the order of tabs(d).
+# Taskbar button i: [x, y, w, h]. Buttons run left to right in the order of shown_tabs(d).
 fun tab_box(d, i)
     let w = tab_width_for(d)
     return [start_width + 4 + i * (w + 4), bar_top(d) + 3, w, bar_height - 6]
+
+# How many tabs fit at min_tab, leaving room for the overflow button when they do not all fit.
+fun tab_capacity(d)
+    let room = d.width - start_width - 4
+    if len(d.windows) * (min_tab + 4) <= room
+        return len(d.windows)
+    return math.max(1, int((room - overflow_width - 4) / (min_tab + 4)))
+
+# The tabs that get a button: all of them while they fit, else the first ones in
+# launch order, with the focused window's tab in place of the last one.
+fun shown_tabs(d)
+    let t = tabs(d)
+    let k = tab_capacity(d)
+    if k >= len(t)
+        return t
+    let f = focused(d)
+    let out = []
+    for i in 0..k
+        append(out, t[i])
+    if f != none
+        let present = false
+        for w in out
+            if w.id == f.id
+                present = true
+        if not present
+            out[k - 1] = f
+    return out
+
+# The windows that have no tab, in launch order. They are behind the overflow button.
+fun hidden_tabs(d)
+    let shown = shown_tabs(d)
+    let out = []
+    for w in tabs(d)
+        let seen = false
+        for s in shown
+            if s.id == w.id
+                seen = true
+        if not seen
+            append(out, w)
+    return out
+
+# The "+N" button [x, y, w, h], at the right end of the bar, or none when every window has a tab.
+fun overflow_box(d)
+    if tab_capacity(d) >= len(d.windows)
+        return none
+    return [d.width - overflow_width - 2, bar_top(d) + 3, overflow_width, bar_height - 6]
+
+fun overflow_label(d) = "+{len(d.windows) - tab_capacity(d)}"
+
+# Rows in a column of the hidden-windows list, and columns it takes (a new column
+# starts to the left once the rows reach the top of the desktop).
+fun overflow_rows(d) = math.max(1, math.min(len(hidden_tabs(d)), int(bar_top(d) / menu_row)))
+fun overflow_cols(d) = int((len(hidden_tabs(d)) + overflow_rows(d) - 1) / overflow_rows(d))
+
+# Row i of the hidden-windows list: [x, y, w, h]. Column 0 is at the right edge,
+# the first row at the top, like the Start menu.
+fun overflow_item_box(d, i)
+    let rows = overflow_rows(d)
+    let col = int(i / rows)
+    return [d.width - (col + 1) * overflow_col, bar_top(d) - (rows - i % rows) * menu_row, overflow_col, menu_row]
+
+# How many list rows get drawn and take clicks: what fits across the desktop.
+fun overflow_shown(d) = math.min(len(hidden_tabs(d)), overflow_rows(d) * int(d.width / overflow_col))
 
 # Tabs share the bar: tab_width while they fit, narrower after, never under min_tab.
 fun tab_width_for(d)
     let n = len(d.windows)
     if n == 0
         return tab_width
-    let w = int((d.width - start_width - 4) / n) - 4
+    let shown = math.min(n, tab_capacity(d))
+    let room = d.width - start_width - 4
+    if shown < n
+        room = room - overflow_width - 4
+    let w = int(room / shown) - 4
     if w > tab_width
         return tab_width
     if w < min_tab
@@ -139,6 +211,8 @@ fun close(d, id)
     if i >= 0
         remove(d.windows, i)
     _end_drag_for(d, id)
+    if overflow_box(d) == none
+        d.overflow_open = false
 
 # Hide a window. Focus goes to the next visible window down.
 fun minimize(d, id)
@@ -207,22 +281,29 @@ fun _begin_drag(d, w, mode, x, y)
 # A mouse click at (x, y). Gives a short word saying what it hit:
 #   "launch" a Start menu row (opened that app)   "start" the Start button
 #   "tab" a taskbar button that showed its window  "minimize" the _ box, or a tab of the window on top
+#   "overflow" the +N button (toggled the hidden-windows list)   "tab" also a row of that list
 #   "bar" empty taskbar   "close" the x box   "title" and "resize" start a drag
 #   "app" inside a window (its on_click ran)   "desktop" nothing
 # Call motion and release after a "title" or "resize". A press first drops any drag still on.
 fun click(d, x, y)
     d.drag = none   # a new press ends a drag whose release never came (let go outside the window)
     let menu_was_open = d.menu_open
+    let overflow_was_open = d.overflow_open
+    d.overflow_open = false   # any press closes the list; the button below reopens it
     if x < 0 or x >= d.width or y < 0 or y >= d.height
         d.menu_open = false
         return "desktop"
+    if overflow_was_open
+        let r = _click_overflow_list(d, x, y)
+        if r != none
+            return r
     if menu_was_open
         d.menu_open = false
         let r = _click_menu(d, x, y)
         if r != none
             return r
     if y >= bar_top(d)
-        return _click_bar(d, x, y, menu_was_open)
+        return _click_bar(d, x, y, menu_was_open, overflow_was_open)
     return _click_windows(d, x, y)
 
 # A press while the Start menu is open: the app it picked, or none.
@@ -233,12 +314,27 @@ fun _click_menu(d, x, y)
             return "launch"
     return none
 
-# A press on the taskbar: Start (which toggles the menu), a tab, or empty bar.
-fun _click_bar(d, x, y, menu_was_open)
+# A press while the hidden-windows list is open: the window it picked (restored
+# and in front, so it gets a tab), or none.
+fun _click_overflow_list(d, x, y)
+    let hidden = hidden_tabs(d)
+    for i in 0..overflow_shown(d)
+        if _inside(overflow_item_box(d, i), x, y)
+            restore(d, hidden[i].id)
+            return "tab"
+    return none
+
+# A press on the taskbar: Start (which toggles the menu), the +N button (which
+# toggles the list), a tab, or empty bar.
+fun _click_bar(d, x, y, menu_was_open, overflow_was_open)
     if x < start_width
         d.menu_open = not menu_was_open
         return "start"
-    let t = tabs(d)
+    let ob = overflow_box(d)
+    if ob != none and _inside(ob, x, y)
+        d.overflow_open = not overflow_was_open
+        return "overflow"
+    let t = shown_tabs(d)
     for i in 0..len(t)
         if _inside(tab_box(d, i), x, y)
             let f = focused(d)

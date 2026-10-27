@@ -20,7 +20,7 @@ print(w.x, w.y)
 
 # taskbar tabs share the bar: each one stays on screen and clicking it works
 let d2 = wm.new_desktop(640, 480, wm.default_apps())
-for n in [1, 6, 7, 12, 20]
+for n in [1, 6, 7, 12, 13]
     while len(d2.windows) < n
         wm.launch(d2, apps[len(d2.windows) % len(apps)])
     let last = wm.tab_box(d2, n - 1)
