@@ -327,10 +327,12 @@ fun _first_row(w, lines)
 # just far enough to show the selected line. Other apps show their first lines
 # and the start of each line.
 fun visible_lines(w)
-    let lines = w.app.lines(w.state)
     let rows = rows_fit(w)
     let cols = cols_fit(w)
     let tail = "tail" in w.app and w.app.tail
+    if tail
+        w.state.rows = rows   # lets an app with a long text build only the lines that can show
+    let lines = w.app.lines(w.state)
     let out = []
     if len(lines) <= rows
         for i in 0..len(lines)
@@ -662,12 +664,27 @@ fun _editor_init()
         text = vfs.read(_shell_fs, path)
     catch
         text = ""
-    return {fs: _shell_fs, path: path, text: text, status: "open"}
+    return {fs: _shell_fs, path: path, text: text, status: "open", rows: 0}
+
+# The last `count` lines of text, split on newlines (all of them when count is 0).
+# It scans back from the end, so a big file costs a few rows, not a split of everything.
+fun last_lines(text, count)
+    if count <= 0
+        return strings.split(text, "\n")
+    let i = len(text) - 1
+    let found = 0
+    while i >= 0 and found < count
+        if text[i] == "\n"
+            found = found + 1
+        i = i - 1
+    if found < count
+        return strings.split(text, "\n")
+    return strings.split(slice(text, i + 2, len(text)), "\n")
 
 # The title line, then one line per line of text (the font has no newline glyph); the cursor is on the last.
 fun _editor_lines(s)
     let out = ["Editor: " + s.path + "  (ctrl+s save)  [" + s.status + "]"]
-    for line in strings.split(s.text + "_", "\n")
+    for line in last_lines(s.text + "_", s.rows)
         append(out, line)
     return out
 

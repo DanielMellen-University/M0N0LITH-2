@@ -1,0 +1,43 @@
+# The Editor on a big file: only the rows that fit are built, so it stays quick.
+use ../shell/wm
+use std/vfs
+use std/time
+use std/strings
+use std/math
+
+let d = wm.new_desktop(640, 480, wm.default_apps())
+let e = wm.launch(d, wm.editor)
+let big = ""
+for i in 0..3000
+    big = big + "line {i} 0123456789 abcdefghij klmnopqrst\n"
+e.state.text = big
+let t0 = time.clock()
+let v = wm.visible_lines(e)
+let fast = time.since(t0) < 0.2
+print(len(v), v[0])
+for line in v
+    print(line)
+print("fast:", fast)
+
+# the same rows as splitting everything
+let text = "a\nbb\n\nccc\ndddd\n"
+let every = true
+for n in 1..9
+    let whole = strings.split(text, "\n")
+    let want = []
+    for i in math.max(0, len(whole) - n)..len(whole)
+        append(want, whole[i])
+    if wm.last_lines(text, n) != want
+        every = false
+        print("differs at", n)
+print("same as a full split:", every)
+
+# a text shorter than the window, and a single long line with no newline
+e.state.text = "a\nb"
+print(wm.visible_lines(e))
+e.state.text = "x"
+print(wm.visible_lines(e))
+e.state.text = ""
+print(wm.visible_lines(e))
+e.state.text = "a\n\n\n\nb\n"
+print(wm.visible_lines(e))
