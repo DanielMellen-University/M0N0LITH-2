@@ -265,6 +265,7 @@ fun _click_in(d, w, x, y)
         return "resize"
     if "selected" in w.app
         w.state.first = _first_row(w, w.app.lines(w.state))
+        w.state.rows = rows_fit(w)
     w.app.on_click(w.state, x - w.x, y - w.y - title_height)
     return "app"
 
@@ -721,7 +722,7 @@ fun _term_key(s, k)
         s.input = _typed(s.input, k)
 
 # Files: browse the shared VFS. Click a row or use up/down/return/backspace.
-fun _files_init() = {fs: _shell_fs, path: "/home", sel: 0, first: 1}
+fun _files_init() = {fs: _shell_fs, path: "/home", sel: 0, first: 1, rows: 0}
 
 fun _files_names(s)
     s.path = _existing_dir(s.fs, s.path)
@@ -775,7 +776,7 @@ fun _files_click(s, x, y)
     if y < text_top
         return
     let row = int((y - text_top) / line_height)
-    if row <= 0
+    if row <= 0 or row >= s.rows
         return
     let names = _files_names(s)
     let i = row - 1 + s.first - 1   # s.first: the list line at the top, set by click

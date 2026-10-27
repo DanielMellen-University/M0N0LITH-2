@@ -1,0 +1,14 @@
+# A click below the last drawn Files row must not open an unseen file.
+use ../shell/wm
+use std/vfs
+let d = wm.new_desktop(640, 480, wm.default_apps())
+let f = wm.launch(d, wm.files_app)
+f.state.path = "/tmp"
+for i in 10..30
+    vfs.write(f.state.fs, "/tmp/file{i}.txt", "x")
+let lines = wm.visible_lines(f)
+print("rows", wm.rows_fit(f), "shown", len(lines), lines[len(lines) - 1])
+let y = wm.text_top + wm.line_height * wm.rows_fit(f)
+print("hidden row", y, "inside height", y < f.height)
+print(wm.click(d, f.x + 20, f.y + wm.title_height + y), f.state.sel, f.state.path)
+print(wm.visible_lines(f)[len(lines) - 1])

@@ -18,6 +18,7 @@ tests/
   shell_start_menu.relic  the Start button opens and closes the menu
   shell_many_windows.relic  windows cascade and wrap, taskbar tabs shrink to fit
   shell_files_click.relic  clicking rows in Files
+  shell_files_hidden.relic  clicks below the visible Files rows do nothing
   shell_drag_resize.relic  dragging and resizing keep windows reachable
   shell_small_apps.relic  Editor, Notes and Clicker
   shell_files_stale.relic  Files when another app removed the selected file
