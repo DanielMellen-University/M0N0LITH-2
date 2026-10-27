@@ -1,0 +1,18 @@
+# write replaces file contents, including when no text follows the path.
+use ../shell/wm
+use std/vfs
+let d = wm.new_desktop(640, 480, wm.default_apps())
+let t = wm.launch(d, wm.terminal)
+fun run(line)
+    wm.handle(d, {type: "text", text: line})
+    wm.key(d, "return")
+    print(t.state.buf[len(t.state.buf) - 1])
+run("write")
+run("write /tmp/write-test first   second")
+print("words", vfs.read(t.state.fs, "/tmp/write-test") == "first second\n")
+run("write /tmp/write-test")
+print("empty text", vfs.read(t.state.fs, "/tmp/write-test") == "\n")
+run("write /tmp/write-test replacement")
+print("replaced", vfs.read(t.state.fs, "/tmp/write-test") == "replacement\n")
+run("write /tmp missing")
+print("directory intact", vfs.is_dir(t.state.fs, "/tmp"))

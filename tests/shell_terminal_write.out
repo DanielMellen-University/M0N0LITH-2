@@ -1,0 +1,9 @@
+usage: write <path> <text>
+/home> write /tmp/write-test first   second
+words true
+/home> write /tmp/write-test
+empty text true
+/home> write /tmp/write-test replacement
+replaced true
+write: cannot write /tmp
+directory intact true
