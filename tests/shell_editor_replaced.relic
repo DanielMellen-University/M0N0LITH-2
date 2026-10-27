@@ -1,0 +1,25 @@
+# A removed file can be recreated on save; a replacement folder causes a failed save.
+use ../shell/wm
+use std/vfs
+let d = wm.new_desktop(640, 480, wm.default_apps())
+let f = wm.launch(d, wm.files_app)
+let fs = f.state.fs
+vfs.write(fs, "/home/edit.txt", "original")
+wm.key(d, "down")
+wm.key(d, "return")
+let e = wm.launch(d, wm.editor)
+wm.key(d, "x")
+vfs.remove(fs, e.state.path)
+wm.key(d, "ctrl+s")
+print("recreated", e.state.status, vfs.read(fs, e.state.path), wm.visible_lines(e))
+wm.key(d, "y")
+vfs.remove(fs, e.state.path)
+vfs.make_dir(fs, e.state.path)
+wm.key(d, "ctrl+s")
+print("folder blocks save", e.state.status, e.state.text, vfs.is_dir(fs, e.state.path))
+vfs.remove(fs, e.state.path)
+wm.key(d, "ctrl+s")
+print("retry", e.state.status, vfs.read(fs, e.state.path))
+wm.key(d, "backspace")
+wm.key(d, "ctrl+s")
+print("saved deletion", e.state.status, vfs.read(fs, e.state.path))
