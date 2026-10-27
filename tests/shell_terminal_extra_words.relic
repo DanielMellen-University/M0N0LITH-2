@@ -1,0 +1,26 @@
+# clear, apps, date and pwd take no words: an extra one prints usage and does
+# nothing, like a word too many for rm or cat, so `clear x` does not wipe the output.
+use ../shell/wm
+let t = wm.terminal.init()
+fun type(line)
+    for c in line
+        if c == " "
+            wm.terminal.on_key(t, "space")
+        else
+            wm.terminal.on_key(t, c)
+    wm.terminal.on_key(t, "return")
+fun run(line)
+    t.buf = []
+    type(line)
+    print(t.buf)
+run("pwd x")
+run("apps all")
+run("date now")
+run("clear  ")
+type("echo kept")
+type("clear screen")
+print(t.buf)
+run("pwd")
+run("apps")
+type("clear")
+print(t.buf)

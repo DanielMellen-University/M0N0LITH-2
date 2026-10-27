@@ -819,18 +819,22 @@ fun _term_run(s, line)
         _term_reply(s, "write rm mv")
         _term_reply(s, "echo text > file, >> adds")
     else if cmd == "clear"
-        s.buf = []
+        if _term_args(s, parts, 0, "clear")
+            s.buf = []
     else if cmd == "echo"
         _term_echo(s, parts)
     else if cmd == "apps"
-        let names = []
-        for app in default_apps()
-            append(names, app.name)
-        _term_reply(s, strings.join(names, ", "))
+        if _term_args(s, parts, 0, "apps")
+            let names = []
+            for app in default_apps()
+                append(names, app.name)
+            _term_reply(s, strings.join(names, ", "))
     else if cmd == "date"
-        _term_reply(s, format_time(time.now()))
+        if _term_args(s, parts, 0, "date")
+            _term_reply(s, format_time(time.now()))
     else if cmd == "pwd"
-        _term_reply(s, s.cwd)
+        if _term_args(s, parts, 0, "pwd")
+            _term_reply(s, s.cwd)
     else if cmd == "cd"
         if len(parts) > 2
             _term_reply(s, "usage: cd [path]")

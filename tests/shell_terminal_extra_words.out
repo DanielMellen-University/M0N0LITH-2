@@ -1,0 +1,8 @@
+["/home> pwd x", "usage: pwd"]
+["/home> apps all", "usage: apps"]
+["/home> date now", "usage: date"]
+[]
+["/home> echo kept", "kept", "/home> clear screen", "usage: clear"]
+["/home> pwd", "/home"]
+["/home> apps", "Clicker, Notes, Terminal, Files, Editor"]
+[]
