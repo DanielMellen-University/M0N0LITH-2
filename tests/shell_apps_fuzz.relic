@@ -1,0 +1,82 @@
+# Random Terminal commands from two Terminals, with Files and Editor windows on
+# the same filesystem (fixed seeds). After every step: no error escapes an app,
+# each Terminal and Files is in a folder that exists, Files has its selection on
+# a row, the Terminal keeps at most 200 lines, and / and the window rows fit.
+use ../shell/wm
+use std/vfs
+let seed = 0
+fun rnd(n)
+    seed = (seed * 1103515245 + 12345) % 2147483648
+    return int(seed / 65536) % n
+let cmds = ["cd", "ls", "cat", "mkdir", "touch", "write", "rm", "mv", "echo", "pwd", "clear"]
+let words = ["a", "b", "a/b", "/", "..", ".", "/tmp", "/home", "a/", "x.txt", "../a", ">", ">>", "//", "a\\b", "/home/welcome.txt", "é", "-r"]
+let keys = ["up", "down", "return", "backspace", "a", "ctrl+s", "space", "\n"]
+fun type(t, line)
+    for c in line
+        if c == " "
+            wm.terminal.on_key(t, "space")
+        else
+            wm.terminal.on_key(t, c)
+    wm.terminal.on_key(t, "return")
+let problems = {}
+fun note(what)
+    if not what in problems
+        problems[what] = 0
+        print("problem:", what)
+    problems[what] = problems[what] + 1
+for seed0 in [5, 6, 7]
+    seed = seed0
+    let d = wm.new_desktop(640, 480, wm.default_apps())
+    let t1 = wm.launch(d, wm.terminal)
+    let t2 = wm.launch(d, wm.terminal)
+    let f = wm.launch(d, wm.files_app)
+    let fs = t1.state.fs
+    for step in 0..1500
+        let a = rnd(6)
+        try
+            if a <= 1
+                let t = t1
+                if a == 1
+                    t = t2
+                let line = cmds[rnd(len(cmds))]
+                for i in 0..rnd(4)
+                    line = line + " " + words[rnd(len(words))]
+                type(t.state, line)
+            else if a == 2
+                wm.restore(d, f.id)
+                wm.key(d, keys[rnd(len(keys))])
+            else if a == 3
+                wm.click(d, f.x + 10 + rnd(f.width - 20), f.y + wm.title_height + rnd(f.height))
+            else if a == 4
+                if rnd(4) == 0
+                    wm.launch(d, wm.editor)
+                else
+                    wm.key(d, keys[rnd(len(keys))])
+            else
+                for w in d.windows
+                    if not w.minimized and len(wm.visible_lines(w)) > wm.rows_fit(w)
+                        note("too many rows in " + w.app.name)
+        catch err
+            note("error: " + err.message)
+        for w in [t1, t2]
+            wm.visible_lines(w)
+            if not vfs.is_dir(fs, w.state.cwd)
+                note("Terminal in a missing folder")
+            if len(w.state.buf) > wm.term_history
+                note("Terminal history too long")
+        let lines = wm.visible_lines(f)
+        if not vfs.is_dir(fs, f.state.path)
+            note("Files in a missing folder")
+        if lines[0] != "Files: " + f.state.path
+            note("Files title is not its folder")
+        if len(f.state.names) > 0 and (f.state.sel < 0 or f.state.sel >= len(f.state.names))
+            note("Files selection off the list")
+        if not vfs.is_dir(fs, "/")
+            note("root gone")
+        # keep the desktop small: close the oldest Editor
+        if len(d.windows) > 8
+            for w in wm.tabs(d)
+                if len(d.windows) > 8 and w.app.name == "Editor"
+                    wm.close(d, w.id)
+    print("done", seed0, len(d.windows))
+print("problems:", problems)

@@ -44,4 +44,4 @@ Files remembers the last row content and available row count when drawn. Once it
 
 ## Tests
 
-CMake discovers every `tests/*.relic` program. Each current test drives `wm.relic` and prints what happened; its standard output must match the `.out` file next to it (or be empty if that file is absent). `shell_fuzz` uses fixed seeds on two desktop sizes and checks model invariants after every step. CTest also runs `relic check` on both shell files. To change an expected output on purpose, run the test, read the diff, and save the new output.
+CMake discovers every `tests/*.relic` program. Each current test drives `wm.relic` and prints what happened; its standard output must match the `.out` file next to it (or be empty if that file is absent). `shell_fuzz` uses fixed seeds on two desktop sizes and checks model invariants after every step. `shell_apps_fuzz` does the same for the apps: random commands from two Terminals while Files and Editor work on the same filesystem. CTest also runs `relic check` on both shell files. To change an expected output on purpose, run the test, read the diff, and save the new output.

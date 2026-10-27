@@ -79,6 +79,7 @@ tests/
   shell_missed_release.relic  a lost mouse-up does not leave a drag running
   shell_outside_click.relic  presses outside the desktop do not hit its controls
   shell_fuzz.relic  random input against the window model, checking invariants each step
+  shell_apps_fuzz.relic  random Terminal commands with Files and Editor on the same filesystem
 tools/
   run_golden.cmake  golden test runner (Relic's, cut down to what these tests use)
 relic/            Relic, pinned as a git submodule
