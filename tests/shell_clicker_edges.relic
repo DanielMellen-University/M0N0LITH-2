@@ -1,0 +1,20 @@
+# Rapid clicks and keys count independently; a new window starts at zero.
+use ../shell/wm
+let d = wm.new_desktop(640, 480, wm.default_apps())
+let c = wm.launch(d, wm.clicker)
+for i in 0..100
+    wm.key(d, "space")
+    wm.click(d, c.x + 5, c.y + wm.title_height + 5)
+wm.handle(d, {type: "text", text: "  x "})
+for k in ["return", "backspace", "up", "ctrl+s"]
+    wm.key(d, k)
+print("rapid", c.state.count, wm.visible_lines(c))
+wm.minimize(d, c.id)
+wm.key(d, "space")
+print("minimized", c.state.count)
+wm.restore(d, c.id)
+wm.key(d, "space")
+print("restored", wm.visible_lines(c))
+wm.close(d, c.id)
+let fresh = wm.launch(d, wm.clicker)
+print("reopened", c.state.count, wm.visible_lines(fresh))

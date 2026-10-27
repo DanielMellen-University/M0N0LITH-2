@@ -32,6 +32,7 @@ tests/
   shell_drag_resize.relic  dragging and resizing keep windows reachable
   shell_resize_offset.relic  resizing follows the point grabbed in the handle
   shell_small_apps.relic  Editor, Notes and Clicker
+  shell_clicker_edges.relic  rapid input and Clicker state after reopening
   shell_app_focus.relic  Notes and Clicker state across focus and window controls
   shell_notes_resize.relic  Notes text clipping and edits across resizes
   shell_notes_input_edges.relic  single-line input and reopening Notes

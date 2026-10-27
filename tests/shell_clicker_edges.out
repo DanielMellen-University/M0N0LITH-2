@@ -1,0 +1,4 @@
+rapid 203 ["Clicks: 203", "Click here to count."]
+minimized 203
+restored ["Clicks: 204", "Click here to count."]
+reopened 204 ["Clicks: 0", "Click here to count."]
