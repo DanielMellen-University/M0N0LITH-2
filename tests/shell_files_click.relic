@@ -1,0 +1,29 @@
+# Files: clicking a row picks it, and a folder opens. Text lines are 14 pixels
+# apart and the first starts 6 pixels down, so line r covers y from 6 + 14 * r.
+use ../shell/wm
+let d = wm.new_desktop(640, 480, wm.default_apps())
+let w = wm.launch(d, wm.files_app)
+fun click_y(y)
+    return wm.click(d, w.x + 20, w.y + wm.title_height + y)
+fun show()
+    print(w.app.lines(w.state))
+show()
+# the title line (y 6 to 19) and the strip above the text do nothing
+print(click_y(2), click_y(8), click_y(18))
+show()
+# line 1 is ".." (up to /), line 2 welcome.txt: aim at the middle of each
+print(click_y(6 + 14 * 1 + 7))
+show()
+print(click_y(6 + 14 * 2 + 7))
+show()
+# the last pixel of a line and the first of the next
+print(click_y(6 + 14 * 2 - 1), w.state.path)
+show()
+# below the last row does nothing
+print(click_y(100), w.state.path)
+# a click on a folder row opens it; a click on a file sends it to the next Editor
+print(click_y(6 + 14 * 1 + 7), w.state.path)
+show()
+print(click_y(6 + 14 * 2 + 7), w.state.path)
+let e = wm.launch(d, wm.editor)
+print(e.app.lines(e.state)[0])

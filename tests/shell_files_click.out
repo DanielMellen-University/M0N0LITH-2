@@ -1,0 +1,14 @@
+["Files: /home", "> ..", "  welcome.txt"]
+app app app
+["Files: /home", "> ..", "  welcome.txt"]
+app
+["Files: /", "> home/", "  tmp/"]
+app
+["Files: /tmp", "> .."]
+app /
+["Files: /", "> home/", "  tmp/"]
+app /
+app /home
+["Files: /home", "> ..", "  welcome.txt"]
+app /home
+Editor: /home/welcome.txt  (ctrl+s save)  [open]

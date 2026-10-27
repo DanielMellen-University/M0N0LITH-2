@@ -516,8 +516,12 @@ fun _files_open(s, name)
         # the next Editor window opens this file
         _shell_open.path = full
 
+# Text lines are 14 pixels apart and the first starts 6 pixels down (desktop.relic
+# draws them that way), so line r covers y from 6 + 14 * r. Line 0 is the title.
 fun _files_click(s, x, y)
-    let row = int(y / 14)
+    if y < 6
+        return
+    let row = int((y - 6) / 14)
     if row <= 0
         return
     let names = _files_names(s)
