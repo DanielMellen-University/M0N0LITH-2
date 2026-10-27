@@ -1,0 +1,19 @@
+# With no focused window, tabs remain in launch order and hidden rows restore windows.
+use ../shell/wm
+let d = wm.new_desktop(640, 480, wm.default_apps())
+for i in 0..14
+    let w = wm.launch(d, wm.clicker)
+    wm.minimize(d, w.id)
+fun ids(windows)
+    let out = []
+    for w in windows
+        append(out, w.id)
+    return out
+print("none focused", wm.focused(d), ids(wm.shown_tabs(d)), ids(wm.hidden_tabs(d)))
+let button = wm.overflow_box(d)
+print("open", wm.click(d, button[0], button[1]), d.overflow_open)
+let row = wm.overflow_item_box(d, 0)
+print("restore", wm.click(d, row[0], row[1]), wm.focused(d).id, d.overflow_open)
+print("tabs", ids(wm.shown_tabs(d)), ids(wm.hidden_tabs(d)))
+wm.minimize(d, wm.focused(d).id)
+print("minimized again", wm.focused(d), ids(wm.shown_tabs(d)), ids(wm.hidden_tabs(d)))

@@ -22,6 +22,7 @@ tests/
   shell_taskbar_overflow.relic  the +N button and hidden-windows list at 14 to 300 windows
   shell_overflow_edges.relic  overflow threshold and list row boundaries
   shell_overflow_lifecycle.relic  focus and stacking as windows change with the list open
+  shell_overflow_all_minimized.relic  overflow tabs and restore when no window is focused
   shell_overflow_limit.relic  the last visible row and the 200-row list limit
   shell_overflow_titles.relic  empty, long and non-ASCII window names in overflow
   shell_launch_small.relic  cascaded windows fit a small desktop
