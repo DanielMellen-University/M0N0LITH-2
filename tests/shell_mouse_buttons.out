@@ -1,0 +1,4 @@
+right press none none
+left press title move
+right release 20 10 move
+left release 20 10 none 0

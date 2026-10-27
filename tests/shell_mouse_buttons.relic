@@ -1,0 +1,16 @@
+# Only left-button presses and releases control a drag.
+use ../shell/wm
+let d = wm.new_desktop(640, 480, wm.default_apps())
+let w = wm.launch(d, wm.clicker)
+fun button(kind, which, x, y)
+    return wm.handle(d, {type: kind, button: which, x: x, y: y, clicks: 1})
+let x = w.x
+let y = w.y
+print("right press", button("mouse_down", 3, x + 10, y + 4), d.drag)
+print("left press", button("mouse_down", 1, x + 10, y + 4), d.drag.mode)
+button("mouse_up", 3, x + 10, y + 4)
+wm.handle(d, {type: "mouse_move", x: x + 30, y: y + 14, dx: 20, dy: 10})
+print("right release", w.x - x, w.y - y, d.drag.mode)
+button("mouse_up", 1, x + 30, y + 14)
+wm.handle(d, {type: "mouse_move", x: x + 50, y: y + 24, dx: 20, dy: 10})
+print("left release", w.x - x, w.y - y, d.drag, w.state.count)

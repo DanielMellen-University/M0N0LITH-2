@@ -33,6 +33,7 @@ tests/
   shell_files_selection.relic  Files keeps its selection across directory changes
   shell_files_changed_click.relic  Files ignores a click on rows changed since drawing
   shell_input.relic  graphics events turned into keys and clicks (ctrl+s, text, the mouse)
+  shell_mouse_buttons.relic  left and right mouse buttons during a drag
   shell_clip.relic  text cut to the window, Files scrolling to the selection
   shell_big_file.relic  the Editor on a file of thousands of lines stays quick
   shell_terminal_history.relic  the Terminal keeps its last 200 lines
