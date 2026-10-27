@@ -199,50 +199,68 @@ fun _begin_drag(d, w, mode, x, y)
 fun click(d, x, y)
     d.drag = none   # a new press ends a drag whose release never came (let go outside the window)
     let menu_was_open = d.menu_open
-    if d.menu_open
+    if menu_was_open
         d.menu_open = false
-        for i in 0..len(d.apps)
-            if _inside(menu_item_box(d, i), x, y)
-                launch(d, d.apps[i])
-                return "launch"
+        let r = _click_menu(d, x, y)
+        if r != none
+            return r
     if y >= bar_top(d)
-        if x < start_width
-            d.menu_open = not menu_was_open
-            return "start"
-        let t = tabs(d)
-        for i in 0..len(t)
-            if _inside(tab_box(d, i), x, y)
-                let f = focused(d)
-                if f != none and f.id == t[i].id
-                    minimize(d, t[i].id)
-                    return "minimize"
-                restore(d, t[i].id)
-                return "tab"
-        return "bar"
+        return _click_bar(d, x, y, menu_was_open)
+    return _click_windows(d, x, y)
+
+# A press while the Start menu is open: the app it picked, or none.
+fun _click_menu(d, x, y)
+    for i in 0..len(d.apps)
+        if _inside(menu_item_box(d, i), x, y)
+            launch(d, d.apps[i])
+            return "launch"
+    return none
+
+# A press on the taskbar: Start (which toggles the menu), a tab, or empty bar.
+fun _click_bar(d, x, y, menu_was_open)
+    if x < start_width
+        d.menu_open = not menu_was_open
+        return "start"
+    let t = tabs(d)
+    for i in 0..len(t)
+        if _inside(tab_box(d, i), x, y)
+            let f = focused(d)
+            if f != none and f.id == t[i].id
+                minimize(d, t[i].id)
+                return "minimize"
+            restore(d, t[i].id)
+            return "tab"
+    return "bar"
+
+# A press above the taskbar: the top window under it gets raised and takes the press.
+fun _click_windows(d, x, y)
     let i = len(d.windows) - 1
     while i >= 0
         let w = d.windows[i]
         if not w.minimized and _inside([w.x, w.y, w.width, w.height + title_height], x, y)
             _raise(d, i)
-            w = d.windows[len(d.windows) - 1]
-            if _inside(close_box(w), x, y)
-                close(d, w.id)
-                return "close"
-            if _inside(minimize_box(w), x, y)
-                minimize(d, w.id)
-                return "minimize"
-            if y < w.y + title_height
-                _begin_drag(d, w, "move", x, y)
-                return "title"
-            if _inside(resize_box(w), x, y)
-                _begin_drag(d, w, "resize", x, y)
-                return "resize"
-            if "selected" in w.app
-                w.state.first = _first_row(w, w.app.lines(w.state))
-            w.app.on_click(w.state, x - w.x, y - w.y - title_height)
-            return "app"
+            return _click_in(d, d.windows[len(d.windows) - 1], x, y)
         i = i - 1
     return "desktop"
+
+# A press inside window w, already on top: its boxes first, then the app.
+fun _click_in(d, w, x, y)
+    if _inside(close_box(w), x, y)
+        close(d, w.id)
+        return "close"
+    if _inside(minimize_box(w), x, y)
+        minimize(d, w.id)
+        return "minimize"
+    if y < w.y + title_height
+        _begin_drag(d, w, "move", x, y)
+        return "title"
+    if _inside(resize_box(w), x, y)
+        _begin_drag(d, w, "resize", x, y)
+        return "resize"
+    if "selected" in w.app
+        w.state.first = _first_row(w, w.app.lines(w.state))
+    w.app.on_click(w.state, x - w.x, y - w.y - title_height)
+    return "app"
 
 # Mouse move while a button may be held. Updates a drag or resize in progress.
 fun motion(d, x, y)
