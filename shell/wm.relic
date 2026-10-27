@@ -774,11 +774,11 @@ fun _term_cd(s, parts)
 # Why p cannot be made as a new file or folder, or none: the nearest part of
 # the path that exists is a file, or the folder it should go in is missing.
 # vfs only says "cannot write p", which does not say which part is wrong.
-fun _term_why_not_new(s, p)
+fun _why_not_new(fs, p)
     let up = paths.dir(p)
-    while not vfs.exists(s.fs, up)
+    while not vfs.exists(fs, up)
         up = paths.dir(up)
-    if not vfs.is_dir(s.fs, up)
+    if not vfs.is_dir(fs, up)
         return "not a folder: " + up
     if up != paths.dir(p)
         return "no folder: " + paths.dir(p)
@@ -806,7 +806,7 @@ fun _term_touch(s, path)
     let p = _term_path(s, path)
     if vfs.exists(s.fs, p)
         return
-    let why = _term_why_not_new(s, p)
+    let why = _why_not_new(s.fs, p)
     if why != none
         _term_reply(s, "touch: " + why)
         return
@@ -824,7 +824,7 @@ fun _term_write(s, cmd, path, text, add)
         _term_reply(s, cmd + ": is a folder: " + p)
         return
     if not vfs.exists(s.fs, p)
-        let why = _term_why_not_new(s, p)
+        let why = _why_not_new(s.fs, p)
         if why != none
             _term_reply(s, cmd + ": " + why)
             return
@@ -877,8 +877,8 @@ fun _term_mv(s, a, b)
         _term_reply(s, "mv: cannot move " + src + " into itself")
     else if vfs.exists(s.fs, dst)
         _term_reply(s, "mv: already there: " + dst)
-    else if _term_why_not_new(s, dst) != none
-        _term_reply(s, "mv: " + _term_why_not_new(s, dst))
+    else if _why_not_new(s.fs, dst) != none
+        _term_reply(s, "mv: " + _why_not_new(s.fs, dst))
     else
         try
             vfs.rename(s.fs, src, dst)
@@ -1155,6 +1155,13 @@ fun _editor_click(s, x, y)
 
 fun _editor_key(s, k)
     if k == "ctrl+s"
+        # the same reasons the Terminal gives, shorter than "cannot write" and the whole path
+        if vfs.is_dir(s.fs, s.path)
+            s.status = "is a folder"
+            return
+        if not vfs.exists(s.fs, s.path) and _why_not_new(s.fs, s.path) != none
+            s.status = _why_not_new(s.fs, s.path)
+            return
         try
             vfs.write(s.fs, s.path, s.text)
             s.status = "saved"

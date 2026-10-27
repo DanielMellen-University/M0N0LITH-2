@@ -19,3 +19,9 @@ e.state.path = "/nope/missing/folder/file.txt"
 wm.key(d, "ctrl+s")
 print(e.state.status)
 print(wm.visible_lines(e)[0])
+# a status that names the folder leaves room for the file name
+e.width = 320
+print(wm.visible_lines(e)[0])
+e.state.path = "/home/welcome.txt/inside.txt"
+wm.key(d, "ctrl+s")
+print(wm.visible_lines(e)[0])

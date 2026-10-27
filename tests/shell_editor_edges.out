@@ -2,6 +2,6 @@
 open true
 ["Editor [edited] /tmp/ed/empty", "_"]
 saved true
-["Editor [cannot write /tmp/ed/empty] /tm", "a_"]
+["Editor [no folder: /tmp/ed] ...ed/empty", "a_"]
 buffer retained a
 saved a

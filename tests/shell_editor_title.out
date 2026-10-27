@@ -5,5 +5,7 @@
 80 9 Editor [o
 Editor [open] ...day.txt
 Editor [saved] ...ay.txt
-cannot write /nope/missing/folder/file.txt
-Editor [cannot write /no
+no folder: /nope/missing/folder
+Editor [no folder: /nope
+Editor [no folder: /nope/missing/folder
+Editor [not a folder: /home/welcome.txt
