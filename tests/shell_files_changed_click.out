@@ -1,0 +1,6 @@
+drawn ["Files: /tmp", "> ..", "  b.txt", "  c.txt"]
+click old b app 0
+editor /home/welcome.txt
+redrawn ["Files: /tmp", "> ..", "  a.txt", "  b.txt", "  c.txt"]
+click new b app 2
+editor /tmp/b.txt

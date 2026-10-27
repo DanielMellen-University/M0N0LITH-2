@@ -270,7 +270,11 @@ fun _click_in(d, w, x, y)
         _begin_drag(d, w, "resize", x, y)
         return "resize"
     if "selected" in w.app
-        w.state.first = _first_row(w, w.app.lines(w.state))
+        let lines = w.app.lines(w.state)
+        # The rows under the pointer may have changed since the last frame.
+        if "drawn" in w.state and (w.state.drawn != lines or w.state.drawn_rows != rows_fit(w))
+            return "app"
+        w.state.first = _first_row(w, lines)
         w.state.rows = rows_fit(w)
     w.app.on_click(w.state, x - w.x, y - w.y - title_height)
     return "app"
@@ -382,6 +386,9 @@ fun visible_lines(w)
         w.state.rows = rows
         w.state.cols = cols_fit(w)
     let lines = w.app.lines(w.state)
+    if "selected" in w.app
+        w.state.drawn = lines
+        w.state.drawn_rows = rows
     let cols = cols_fit(w)
     let out = []
     for i in _shown(w, lines, rows, tail)
