@@ -532,6 +532,11 @@ fun _files_click(s, x, y)
 
 fun _files_key(s, k)
     let names = _files_names(s)
+    # another app may have removed files since the last draw
+    if s.sel >= len(names)
+        s.sel = len(names) - 1
+    if s.sel < 0
+        s.sel = 0
     if k == "up"
         if s.sel > 0
             s.sel = s.sel - 1

@@ -1,0 +1,21 @@
+# Files after another app removed what it had selected: keys must not crash
+use ../shell/wm
+let d = wm.new_desktop(640, 480, wm.default_apps())
+let f = wm.launch(d, wm.files_app)
+wm.key(d, "down")
+print(f.state.sel, f.app.lines(f.state))
+let t = wm.launch(d, wm.terminal)
+for c in "rm welcome.txt"
+    if c == " "
+        wm.key(d, "space")
+    else
+        wm.key(d, c)
+wm.key(d, "return")
+wm.restore(d, f.id)
+# the list is not redrawn between the removal and these keys
+wm.key(d, "return")
+print(f.state.path, f.state.sel)
+print(f.app.lines(f.state))
+wm.key(d, "down")
+wm.key(d, "up")
+print(f.state.sel)
