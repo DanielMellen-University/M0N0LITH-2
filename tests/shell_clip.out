@@ -1,0 +1,9 @@
+terminal rows 8 cols 34
+2 lines of 2
+8 lines of 26
+["line 8", "/home> echo line 9", "line 9", "/home> echo line 10", "line 10", "/home> echo line 11", "line 11", "indow this narrow, then some more_"]
+34 characters in the last line, the end of the input is kept
+5 ["Editor: /home/welcome.txt  (ctrl+s save", "text 5", "text 6", "text 7", "end_"]
+26 ["Type something:", "5678901234567890123456789_"]
+16 lines, 9 fit
+["Files: /tmp", "> ..", "  file10.txt", "  file11.txt", "  file12.txt", "  file13.txt", "  file14.txt", "  file15.txt", "  file16.txt"]

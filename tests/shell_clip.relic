@@ -1,0 +1,42 @@
+# lines that do not fit a window: Terminal, Editor and Notes keep the cursor line in view,
+# Files shows its first lines; long lines are cut to the window width
+use ../shell/wm
+use std/vfs
+let d = wm.new_desktop(640, 480, wm.default_apps())
+fun type_in(d, text)
+    for c in text
+        if c == " "
+            wm.key(d, "space")
+        else
+            wm.key(d, c)
+fun line(d, text)
+    type_in(d, text)
+    wm.key(d, "return")
+let t = wm.launch(d, wm.terminal)
+print("terminal rows", wm.rows_fit(t), "cols", wm.cols_fit(t))
+print(len(wm.visible_lines(t)), "lines of", len(t.app.lines(t.state)))
+for i in 0..12
+    line(d, "echo line {i}")
+type_in(d, "echo a very long command that cannot fit in a window this narrow, then some more")
+let v = wm.visible_lines(t)
+print(len(v), "lines of", len(t.app.lines(t.state)))
+print(v)
+print(len(v[len(v) - 1]), "characters in the last line, the end of the input is kept")
+# Editor: the title line stays, the last lines show
+let e = wm.launch(d, wm.editor)
+for i in 0..8
+    type_in(d, "text {i}")
+    wm.key(d, "return")
+type_in(d, "end")
+print(wm.rows_fit(e), wm.visible_lines(e))
+# Notes: one long line keeps its end
+let n = wm.launch(d, wm.notes)
+type_in(d, "0123456789012345678901234567890123456789")
+print(wm.cols_fit(n), wm.visible_lines(n))
+# Files: first rows only, however many files there are
+let f = wm.launch(d, wm.files_app)
+f.state.path = "/tmp"
+for i in 10..24
+    vfs.write(t.state.fs, "/tmp/file{i}.txt", "x")
+print(len(f.app.lines(f.state)), "lines,", wm.rows_fit(f), "fit")
+print(wm.visible_lines(f))

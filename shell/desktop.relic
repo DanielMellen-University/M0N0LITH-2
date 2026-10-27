@@ -33,7 +33,7 @@ fun draw(d)
         draw_box(mb, 110, 110, 125)
         graphics.text(mb[0] + 4, mb[1] + 2, "_", 255, 255, 255)
         let row = 0
-        for line in w.app.lines(w.state)
+        for line in wm.visible_lines(w)
             graphics.text(w.x + 6, w.y + wm.title_height + 6 + row * 14, line, 20, 20, 20)
             row = row + 1
         let rb = wm.resize_box(w)

@@ -14,6 +14,7 @@ use std/strings
 use std/time
 use std/vfs
 use std/paths
+use std/math
 
 let bar_height = 24     # taskbar along the bottom
 let title_height = 16   # window title bar
@@ -294,6 +295,45 @@ fun handle(d, e)
     else if e.type == "mouse_up" and e.button == 1
         release(d)
     return none
+
+# ---- what fits in a window ----
+
+# Text rows are 14 pixels apart, the first 6 down, in 8 pixel wide characters
+# starting 6 across (desktop.relic draws them that way).
+fun rows_fit(w) = math.max(1, int((w.height - 4) / 14))
+fun cols_fit(w) = math.max(1, int((w.width - 8) / 8))
+
+fun _fit(text, cols, keep_end)
+    if len(text) <= cols
+        return text
+    if keep_end
+        return slice(text, len(text) - cols, len(text))
+    return slice(text, 0, cols)
+
+# The lines of a window that fit it. An app with tail: true is one where you
+# type at the end (Terminal, Editor, Notes): it keeps its first pinned lines
+# and the last ones, and the last line, which has the cursor, keeps its end.
+# Other apps show their first lines and the start of each line.
+fun visible_lines(w)
+    let lines = w.app.lines(w.state)
+    let rows = rows_fit(w)
+    let cols = cols_fit(w)
+    let tail = "tail" in w.app and w.app.tail
+    let out = []
+    if len(lines) <= rows
+        for i in 0..len(lines)
+            append(out, _fit(lines[i], cols, tail and i == len(lines) - 1))
+        return out
+    if not tail
+        for i in 0..rows
+            append(out, _fit(lines[i], cols, false))
+        return out
+    let pinned = math.min(w.app.pinned, rows - 1)
+    for i in 0..pinned
+        append(out, _fit(lines[i], cols, false))
+    for i in len(lines) - (rows - pinned)..len(lines)
+        append(out, _fit(lines[i], cols, i == len(lines) - 1))
+    return out
 
 # ---- small apps ----
 
@@ -634,8 +674,8 @@ fun _editor_key(s, k)
         s.status = "edited"
 
 let clicker = {name: "Clicker", width: 180, height: 60, init: _clicker_init, lines: _clicker_lines, on_click: _clicker_click, on_key: _clicker_key}
-let notes = {name: "Notes", width: 220, height: 60, init: _notes_init, lines: _notes_lines, on_click: _notes_click, on_key: _notes_key}
-let terminal = {name: "Terminal", width: 280, height: 120, init: _term_init, lines: _term_lines, on_click: _term_click, on_key: _term_key}
+let notes = {name: "Notes", width: 220, height: 60, init: _notes_init, lines: _notes_lines, on_click: _notes_click, on_key: _notes_key, tail: true, pinned: 1}
+let terminal = {name: "Terminal", width: 280, height: 120, init: _term_init, lines: _term_lines, on_click: _term_click, on_key: _term_key, tail: true, pinned: 0}
 let files_app = {name: "Files", width: 260, height: 140, init: _files_init, lines: _files_lines, on_click: _files_click, on_key: _files_key}
-let editor = {name: "Editor", width: 320, height: 80, init: _editor_init, lines: _editor_lines, on_click: _editor_click, on_key: _editor_key}
+let editor = {name: "Editor", width: 320, height: 80, init: _editor_init, lines: _editor_lines, on_click: _editor_click, on_key: _editor_key, tail: true, pinned: 1}
 fun default_apps() = [clicker, notes, terminal, files_app, editor]
