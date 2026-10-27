@@ -38,3 +38,21 @@ mv: not found: /home/welcome.txt/x
 cd: not a folder: /home/welcome.txt/x
 /home> write welcome.txt/x t
 write: cannot write /home/welcome.txt/x
+/home> touch a.txt
+/home> touch b.txt
+/home> rm a.txt b.txt
+usage: rm <path>
+/home> cat a.txt b.txt
+usage: cat <path>
+/home> mkdir x y
+usage: mkdir <path>
+/home> touch p q
+usage: touch <path>
+/home> cd /tmp /home
+usage: cd [path]
+/home> ls /tmp /home
+usage: ls [path]
+/home> mv a.txt b.txt c.txt
+usage: mv <from> <to>
+/home> ls
+a.txt  b.txt  new/  sub/  welcome.txt

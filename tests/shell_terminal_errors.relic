@@ -27,3 +27,6 @@ run(["mkdir /tmp", "mkdir /home/welcome.txt", "mkdir /home/new", "mkdir /home/ne
 
 # a path that goes through a file is just not there
 run(["ls welcome.txt/x", "cat welcome.txt/x", "mkdir welcome.txt/x", "touch welcome.txt/x", "rm welcome.txt/x", "mv welcome.txt/x y", "cd welcome.txt/x", "write welcome.txt/x t"])
+
+# a word too many is an error, not a quiet half-run
+run(["touch a.txt", "touch b.txt", "rm a.txt b.txt", "cat a.txt b.txt", "mkdir x y", "touch p q", "cd /tmp /home", "ls /tmp /home", "mv a.txt b.txt c.txt", "ls"])

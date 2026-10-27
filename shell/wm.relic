@@ -467,9 +467,10 @@ fun _term_reply(s, line)
 
 fun _term_path(s, p) = paths.normalize(paths.join(s.cwd, p))
 
-# True when the command got at least n words after it, else prints usage.
+# True when the command got exactly n words after it, else prints usage. A word
+# too many is an error too: `rm a b` must not quietly remove only a.
 fun _term_args(s, parts, n, usage)
-    if len(parts) - 1 >= n
+    if len(parts) - 1 == n
         return true
     _term_reply(s, "usage: " + usage)
     return false
@@ -619,9 +620,15 @@ fun _term_run(s, line)
     else if cmd == "pwd"
         _term_reply(s, s.cwd)
     else if cmd == "cd"
-        _term_cd(s, parts)
+        if len(parts) > 2
+            _term_reply(s, "usage: cd [path]")
+        else
+            _term_cd(s, parts)
     else if cmd == "ls"
-        _term_ls(s, parts)
+        if len(parts) > 2
+            _term_reply(s, "usage: ls [path]")
+        else
+            _term_ls(s, parts)
     else if cmd == "cat"
         if _term_args(s, parts, 1, "cat <path>")
             _term_cat(s, parts[1])
@@ -632,8 +639,10 @@ fun _term_run(s, line)
         if _term_args(s, parts, 1, "touch <path>")
             _term_touch(s, parts[1])
     else if cmd == "write"
-        if _term_args(s, parts, 1, "write <path> <text>")
+        if len(parts) > 1
             _term_write(s, "write", parts[1], strings.join(slice(parts, 2, len(parts)), " "), false)
+        else
+            _term_reply(s, "usage: write <path> <text>")
     else if cmd == "rm"
         if _term_args(s, parts, 1, "rm <path>")
             _term_rm(s, parts[1])
