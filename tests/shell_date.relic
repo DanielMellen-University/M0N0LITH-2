@@ -1,0 +1,21 @@
+# The Terminal's date command prints UTC in a readable form.
+use ../shell/wm
+
+print(wm.format_time(0))
+print(wm.format_time(951782400))     # 2000-02-29 (leap day)
+print(wm.format_time(1709164799))    # 2024-02-28 23:59:59
+print(wm.format_time(1709164800))    # 2024-02-29 00:00:00 (leap day)
+print(wm.format_time(1709251200))    # 2024-03-01
+print(wm.format_time(1793077620.58685))
+print(wm.format_time(4102444799))    # 2099-12-31 23:59:59
+print(wm.format_time(4107542400))    # 2100-03-01 (2100 is not a leap year)
+print(wm.format_time(-5))
+print(wm.format_time(86399), wm.format_time(86400))
+
+let d = wm.new_desktop(640, 480, wm.default_apps())
+let t = wm.launch(d, wm.terminal)
+for c in "date"
+    wm.key(d, c)
+wm.key(d, "return")
+let out = t.state.buf[len(t.state.buf) - 1]
+print(len(out), out[4], out[7], out[10], out[13], out[16], out[19])

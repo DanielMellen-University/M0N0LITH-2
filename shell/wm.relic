@@ -380,6 +380,31 @@ fun _notes_key(s, k)
 
 # Relic-native terminal (no host process spawn). It works on the shared VFS
 # from a current folder that starts at /home. Paths may be relative to it.
+# Seconds since 1970 as "2026-10-27 05:12:16 UTC" (days to a date by Howard Hinnant's civil_from_days).
+fun format_time(secs)
+    let total = math.max(0, int(secs))
+    let days = int(total / 86400)
+    let rest = total - days * 86400
+    let z = days + 719468
+    let era = int(z / 146097)
+    let doe = z - era * 146097
+    let yoe = int((doe - int(doe / 1460) + int(doe / 36524) - int(doe / 146096)) / 365)
+    let doy = doe - (365 * yoe + int(yoe / 4) - int(yoe / 100))
+    let mp = int((5 * doy + 2) / 153)
+    let day = doy - int((153 * mp + 2) / 5) + 1
+    let month = mp + 3
+    if month > 12
+        month = month - 12
+    let year = yoe + era * 400
+    if month <= 2
+        year = year + 1
+    return "{year}-{_two(month)}-{_two(day)} {_two(int(rest / 3600))}:{_two(int((rest % 3600) / 60))}:{_two(rest % 60)} UTC"
+
+fun _two(n)
+    if n < 10
+        return "0{n}"
+    return "{n}"
+
 fun _term_init() = {buf: ["Terminal. Type help."], input: "", cwd: "/home", fs: _shell_fs}
 
 fun _term_lines(s)
@@ -550,7 +575,7 @@ fun _term_run(s, line)
     else if cmd == "apps"
         _term_reply(s, "Clicker, Notes, Terminal, Files, Editor")
     else if cmd == "date"
-        _term_reply(s, str(time.now()))
+        _term_reply(s, format_time(time.now()))
     else if cmd == "pwd"
         _term_reply(s, s.cwd)
     else if cmd == "cd"
