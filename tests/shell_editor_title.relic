@@ -1,0 +1,21 @@
+# The Editor title: status, path and the save hint when they fit; then the
+# hint goes, then the start of the path, so the file name stays readable. A long
+# error status still shows first.
+use ../shell/wm
+use std/vfs
+let d = wm.new_desktop(640, 480, wm.default_apps())
+let e = wm.launch(d, wm.editor)
+for width in [600, 320, 200, 120, 80]
+    e.width = width
+    let v = wm.visible_lines(e)
+    print(width, wm.cols_fit(e), v[0])
+e.width = 200
+e.state.path = "/home/projects/monolith/notes/today.txt"
+print(wm.visible_lines(e)[0])
+vfs.make_dir(e.state.fs, "/home/projects/monolith/notes")
+wm.key(d, "ctrl+s")
+print(wm.visible_lines(e)[0])
+e.state.path = "/nope/missing/folder/file.txt"
+wm.key(d, "ctrl+s")
+print(e.state.status)
+print(wm.visible_lines(e)[0])

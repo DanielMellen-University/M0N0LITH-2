@@ -41,6 +41,7 @@ tests/
   shell_shared_desktops.relic  shared filesystem and Editor path across desktop maps
   shell_notes_resize.relic  Notes text clipping and edits across resizes
   shell_notes_input_edges.relic  single-line input and reopening Notes
+  shell_editor_title.relic  Editor title keeps the file name and the status in view
   shell_editor_stale.relic  Editor reports a file removed before opening
   shell_editor_edges.relic  Editor empty buffers, line edges and failed saves
   shell_editor_long_line.relic  long-line clipping, ignored movement and saving the full buffer
@@ -131,7 +132,7 @@ Click Start (again to close the menu), pick an app, click inside it or type. Dra
 
 Keys go to the window on top. Typing keeps its case and symbols (AltGr characters too), Ctrl+S saves in the Editor, Backspace works in Terminal, Notes and Editor, and Return runs a Terminal command or starts a new Editor line (Notes is one line). Up, Down and Return move through Files, and Backspace goes up a folder. Text that does not fit a window is cut at its edge: Terminal, Editor and Notes show their last lines, and Files follows the selected row and shortens a long folder path in its title to its end. The Terminal wraps long lines to its window; the other apps cut them.
 
-Terminal splits commands on spaces; quotes are literal characters and do not group words, so paths containing spaces cannot be entered as one argument. Editor typing and Backspace work at the end of the text; arrow keys do not move its cursor. Its status shows the last edit, save, or file error, and a failed save leaves the buffer available for another attempt.
+Terminal splits commands on spaces; quotes are literal characters and do not group words, so paths containing spaces cannot be entered as one argument. Editor typing and Backspace work at the end of the text; arrow keys do not move its cursor. Its title shows the status first, then the path (the start of a long path gives way to `...` so the file name stays), then the Ctrl+S hint when there is room. The status shows the last edit, save, or file error, and a failed save leaves the buffer available for another attempt.
 
 Terminal commands are `help`, `clear`, `echo`, `apps`, `date`, `pwd`, `cd`, `ls`, `cat`, `mkdir`, `touch`, `write`, `rm` and `mv`. `clear`, `apps`, `date` and `pwd` take no words. `cd` without a path goes to `/home`; `ls` without one lists the current folder. `write path text` replaces a file and adds a newline; `echo text > path` does the same, while `>>` appends. `cd`, `ls`, `cat`, `mkdir`, `touch`, `rm` and `mv` reject arguments beginning with `-`, and so do the paths of `write` and `echo >` (write `./-x` to mean such a name); `rm` removes only files or empty folders. A path ending in `/` names a folder, so `cat notes.txt/` or `rm notes.txt/` is an error and `touch new/` makes nothing. Output keeps the last 200 logical lines, which may wrap into more screen rows.
 

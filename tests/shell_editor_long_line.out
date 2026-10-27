@@ -1,4 +1,4 @@
-end 105 ["Editor [edited] /home/long.txt  (ctrl+s", "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx End!_"]
+end 105 ["Editor [edited] /home/long.txt", "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx End!_"]
 movement ignored 105 edited
 saved saved 104 true
-saved view ["Editor [saved] /home/long.txt  (ctrl+s ", "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx End_"]
+saved view ["Editor [saved] /home/long.txt", "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx End_"]

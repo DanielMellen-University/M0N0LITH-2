@@ -1,12 +1,12 @@
-5 Editor [open] /home/welcome.txt  (ctrl+
-Editor [open] /home/welcome.txt  (ctrl+
+5 Editor [open] /home/welcome.txt
+Editor [open] /home/welcome.txt
 line 2997 0123456789 abcdefghij klmnopq
 line 2998 0123456789 abcdefghij klmnopq
 line 2999 0123456789 abcdefghij klmnopq
 _
 fast: true
 same as a full split: true
-["Editor [open] /home/welcome.txt  (ctrl+", "a", "b_"]
-["Editor [open] /home/welcome.txt  (ctrl+", "x_"]
-["Editor [open] /home/welcome.txt  (ctrl+", "_"]
-["Editor [open] /home/welcome.txt  (ctrl+", "", "", "b", "_"]
+["Editor [open] /home/welcome.txt", "a", "b_"]
+["Editor [open] /home/welcome.txt", "x_"]
+["Editor [open] /home/welcome.txt", "_"]
+["Editor [open] /home/welcome.txt", "", "", "b", "_"]

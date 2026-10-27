@@ -1,0 +1,9 @@
+600 74 Editor [open] /home/welcome.txt  (ctrl+s save)
+320 39 Editor [open] /home/welcome.txt
+200 24 Editor [open] ...ome.txt
+120 14 Editor [open] 
+80 9 Editor [o
+Editor [open] ...day.txt
+Editor [saved] ...ay.txt
+cannot write /nope/missing/folder/file.txt
+Editor [cannot write /no

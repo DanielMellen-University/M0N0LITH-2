@@ -1102,8 +1102,17 @@ fun last_lines(text, count)
     return strings.split(text, "\n")
 
 # The title line (the status first: a window is often too narrow for the end of it), then one line per line of text (the font has no newline glyph); the cursor is on the last.
+# When the whole title does not fit, the save hint goes first, then the start
+# of the path, so the file name stays in view. A status too long to leave room
+# for the path (an error) keeps the old cut: the status matters more.
 fun _editor_lines(s)
-    let out = ["Editor [" + s.status + "] " + s.path + "  (ctrl+s save)"]
+    let head = "Editor [" + s.status + "] "
+    let title = head + s.path + "  (ctrl+s save)"
+    if "cols" in s and s.cols > 0 and len(title) > s.cols
+        title = head + s.path
+        if len(head) + 4 <= s.cols
+            title = _fit_path(head, s.path, s.cols)
+    let out = [title]
     for line in last_lines(s.text + "_", s.rows)
         append(out, line)
     return out
