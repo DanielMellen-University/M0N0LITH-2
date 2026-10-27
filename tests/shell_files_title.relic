@@ -1,0 +1,27 @@
+# Files keeps the end of a long folder path in its title, so a narrow window
+# still shows the folder you are in. Short paths are unchanged, and clicks on
+# rows still line up after the title is shortened.
+use ../shell/wm
+use std/vfs
+let d = wm.new_desktop(640, 480, wm.default_apps())
+let f = wm.launch(d, wm.files_app)
+let fs = f.state.fs
+vfs.make_dir(fs, "/home/projects/monolith/shell/apps/files")
+vfs.write(fs, "/home/projects/monolith/shell/apps/files/readme.txt", "hi")
+print(wm.visible_lines(f)[0])
+f.state.path = "/home/projects/monolith/shell/apps/files"
+for width in [600, 260, 160, 80]
+    f.width = width
+    let v = wm.visible_lines(f)
+    print(width, wm.cols_fit(f), len(v[0]), v[0])
+# the title fits, so visible_lines does not cut its end off
+f.width = 160
+let v = wm.visible_lines(f)
+print("fits:", len(v[0]) <= wm.cols_fit(f))
+# a click on the file row still opens it
+print(wm.click(d, f.x + 20, f.y + wm.title_height + wm.text_top + wm.line_height * 2 + 2), f.state.sel)
+let e = wm.launch(d, wm.editor)
+print(e.state.path, e.state.text)
+f.state.path = "/"
+f.width = 80
+print(wm.visible_lines(f)[0])

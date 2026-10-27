@@ -31,6 +31,7 @@ tests/
   shell_files_click.relic  clicking rows in Files
   shell_files_boundaries.relic  root, empty folders, unusual names and reopening Files
   shell_files_long_names.relic  clipped names open the full path and deleted selections do not open replacements
+  shell_files_title.relic  Files keeps the end of a long folder path in its title
   shell_files_hidden.relic  clicks below the visible Files rows do nothing
   shell_drag_resize.relic  dragging and resizing keep windows reachable
   shell_resize_offset.relic  resizing follows the point grabbed in the handle
@@ -128,7 +129,7 @@ With Visual Studio the program is `relic\build-sdl\Release\relic.exe`.
 
 Click Start (again to close the menu), pick an app, click inside it or type. Drag a title bar to move a window, drag its bottom-right corner to resize. The _ box minimizes a window and the x box closes it. A taskbar button brings its window to the front, or minimizes it if it is already in front; click it again to restore. With many windows open the buttons get narrower and their names shorter, down to four letters. Past 13 windows (on the 640 pixel desktop) the rest go behind a +N button at the end of the bar: click it for a list of those windows and pick one to bring it to the front. The focused window always keeps its button. The list shows up to 200 hidden windows on the 640 by 480 desktop; additional hidden windows have no list row. New windows cascade from the top left again after ten, skipping a step another window is still sitting on. Escape closes the Start menu or the +N list when one is open, and otherwise quits (which loses the in-memory files).
 
-Keys go to the window on top. Typing keeps its case and symbols (AltGr characters too), Ctrl+S saves in the Editor, Backspace works in Terminal, Notes and Editor, and Return runs a Terminal command or starts a new Editor line (Notes is one line). Up, Down and Return move through Files, and Backspace goes up a folder. Text that does not fit a window is cut at its edge: Terminal, Editor and Notes show their last lines, and Files follows the selected row. The Terminal wraps long lines to its window; the other apps cut them.
+Keys go to the window on top. Typing keeps its case and symbols (AltGr characters too), Ctrl+S saves in the Editor, Backspace works in Terminal, Notes and Editor, and Return runs a Terminal command or starts a new Editor line (Notes is one line). Up, Down and Return move through Files, and Backspace goes up a folder. Text that does not fit a window is cut at its edge: Terminal, Editor and Notes show their last lines, and Files follows the selected row and shortens a long folder path in its title to its end. The Terminal wraps long lines to its window; the other apps cut them.
 
 Terminal splits commands on spaces; quotes are literal characters and do not group words, so paths containing spaces cannot be entered as one argument. Editor typing and Backspace work at the end of the text; arrow keys do not move its cursor. Its status shows the last edit, save, or file error, and a failed save leaves the buffer available for another attempt.
 
