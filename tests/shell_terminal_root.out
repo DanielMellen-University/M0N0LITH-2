@@ -1,0 +1,13 @@
+["/home> cd /../../"]
+["/> pwd", "/"]
+["/> rm /", "rm: folder not empty: /"]
+["/> mv / /tmp", "mv: cannot move / into itself"]
+["/> mkdir /./", "mkdir: already there: /"]
+["/> cat /../", "cat: is a folder: /"]
+["/> touch /tmp/./root-test"]
+["/> mv /tmp/root-test /home/../tmp/renamed"]
+["/> cat /tmp/renamed"]
+["/> rm /tmp/./renamed"]
+root intact true true true
+["/> cd /tmp/../home//"]
+["/home> pwd", "/home"]

@@ -55,6 +55,7 @@ tests/
   shell_terminal_redirect.relic  echo redirects and missing destinations
   shell_terminal_redirect_errors.relic  failed redirects and output after clear
   shell_terminal_edges.relic  Terminal path and input boundaries
+  shell_terminal_root.relic  root and normalized path operations
   shell_terminal_stale.relic  Terminal recovers when its current folder is removed
   shell_terminal_ls.relic  Terminal packs directory listings to the window width
   shell_terminal_wrap.relic  Terminal wraps long lines to the window width

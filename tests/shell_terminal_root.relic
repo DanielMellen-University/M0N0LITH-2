@@ -1,0 +1,26 @@
+# Root and normalized paths remain usable after failed filesystem commands.
+use ../shell/wm
+use std/vfs
+let t = wm.terminal.init()
+fun run(line)
+    t.buf = []
+    for c in line
+        if c == " "
+            wm.terminal.on_key(t, "space")
+        else
+            wm.terminal.on_key(t, c)
+    wm.terminal.on_key(t, "return")
+    print(t.buf)
+run("cd /../../")
+run("pwd")
+run("rm /")
+run("mv / /tmp")
+run("mkdir /./")
+run("cat /../")
+run("touch /tmp/./root-test")
+run("mv /tmp/root-test /home/../tmp/renamed")
+run("cat /tmp/renamed")
+run("rm /tmp/./renamed")
+print("root intact", vfs.is_dir(t.fs, "/"), vfs.is_dir(t.fs, "/home"), not vfs.exists(t.fs, "/tmp/renamed"))
+run("cd /tmp/../home//")
+run("pwd")
