@@ -195,6 +195,9 @@ fun tabs(d)
 
 fun _begin_drag(d, w, mode, x, y)
     d.drag = {id: w.id, mode: mode, ox: x - w.x, oy: y - w.y}
+    if mode == "resize"
+        d.drag.ox = x - (w.x + w.width)
+        d.drag.oy = y - (w.y + title_height + w.height)
 
 # A mouse click at (x, y). Gives a short word saying what it hit:
 #   "launch" a Start menu row (opened that app)   "start" the Start button
@@ -286,8 +289,8 @@ fun motion(d, x, y)
         w.y = y - d.drag.oy
         _clamp_pos(d, w)
     else if d.drag.mode == "resize"
-        w.width = x - w.x
-        w.height = y - w.y - title_height
+        w.width = x - w.x - d.drag.ox
+        w.height = y - w.y - title_height - d.drag.oy
         _clamp_size(d, w)
 
 # Mouse button up ends any drag or resize.

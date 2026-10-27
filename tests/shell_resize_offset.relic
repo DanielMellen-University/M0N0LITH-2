@@ -1,0 +1,15 @@
+# Resizing tracks the pointer from the point grabbed within the grip.
+use ../shell/wm
+let d = wm.new_desktop(640, 480, wm.default_apps())
+let w = wm.launch(d, wm.notes)
+let x = w.x + w.width - 10
+let y = w.y + wm.title_height + w.height - 8
+print(wm.click(d, x, y), w.width, w.height)
+wm.motion(d, x, y)
+print("no movement", w.width, w.height)
+wm.motion(d, x + 25, y + 15)
+print("moved", w.width, w.height)
+wm.motion(d, x - 500, y - 500)
+print("minimum", w.width, w.height)
+wm.motion(d, x + 25, y + 15)
+print("back", w.width, w.height)

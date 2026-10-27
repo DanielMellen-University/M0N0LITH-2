@@ -20,6 +20,7 @@ tests/
   shell_files_click.relic  clicking rows in Files
   shell_files_hidden.relic  clicks below the visible Files rows do nothing
   shell_drag_resize.relic  dragging and resizing keep windows reachable
+  shell_resize_offset.relic  resizing follows the point grabbed in the handle
   shell_small_apps.relic  Editor, Notes and Clicker
   shell_files_stale.relic  Files when another app removed the selected file
   shell_input.relic  graphics events turned into keys and clicks (ctrl+s, text, the mouse)
