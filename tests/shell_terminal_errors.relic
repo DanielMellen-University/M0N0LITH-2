@@ -30,3 +30,6 @@ run(["ls welcome.txt/x", "cat welcome.txt/x", "mkdir welcome.txt/x", "touch welc
 
 # a word too many is an error, not a quiet half-run
 run(["touch a.txt", "touch b.txt", "rm a.txt b.txt", "cat a.txt b.txt", "mkdir x y", "touch p q", "cd /tmp /home", "ls /tmp /home", "mv a.txt b.txt c.txt", "ls"])
+
+# options are not supported; say so instead of looking for a file named -l
+run(["ls -l", "rm -r sub", "cat -n a.txt", "mkdir -p x/y", "cd -", "echo -n hi", "touch ./-odd", "ls", "rm ./-odd", "mv a.txt -b", "write -x text"])

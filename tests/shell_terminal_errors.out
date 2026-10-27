@@ -56,3 +56,22 @@ usage: ls [path]
 usage: mv <from> <to>
 /home> ls
 a.txt  b.txt  new/  sub/  welcome.txt
+/home> ls -l
+ls: no options, not even -l
+/home> rm -r sub
+rm: no options, not even -r
+/home> cat -n a.txt
+cat: no options, not even -n
+/home> mkdir -p x/y
+mkdir: no options, not even -p
+/home> cd -
+cd: no options, not even -
+/home> echo -n hi
+-n hi
+/home> touch ./-odd
+/home> ls
+-odd  a.txt  b.txt  new/  sub/  welcome.txt
+/home> rm ./-odd
+/home> mv a.txt -b
+mv: no options, not even -b
+/home> write -x text

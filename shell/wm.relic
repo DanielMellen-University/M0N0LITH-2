@@ -598,6 +598,9 @@ fun _words(line)
             append(out, w)
     return out
 
+# Commands whose words are all paths, so a word like -l or -r is a mistake, not a name.
+let _path_commands = ["cd", "ls", "cat", "mkdir", "touch", "rm", "mv"]
+
 fun _term_run(s, line)
     let trimmed = strings.trim(line)
     _term_reply(s, s.cwd + "> " + line)
@@ -605,6 +608,11 @@ fun _term_run(s, line)
         return
     let parts = _words(trimmed)
     let cmd = parts[0]
+    if cmd in _path_commands
+        for word in slice(parts, 1, len(parts))
+            if strings.starts_with(word, "-")
+                _term_reply(s, cmd + ": no options, not even " + word)
+                return
     if cmd == "help"
         _term_reply(s, "help clear echo apps date")
         _term_reply(s, "pwd cd ls cat mkdir touch write rm mv")
