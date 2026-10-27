@@ -1,0 +1,19 @@
+# A press while a drag is still on (its mouse-up was lost) ends that drag.
+use ../shell/wm
+
+let d = wm.new_desktop(640, 480, wm.default_apps())
+let w = wm.launch(d, wm.terminal)
+print(wm.click(d, w.x + 20, w.y + 5), w.x, w.y)
+wm.motion(d, w.x + 30, w.y + 15)
+print(w.x, w.y)
+
+# the release never comes; a press on the empty desktop
+print(wm.click(d, 600, 300), d.drag)
+wm.motion(d, 500, 400)
+print(w.x, w.y)
+
+# same for a resize, and for a press on the taskbar
+print(wm.click(d, w.x + w.width - 3, w.y + wm.title_height + w.height - 3), d.drag.mode)
+print(wm.click(d, 10, 470), d.drag)
+wm.motion(d, 500, 400)
+print(w.width, w.height)

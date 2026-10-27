@@ -191,6 +191,7 @@ fun _begin_drag(d, w, mode, x, y)
 # A mouse click at (x, y). Gives a short word saying what it hit.
 # Title and resize hits also start a drag; call motion and release after.
 fun click(d, x, y)
+    d.drag = none   # a new press ends a drag whose release never came (let go outside the window)
     let menu_was_open = d.menu_open
     if d.menu_open
         d.menu_open = false
