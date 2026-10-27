@@ -1,0 +1,23 @@
+return return
+backspace backspace
+tab tab
+up up
+down down
+left left
+right right
+delete delete
+keypad enter return
+a none
+space none
+ctrl left ctrl none
+ctrl right ctrl none
+ctrl left shift none
+ctrl right shift none
+ctrl left alt none
+ctrl right alt none
+ctrl left gui none
+ctrl right gui none
+ctrl s ctrl+s
+ctrl up ctrl+up
+notes ["Type something:", "A é_"]
+restored ["Type something:", "A é_"]

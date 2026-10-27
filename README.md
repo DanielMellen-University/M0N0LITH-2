@@ -46,6 +46,7 @@ tests/
   shell_files_changed_click.relic  Files ignores a click on rows changed since drawing
   shell_files_resize_click.relic  Files waits for a redraw after a resize before accepting a row click
   shell_input.relic  graphics events turned into keys and clicks (ctrl+s, text, the mouse)
+  shell_event_keys.relic  named keys, modifiers and ignored events
   shell_mouse_buttons.relic  left and right mouse buttons during a drag
   shell_clip.relic  text cut to the window, Files scrolling to the selection
   shell_big_file.relic  the Editor on a file of thousands of lines stays quick

@@ -1,0 +1,17 @@
+# Named keys, modifiers and ignored events have distinct translations.
+use ../shell/wm
+fun down(k, ctrl) = {type: "key_down", key: k, ctrl: ctrl}
+for k in ["return", "backspace", "tab", "up", "down", "left", "right", "delete", "keypad enter", "a", "space"]
+    print(k, wm.key_of_event(down(k, false)))
+for k in ["left ctrl", "right ctrl", "left shift", "right shift", "left alt", "right alt", "left gui", "right gui", "s", "up"]
+    print("ctrl", k, wm.key_of_event(down(k, true)))
+let d = wm.new_desktop(640, 480, wm.default_apps())
+let n = wm.launch(d, wm.notes)
+wm.handle(d, {type: "text", text: "A é!"})
+wm.handle(d, {type: "key_up", key: "backspace"})
+wm.handle(d, down("backspace", false))
+print("notes", wm.visible_lines(n))
+wm.minimize(d, n.id)
+wm.handle(d, {type: "text", text: "ignored"})
+wm.restore(d, n.id)
+print("restored", wm.visible_lines(n))
