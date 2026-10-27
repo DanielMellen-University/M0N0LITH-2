@@ -255,6 +255,46 @@ fun key(d, k)
     if w != none
         w.app.on_key(w.state, k)
 
+# ---- input events ----
+
+# Keys that are not typed text; the apps handle these by name. Letters, digits,
+# punctuation and space come as text events, which carry shift, layout and Unicode.
+let _named_keys = ["return", "backspace", "tab", "up", "down", "left", "right", "delete"]
+let _modifier_keys = ["left ctrl", "right ctrl", "left shift", "right shift", "left alt", "right alt", "left gui", "right gui"]
+
+# The app key for a key_down event, or none when it needs no key. With ctrl held
+# the key is "ctrl+" and its name ("ctrl+s"); text events do not come with ctrl.
+fun key_of_event(e)
+    if e.type != "key_down"
+        return none
+    if e.ctrl and not e.key in _modifier_keys
+        return "ctrl+" + e.key
+    if e.key in _named_keys
+        return e.key
+    return none
+
+# Feeds one graphics event to the desktop: typed text and named keys go to the
+# window on top, the left mouse button clicks, drags and releases. Gives the
+# click result word for a click, else none.
+fun handle(d, e)
+    if e.type == "text"
+        for ch in e.text
+            if ch == " "
+                key(d, "space")
+            else
+                key(d, ch)
+    else if e.type == "key_down"
+        let k = key_of_event(e)
+        if k != none
+            key(d, k)
+    else if e.type == "mouse_down" and e.button == 1
+        return click(d, e.x, e.y)
+    else if e.type == "mouse_move"
+        motion(d, e.x, e.y)
+    else if e.type == "mouse_up" and e.button == 1
+        release(d)
+    return none
+
 # ---- small apps ----
 
 fun _clicker_init() = {count: 0}

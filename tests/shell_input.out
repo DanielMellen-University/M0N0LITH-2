@@ -1,0 +1,14 @@
+launch
+Terminal
+["Terminal. Type help.", "/home> echo Hello, World! > /tmp/a.txt", "/home> cat /tmp/a.txt", "Hello, World!", "/home> _"]
+écho
+éch
+ctrl+s none up none
+launch
+none saved
+Editor ["Editor: /home/welcome.txt  (ctrl+s save)  [saved]", "Welcome to Relic.", "Hi there_"]
+launch
+1
+title
+none 50 none
+none none none

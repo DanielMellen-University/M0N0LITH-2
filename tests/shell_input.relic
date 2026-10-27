@@ -1,0 +1,50 @@
+# graphics events into the desktop: typed text, named keys, ctrl+key, the mouse
+use ../shell/wm
+let d = wm.new_desktop(640, 480, wm.default_apps())
+fun text(t) = {type: "text", text: t}
+fun down(k, ctrl) = {type: "key_down", key: k, repeat: false, shift: false, ctrl: ctrl, alt: false}
+fun type_in(d, t) = wm.handle(d, text(t))
+fun mouse(d, type, x, y) = wm.handle(d, {type: type, button: 1, x: x, y: y, clicks: 1})
+fun start(d, i)
+    mouse(d, "mouse_down", 10, 470)
+    mouse(d, "mouse_up", 10, 470)
+    let b = wm.menu_item_box(d, i)
+    return mouse(d, "mouse_down", b[0] + 5, b[1] + 5)
+
+# the mouse: Start, then the Terminal row
+print(start(d, 2))
+let t = wm.focused(d)
+print(t.app.name)
+# typed text keeps its case and symbols; space arrives as text too
+type_in(d, "echo Hello, World! > /tmp/a.txt")
+wm.handle(d, down("return", false))
+type_in(d, "cat /tmp/a.txt")
+wm.handle(d, down("return", false))
+print(t.app.lines(t.state))
+# unicode, named keys and keys that are only modifiers or plain letters
+type_in(d, "écho")
+for k in ["left shift", "right ctrl", "a", "space", "f1", "escape", "home"]
+    wm.handle(d, down(k, false))
+print(t.state.input)
+wm.handle(d, down("backspace", false))
+print(t.state.input)
+print(wm.key_of_event(down("s", true)), wm.key_of_event(down("left ctrl", true)), wm.key_of_event(down("up", false)), wm.key_of_event(text("x")))
+
+# ctrl+s saves in the Editor (it used to come only from tests: next_key never said "ctrl+s")
+print(start(d, 4))
+let e = wm.focused(d)
+type_in(d, "Hi there")
+print(wm.handle(d, down("s", true)), e.state.status)
+print(wm.focused(d).app.name, e.app.lines(e.state))
+# the space bar counts in the Clicker, as text
+print(start(d, 0))
+let c = wm.focused(d)
+type_in(d, " ")
+type_in(d, "x")
+print(c.state.count)
+# the mouse drags a window by its title and a button other than the left does nothing
+let x = c.x
+print(mouse(d, "mouse_down", c.x + 10, c.y + 4))
+wm.handle(d, {type: "mouse_move", x: c.x + 60, y: c.y + 4, dx: 50, dy: 0})
+print(mouse(d, "mouse_up", c.x + 60, c.y + 4), c.x - x, d.drag)
+print(wm.handle(d, {type: "mouse_down", button: 3, x: 5, y: 5, clicks: 1}), wm.handle(d, {type: "wheel", dx: 0, dy: 1}), wm.handle(d, {type: "resize", width: 800, height: 600}))
