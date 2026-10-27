@@ -593,14 +593,44 @@ fun _wrap(line, width)
         at = at + w
     return out
 
+# The last k pieces _wrap(line, width) would give, without cutting the rest.
+fun _wrap_last(line, width, k)
+    let w = math.max(1, width)
+    let n = int((len(line) + w - 1) / w)
+    if n <= 1
+        return [line]
+    let out = []
+    for p in math.max(0, n - k)..n
+        append(out, slice(line, p * w, math.min(len(line), (p + 1) * w)))
+    return out
+
+# The output and the prompt, wrapped to cols. Once visible_lines has set rows,
+# only the last rows rows are built: wrapping all 200 kept lines each frame took
+# about 0.24 s after cat of a file with one 200,000-character line.
 fun _term_lines(s)
     s.cwd = _existing_dir(s.fs, s.cwd)   # another Terminal may have removed or moved it
+    let prompt = s.cwd + "> " + s.input + "_"
     let out = []
-    for line in s.buf
-        for piece in _wrap(line, s.cols)
+    if not "rows" in s or s.rows <= 0
+        for line in s.buf
+            for piece in _wrap(line, s.cols)
+                append(out, piece)
+        for piece in _wrap(prompt, s.cols)
             append(out, piece)
-    for piece in _wrap(s.cwd + "> " + s.input + "_", s.cols)
-        append(out, piece)
+        return out
+    let parts = [_wrap_last(prompt, s.cols, s.rows)]   # last line first
+    let have = len(parts[0])
+    let i = len(s.buf) - 1
+    while i >= 0 and have < s.rows
+        let p = _wrap_last(s.buf[i], s.cols, s.rows - have)
+        append(parts, p)
+        have = have + len(p)
+        i = i - 1
+    let j = len(parts) - 1
+    while j >= 0
+        for piece in parts[j]
+            append(out, piece)
+        j = j - 1
     return out
 
 fun _term_click(s, x, y)

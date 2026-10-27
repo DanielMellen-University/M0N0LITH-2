@@ -71,6 +71,7 @@ tests/
   shell_terminal_stale.relic  Terminal recovers when its current folder is removed
   shell_terminal_ls.relic  Terminal packs directory listings to the window width
   shell_terminal_wrap.relic  Terminal wraps long lines to the window width
+  shell_terminal_frame.relic  Terminal builds only the rows that fit, matching a full wrap
   shell_help.relic  Terminal help and app names match the available commands and apps
   shell_title.relic  window titles fit beside the title bar buttons
   shell_date.relic  the date command and its UTC format

@@ -1,6 +1,6 @@
 terminal rows 8 cols 34
 2 lines of 2
-8 lines of 28
+8 lines of 8
 ["line 9", "/home> echo line 10", "line 10", "/home> echo line 11", "line 11", "/home> echo a very long command th", "at cannot fit in a window this nar", "row, then some more_"]
 20 characters in the last line: the long input wraps and the cursor stays in view
 5 ["Editor [edited] /home/welcome.txt  (ctr", "text 5", "text 6", "text 7", "end_"]

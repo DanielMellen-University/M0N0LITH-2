@@ -1,0 +1,70 @@
+# Once a Terminal window has been drawn, it builds only the rows that fit: the
+# rows match wrapping everything and taking the end, across window sizes and long
+# lines, and a frame after cat of a 200,000-character line stays quick.
+use ../shell/wm
+use std/vfs
+use std/strings
+use std/time
+let d = wm.new_desktop(640, 480, wm.default_apps())
+let w = wm.launch(d, wm.terminal)
+let t = w.state
+fun type(line)
+    for c in line
+        if c == " "
+            wm.terminal.on_key(t, "space")
+        else
+            wm.terminal.on_key(t, c)
+    wm.terminal.on_key(t, "return")
+# every row, as the Terminal built them before it knew its window
+fun every_row()
+    let rows = t.rows
+    t.rows = 0
+    let all = wm.terminal.lines(t)
+    t.rows = rows
+    return all
+fun check(what)
+    let same = true
+    for size in [[80, 40], [120, 60], [280, 120], [600, 400], [83, 200]]
+        w.width = size[0]
+        w.height = size[1]
+        let v = wm.visible_lines(w)
+        let all = every_row()
+        let n = wm.rows_fit(w)
+        let want = all
+        if len(all) > n
+            want = slice(all, len(all) - n, len(all))
+        let cols = wm.cols_fit(w)
+        let fitted = []
+        for i in 0..len(want)
+            let line = want[i]
+            if len(line) > cols
+                line = slice(line, len(line) - cols, len(line))
+            append(fitted, line)
+        if v != fitted
+            same = false
+            print(what, size, "differs", v, fitted)
+    print(what, "same rows:", same)
+check("new")
+type("echo one")
+check("short")
+for i in 0..30
+    type("echo line {i} " + strings.repeat("x", i * 7))
+check("long lines")
+t.input = strings.repeat("y", 500)
+check("long input")
+t.input = ""
+vfs.write(t.fs, "/tmp/long", strings.repeat("0123456789", 2000))
+type("cat /tmp/long")
+check("one long line")
+let parts = []
+for i in 0..2000
+    append(parts, strings.repeat("0123456789", 10))
+vfs.write(t.fs, "/tmp/long", strings.join(parts, ""))
+type("cat /tmp/long")
+w.width = 280
+w.height = 120
+let t0 = time.clock()
+let v = wm.visible_lines(w)
+let fast = time.since(t0) < 0.1
+print(v)
+print("fast:", fast)

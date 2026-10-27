@@ -35,7 +35,7 @@ When even `min_tab` tabs would run off the bar (more than 13 windows on a 640 pi
 
 An app is a map: `name`, `width`, `height`, `init()`, `lines(state)`, `on_click(state, x, y)` and `on_key(state, key)`. `lines` gives the text rows. `visible_lines(w)` cuts them to what fits the window, which is what `desktop.relic` draws, so no text leaves its window. Two optional fields change how rows are chosen:
 
-- `tail: true` and `pinned: n` for an app you type into at the end (Terminal, Editor, Notes): the first `n` lines stay, then the last ones that fit. Before it asks an app of this kind for `lines`, `visible_lines` puts the window's `rows` and `cols` in the app's state; Editor builds only `rows` lines of a big file, and Terminal wraps its output to `cols`.
+- `tail: true` and `pinned: n` for an app you type into at the end (Terminal, Editor, Notes): the first `n` lines stay, then the last ones that fit. Before it asks an app of this kind for `lines`, `visible_lines` puts the window's `rows` and `cols` in the app's state; Editor builds only `rows` lines of a big file, and Terminal wraps its output to `cols` and builds only the last `rows` rows.
 - `selected(state)` for a list (Files): the title line stays and the list scrolls just far enough to show the selected line.
 
 Terminal, Files and Editor work on one in-memory filesystem (`std/vfs`), so a change in one shows in the others. An app has to cope with that: a folder or file can be gone between two frames.
