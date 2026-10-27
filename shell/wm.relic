@@ -371,7 +371,9 @@ fun visible_lines(w)
     let rows = rows_fit(w)
     let tail = "tail" in w.app and w.app.tail
     if tail
-        w.state.rows = rows   # lets an app with a long text build only the lines that can show
+        # lets an app build only the lines that can show, and wrap at the window's width
+        w.state.rows = rows
+        w.state.cols = cols_fit(w)
     let lines = w.app.lines(w.state)
     let cols = cols_fit(w)
     let out = []
@@ -456,14 +458,29 @@ fun _two(n)
 
 # Relic-native terminal (no host process spawn). It works on the shared VFS
 # from a current folder that starts at /home. Paths may be relative to it.
-fun _term_init() = {buf: ["Terminal. Type help."], input: "", cwd: "/home", fs: _shell_fs}
+fun _term_init() = {buf: ["Terminal. Type help."], input: "", cwd: "/home", fs: _shell_fs, cols: term_width}
+
+# A line cut into pieces of at most width characters, so a long line wraps
+# in the window instead of losing its end.
+fun _wrap(line, width)
+    let w = math.max(1, width)
+    if len(line) <= w
+        return [line]
+    let out = []
+    let at = 0
+    while at < len(line)
+        append(out, slice(line, at, math.min(len(line), at + w)))
+        at = at + w
+    return out
 
 fun _term_lines(s)
     s.cwd = _existing_dir(s.fs, s.cwd)   # another Terminal may have removed or moved it
     let out = []
     for line in s.buf
-        append(out, line)
-    append(out, s.cwd + "> " + s.input + "_")
+        for piece in _wrap(line, s.cols)
+            append(out, piece)
+    for piece in _wrap(s.cwd + "> " + s.input + "_", s.cols)
+        append(out, piece)
     return out
 
 fun _term_click(s, x, y)
@@ -524,7 +541,7 @@ fun _term_ls(s, parts)
             append(names, n + "/")
         else
             append(names, n)
-    for line in _pack(names, term_width)
+    for line in _pack(names, s.cols)
         _term_reply(s, line)
 
 fun _term_cat(s, path)

@@ -1,0 +1,34 @@
+# Long Terminal lines wrap to the window instead of losing their end.
+use ../shell/wm
+use std/vfs
+
+let d = wm.new_desktop(640, 480, wm.default_apps())
+let t = wm.launch(d, wm.terminal)
+t.height = 300
+
+fun type(text)
+    for c in text
+        if c == " "
+            wm.key(d, "space")
+        else
+            wm.key(d, c)
+    wm.key(d, "return")
+
+type("echo the quick brown fox jumps over the lazy dog and keeps running")
+type("mv /home/nope /home/nowhere/else/entirely")
+for line in wm.visible_lines(t)
+    print("[" + line + "]")
+
+# a typed line wraps too, and the cursor stays in view
+for c in "this is a long command that is still being typed"
+    if c == " "
+        wm.key(d, "space")
+    else
+        wm.key(d, c)
+let v = wm.visible_lines(t)
+print(v[len(v) - 2], "|", v[len(v) - 1])
+
+# a wider window wraps later
+t.width = 560
+v = wm.visible_lines(t)
+print(len(v[len(v) - 1]), v[len(v) - 1])

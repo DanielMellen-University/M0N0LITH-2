@@ -1,0 +1,12 @@
+[Terminal. Type help.]
+[/home> echo the quick brown fox ju]
+[mps over the lazy dog and keeps ru]
+[nning]
+[the quick brown fox jumps over the]
+[ lazy dog and keeps running]
+[/home> mv /home/nope /home/nowhere]
+[/else/entirely]
+[mv: not found: /home/nope]
+[/home> _]
+/home> this is a long command that |  is still being typed_
+56 /home> this is a long command that is still being typed_

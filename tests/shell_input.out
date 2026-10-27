@@ -1,6 +1,6 @@
 launch
 Terminal
-["Terminal. Type help.", "/home> echo Hello, World! > /tmp/a.txt", "/home> cat /tmp/a.txt", "Hello, World!", "/home> _"]
+["Terminal. Type help.", "/home> echo Hello, World! > /tmp/a", ".txt", "/home> cat /tmp/a.txt", "Hello, World!", "/home> _"]
 écho
 éch
 ctrl+s none up none

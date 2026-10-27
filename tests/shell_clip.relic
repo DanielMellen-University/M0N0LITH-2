@@ -21,7 +21,7 @@ type_in(d, "echo a very long command that cannot fit in a window this narrow, th
 let v = wm.visible_lines(t)
 print(len(v), "lines of", len(t.app.lines(t.state)))
 print(v)
-print(len(v[len(v) - 1]), "characters in the last line, the end of the input is kept")
+print(len(v[len(v) - 1]), "characters in the last line: the long input wraps and the cursor stays in view")
 # Editor: the title line stays, the last lines show
 let e = wm.launch(d, wm.editor)
 for i in 0..8
