@@ -363,32 +363,37 @@ fun _first_row(w, lines)
 # and the start of each line.
 fun visible_lines(w)
     let rows = rows_fit(w)
-    let cols = cols_fit(w)
     let tail = "tail" in w.app and w.app.tail
     if tail
         w.state.rows = rows   # lets an app with a long text build only the lines that can show
     let lines = w.app.lines(w.state)
+    let cols = cols_fit(w)
     let out = []
+    for i in _shown(w, lines, rows, tail)
+        append(out, _fit(lines[i], cols, tail and i == len(lines) - 1))
+    return out
+
+# The indexes of the lines visible_lines shows, in order.
+fun _shown(w, lines, rows, tail)
+    let shown = []
     if len(lines) <= rows
         for i in 0..len(lines)
-            append(out, _fit(lines[i], cols, tail and i == len(lines) - 1))
-        return out
-    if "selected" in w.app
+            append(shown, i)
+    else if "selected" in w.app
+        append(shown, 0)
         let first = _first_row(w, lines)
-        append(out, _fit(lines[0], cols, false))
         for i in first..first + math.max(1, rows - 1)
-            append(out, _fit(lines[i], cols, false))
-        return out
-    if not tail
+            append(shown, i)
+    else if not tail
         for i in 0..rows
-            append(out, _fit(lines[i], cols, false))
-        return out
-    let pinned = math.min(w.app.pinned, rows - 1)
-    for i in 0..pinned
-        append(out, _fit(lines[i], cols, false))
-    for i in len(lines) - (rows - pinned)..len(lines)
-        append(out, _fit(lines[i], cols, i == len(lines) - 1))
-    return out
+            append(shown, i)
+    else
+        let pinned = math.min(w.app.pinned, rows - 1)
+        for i in 0..pinned
+            append(shown, i)
+        for i in len(lines) - (rows - pinned)..len(lines)
+            append(shown, i)
+    return shown
 
 # ---- small apps ----
 
