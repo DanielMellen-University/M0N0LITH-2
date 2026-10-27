@@ -1,0 +1,19 @@
+# Ctrl+Alt is AltGr on Windows: AltGr+S types a character in some layouts (the
+# Polish s with an accent), so the Editor must not save on it. Plain Ctrl+S
+# still saves, and events without an alt field (older hosts, other tests) work.
+use ../shell/wm
+use std/vfs
+fun ev(k, ctrl, alt) = {type: "key_down", key: k, ctrl: ctrl, alt: alt, shift: false, repeat: false}
+print(wm.key_of_event(ev("s", true, false)), wm.key_of_event(ev("s", true, true)), wm.key_of_event(ev("s", false, true)))
+print(wm.key_of_event(ev("return", true, true)), wm.key_of_event(ev("backspace", true, true)), wm.key_of_event(ev("right alt", true, true)))
+print(wm.key_of_event({type: "key_down", key: "s", ctrl: true}))
+let d = wm.new_desktop(640, 480, wm.default_apps())
+let e = wm.launch(d, wm.editor)
+let fs = e.state.fs
+let before = vfs.read(fs, e.state.path)
+# AltGr+S as Windows sends it: the key with ctrl and alt, then the character as text
+wm.handle(d, ev("s", true, true))
+wm.handle(d, {type: "text", text: "ś"})
+print(e.state.status, vfs.read(fs, e.state.path) == before, wm.visible_lines(e))
+wm.handle(d, ev("s", true, false))
+print(e.state.status, vfs.read(fs, e.state.path) == before + "ś")

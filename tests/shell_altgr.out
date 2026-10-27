@@ -1,0 +1,5 @@
+ctrl+s none none
+return backspace none
+ctrl+s
+edited true ["Editor [edited] /home/welcome.txt  (ctr", "Welcome to Relic.", "ś_"]
+saved true

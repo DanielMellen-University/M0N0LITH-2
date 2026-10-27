@@ -438,10 +438,13 @@ let _modifier_keys = ["left ctrl", "right ctrl", "left shift", "right shift", "l
 
 # The app key for a key_down event, or none when it needs no key. With ctrl held
 # the key is "ctrl+" and its name ("ctrl+s"); text events do not come with ctrl.
+# Ctrl and Alt together is AltGr on Windows, which types characters such as the
+# Polish s with an accent (AltGr+S): that comes as text, so it is not Ctrl+S.
 fun key_of_event(e)
     if e.type != "key_down"
         return none
-    if e.ctrl and not e.key in _modifier_keys
+    let altgr = e.ctrl and "alt" in e and e.alt
+    if e.ctrl and not altgr and not e.key in _modifier_keys
         return "ctrl+" + e.key
     if e.key == "keypad enter"
         return "return"
