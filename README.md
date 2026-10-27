@@ -14,6 +14,7 @@ shell/
 tests/
   shell_wm.relic  drives wm.relic with fake clicks and keys; output must match shell_wm.out
   shell_minimize.relic  minimize and restore from the taskbar and the _ box
+  shell_terminal.relic  Terminal commands: extra spaces, folders, redirects, errors
 tools/
   run_golden.cmake  golden test runner (copied from Relic)
 relic/            Relic, pinned as a git submodule
@@ -41,7 +42,7 @@ Already cloned without submodules? Run `git submodule update --init`.
 
 `-DRELIC_BUILD_HOST=ON` matters. Since Relic 1.0.7 the default Relic build is C only and makes `relicc` (the compiler to C), not the `relic` program the tests and `relic check` use. The flag builds the C++ host that provides `relic`.
 
-The tests run `shell_wm`, `shell_minimize` and `relic check` on every shell file. CI runs the same steps on Linux, macOS and Windows.
+The tests run `shell_wm`, `shell_minimize`, `shell_terminal` and `relic check` on every shell file. CI runs the same steps on Linux, macOS and Windows.
 
 ## Run the desktop
 
