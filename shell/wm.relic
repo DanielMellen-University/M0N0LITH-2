@@ -527,7 +527,12 @@ fun _editor_init()
         text = ""
     return {fs: _shell_fs, path: path, text: text, status: "open"}
 
-fun _editor_lines(s) = ["Editor: " + s.path + "  (ctrl+s save)  [" + s.status + "]", s.text + "_"]
+# The title line, then one line per line of text (the font has no newline glyph); the cursor is on the last.
+fun _editor_lines(s)
+    let out = ["Editor: " + s.path + "  (ctrl+s save)  [" + s.status + "]"]
+    for line in strings.split(s.text + "_", "\n")
+        append(out, line)
+    return out
 
 fun _editor_click(s, x, y)
     return none

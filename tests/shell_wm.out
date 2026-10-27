@@ -107,7 +107,7 @@ launch
 ["Files: /home", "> ..", "  notes/", "  welcome.txt"]
 ["Files: /home/notes", "> ..", "  plan.txt", "  todo.txt"]
 launch
-["Editor: /home/notes/todo.txt  (ctrl+s save)  [open]", "buy milk\ncall home\n_"]
+["Editor: /home/notes/todo.txt  (ctrl+s save)  [open]", "buy milk", "call home", "_"]
 Files /home/notes
 tab Terminal
 /home> rm notes/todo.txt

@@ -104,7 +104,8 @@ print(w.app.lines(w.state)[0])
 for k in ["!", "ctrl+s"]
     wm.key(d, k)
 print(w.app.lines(w.state)[0])
-print(w.app.lines(w.state)[1])
+for line in slice(w.app.lines(w.state), 1, len(w.app.lines(w.state)))
+    print(line)
 
 # Terminal on the shared VFS: type a command line, then print what it added
 fun run(d, text)
