@@ -60,6 +60,7 @@ tests/
   shell_terminal_touch.relic  touch preserves existing entries and creates empty files
   shell_terminal_write.relic  write replaces content and handles empty text
   shell_terminal_cat_blank.relic  cat preserves blank lines in files
+  shell_terminal_slash.relic  a path ending in / must be a folder
   shell_terminal_redirect.relic  echo redirects and missing destinations
   shell_terminal_redirect_errors.relic  failed redirects and output after clear
   shell_terminal_edges.relic  Terminal path and input boundaries
@@ -121,7 +122,7 @@ Keys go to the window on top. Typing keeps its case and symbols, Ctrl+S saves in
 
 Terminal splits commands on spaces; quotes are literal characters and do not group words, so paths containing spaces cannot be entered as one argument. Editor typing and Backspace work at the end of the text; arrow keys do not move its cursor. Its status shows the last edit, save, or file error, and a failed save leaves the buffer available for another attempt.
 
-Terminal commands are `help`, `clear`, `echo`, `apps`, `date`, `pwd`, `cd`, `ls`, `cat`, `mkdir`, `touch`, `write`, `rm` and `mv`. `cd` without a path goes to `/home`; `ls` without one lists the current folder. `write path text` replaces a file and adds a newline; `echo text > path` does the same, while `>>` appends. `cd`, `ls`, `cat`, `mkdir`, `touch`, `rm` and `mv` reject arguments beginning with `-`; `rm` removes only files or empty folders. Output keeps the last 200 logical lines, which may wrap into more screen rows.
+Terminal commands are `help`, `clear`, `echo`, `apps`, `date`, `pwd`, `cd`, `ls`, `cat`, `mkdir`, `touch`, `write`, `rm` and `mv`. `cd` without a path goes to `/home`; `ls` without one lists the current folder. `write path text` replaces a file and adds a newline; `echo text > path` does the same, while `>>` appends. `cd`, `ls`, `cat`, `mkdir`, `touch`, `rm` and `mv` reject arguments beginning with `-`; `rm` removes only files or empty folders. A path ending in `/` names a folder, so `cat notes.txt/` or `rm notes.txt/` is an error and `touch new/` makes nothing. Output keeps the last 200 logical lines, which may wrap into more screen rows.
 
 ## Docs
 

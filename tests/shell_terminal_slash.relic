@@ -1,0 +1,38 @@
+# A path ending in / names a folder: commands refuse it when it is a file, and
+# touch, write and echo do not make a file from it. Folders with a slash still work.
+use ../shell/wm
+use std/vfs
+let t = wm.terminal.init()
+fun run(line)
+    t.buf = []
+    for c in line
+        if c == " "
+            wm.terminal.on_key(t, "space")
+        else
+            wm.terminal.on_key(t, c)
+    wm.terminal.on_key(t, "return")
+    print(t.buf)
+run("write /tmp/a.txt hello")
+run("cat /tmp/a.txt/")
+run("ls /tmp/a.txt/")
+run("rm /tmp/a.txt/")
+run("mv /tmp/a.txt/ /tmp/b.txt")
+run("mv /tmp/a.txt /tmp/b.txt/")
+run("cat /tmp/a.txt")
+run("touch /tmp/new/")
+run("write /tmp/new/ text")
+run("echo text > /tmp/new/")
+run("echo text >> /tmp/a.txt\\")
+print("no new file:", not vfs.exists(t.fs, "/tmp/new"))
+run("mkdir /tmp/d/")
+run("touch /tmp/d/")
+run("ls /tmp/")
+run("mv /tmp/a.txt /tmp/d/")
+run("ls /tmp/d/")
+run("cat /tmp/nope/")
+run("rm /tmp/d/a.txt")
+run("rm /tmp/d/")
+run("ls /tmp")
+run("mkdir /tmp/e")
+run("mv /tmp/e /tmp/f/")
+run("ls /tmp")

@@ -616,6 +616,19 @@ fun _term_reply(s, line)
 
 fun _term_path(s, p) = paths.normalize(paths.join(s.cwd, p))
 
+# A word ending in / names a folder, but normalizing drops the slash, so without
+# this check `rm notes.txt/` removed the file and `touch new/` made one. True (after
+# printing the error) when word ends in / and is a file, or is not there and the
+# command would create a file from it.
+fun _term_not_folder(s, cmd, word, creates)
+    if not (strings.ends_with(word, "/") or strings.ends_with(word, "\\"))
+        return false
+    let p = _term_path(s, word)
+    if vfs.is_dir(s.fs, p) or not (creates or vfs.exists(s.fs, p))
+        return false
+    _term_reply(s, cmd + ": not a folder: " + p)
+    return true
+
 # cd and ls accept an optional path, with different defaults.
 fun _term_optional_path(s, parts, default)
     if len(parts) > 1
@@ -652,6 +665,8 @@ fun _pack(words, width)
     return lines
 
 fun _term_ls(s, parts)
+    if len(parts) > 1 and _term_not_folder(s, "ls", parts[1], false)
+        return
     let p = _term_optional_path(s, parts, s.cwd)
     if not vfs.exists(s.fs, p)
         _term_reply(s, "ls: not found: " + p)
@@ -669,6 +684,8 @@ fun _term_ls(s, parts)
         _term_reply(s, line)
 
 fun _term_cat(s, path)
+    if _term_not_folder(s, "cat", path, false)
+        return
     let p = _term_path(s, path)
     if not vfs.exists(s.fs, p)
         _term_reply(s, "cat: not found: " + p)
@@ -704,6 +721,8 @@ fun _term_mkdir(s, path)
         _term_reply(s, "mkdir: " + err.message)
 
 fun _term_touch(s, path)
+    if _term_not_folder(s, "touch", path, true)
+        return
     let p = _term_path(s, path)
     if vfs.exists(s.fs, p)
         return
@@ -714,6 +733,8 @@ fun _term_touch(s, path)
 
 # write and echo > replace the file; echo >> adds to the end. Each adds a newline.
 fun _term_write(s, cmd, path, text, add)
+    if _term_not_folder(s, cmd, path, true)
+        return
     let p = _term_path(s, path)
     try
         if add
@@ -733,6 +754,8 @@ fun _term_echo(s, parts)
         _term_reply(s, strings.join(slice(parts, 1, n), " "))
 
 fun _term_rm(s, path)
+    if _term_not_folder(s, "rm", path, false)
+        return
     let p = _term_path(s, path)
     if not vfs.exists(s.fs, p)
         _term_reply(s, "rm: not found: " + p)
@@ -746,6 +769,10 @@ fun _term_rm(s, path)
 
 # mv a b: rename a to b, or move a into b when b is a folder.
 fun _term_mv(s, a, b)
+    # a folder may move to a new name ending in /, a file may not
+    let file = not vfs.is_dir(s.fs, _term_path(s, a))
+    if _term_not_folder(s, "mv", a, false) or _term_not_folder(s, "mv", b, file)
+        return
     let src = _term_path(s, a)
     let dst = _term_path(s, b)
     if vfs.is_dir(s.fs, dst)
