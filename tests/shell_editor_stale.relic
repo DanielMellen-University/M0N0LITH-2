@@ -1,0 +1,14 @@
+# A file selected in Files may be removed before the next Editor opens it.
+use ../shell/wm
+use std/vfs
+let d = wm.new_desktop(640, 480, wm.default_apps())
+let f = wm.launch(d, wm.files_app)
+wm.key(d, "down")
+wm.key(d, "return")
+vfs.remove(f.state.fs, "/home/welcome.txt")
+let e = wm.launch(d, wm.editor)
+print(wm.visible_lines(e))
+wm.key(d, "x")
+wm.key(d, "ctrl+s")
+print(wm.visible_lines(e))
+print(vfs.read(e.state.fs, e.state.path))

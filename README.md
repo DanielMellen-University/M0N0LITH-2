@@ -22,6 +22,7 @@ tests/
   shell_drag_resize.relic  dragging and resizing keep windows reachable
   shell_resize_offset.relic  resizing follows the point grabbed in the handle
   shell_small_apps.relic  Editor, Notes and Clicker
+  shell_editor_stale.relic  Editor reports a file removed before opening
   shell_files_stale.relic  Files when another app removed the selected file
   shell_files_selection.relic  Files keeps its selection across directory changes
   shell_files_changed_click.relic  Files ignores a click on rows changed since drawing

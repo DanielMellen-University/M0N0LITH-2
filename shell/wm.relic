@@ -843,11 +843,12 @@ fun _files_key(s, k)
 fun _editor_init()
     let path = _shell_open.path
     let text = ""
+    let status = "open"
     try
         text = vfs.read(_shell_fs, path)
-    catch
-        text = ""
-    return {fs: _shell_fs, path: path, text: text, status: "open", rows: 0}
+    catch err
+        status = err.message
+    return {fs: _shell_fs, path: path, text: text, status: status, rows: 0}
 
 # The last `count` lines of text, split on newlines (all of them when count is 0).
 # It scans back from the end, so a big file costs a few rows, not a split of everything.
