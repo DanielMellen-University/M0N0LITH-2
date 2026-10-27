@@ -1,0 +1,22 @@
+# Long lines keep the cursor visible and save the entire buffer.
+use ../shell/wm
+use std/vfs
+let d = wm.new_desktop(640, 480, wm.default_apps())
+let f = wm.launch(d, wm.files_app)
+vfs.write(f.state.fs, "/home/long.txt", "")
+wm.key(d, "down")
+wm.key(d, "return")
+let e = wm.launch(d, wm.editor)
+for i in 0..100
+    wm.key(d, "x")
+wm.handle(d, {type: "text", text: " End!"})
+print("end", len(e.state.text), wm.visible_lines(e))
+for k in ["left", "right", "up", "down", "delete", "home", "end"]
+    wm.key(d, k)
+print("movement ignored", len(e.state.text), e.state.status)
+wm.key(d, "backspace")
+wm.key(d, "return")
+wm.key(d, "backspace")
+wm.key(d, "ctrl+s")
+print("saved", e.state.status, len(vfs.read(e.state.fs, e.state.path)), vfs.read(e.state.fs, e.state.path) == e.state.text)
+print("saved view", wm.visible_lines(e))

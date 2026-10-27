@@ -35,6 +35,7 @@ tests/
   shell_notes_resize.relic  Notes text clipping and edits across resizes
   shell_editor_stale.relic  Editor reports a file removed before opening
   shell_editor_edges.relic  Editor empty buffers, line edges and failed saves
+  shell_editor_long_line.relic  long-line clipping, ignored movement and saving the full buffer
   shell_files_stale.relic  Files when another app removed the selected file
   shell_files_ancestor.relic  Files and Terminal recover after an ancestor folder moves
   shell_files_selection.relic  Files keeps its selection across directory changes
