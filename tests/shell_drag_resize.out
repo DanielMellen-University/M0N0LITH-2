@@ -1,0 +1,13 @@
+start 40 30 220 60
+title
+dragged far up left -180 0
+dragged far down right 600 440
+after release 600 440
+resize
+resized small 80 40
+resized big 540 340 right edge 640 bottom edge 456
+close 0 false
+40 30 none none
+desktop desktop desktop
+64 50 88 70
+app true

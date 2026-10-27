@@ -1,0 +1,37 @@
+# dragging and resizing: windows stay reachable and between the minimum size and the screen
+use ../shell/wm
+let d = wm.new_desktop(640, 480, wm.default_apps())
+let w = wm.launch(d, wm.notes)
+print("start", w.x, w.y, w.width, w.height)
+print(wm.click(d, w.x + 10, w.y + 4))
+wm.motion(d, -500, -500)
+print("dragged far up left", w.x, w.y)
+wm.motion(d, 5000, 5000)
+print("dragged far down right", w.x, w.y)
+wm.release(d)
+wm.motion(d, 10, 10)
+print("after release", w.x, w.y)
+w.x = 100
+w.y = 100
+print(wm.click(d, w.x + w.width - 3, w.y + wm.title_height + w.height - 3))
+wm.motion(d, 0, 0)
+print("resized small", w.width, w.height)
+wm.motion(d, 9999, 9999)
+print("resized big", w.width, w.height, "right edge", w.x + w.width, "bottom edge", w.y + wm.title_height + w.height)
+wm.release(d)
+# a drag ends when its window closes or is minimized
+d.menu_open = true
+print(wm.click(d, w.x + w.width - 3, w.y + 3), len(d.windows), d.menu_open)
+wm.motion(d, 5, 5)
+let a = wm.launch(d, wm.notes)
+wm.click(d, a.x + 10, a.y + 4)
+wm.minimize(d, a.id)
+wm.motion(d, 200, 200)
+print(a.x, a.y, d.drag, wm.focused(d))
+wm.key(d, "x")
+print(wm.click(d, 300, 300), wm.click(d, 700, 300), wm.click(d, -5, 3))
+# overlapping windows: a click raises the one it hits
+let b = wm.launch(d, wm.clicker)
+let c = wm.launch(d, wm.clicker)
+print(b.x, b.y, c.x, c.y)
+print(wm.click(d, b.x + 3, b.y + 20), d.windows[len(d.windows) - 1].id == b.id)

@@ -18,6 +18,7 @@ tests/
   shell_start_menu.relic  the Start button opens and closes the menu
   shell_many_windows.relic  windows cascade and wrap, taskbar tabs shrink to fit
   shell_files_click.relic  clicking rows in Files
+  shell_drag_resize.relic  dragging and resizing keep windows reachable
   shell_small_apps.relic  Editor, Notes and Clicker
 tools/
   run_golden.cmake  golden test runner (copied from Relic)
