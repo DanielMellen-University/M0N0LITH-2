@@ -7,3 +7,10 @@ terminal rows 8 cols 34
 26 ["Type something:", "5678901234567890123456789_"]
 16 lines, 9 fit
 ["Files: /tmp", "> ..", "  file10.txt", "  file11.txt", "  file12.txt", "  file13.txt", "  file14.txt", "  file15.txt", "  file16.txt"]
+0 Files: /tmp | > .. ..   file16.txt
+6 Files: /tmp |   .. ..   file16.txt
+14 Files: /tmp |   file16.txt .. > file23.txt
+0 Files: /tmp | > .. ..   file16.txt
+11   file13.txt   file15.txt
+app 6 /tmp
+  ..

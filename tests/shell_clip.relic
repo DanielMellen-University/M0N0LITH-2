@@ -40,3 +40,24 @@ for i in 10..24
     vfs.write(t.state.fs, "/tmp/file{i}.txt", "x")
 print(len(f.app.lines(f.state)), "lines,", wm.rows_fit(f), "fit")
 print(wm.visible_lines(f))
+# ... but the selected row stays in view as it moves down and back up
+fun shown(d)
+    let v = wm.visible_lines(f)
+    return v[0] + " | " + v[1] + " .. " + v[len(v) - 1]
+print(f.state.sel, shown(d))
+for i in 0..6
+    wm.key(d, "down")
+print(f.state.sel, shown(d))
+for i in 0..10
+    wm.key(d, "down")
+print(f.state.sel, shown(d))
+for i in 0..20
+    wm.key(d, "up")
+print(f.state.sel, shown(d))
+# a click lands on the row that is drawn there, scrolled or not
+for i in 0..11
+    wm.key(d, "down")
+let v = wm.visible_lines(f)
+print(f.state.sel, v[1], v[3])
+print(wm.click(d, f.x + 20, f.y + wm.title_height + 6 + 14 * 3 + 7), f.state.sel, f.state.path)
+print(wm.visible_lines(f)[1])
