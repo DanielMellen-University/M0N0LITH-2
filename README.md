@@ -34,6 +34,7 @@ tests/
   shell_small_apps.relic  Editor, Notes and Clicker
   shell_app_focus.relic  Notes and Clicker state across focus and window controls
   shell_notes_resize.relic  Notes text clipping and edits across resizes
+  shell_notes_input_edges.relic  single-line input and reopening Notes
   shell_editor_stale.relic  Editor reports a file removed before opening
   shell_editor_edges.relic  Editor empty buffers, line edges and failed saves
   shell_editor_long_line.relic  long-line clipping, ignored movement and saving the full buffer

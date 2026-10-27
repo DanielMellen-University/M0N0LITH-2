@@ -1,0 +1,16 @@
+# Notes stays on one line even when a text event contains line breaks.
+use ../shell/wm
+let d = wm.new_desktop(640, 480, wm.default_apps())
+let n = wm.launch(d, wm.notes)
+wm.key(d, "backspace")
+print("empty", wm.visible_lines(n))
+wm.handle(d, {type: "text", text: "first\nsecond\nthird"})
+print("pasted", n.state.text, wm.visible_lines(n))
+wm.key(d, "backspace")
+wm.close(d, n.id)
+let fresh = wm.launch(d, wm.notes)
+print("closed", n.state.text, "fresh", wm.visible_lines(fresh))
+let t = wm.launch(d, wm.terminal)
+wm.handle(d, {type: "text", text: "echo a\nb"})
+wm.key(d, "return")
+print("terminal", t.state.buf)

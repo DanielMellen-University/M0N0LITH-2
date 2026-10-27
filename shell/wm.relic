@@ -529,13 +529,14 @@ fun _clicker_key(s, k)
         s.count = s.count + 1
 
 # What typing key k does to text: backspace drops the last character, space and
-# any single character are added. Any other key leaves it alone.
+# any single character except a newline are added. Return is handled separately
+# by the Editor; Notes and Terminal keep their input on one line.
 fun _typed(text, k)
     if k == "backspace"
         return slice(text, 0, math.max(0, len(text) - 1))
     if k == "space"
         return text + " "
-    if len(k) == 1
+    if len(k) == 1 and k != "\n"
         return text + k
     return text
 

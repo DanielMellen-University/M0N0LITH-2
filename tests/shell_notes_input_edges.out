@@ -1,0 +1,4 @@
+empty ["Type something:", "_"]
+pasted firstsecondthird ["Type something:", "firstsecondthird_"]
+closed firstsecondthir fresh ["Type something:", "_"]
+terminal ["Terminal. Type help.", "/home> echo ab", "ab"]
