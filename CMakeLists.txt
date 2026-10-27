@@ -14,7 +14,7 @@ message(STATUS "Using relic: ${RELIC_EXE}")
 enable_testing()
 
 # Golden tests: tests/name.relic runs and its stdout must match tests/name.out.
-file(GLOB GOLDEN_TESTS ${CMAKE_SOURCE_DIR}/tests/*.relic)
+file(GLOB GOLDEN_TESTS CONFIGURE_DEPENDS ${CMAKE_SOURCE_DIR}/tests/*.relic)
 foreach(t ${GOLDEN_TESTS})
   get_filename_component(name ${t} NAME_WE)
   add_test(NAME golden_${name}
