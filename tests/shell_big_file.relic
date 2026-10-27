@@ -1,6 +1,5 @@
 # The Editor on a big file: only the rows that fit are built, so it stays quick.
 use ../shell/wm
-use std/vfs
 use std/time
 use std/strings
 use std/math

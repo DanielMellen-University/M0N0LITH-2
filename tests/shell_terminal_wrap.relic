@@ -1,6 +1,5 @@
 # Long Terminal lines wrap to the window instead of losing their end.
 use ../shell/wm
-use std/vfs
 
 let d = wm.new_desktop(640, 480, wm.default_apps())
 let t = wm.launch(d, wm.terminal)
