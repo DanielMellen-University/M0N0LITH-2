@@ -1,0 +1,35 @@
+# The hidden-windows list lays out each row without rebuilding the tab lists, so
+# a frame with the list open stays quick at 300 windows, and the layout matches
+# hidden_tabs at every window count.
+use ../shell/wm
+use std/time
+
+let d = wm.new_desktop(640, 480, wm.default_apps())
+let same = true
+for i in 0..60
+    wm.launch(d, d.apps[i % len(d.apps)])
+    if i % 7 == 3
+        wm.minimize(d, d.windows[0].id)
+    let hidden = len(wm.hidden_tabs(d))
+    let rows = 1
+    if hidden > 0
+        rows = hidden
+    if rows > int(wm.bar_top(d) / wm.menu_row)
+        rows = int(wm.bar_top(d) / wm.menu_row)
+    if wm.overflow_rows(d) != rows or wm.overflow_shown(d) != hidden
+        same = false
+        print("differs at", len(d.windows), hidden, wm.overflow_rows(d), wm.overflow_shown(d))
+print("layout matches hidden_tabs:", same)
+
+for i in 60..300
+    wm.launch(d, d.apps[i % len(d.apps)])
+print(wm.overflow_label(d), wm.overflow_shown(d), wm.overflow_cols(d))
+let t0 = time.clock()
+# what desktop.relic does for one frame with the list open
+let hidden = wm.hidden_tabs(d)
+let names = []
+for i in 0..wm.overflow_shown(d)
+    let b = wm.overflow_item_box(d, i)
+    append(names, hidden[i].app.name)
+print("rows built:", len(names))
+print("fast:", time.since(t0) < 0.5)

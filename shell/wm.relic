@@ -117,10 +117,14 @@ fun overflow_box(d)
 
 fun overflow_label(d) = "+{len(d.windows) - tab_capacity(d)}"
 
+# How many windows have no tab: the same as len(hidden_tabs(d)), without building
+# the list, since the list layout below asks for it once per row.
+fun _hidden_count(d) = len(d.windows) - math.min(len(d.windows), tab_capacity(d))
+
 # Rows in a column of the hidden-windows list, and columns it takes (a new column
 # starts to the left once the rows reach the top of the desktop).
-fun overflow_rows(d) = math.max(1, math.min(len(hidden_tabs(d)), int(bar_top(d) / menu_row)))
-fun overflow_cols(d) = int((len(hidden_tabs(d)) + overflow_rows(d) - 1) / overflow_rows(d))
+fun overflow_rows(d) = math.max(1, math.min(_hidden_count(d), int(bar_top(d) / menu_row)))
+fun overflow_cols(d) = int((_hidden_count(d) + overflow_rows(d) - 1) / overflow_rows(d))
 
 # Row i of the hidden-windows list: [x, y, w, h]. Column 0 is at the right edge,
 # the first row at the top, like the Start menu.
@@ -130,7 +134,7 @@ fun overflow_item_box(d, i)
     return [d.width - (col + 1) * overflow_col, bar_top(d) - (rows - i % rows) * menu_row, overflow_col, menu_row]
 
 # How many list rows get drawn and take clicks: what fits across the desktop.
-fun overflow_shown(d) = math.min(len(hidden_tabs(d)), overflow_rows(d) * int(d.width / overflow_col))
+fun overflow_shown(d) = math.min(_hidden_count(d), overflow_rows(d) * int(d.width / overflow_col))
 
 # Tabs share the bar: tab_width while they fit, narrower after, never under min_tab.
 fun tab_width_for(d)

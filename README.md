@@ -25,6 +25,7 @@ tests/
   shell_overflow_all_minimized.relic  overflow tabs and restore when no window is focused
   shell_overflow_limit.relic  the last visible row and the 200-row list limit
   shell_overflow_titles.relic  empty, long and non-ASCII window names in overflow
+  shell_overflow_speed.relic  the hidden-windows list stays quick at 300 windows
   shell_launch_small.relic  cascaded windows fit a small desktop
   shell_files_click.relic  clicking rows in Files
   shell_files_boundaries.relic  root, empty folders, unusual names and reopening Files
