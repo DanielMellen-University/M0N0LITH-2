@@ -1,0 +1,16 @@
+# Terminal commands on the shared VFS: extra spaces, folders, redirects and errors
+use ../shell/wm
+let t = wm.terminal.init()
+fun run(line)
+    let before = len(t.buf)
+    for ch in line
+        if ch == " "
+            wm.terminal.on_key(t, "space")
+        else
+            wm.terminal.on_key(t, ch)
+    wm.terminal.on_key(t, "return")
+    print("> " + line)
+    for i in before + 1..len(t.buf)
+        print("  " + t.buf[i])
+for line in ["pwd", "ls", "cat  welcome.txt", "ls   /home", "cd  ..", "pwd", "cd  home", "pwd", "echo  a    b", "echo hi > a.txt", "echo  there  >>  a.txt", "cat a.txt", "mkdir  d", "mv  a.txt  d", "ls", "ls d", "cd d", "pwd", "rm  a.txt", "cd ..", "rm d", "ls", "cd welcome.txt", "cat d", "cat", "touch", "mv x", "nope"]
+    run(line)

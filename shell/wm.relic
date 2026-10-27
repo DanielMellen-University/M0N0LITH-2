@@ -375,12 +375,20 @@ fun _term_mv(s, a, b)
             _term_reply(s, "mv: " + err.message)
     s.cwd = _existing_dir(s.fs, s.cwd)
 
+# The words of a line; a run of spaces counts as one.
+fun _words(line)
+    let out = []
+    for w in strings.split(line, " ")
+        if w != ""
+            append(out, w)
+    return out
+
 fun _term_run(s, line)
     let trimmed = strings.trim(line)
     append(s.buf, s.cwd + "> " + line)
     if trimmed == ""
         return
-    let parts = strings.split(trimmed, " ")
+    let parts = _words(trimmed)
     let cmd = parts[0]
     if cmd == "help"
         _term_reply(s, "help clear echo apps date")

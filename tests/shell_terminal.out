@@ -1,0 +1,47 @@
+> pwd
+  /home
+> ls
+  welcome.txt
+> cat  welcome.txt
+  Welcome to Relic.
+> ls   /home
+  welcome.txt
+> cd  ..
+> pwd
+  /
+> cd  home
+> pwd
+  /home
+> echo  a    b
+  a b
+> echo hi > a.txt
+> echo  there  >>  a.txt
+> cat a.txt
+  hi
+  there
+> mkdir  d
+> mv  a.txt  d
+> ls
+  d/  welcome.txt
+> ls d
+  a.txt
+> cd d
+> pwd
+  /home/d
+> rm  a.txt
+> cd ..
+> rm d
+> ls
+  welcome.txt
+> cd welcome.txt
+  cd: not a folder: /home/welcome.txt
+> cat d
+  cat: cannot read /home/d
+> cat
+  usage: cat <path>
+> touch
+  usage: touch <path>
+> mv x
+  usage: mv <from> <to>
+> nope
+  unknown: nope
