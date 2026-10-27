@@ -72,6 +72,8 @@ With Visual Studio the program is `relic\build-sdl\Release\relic.exe`.
 
 Click Start (again to close the menu), pick an app, click inside it or type. Drag a title bar to move a window, drag its bottom-right corner to resize. The _ box minimizes a window and the x box closes it. A taskbar button brings its window to the front, or minimizes it if it is already in front; click it again to restore. With many windows open the buttons get narrower and their names shorter, and new windows cascade from the top left again after ten. Escape quits.
 
+Keys go to the window on top. Typing keeps its case and symbols, Ctrl+S saves in the Editor, Backspace works in Terminal, Notes and Editor, and Return runs a Terminal command or starts a new Editor line (Notes is one line). Up, Down and Return move through Files, and Backspace goes up a folder. Text that does not fit a window is cut at its edge: Terminal, Editor and Notes show their last lines, and Files follows the selected row.
+
 ## Docs
 
 - [Roadmap](docs/ROADMAP.md)
