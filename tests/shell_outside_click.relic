@@ -1,0 +1,14 @@
+# Mouse presses outside the desktop cannot operate its taskbar or windows.
+use ../shell/wm
+let d = wm.new_desktop(640, 480, wm.default_apps())
+let w = wm.launch(d, wm.notes)
+print(wm.click(d, -1, 470), d.menu_open)
+print(wm.click(d, 10, 480), d.menu_open)
+wm.click(d, 10, 470)
+print("menu open", d.menu_open)
+print(wm.click(d, -1, 470), d.menu_open, len(d.windows))
+# A dragged window can extend beyond the screen; that part is not clickable.
+w.x = -100
+w.y = 20
+print(wm.click(d, -50, 25), d.drag)
+print(wm.click(d, 640, 470), d.menu_open)

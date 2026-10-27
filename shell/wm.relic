@@ -205,6 +205,9 @@ fun _begin_drag(d, w, mode, x, y)
 fun click(d, x, y)
     d.drag = none   # a new press ends a drag whose release never came (let go outside the window)
     let menu_was_open = d.menu_open
+    if x < 0 or x >= d.width or y < 0 or y >= d.height
+        d.menu_open = false
+        return "desktop"
     if menu_was_open
         d.menu_open = false
         let r = _click_menu(d, x, y)

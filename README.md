@@ -29,6 +29,7 @@ tests/
   shell_terminal_errors.relic  Terminal error messages (mv, mkdir, cat, paths through a file)
   shell_date.relic  the date command and its UTC format
   shell_missed_release.relic  a lost mouse-up does not leave a drag running
+  shell_outside_click.relic  presses outside the desktop do not hit its controls
   shell_fuzz.relic  random input against the window model, checking invariants each step
 tools/
   run_golden.cmake  golden test runner (Relic's, cut down to what these tests use)
