@@ -56,6 +56,7 @@ tests/
   shell_last_lines.relic  Editor line splitting at empty and trailing newline boundaries
   shell_terminal_history.relic  the Terminal keeps its last 200 lines
   shell_terminal_errors.relic  Terminal error messages (mv, mkdir, cat, paths through a file)
+  shell_terminal_touch.relic  touch preserves existing entries and creates empty files
   shell_terminal_cat_blank.relic  cat preserves blank lines in files
   shell_terminal_redirect.relic  echo redirects and missing destinations
   shell_terminal_redirect_errors.relic  failed redirects and output after clear

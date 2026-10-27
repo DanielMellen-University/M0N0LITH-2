@@ -1,0 +1,17 @@
+# touch preserves existing files and folders, and creates an empty file only once.
+use ../shell/wm
+use std/vfs
+let d = wm.new_desktop(640, 480, wm.default_apps())
+let t = wm.launch(d, wm.terminal)
+fun run(line)
+    wm.handle(d, {type: "text", text: line})
+    wm.key(d, "return")
+    print(t.state.buf[len(t.state.buf) - 1])
+run("touch welcome.txt")
+print("content preserved", vfs.read(t.state.fs, "/home/welcome.txt") == "Welcome to Relic.\n")
+run("touch /tmp")
+print("folder", vfs.is_dir(t.state.fs, "/tmp"))
+run("touch /tmp/new")
+run("touch /tmp/new")
+print("empty", vfs.read(t.state.fs, "/tmp/new") == "")
+run("touch /tmp/missing/new")
