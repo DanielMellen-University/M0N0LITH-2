@@ -1,0 +1,16 @@
+# Menu rectangles use inclusive top/left and exclusive bottom/right edges.
+use ../shell/wm
+let d = wm.new_desktop(640, 480, wm.default_apps())
+fun open()
+    wm.click(d, 10, d.height - 10)
+let first = wm.menu_item_box(d, 0)
+open()
+print("above", wm.click(d, 0, first[1] - 1), len(d.windows), d.menu_open)
+open()
+print("top left", wm.click(d, 0, first[1]), wm.focused(d).app.name)
+open()
+print("next row", wm.click(d, 119, first[1] + first[3]), wm.focused(d).app.name)
+open()
+print("right edge", wm.click(d, 120, first[1]), len(d.windows), d.menu_open)
+open()
+print("bar boundary", wm.click(d, 10, wm.bar_top(d)), len(d.windows), d.menu_open)
