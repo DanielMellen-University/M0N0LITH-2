@@ -1,0 +1,40 @@
+# help and apps say what is true: every command help names exists, and apps lists the Start menu.
+use ../shell/wm
+use std/strings
+
+let d = wm.new_desktop(640, 480, wm.default_apps())
+let t = wm.launch(d, wm.terminal)
+
+fun type(text)
+    for c in text
+        if c == " "
+            wm.key(d, "space")
+        else
+            wm.key(d, c)
+    wm.key(d, "return")
+
+type("help")
+let help = []
+for line in t.state.buf
+    if not strings.starts_with(line, "/")
+        append(help, line)
+print(help)
+let words = []
+for line in slice(help, 1, 3)
+    for w in strings.split(line, " ")
+        append(words, w)
+let missing = []
+for w in words
+    t.state.buf = []
+    type(w)
+    for line in t.state.buf
+        if strings.starts_with(line, "unknown")
+            append(missing, w)
+print("unknown commands in help:", missing)
+
+t.state.buf = []
+type("apps")
+let names = []
+for a in d.apps
+    append(names, a.name)
+print(t.state.buf[1] == strings.join(names, ", "), t.state.buf[1])

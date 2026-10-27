@@ -627,7 +627,10 @@ fun _term_run(s, line)
     else if cmd == "echo"
         _term_echo(s, parts)
     else if cmd == "apps"
-        _term_reply(s, "Clicker, Notes, Terminal, Files, Editor")
+        let names = []
+        for app in default_apps()
+            append(names, app.name)
+        _term_reply(s, strings.join(names, ", "))
     else if cmd == "date"
         _term_reply(s, format_time(time.now()))
     else if cmd == "pwd"
