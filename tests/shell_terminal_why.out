@@ -12,3 +12,10 @@
 ["/home> mv /tmp/f.txt /tmp/new/deep/er"]
 ["/home> ls /tmp/new/deep/er", "f.txt"]
 moved, nothing made: true true
+["/home> cd /tmp/nope", "cd: not found: /tmp/nope"]
+["/home> cd /tmp/new/deep/er/f.txt", "cd: not a folder: /tmp/new/deep/er/f.txt"]
+["/home> cd /tmp/new/deep/er/f.txt/x", "cd: not a folder: /tmp/new/deep/er/f.txt"]
+["/home> ls /tmp/nope/x", "ls: not found: /tmp/nope/x"]
+["/home> cat /tmp/new/deep/er/f.txt/x", "cat: not a folder: /tmp/new/deep/er/f.txt"]
+["/home> rm /tmp/new/deep/er/f.txt/x/y", "rm: not a folder: /tmp/new/deep/er/f.txt"]
+["/home> mv /tmp/nope /tmp/x", "mv: not found: /tmp/nope"]

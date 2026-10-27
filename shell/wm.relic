@@ -729,7 +729,7 @@ fun _term_ls(s, parts)
         return
     let p = _term_optional_path(s, parts, s.cwd)
     if not vfs.exists(s.fs, p)
-        _term_reply(s, "ls: not found: " + p)
+        _term_reply(s, "ls: " + _term_missing(s, p))
         return
     if not vfs.is_dir(s.fs, p)
         _term_reply(s, paths.base(p))
@@ -748,7 +748,7 @@ fun _term_cat(s, path)
         return
     let p = _term_path(s, path)
     if not vfs.exists(s.fs, p)
-        _term_reply(s, "cat: not found: " + p)
+        _term_reply(s, "cat: " + _term_missing(s, p))
         return
     if vfs.is_dir(s.fs, p)
         _term_reply(s, "cat: is a folder: " + p)
@@ -768,8 +768,10 @@ fun _term_cd(s, parts)
     let p = _term_optional_path(s, parts, "/home")
     if vfs.is_dir(s.fs, p)
         s.cwd = p
-    else
+    else if vfs.exists(s.fs, p)
         _term_reply(s, "cd: not a folder: " + p)
+    else
+        _term_reply(s, "cd: " + _term_missing(s, p))
 
 # Why p cannot be made as a new file or folder, or none: the nearest part of
 # the path that exists is a file, or the folder it should go in is missing.
@@ -783,6 +785,15 @@ fun _why_not_new(fs, p)
     if up != paths.dir(p)
         return "no folder: " + paths.dir(p)
     return none
+
+# Why p is not there: a part of its path is a file, or it is simply missing.
+fun _term_missing(s, p)
+    let up = paths.dir(p)
+    while not vfs.exists(s.fs, up)
+        up = paths.dir(up)
+    if not vfs.is_dir(s.fs, up)
+        return "not a folder: " + up
+    return "not found: " + p
 
 fun _term_mkdir(s, path)
     let p = _term_path(s, path)
@@ -852,7 +863,7 @@ fun _term_rm(s, path)
         return
     let p = _term_path(s, path)
     if not vfs.exists(s.fs, p)
-        _term_reply(s, "rm: not found: " + p)
+        _term_reply(s, "rm: " + _term_missing(s, p))
     else if vfs.is_dir(s.fs, p) and len(vfs.list(s.fs, p)) > 0
         _term_reply(s, "rm: folder not empty: " + p)
     else
@@ -872,7 +883,7 @@ fun _term_mv(s, a, b)
     if vfs.is_dir(s.fs, dst)
         dst = paths.join(dst, paths.base(src))
     if not vfs.exists(s.fs, src)
-        _term_reply(s, "mv: not found: " + src)
+        _term_reply(s, "mv: " + _term_missing(s, src))
     else if vfs.is_dir(s.fs, src) and (src == "/" or strings.starts_with(dst, src + "/"))
         _term_reply(s, "mv: cannot move " + src + " into itself")
     else if vfs.exists(s.fs, dst)

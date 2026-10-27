@@ -1,4 +1,4 @@
-# Errors that make a file or folder say which part of the path is wrong: a
+# Errors say which part of the path is wrong: a
 # folder that is missing, a part that is a file, or a target that is a folder.
 use ../shell/wm
 use std/vfs
@@ -26,3 +26,11 @@ run("mv /tmp/new /tmp/f.txt/deep")
 run("mv /tmp/f.txt /tmp/new/deep/er")
 run("ls /tmp/new/deep/er")
 print("moved, nothing made:", vfs.exists(t.fs, "/tmp/new/deep/er/f.txt"), not vfs.exists(t.fs, "/tmp/gone"))
+# reading and moving: a missing path is not found, a path through a file names the file
+run("cd /tmp/nope")
+run("cd /tmp/new/deep/er/f.txt")
+run("cd /tmp/new/deep/er/f.txt/x")
+run("ls /tmp/nope/x")
+run("cat /tmp/new/deep/er/f.txt/x")
+run("rm /tmp/new/deep/er/f.txt/x/y")
+run("mv /tmp/nope /tmp/x")
