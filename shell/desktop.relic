@@ -36,7 +36,7 @@ fun draw(d)
         graphics.clip(w.x, w.y + wm.title_height, w.width, w.height)
         let row = 0
         for line in wm.visible_lines(w)
-            graphics.text(w.x + 6, w.y + wm.title_height + 6 + row * 14, line, 20, 20, 20)
+            graphics.text(w.x + wm.text_left, w.y + wm.title_height + wm.text_top + row * wm.line_height, line, 20, 20, 20)
             row = row + 1
         graphics.unclip()
         let rb = wm.resize_box(w)

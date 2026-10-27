@@ -26,6 +26,10 @@ let grip = 12           # bottom-right resize handle
 let min_width = 80
 let min_height = 40
 let cascade_steps = 10   # windows per cascade before it wraps
+let char_width = 8       # the font's characters
+let line_height = 14     # text rows are this far apart
+let text_left = 6        # text starts this far in from a window's left edge
+let text_top = 6         # and this far below the title bar
 
 # Shared in-memory VFS for Files, Editor and Terminal (not the host disk).
 let _shell_fs = vfs.new()
@@ -69,7 +73,7 @@ fun tab_width_for(d)
 
 # A window's tab text, cut to what fits in its tab (the font is 8 pixels wide).
 fun tab_label(d, w)
-    let room = int((tab_width_for(d) - 8) / 8)
+    let room = int((tab_width_for(d) - char_width) / char_width)
     if room < 1
         room = 1
     return slice(w.app.name, 0, room)
@@ -300,10 +304,11 @@ fun handle(d, e)
 
 # ---- what fits in a window ----
 
-# Text rows are 14 pixels apart, the first 6 down, in 8 pixel wide characters
-# starting 6 across (desktop.relic draws them that way).
-fun rows_fit(w) = math.max(1, int((w.height - 4) / 14))
-fun cols_fit(w) = math.max(1, int((w.width - 8) / 8))
+# desktop.relic draws row r at y = text_top + r * line_height under the title
+# bar, and each character char_width wide from text_left. A row counts as
+# fitting with 4 pixels to spare below it, a column with 2 to spare on the right.
+fun rows_fit(w) = math.max(1, int((w.height - 4) / line_height))
+fun cols_fit(w) = math.max(1, int((w.width - text_left - 2) / char_width))
 
 fun _fit(text, cols, keep_end)
     if len(text) <= cols
@@ -665,12 +670,11 @@ fun _files_open(s, name)
         # the next Editor window opens this file
         _shell_open.path = full
 
-# Text lines are 14 pixels apart and the first starts 6 pixels down (desktop.relic
-# draws them that way), so line r covers y from 6 + 14 * r. Line 0 is the title.
+# Line r covers y from text_top + line_height * r. Line 0 is the title.
 fun _files_click(s, x, y)
-    if y < 6
+    if y < text_top
         return
-    let row = int((y - 6) / 14)
+    let row = int((y - text_top) / line_height)
     if row <= 0
         return
     let names = _files_names(s)
