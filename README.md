@@ -34,6 +34,7 @@ tests/
   shell_small_apps.relic  Editor, Notes and Clicker
   shell_clicker_edges.relic  rapid input and Clicker state after reopening
   shell_app_focus.relic  Notes and Clicker state across focus and window controls
+  shell_shared_desktops.relic  shared filesystem and Editor path across desktop maps
   shell_notes_resize.relic  Notes text clipping and edits across resizes
   shell_notes_input_edges.relic  single-line input and reopening Notes
   shell_editor_stale.relic  Editor reports a file removed before opening

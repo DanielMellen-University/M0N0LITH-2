@@ -1,0 +1,20 @@
+# Desktop maps share the filesystem and the next Editor path, but not windows.
+use ../shell/wm
+use std/vfs
+let a = wm.new_desktop(640, 480, wm.default_apps())
+let b = wm.new_desktop(640, 480, wm.default_apps())
+let f = wm.launch(a, wm.files_app)
+vfs.write(f.state.fs, "/home/shared-test.txt", "from first desktop")
+wm.key(a, "down")
+wm.key(a, "return")
+let e = wm.launch(b, wm.editor)
+print("opened", e.state.path, e.state.text)
+wm.handle(b, {type: "text", text: "!"})
+wm.key(b, "ctrl+s")
+let t = wm.launch(a, wm.terminal)
+wm.handle(a, {type: "text", text: "cat shared-test.txt"})
+wm.key(a, "return")
+print("saved", t.state.buf[len(t.state.buf) - 1])
+print("windows", len(a.windows), len(b.windows), wm.focused(a).app.name, wm.focused(b).app.name)
+wm.close(b, e.id)
+print("independent", len(a.windows), len(b.windows), wm.focused(a).app.name)
