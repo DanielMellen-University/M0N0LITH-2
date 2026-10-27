@@ -282,6 +282,8 @@ fun key_of_event(e)
         return none
     if e.ctrl and not e.key in _modifier_keys
         return "ctrl+" + e.key
+    if e.key == "keypad enter"
+        return "return"
     if e.key in _named_keys
         return e.key
     return none

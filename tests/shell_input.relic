@@ -48,3 +48,10 @@ print(mouse(d, "mouse_down", c.x + 10, c.y + 4))
 wm.handle(d, {type: "mouse_move", x: c.x + 60, y: c.y + 4, dx: 50, dy: 0})
 print(mouse(d, "mouse_up", c.x + 60, c.y + 4), c.x - x, d.drag)
 print(wm.handle(d, {type: "mouse_down", button: 3, x: 5, y: 5, clicks: 1}), wm.handle(d, {type: "wheel", dx: 0, dy: 1}), wm.handle(d, {type: "resize", width: 800, height: 600}))
+
+# Enter on the number pad counts as Return
+print(start(d, 2))
+let term = wm.focused(d)
+type_in(d, "pwd")
+wm.handle(d, down("keypad enter", false))
+print(term.state.buf[len(term.state.buf) - 1], term.state.input == "")

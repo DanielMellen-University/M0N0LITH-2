@@ -12,3 +12,5 @@ launch
 title
 none 50 none
 none none none
+launch
+/home true
