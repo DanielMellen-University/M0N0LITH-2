@@ -31,4 +31,4 @@ Terminal, Files and Editor work on one in-memory filesystem (`std/vfs`), so a ch
 
 ## Tests
 
-Each `tests/shell_*.relic` drives `wm.relic` with fake input and prints what happened; the output must match the `.out` file next to it. `shell_fuzz` throws random input at the model and checks the invariants above after every step. To change an expected output on purpose, run the test, read the diff, and save the new output.
+CMake discovers every `tests/*.relic` program. Each current test drives `wm.relic` and prints what happened; its standard output must match the `.out` file next to it (or be empty if that file is absent). `shell_fuzz` uses fixed seeds on two desktop sizes and checks model invariants after every step. CTest also runs `relic check` on both shell files. To change an expected output on purpose, run the test, read the diff, and save the new output.

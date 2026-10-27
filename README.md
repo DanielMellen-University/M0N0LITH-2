@@ -80,7 +80,7 @@ Already cloned without submodules? Run `git submodule update --init`.
 
 `-DRELIC_BUILD_HOST=ON` matters. Since Relic 1.0.7 the default Relic build is C only and makes `relicc` (the compiler to C), not the `relic` program the tests and `relic check` use. The flag builds the C++ host that provides `relic`.
 
-The tests run every `tests/shell_*.relic` program against its `.out` file, and `relic check` on every shell file. CI runs the same steps on Linux, macOS and Windows.
+CMake discovers every `tests/*.relic` program and compares its standard output with the matching `.out` file (or empty output if there is no `.out`). It also runs `relic check` on both shell files. CI runs the same steps on Linux, macOS and Windows.
 
 ## Run the desktop
 
