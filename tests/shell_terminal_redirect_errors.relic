@@ -1,0 +1,26 @@
+# Failed redirects leave existing files and directories intact, and clear resets output.
+use ../shell/wm
+use std/vfs
+let d = wm.new_desktop(640, 480, wm.default_apps())
+let t = wm.launch(d, wm.terminal)
+let fs = t.state.fs
+vfs.write(fs, "/tmp/keep", "original")
+fun run(line)
+    wm.handle(d, {type: "text", text: line})
+    wm.key(d, "return")
+    print(t.state.buf)
+    t.state.buf = []
+run("echo text > /tmp")
+run("echo text >> /tmp")
+run("echo text > /tmp/missing/file")
+run("echo text >> /tmp/keep/child")
+run("echo text >")
+print("unchanged", vfs.read(fs, "/tmp/keep"), vfs.is_dir(fs, "/tmp"))
+run("echo 'hello world' > /tmp/quoted")
+print("literal quotes", vfs.read(fs, "/tmp/quoted"))
+wm.handle(d, {type: "text", text: "clear"})
+wm.key(d, "return")
+print("clear view", wm.visible_lines(t))
+wm.handle(d, {type: "text", text: "echo after"})
+wm.key(d, "return")
+print("after view", wm.visible_lines(t))

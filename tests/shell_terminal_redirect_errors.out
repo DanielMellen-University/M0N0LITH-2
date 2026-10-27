@@ -1,0 +1,11 @@
+["Terminal. Type help.", "/home> echo text > /tmp", "echo: cannot write /tmp"]
+["/home> echo text >> /tmp", "echo: cannot append /tmp"]
+["/home> echo text > /tmp/missing/file", "echo: cannot write /tmp/missing/file"]
+["/home> echo text >> /tmp/keep/child", "echo: cannot write /tmp/keep/child"]
+["/home> echo text >", "echo: missing redirect path"]
+unchanged original true
+["/home> echo 'hello world' > /tmp/quoted"]
+literal quotes 'hello world'
+
+clear view ["/home> _"]
+after view ["/home> echo after", "after", "/home> _"]

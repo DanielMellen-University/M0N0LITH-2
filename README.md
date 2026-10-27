@@ -53,6 +53,7 @@ tests/
   shell_terminal_errors.relic  Terminal error messages (mv, mkdir, cat, paths through a file)
   shell_terminal_cat_blank.relic  cat preserves blank lines in files
   shell_terminal_redirect.relic  echo redirects and missing destinations
+  shell_terminal_redirect_errors.relic  failed redirects and output after clear
   shell_terminal_edges.relic  Terminal path and input boundaries
   shell_terminal_stale.relic  Terminal recovers when its current folder is removed
   shell_terminal_ls.relic  Terminal packs directory listings to the window width
