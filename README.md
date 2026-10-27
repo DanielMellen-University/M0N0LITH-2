@@ -90,6 +90,8 @@ Click Start (again to close the menu), pick an app, click inside it or type. Dra
 
 Keys go to the window on top. Typing keeps its case and symbols, Ctrl+S saves in the Editor, Backspace works in Terminal, Notes and Editor, and Return runs a Terminal command or starts a new Editor line (Notes is one line). Up, Down and Return move through Files, and Backspace goes up a folder. Text that does not fit a window is cut at its edge: Terminal, Editor and Notes show their last lines, and Files follows the selected row. The Terminal wraps long lines to its window; the other apps cut them.
 
+Terminal splits commands on spaces; quotes are literal characters and do not group words, so paths containing spaces cannot be entered as one argument. Editor typing and Backspace work at the end of the text; arrow keys do not move its cursor. Its status shows the last edit, save, or file error, and a failed save leaves the buffer available for another attempt.
+
 ## Docs
 
 - [How the shell is put together](docs/SHELL.md)
