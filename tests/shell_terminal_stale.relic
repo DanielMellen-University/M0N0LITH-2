@@ -1,0 +1,30 @@
+# A Terminal whose folder another Terminal removed or moved falls back to the nearest folder that is still there.
+use ../shell/wm
+
+let d = wm.new_desktop(640, 480, wm.default_apps())
+let a = wm.launch(d, wm.terminal)
+let b = wm.launch(d, wm.terminal)
+
+fun type(w, text)
+    d.windows = [w]   # the keys go to the window on top
+    for c in text
+        if c == " "
+            wm.key(d, "space")
+        else
+            wm.key(d, c)
+    wm.key(d, "return")
+
+type(a, "mkdir /home/proj")
+type(a, "mkdir /home/proj/src")
+type(a, "cd /home/proj/src")
+print(a.state.cwd)
+type(b, "mv /home/proj /tmp/moved")
+print(wm.visible_lines(a)[len(wm.visible_lines(a)) - 1])
+print(a.state.cwd)
+type(a, "pwd")
+type(a, "ls")
+print(a.state.buf[len(a.state.buf) - 2], "|", a.state.buf[len(a.state.buf) - 1])
+type(a, "cd /tmp/moved/src")
+type(b, "rm /tmp/moved/src")
+type(a, "pwd")
+print(a.state.buf[len(a.state.buf) - 1])

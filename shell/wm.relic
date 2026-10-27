@@ -453,6 +453,7 @@ fun _two(n)
 fun _term_init() = {buf: ["Terminal. Type help."], input: "", cwd: "/home", fs: _shell_fs}
 
 fun _term_lines(s)
+    s.cwd = _existing_dir(s.fs, s.cwd)   # another Terminal may have removed or moved it
     let out = []
     for line in s.buf
         append(out, line)
@@ -607,6 +608,7 @@ fun _words(line)
 let _path_commands = ["cd", "ls", "cat", "mkdir", "touch", "rm", "mv"]
 
 fun _term_run(s, line)
+    s.cwd = _existing_dir(s.fs, s.cwd)
     let trimmed = strings.trim(line)
     _term_reply(s, s.cwd + "> " + line)
     if trimmed == ""
