@@ -26,6 +26,7 @@ tests/
   shell_overflow_titles.relic  empty, long and non-ASCII window names in overflow
   shell_launch_small.relic  cascaded windows fit a small desktop
   shell_files_click.relic  clicking rows in Files
+  shell_files_boundaries.relic  root, empty folders, unusual names and reopening Files
   shell_files_hidden.relic  clicks below the visible Files rows do nothing
   shell_drag_resize.relic  dragging and resizing keep windows reachable
   shell_resize_offset.relic  resizing follows the point grabbed in the handle

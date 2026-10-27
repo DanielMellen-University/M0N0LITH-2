@@ -1,0 +1,28 @@
+# Root, empty folders, unusual names and fresh Files windows.
+use ../shell/wm
+use std/vfs
+let d = wm.new_desktop(640, 480, wm.default_apps())
+let f = wm.launch(d, wm.files_app)
+let fs = f.state.fs
+f.state.path = "/"
+print("root", wm.visible_lines(f))
+wm.key(d, "backspace")
+wm.key(d, "up")
+print("root bounds", f.state.path, f.state.sel)
+vfs.make_dir(fs, "/tmp/empty folder")
+f.state.path = "/tmp/empty folder"
+print("empty", wm.visible_lines(f))
+wm.key(d, "down")
+print("empty down", f.state.sel)
+wm.key(d, "return")
+print("parent", f.state.path)
+vfs.write(fs, "/tmp/empty folder/a b!?é.txt", "odd name")
+f.state.path = "/tmp/empty folder"
+print("odd name", wm.visible_lines(f))
+wm.key(d, "down")
+wm.key(d, "return")
+let e = wm.launch(d, wm.editor)
+print("opened", e.state.path, e.state.text)
+wm.close(d, f.id)
+let fresh = wm.launch(d, wm.files_app)
+print("fresh", fresh.state.path, fresh.state.sel, wm.visible_lines(fresh))

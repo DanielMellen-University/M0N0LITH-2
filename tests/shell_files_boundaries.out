@@ -1,0 +1,8 @@
+root ["Files: /", "> home/", "  tmp/"]
+root bounds / 0
+empty ["Files: /tmp/empty folder", "> .."]
+empty down 0
+parent /tmp
+odd name ["Files: /tmp/empty folder", "> ..", "  a b!?é.txt"]
+opened /tmp/empty folder/a b!?é.txt odd name
+fresh /home 0 ["Files: /home", "> ..", "  welcome.txt"]
