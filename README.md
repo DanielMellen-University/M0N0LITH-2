@@ -20,6 +20,15 @@ tests/
   shell_files_click.relic  clicking rows in Files
   shell_drag_resize.relic  dragging and resizing keep windows reachable
   shell_small_apps.relic  Editor, Notes and Clicker
+  shell_files_stale.relic  Files when another app removed the selected file
+  shell_input.relic  graphics events turned into keys and clicks (ctrl+s, text, the mouse)
+  shell_clip.relic  text cut to the window, Files scrolling to the selection
+  shell_big_file.relic  the Editor on a file of thousands of lines stays quick
+  shell_terminal_history.relic  the Terminal keeps its last 200 lines
+  shell_terminal_errors.relic  Terminal error messages (mv, mkdir, cat, paths through a file)
+  shell_date.relic  the date command and its UTC format
+  shell_missed_release.relic  a lost mouse-up does not leave a drag running
+  shell_fuzz.relic  random input against the window model, checking invariants each step
 tools/
   run_golden.cmake  golden test runner (copied from Relic)
 relic/            Relic, pinned as a git submodule
