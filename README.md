@@ -55,6 +55,7 @@ tests/
   shell_render_modes.relic  clipping and row selection for plain and tail apps
   shell_big_file.relic  the Editor on a file of thousands of lines stays quick
   shell_last_lines.relic  Editor line splitting at empty and trailing newline boundaries
+  shell_last_lines_long.relic  the Editor on a 200,000-character line stays quick
   shell_terminal_history.relic  the Terminal keeps its last 200 lines
   shell_terminal_errors.relic  Terminal error messages (mv, mkdir, cat, paths through a file)
   shell_terminal_touch.relic  touch preserves existing entries and creates empty files

@@ -1,0 +1,43 @@
+# last_lines on long lines: it reads the text in chunks, so an Editor on a file
+# with one 200,000-character line draws quickly, and the rows match a full split
+# with newlines on and around the chunk edges.
+use ../shell/wm
+use std/strings
+use std/math
+use std/time
+
+fun full(text, n)
+    let whole = strings.split(text, "\n")
+    let want = []
+    for i in math.max(0, len(whole) - n)..len(whole)
+        append(want, whole[i])
+    return want
+
+let same = true
+let checked = 0
+for at in [1, 2, 1022, 1023, 1024, 1025, 1026, 2047, 2048, 2049, 3000]
+    for extra in [0, 1, 5]
+        # a newline `at` characters from the end, and `extra` more near the start
+        let text = strings.repeat("a", 3100 - at) + "\n" + strings.repeat("b", at - 1)
+        for k in 0..extra
+            text = "line {k}\n" + text
+        for n in [1, 2, 3, 8]
+            checked = checked + 1
+            if wm.last_lines(text, n) != full(text, n)
+                same = false
+                print("differs: newline", at, "from the end, extra", extra, "rows", n)
+print("same as a full split:", same, checked)
+print(wm.last_lines("", 3), wm.last_lines("\n", 1), wm.last_lines("\n", 2), wm.last_lines("x\n", 1), wm.last_lines("é\nü", 1))
+
+let d = wm.new_desktop(640, 480, wm.default_apps())
+let e = wm.launch(d, wm.editor)
+let parts = []
+for i in 0..2000
+    append(parts, "0123456789abcdefghijklmnopqrstuvwxyz0123456789abcdefghijklmnopqrstuvwxyz0123456789abcdefghijklmnopqr")
+e.state.text = strings.join(parts, "")
+let t0 = time.clock()
+let v = wm.visible_lines(e)
+let fast = time.since(t0) < 0.5
+for line in v
+    print(line)
+print("fast:", fast)
