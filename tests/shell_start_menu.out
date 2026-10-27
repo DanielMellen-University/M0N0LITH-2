@@ -1,0 +1,11 @@
+Start -> start menu open: true windows: 0
+Start again -> start menu open: false windows: 0
+Start -> start menu open: true windows: 0
+empty desktop -> desktop menu open: false windows: 0
+Start -> start menu open: true windows: 0
+taskbar gap -> bar menu open: false windows: 0
+Start -> start menu open: true windows: 0
+Notes row -> launch menu open: false windows: 1
+Start -> start menu open: true windows: 1
+Clicker row -> launch menu open: false windows: 2
+Clicker 2

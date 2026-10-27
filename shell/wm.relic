@@ -158,6 +158,7 @@ fun _begin_drag(d, w, mode, x, y)
 # A mouse click at (x, y). Gives a short word saying what it hit.
 # Title and resize hits also start a drag; call motion and release after.
 fun click(d, x, y)
+    let menu_was_open = d.menu_open
     if d.menu_open
         d.menu_open = false
         for i in 0..len(d.apps)
@@ -166,7 +167,7 @@ fun click(d, x, y)
                 return "launch"
     if y >= bar_top(d)
         if x < start_width
-            d.menu_open = not d.menu_open
+            d.menu_open = not menu_was_open
             return "start"
         let t = tabs(d)
         for i in 0..len(t)
