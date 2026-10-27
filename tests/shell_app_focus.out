@@ -1,0 +1,6 @@
+initial ["Type something:", "Hi é!_"] ["Type something:", "Other_"] ["Clicks: 3", "Click here to count."]
+minimized true ["Type something:", "Othe_"] 3
+restored ["Type something:", "Hi é_"] ["Type something:", "Othe_"]
+closed true ["Type something:", "Othe _"]
+resize resize 3
+close close 3 true
