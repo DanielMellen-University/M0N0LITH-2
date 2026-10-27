@@ -1,0 +1,7 @@
+["Editor [open] /tmp/ed/empty  (ctrl+s sa", "_"]
+open true
+["Editor [edited] /tmp/ed/empty  (ctrl+s ", "_"]
+saved true
+["Editor [cannot write /tmp/ed/empty] /tm", "a_"]
+buffer retained a
+saved a
