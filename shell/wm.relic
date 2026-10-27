@@ -59,7 +59,7 @@ fun menu_item_box(d, i)
     let n = len(d.apps)
     return [0, bar_top(d) - (n - i) * menu_row, 120, menu_row]
 
-# Taskbar button of window i (in launch order is fine, it is by index).
+# Taskbar button i: [x, y, w, h]. Buttons run left to right in the order of tabs(d).
 fun tab_box(d, i)
     let w = tab_width_for(d)
     return [start_width + 4 + i * (w + 4), bar_top(d) + 3, w, bar_height - 6]
@@ -78,9 +78,7 @@ fun tab_width_for(d)
 
 # A window's tab text, cut to what fits in its tab (the font is 8 pixels wide).
 fun tab_label(d, w)
-    let room = int((tab_width_for(d) - char_width) / char_width)
-    if room < 1
-        room = 1
+    let room = math.max(1, int((tab_width_for(d) - char_width) / char_width))
     return slice(w.app.name, 0, room)
 
 fun close_box(w) = [w.x + w.width - title_height, w.y, title_height, title_height]
@@ -174,7 +172,7 @@ fun _clamp_size(d, w)
         if w.height < min_height
             w.height = min_height
 
-# Taskbar order is launch order, which is the id order.
+# The windows in taskbar order: launch order (by id), whatever their stacking is.
 fun tabs(d)
     let out = []
     for w in d.windows
