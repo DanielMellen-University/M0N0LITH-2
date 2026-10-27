@@ -77,3 +77,4 @@ welcome.txt
 /home> mv a.txt -b
 mv: no options, not even -b
 /home> write -x text
+write: no options, not even -x

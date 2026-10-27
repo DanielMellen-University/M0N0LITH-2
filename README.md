@@ -64,6 +64,7 @@ tests/
   shell_terminal_cat_blank.relic  cat preserves blank lines in files
   shell_terminal_cat_big.relic  cat of a 100,000-line file stays quick
   shell_terminal_extra_words.relic  clear, apps, date and pwd reject extra words
+  shell_terminal_dash_paths.relic  write and echo > refuse paths starting with -
   shell_terminal_slash.relic  a path ending in / must be a folder
   shell_terminal_redirect.relic  echo redirects and missing destinations
   shell_terminal_redirect_errors.relic  failed redirects and output after clear
@@ -128,7 +129,7 @@ Keys go to the window on top. Typing keeps its case and symbols, Ctrl+S saves in
 
 Terminal splits commands on spaces; quotes are literal characters and do not group words, so paths containing spaces cannot be entered as one argument. Editor typing and Backspace work at the end of the text; arrow keys do not move its cursor. Its status shows the last edit, save, or file error, and a failed save leaves the buffer available for another attempt.
 
-Terminal commands are `help`, `clear`, `echo`, `apps`, `date`, `pwd`, `cd`, `ls`, `cat`, `mkdir`, `touch`, `write`, `rm` and `mv`. `clear`, `apps`, `date` and `pwd` take no words. `cd` without a path goes to `/home`; `ls` without one lists the current folder. `write path text` replaces a file and adds a newline; `echo text > path` does the same, while `>>` appends. `cd`, `ls`, `cat`, `mkdir`, `touch`, `rm` and `mv` reject arguments beginning with `-`; `rm` removes only files or empty folders. A path ending in `/` names a folder, so `cat notes.txt/` or `rm notes.txt/` is an error and `touch new/` makes nothing. Output keeps the last 200 logical lines, which may wrap into more screen rows.
+Terminal commands are `help`, `clear`, `echo`, `apps`, `date`, `pwd`, `cd`, `ls`, `cat`, `mkdir`, `touch`, `write`, `rm` and `mv`. `clear`, `apps`, `date` and `pwd` take no words. `cd` without a path goes to `/home`; `ls` without one lists the current folder. `write path text` replaces a file and adds a newline; `echo text > path` does the same, while `>>` appends. `cd`, `ls`, `cat`, `mkdir`, `touch`, `rm` and `mv` reject arguments beginning with `-`, and so do the paths of `write` and `echo >` (write `./-x` to mean such a name); `rm` removes only files or empty folders. A path ending in `/` names a folder, so `cat notes.txt/` or `rm notes.txt/` is an error and `touch new/` makes nothing. Output keeps the last 200 logical lines, which may wrap into more screen rows.
 
 ## Docs
 

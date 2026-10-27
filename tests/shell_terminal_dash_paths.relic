@@ -1,0 +1,32 @@
+# write and echo > do not make a file whose name starts with -, since cat, rm and
+# mv refuse such a word and the file could not be read or removed. Text that
+# starts with - is still fine, and ./-x still names such a path.
+use ../shell/wm
+use std/vfs
+let t = wm.terminal.init()
+fun run(line)
+    t.buf = []
+    for c in line
+        if c == " "
+            wm.terminal.on_key(t, "space")
+        else
+            wm.terminal.on_key(t, c)
+    wm.terminal.on_key(t, "return")
+    print(t.buf)
+run("cd /tmp")
+run("write -h")
+run("write -x some text")
+run("echo hi > -x")
+run("echo hi >> --")
+run("ls")
+print("no dash files:", not vfs.exists(t.fs, "/tmp/-x") and not vfs.exists(t.fs, "/tmp/-h") and not vfs.exists(t.fs, "/tmp/--"))
+run("echo -n -x")
+run("write notes -x -y")
+run("cat notes")
+run("echo -- > notes")
+run("cat notes")
+run("write ./-x made on purpose")
+run("cat ./-x")
+run("rm ./-x")
+run("rm notes")
+run("ls")

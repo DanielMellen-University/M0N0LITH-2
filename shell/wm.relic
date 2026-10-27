@@ -796,6 +796,8 @@ fun _term_echo(s, parts)
     let n = len(parts)
     if n >= 2 and (parts[n - 1] == ">" or parts[n - 1] == ">>")
         _term_reply(s, "echo: missing redirect path")
+    else if n >= 3 and (parts[n - 2] == ">" or parts[n - 2] == ">>") and strings.starts_with(parts[n - 1], "-")
+        _term_reply(s, "echo: a path cannot start with -: " + parts[n - 1])
     else if n >= 3 and (parts[n - 2] == ">" or parts[n - 2] == ">>")
         _term_write(s, "echo", parts[n - 1], strings.join(slice(parts, 1, n - 2), " "), parts[n - 2] == ">>")
     else
@@ -861,6 +863,11 @@ fun _term_run(s, line)
             if strings.starts_with(word, "-")
                 _term_reply(s, cmd + ": no options, not even " + word)
                 return
+    # write's first word is a path too (the rest is text): a file named -x could
+    # not be read or removed afterwards, since cat and rm refuse the word
+    if cmd == "write" and len(parts) > 1 and strings.starts_with(parts[1], "-")
+        _term_reply(s, "write: no options, not even " + parts[1])
+        return
     if cmd == "help"
         _term_reply(s, "help clear echo apps date")
         _term_reply(s, "pwd cd ls cat mkdir touch")
