@@ -30,7 +30,7 @@ tests/
   shell_missed_release.relic  a lost mouse-up does not leave a drag running
   shell_fuzz.relic  random input against the window model, checking invariants each step
 tools/
-  run_golden.cmake  golden test runner (copied from Relic)
+  run_golden.cmake  golden test runner (Relic's, cut down to what these tests use)
 relic/            Relic, pinned as a git submodule
 docs/SHELL.md  the model, the input calls, what an app is
 docs/ROADMAP.md
