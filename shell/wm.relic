@@ -83,6 +83,12 @@ fun tab_label(d, w)
 
 fun close_box(w) = [w.x + w.width - title_height, w.y, title_height, title_height]
 
+# The window's name cut to the room the title bar has left of the _ and x boxes
+# (desktop.relic draws it 4 pixels in).
+fun title_text(w)
+    let room = int((w.width - 2 * title_height - 4) / char_width)
+    return slice(w.app.name, 0, math.max(0, room))
+
 # The _ box, just left of the x box. It minimizes the window.
 fun minimize_box(w) = [w.x + w.width - 2 * title_height, w.y, title_height, title_height]
 

@@ -1,0 +1,12 @@
+# A window's name is cut so it never runs under the _ and x boxes.
+use ../shell/wm
+
+let d = wm.new_desktop(640, 480, wm.default_apps())
+let t = wm.launch(d, wm.terminal)
+print(wm.title_text(t))
+for width in [200, 100, 80, 70, 40]
+    t.width = width
+    print(width, "[" + wm.title_text(t) + "]", len(wm.title_text(t)) * 8 + 4 + 32 <= width)
+# a width too small for any letter gives an empty name, not an error
+t.width = 30
+print("[" + wm.title_text(t) + "]")

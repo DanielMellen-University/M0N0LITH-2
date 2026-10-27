@@ -19,7 +19,7 @@ fun draw_window(d, w)
     else
         draw_box([w.x, w.y, w.width, wm.title_height], 90, 90, 100)
     draw_box([w.x, w.y + wm.title_height, w.width, w.height], 235, 235, 235)
-    graphics.text(w.x + 4, w.y + 2, w.app.name, 255, 255, 255)
+    graphics.text(w.x + 4, w.y + 2, wm.title_text(w), 255, 255, 255)
     let cb = wm.close_box(w)
     draw_box(cb, 180, 60, 60)
     graphics.text(cb[0] + 4, cb[1] + 2, "x", 255, 255, 255)
