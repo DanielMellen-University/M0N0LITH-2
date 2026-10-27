@@ -17,6 +17,7 @@ tests/
   shell_lifecycle.relic  window ids, focus and tab order through lifecycle changes
   shell_terminal.relic  Terminal commands: extra spaces, folders, redirects, errors
   shell_start_menu.relic  the Start button opens and closes the menu
+  shell_menu_focus.relic  keyboard focus while the Start menu or the +N list is open
   shell_menu_edges.relic  Start menu row and taskbar hit boundaries
   shell_many_windows.relic  windows cascade and wrap, taskbar tabs shrink to fit
   shell_taskbar_overflow.relic  the +N button and hidden-windows list at 14 to 300 windows

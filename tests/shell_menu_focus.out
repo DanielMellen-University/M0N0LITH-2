@@ -1,0 +1,9 @@
+menu open while typing: true ab
+launch Terminal false
+terminal input: pwd notes: ab
+dismiss: true Terminal
+terminal input: pwdx
+desktop false Terminal
+list open: true count: 1 true
+tab true Clicker
+picked window got the key: 1 the old top did not: 1

@@ -1,0 +1,35 @@
+# Keyboard focus around the Start menu and the hidden-windows list: keys go to
+# the window on top while either is open and do not close it; a window launched
+# from the menu takes the keys; closing a menu with Escape (dismiss) or a click
+# on the desktop keeps the focus where it was.
+use ../shell/wm
+let d = wm.new_desktop(640, 480, wm.default_apps())
+fun type(text)
+    wm.handle(d, {type: "text", text: text})
+let n = wm.launch(d, wm.notes)
+wm.click(d, 10, 470)
+type("ab")
+print("menu open while typing:", d.menu_open, n.state.text)
+let row = wm.menu_item_box(d, 2)   # Terminal
+print(wm.click(d, row[0] + 5, row[1] + 5), wm.focused(d).app.name, d.menu_open)
+type("pwd")
+print("terminal input:", wm.focused(d).state.input, "notes:", n.state.text)
+wm.click(d, 10, 470)
+print("dismiss:", wm.dismiss(d), wm.focused(d).app.name)
+type("x")
+print("terminal input:", wm.focused(d).state.input)
+wm.click(d, 10, 470)
+print(wm.click(d, 600, 60), d.menu_open, wm.focused(d).app.name)
+# the hidden-windows list
+for i in 0..14
+    wm.launch(d, wm.clicker)
+let top = wm.focused(d)
+let ob = wm.overflow_box(d)
+wm.click(d, ob[0] + 2, ob[1] + 2)
+wm.key(d, "space")
+print("list open:", d.overflow_open, "count:", top.state.count, wm.focused(d).id == top.id)
+let hidden = wm.hidden_tabs(d)
+let pick = wm.overflow_item_box(d, 0)
+print(wm.click(d, pick[0] + 5, pick[1] + 5), wm.focused(d).id == hidden[0].id, wm.focused(d).app.name)
+wm.key(d, "space")
+print("picked window got the key:", wm.focused(d).state.count, "the old top did not:", top.state.count)
