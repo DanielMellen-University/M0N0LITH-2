@@ -1,0 +1,55 @@
+# cat of a big file splits only the last lines the Terminal keeps, so it stays
+# quick, and the output is the same as printing every line.
+use ../shell/wm
+use std/vfs
+use std/strings
+use std/time
+let t = wm.terminal.init()
+fun run(line)
+    for c in line
+        if c == " "
+            wm.terminal.on_key(t, "space")
+        else
+            wm.terminal.on_key(t, c)
+    wm.terminal.on_key(t, "return")
+# what the Terminal kept before: the prompt and every line, then the last 200
+fun expected(text)
+    let out = ["/home> cat /tmp/f"]
+    let body = text
+    if strings.ends_with(body, "\n")
+        body = slice(body, 0, len(body) - 1)
+    if text != ""
+        for line in strings.split(body, "\n")
+            append(out, line)
+    if len(out) > wm.term_history
+        out = slice(out, len(out) - wm.term_history, len(out))
+    return out
+fun lines_of(n, blank_every)
+    let parts = []
+    for i in 0..n
+        if blank_every > 0 and i % blank_every == 0
+            append(parts, "")
+        else
+            append(parts, "row {i}")
+    return parts
+let cases = ["", "\n", "\n\n", "a", "a\n", "a\n\nb", "\n\n\nend\n"]
+for n in [198, 199, 200, 201, 202, 450]
+    append(cases, strings.join(lines_of(n, 0), "\n") + "\n")
+    append(cases, strings.join(lines_of(n, 3), "\n"))
+let same = true
+for text in cases
+    t.buf = []
+    vfs.write(t.fs, "/tmp/f", text)
+    run("cat /tmp/f")
+    if t.buf != expected(text)
+        same = false
+        print("differs for", len(text), "chars:", len(t.buf), len(expected(text)))
+print("same as every line:", same)
+
+vfs.write(t.fs, "/tmp/big", strings.join(lines_of(100000, 0), "\n") + "\n")
+t.buf = []
+let t0 = time.clock()
+run("cat /tmp/big")
+let fast = time.since(t0) < 0.8
+print(len(t.buf), t.buf[0], t.buf[199])
+print("fast:", fast)

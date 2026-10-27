@@ -698,7 +698,8 @@ fun _term_cat(s, path)
         if strings.ends_with(text, "\n")
             text = slice(text, 0, len(text) - 1)
         if text != "" or vfs.size(s.fs, p) > 0
-            for line in strings.split(text, "\n")
+            # only the lines the history keeps, so a big file does not stall the frame
+            for line in last_lines(text, term_history)
                 _term_reply(s, line)
     catch err
         _term_reply(s, "cat: " + err.message)

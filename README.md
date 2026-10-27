@@ -60,6 +60,7 @@ tests/
   shell_terminal_touch.relic  touch preserves existing entries and creates empty files
   shell_terminal_write.relic  write replaces content and handles empty text
   shell_terminal_cat_blank.relic  cat preserves blank lines in files
+  shell_terminal_cat_big.relic  cat of a 100,000-line file stays quick
   shell_terminal_extra_words.relic  clear, apps, date and pwd reject extra words
   shell_terminal_slash.relic  a path ending in / must be a folder
   shell_terminal_redirect.relic  echo redirects and missing destinations
