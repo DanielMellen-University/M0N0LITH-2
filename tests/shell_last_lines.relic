@@ -1,0 +1,6 @@
+# Editor's reverse scan agrees with a full split at line boundaries.
+use ../shell/wm
+let samples = ["", "one", "one\n", "\n\n", "a\nb\nc"]
+for i in 0..len(samples)
+    for count in [0, 1, 2, 3, 5]
+        print(i, count, wm.last_lines(samples[i], count))
