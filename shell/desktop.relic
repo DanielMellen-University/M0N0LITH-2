@@ -1,9 +1,12 @@
 # shell/desktop.relic: a first MONOLITH 2 desktop, written in Relic (M11).
 #   relic/build-sdl/relic shell/desktop.relic
-# Click Start (again to close the menu), pick an app, click inside it or type. Drag a title bar to move,
-# drag the bottom-right corner to resize. The x box closes a window, the _ box
-# minimizes it. A taskbar button brings its window to the front, or minimizes
-# it if it is already in front; click it again to restore. Escape quits.
+# Click Start (again to close the menu), pick an app, click inside it or type.
+# Drag a title bar to move, drag the bottom-right corner to resize. The x box
+# closes a window, the _ box minimizes it. A taskbar button brings its window
+# to the front, or minimizes it if it is already in front; click it again to
+# restore. Ctrl+S saves in the Editor. Escape quits.
+# Input comes as graphics events and wm.handle turns them into app input, so
+# typed text keeps its case and symbols.
 use wm
 use std/graphics
 
@@ -59,26 +62,15 @@ if not graphics.available()
 else
     let d = wm.new_desktop(640, 480, wm.default_apps())
     graphics.open(d.width, d.height, "MONOLITH 2")
-    let was_down = false
     let running = true
     while running and not graphics.quit_requested()
-        let k = graphics.next_key()
-        while k != none
-            if k == "escape"
+        let e = graphics.next_event()
+        while e != none
+            if e.type == "key_down" and e.key == "escape"
                 running = false
             else
-                wm.key(d, k)
-            k = graphics.next_key()
-        let mx = graphics.mouse_x()
-        let my = graphics.mouse_y()
-        let down = graphics.mouse_down(1)
-        if down and not was_down
-            wm.click(d, mx, my)
-        else if down and was_down
-            wm.motion(d, mx, my)
-        else if not down and was_down
-            wm.release(d)
-        was_down = down
+                wm.handle(d, e)
+            e = graphics.next_event()
         draw(d)
         graphics.wait(16)
     graphics.close()
