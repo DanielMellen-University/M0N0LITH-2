@@ -28,6 +28,7 @@ tests/
   shell_editor_stale.relic  Editor reports a file removed before opening
   shell_editor_edges.relic  Editor empty buffers, line edges and failed saves
   shell_files_stale.relic  Files when another app removed the selected file
+  shell_files_ancestor.relic  Files and Terminal recover after an ancestor folder moves
   shell_files_selection.relic  Files keeps its selection across directory changes
   shell_files_changed_click.relic  Files ignores a click on rows changed since drawing
   shell_input.relic  graphics events turned into keys and clicks (ctrl+s, text, the mouse)

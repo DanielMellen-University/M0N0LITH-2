@@ -1,0 +1,19 @@
+# Files and Terminal recover to the nearest remaining folder after an ancestor moves.
+use ../shell/wm
+use std/vfs
+let d = wm.new_desktop(640, 480, wm.default_apps())
+let f = wm.launch(d, wm.files_app)
+let fs = f.state.fs
+vfs.make_dir(fs, "/tmp/tree")
+vfs.make_dir(fs, "/tmp/tree/child")
+f.state.path = "/tmp/tree/child"
+print("before", wm.visible_lines(f))
+let t = wm.launch(d, wm.terminal)
+t.state.cwd = "/tmp/tree/child"
+vfs.rename(fs, "/tmp/tree", "/tmp/moved")
+print("terminal", wm.visible_lines(t), t.state.cwd)
+wm.restore(d, f.id)
+wm.key(d, "return")
+print("files", f.state.path, wm.visible_lines(f))
+wm.key(d, "return")
+print("next return", f.state.path, wm.visible_lines(f))
