@@ -1,0 +1,8 @@
+["Editor: /home/welcome.txt  (ctrl+s save)  [open]", "Welcome to Relic.", "_"]
+["Editor: /home/welcome.txt  (ctrl+s save)  [saved]", "Welcome to Relicx ", "y_"]
+["Editor: /home/welcome.txt  (ctrl+s save)  [saved]", "Welcome to Relicx ", "y_"]
+["Editor: /home/welcome.txt  (ctrl+s save)  [saved]", "_"]
+["Editor: /home/welcome.txt  (ctrl+s save)  [open]", "_"]
+["Type something:", "hz_"]
+["Clicks: 1", "Click here to count."]
+app ["Clicks: 2", "Click here to count."]
