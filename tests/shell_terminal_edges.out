@@ -1,0 +1,14 @@
+["/home> "]
+["/home>    "]
+["/home> cd /../../"]
+["/> pwd", "/"]
+["/> cd ./home/../tmp//"]
+["/tmp> pwd", "/tmp"]
+["/tmp> touch ./odd!@#"]
+["/tmp> ls /tmp/./", "odd!@#"]
+["/tmp> echo 'two words'", "'two words'"]
+["/tmp> cat 'two words'", "usage: cat <path>"]
+["/tmp> write /tmp/long xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"]
+long file length 301
+["/tmp> rm /tmp/long"]
+removed true

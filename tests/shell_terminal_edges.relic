@@ -1,0 +1,30 @@
+# Existing Terminal parsing and path behavior at input boundaries.
+use ../shell/wm
+use std/vfs
+let t = wm.terminal.init()
+fun run(line)
+    t.buf = []
+    for c in line
+        if c == " "
+            wm.terminal.on_key(t, "space")
+        else
+            wm.terminal.on_key(t, c)
+    wm.terminal.on_key(t, "return")
+    print(t.buf)
+run("")
+run("   ")
+run("cd /../../")
+run("pwd")
+run("cd ./home/../tmp//")
+run("pwd")
+run("touch ./odd!@#")
+run("ls /tmp/./")
+run("echo 'two words'")
+run("cat 'two words'")
+let long = ""
+for i in 0..300
+    long = long + "x"
+run("write /tmp/long " + long)
+print("long file length", len(vfs.read(t.fs, "/tmp/long")))
+run("rm /tmp/long")
+print("removed", not vfs.exists(t.fs, "/tmp/long"))
