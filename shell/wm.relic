@@ -386,8 +386,6 @@ fun _notes_key(s, k)
     else if len(k) == 1
         s.text = s.text + k
 
-# Relic-native terminal (no host process spawn). It works on the shared VFS
-# from a current folder that starts at /home. Paths may be relative to it.
 # Seconds since 1970 as "2026-10-27 05:12:16 UTC" (days to a date by Howard Hinnant's civil_from_days).
 fun format_time(secs)
     let total = math.max(0, int(secs))
@@ -413,6 +411,8 @@ fun _two(n)
         return "0{n}"
     return "{n}"
 
+# Relic-native terminal (no host process spawn). It works on the shared VFS
+# from a current folder that starts at /home. Paths may be relative to it.
 fun _term_init() = {buf: ["Terminal. Type help."], input: "", cwd: "/home", fs: _shell_fs}
 
 fun _term_lines(s)
