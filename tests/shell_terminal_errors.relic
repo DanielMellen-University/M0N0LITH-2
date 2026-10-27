@@ -1,0 +1,23 @@
+# Terminal error messages say what went wrong.
+use ../shell/wm
+
+let d = wm.new_desktop(640, 480, wm.default_apps())
+let t = wm.launch(d, wm.terminal)
+
+fun type(text)
+    for c in text
+        if c == " "
+            wm.key(d, "space")
+        else
+            wm.key(d, c)
+    wm.key(d, "return")
+
+fun run(cmds)
+    t.state.buf = []
+    for c in cmds
+        type(c)
+    for l in t.state.buf
+        print(l)
+
+# mv of a folder into itself
+run(["mkdir /home/sub", "mv /home /home/sub", "mv /home /home", "mv / /home/sub", "mv /home/welcome.txt /home/welcome.txt", "ls /home"])

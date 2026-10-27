@@ -1,0 +1,11 @@
+/home> mkdir /home/sub
+/home> mv /home /home/sub
+mv: cannot move /home into itself
+/home> mv /home /home
+mv: cannot move /home into itself
+/home> mv / /home/sub
+mv: cannot move / into itself
+/home> mv /home/welcome.txt /home/welcome.txt
+mv: already there: /home/welcome.txt
+/home> ls /home
+sub/  welcome.txt

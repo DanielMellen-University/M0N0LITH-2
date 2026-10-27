@@ -497,6 +497,8 @@ fun _term_mv(s, a, b)
         dst = paths.join(dst, paths.base(src))
     if not vfs.exists(s.fs, src)
         _term_reply(s, "mv: not found: " + src)
+    else if vfs.is_dir(s.fs, src) and (src == "/" or strings.starts_with(dst, src + "/"))
+        _term_reply(s, "mv: cannot move " + src + " into itself")
     else if vfs.exists(s.fs, dst)
         _term_reply(s, "mv: already there: " + dst)
     else

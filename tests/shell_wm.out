@@ -88,7 +88,7 @@ touch: cannot write /no/such/file
 /home> mv nope x
 mv: not found: /home/nope
 /home> mv notes notes/old
-mv: cannot rename /home/notes
+mv: cannot move /home/notes into itself
 /home> mv welcome.txt notes/todo.txt
 mv: already there: /home/notes/todo.txt
 /home> cat
