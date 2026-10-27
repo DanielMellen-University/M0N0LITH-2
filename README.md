@@ -32,6 +32,7 @@ tests/
 tools/
   run_golden.cmake  golden test runner (copied from Relic)
 relic/            Relic, pinned as a git submodule
+docs/SHELL.md  the model, the input calls, what an app is
 docs/ROADMAP.md
 ```
 
@@ -76,6 +77,7 @@ Keys go to the window on top. Typing keeps its case and symbols, Ctrl+S saves in
 
 ## Docs
 
+- [How the shell is put together](docs/SHELL.md)
 - [Roadmap](docs/ROADMAP.md)
 - Relic language docs: [Relic/docs](https://github.com/DanielMellen-University/Relic/tree/main/docs)
 
