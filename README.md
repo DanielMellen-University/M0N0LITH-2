@@ -30,6 +30,7 @@ tests/
   shell_big_file.relic  the Editor on a file of thousands of lines stays quick
   shell_terminal_history.relic  the Terminal keeps its last 200 lines
   shell_terminal_errors.relic  Terminal error messages (mv, mkdir, cat, paths through a file)
+  shell_terminal_cat_blank.relic  cat preserves blank lines in files
   shell_terminal_stale.relic  Terminal recovers when its current folder is removed
   shell_terminal_ls.relic  Terminal packs directory listings to the window width
   shell_terminal_wrap.relic  Terminal wraps long lines to the window width

@@ -1,0 +1,5 @@
+["/home> cat /tmp/blank.txt"]
+["/home> cat /tmp/blank.txt", ""]
+["/home> cat /tmp/blank.txt", "", ""]
+["/home> cat /tmp/blank.txt", "a", ""]
+["/home> cat /tmp/blank.txt", "a"]

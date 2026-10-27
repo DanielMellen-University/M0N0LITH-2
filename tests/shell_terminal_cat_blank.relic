@@ -1,0 +1,19 @@
+# cat prints one output row for each line, including a single blank line.
+use ../shell/wm
+use std/vfs
+let t = wm.terminal.init()
+fun check(text)
+    vfs.write(t.fs, "/tmp/blank.txt", text)
+    t.buf = []
+    for c in "cat /tmp/blank.txt"
+        if c == " "
+            wm.terminal.on_key(t, "space")
+        else
+            wm.terminal.on_key(t, c)
+    wm.terminal.on_key(t, "return")
+    print(t.buf)
+check("")
+check("\n")
+check("\n\n")
+check("a\n\n")
+check("a")

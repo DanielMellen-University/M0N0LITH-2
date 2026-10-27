@@ -570,7 +570,7 @@ fun _term_cat(s, path)
         let text = vfs.read(s.fs, p)
         if strings.ends_with(text, "\n")
             text = slice(text, 0, len(text) - 1)
-        if text != ""
+        if text != "" or vfs.size(s.fs, p) > 0
             for line in strings.split(text, "\n")
                 _term_reply(s, line)
     catch err
