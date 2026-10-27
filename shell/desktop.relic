@@ -1,6 +1,6 @@
 # shell/desktop.relic: a first MONOLITH 2 desktop, written in Relic (M11).
 #   relic/build-sdl/relic shell/desktop.relic
-# Click Start, pick an app, click inside it or type. Drag a title bar to move,
+# Click Start (again to close the menu), pick an app, click inside it or type. Drag a title bar to move,
 # drag the bottom-right corner to resize. The x box closes a window, the _ box
 # minimizes it. A taskbar button brings its window to the front, or minimizes
 # it if it is already in front; click it again to restore. Escape quits.

@@ -15,6 +15,10 @@ tests/
   shell_wm.relic  drives wm.relic with fake clicks and keys; output must match shell_wm.out
   shell_minimize.relic  minimize and restore from the taskbar and the _ box
   shell_terminal.relic  Terminal commands: extra spaces, folders, redirects, errors
+  shell_start_menu.relic  the Start button opens and closes the menu
+  shell_many_windows.relic  windows cascade and wrap, taskbar tabs shrink to fit
+  shell_files_click.relic  clicking rows in Files
+  shell_small_apps.relic  Editor, Notes and Clicker
 tools/
   run_golden.cmake  golden test runner (copied from Relic)
 relic/            Relic, pinned as a git submodule
@@ -42,7 +46,7 @@ Already cloned without submodules? Run `git submodule update --init`.
 
 `-DRELIC_BUILD_HOST=ON` matters. Since Relic 1.0.7 the default Relic build is C only and makes `relicc` (the compiler to C), not the `relic` program the tests and `relic check` use. The flag builds the C++ host that provides `relic`.
 
-The tests run `shell_wm`, `shell_minimize`, `shell_terminal` and `relic check` on every shell file. CI runs the same steps on Linux, macOS and Windows.
+The tests run every `tests/shell_*.relic` program against its `.out` file, and `relic check` on every shell file. CI runs the same steps on Linux, macOS and Windows.
 
 ## Run the desktop
 
@@ -56,7 +60,7 @@ relic/build-sdl/relic shell/desktop.relic
 
 With Visual Studio the program is `relic\build-sdl\Release\relic.exe`.
 
-Click Start, pick an app, click inside it or type. Drag a title bar to move a window, drag its bottom-right corner to resize. The _ box minimizes a window and the x box closes it. A taskbar button brings its window to the front, or minimizes it if it is already in front; click it again to restore. Escape quits.
+Click Start (again to close the menu), pick an app, click inside it or type. Drag a title bar to move a window, drag its bottom-right corner to resize. The _ box minimizes a window and the x box closes it. A taskbar button brings its window to the front, or minimizes it if it is already in front; click it again to restore. With many windows open the buttons get narrower and their names shorter, and new windows cascade from the top left again after ten. Escape quits.
 
 ## Docs
 
