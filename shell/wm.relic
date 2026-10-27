@@ -575,7 +575,6 @@ fun _term_rm(s, path)
             vfs.remove(s.fs, p)
         catch err
             _term_reply(s, "rm: " + err.message)
-    s.cwd = _existing_dir(s.fs, s.cwd)
 
 # mv a b: rename a to b, or move a into b when b is a folder.
 fun _term_mv(s, a, b)
@@ -594,7 +593,6 @@ fun _term_mv(s, a, b)
             vfs.rename(s.fs, src, dst)
         catch err
             _term_reply(s, "mv: " + err.message)
-    s.cwd = _existing_dir(s.fs, s.cwd)
 
 # The words of a line; a run of spaces counts as one.
 fun _words(line)
