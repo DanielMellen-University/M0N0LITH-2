@@ -130,12 +130,15 @@ fun _index_of(d, id)
             return i
     return -1
 
+fun _end_drag_for(d, id)
+    if d.drag != none and d.drag.id == id
+        d.drag = none
+
 fun close(d, id)
     let i = _index_of(d, id)
     if i >= 0
         remove(d.windows, i)
-    if d.drag != none and d.drag.id == id
-        d.drag = none
+    _end_drag_for(d, id)
 
 # Hide a window. Focus goes to the next visible window down.
 fun minimize(d, id)
@@ -143,8 +146,7 @@ fun minimize(d, id)
     if i < 0
         return
     d.windows[i].minimized = true
-    if d.drag != none and d.drag.id == id
-        d.drag = none
+    _end_drag_for(d, id)
 
 # Show a window again and bring it to the front.
 fun restore(d, id)
