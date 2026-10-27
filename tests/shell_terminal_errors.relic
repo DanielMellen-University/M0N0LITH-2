@@ -24,3 +24,6 @@ run(["mkdir /home/sub", "mv /home /home/sub", "mv /home /home", "mv / /home/sub"
 
 # mkdir of something that is already there, cat of a folder
 run(["mkdir /tmp", "mkdir /home/welcome.txt", "mkdir /home/new", "mkdir /home/new", "cat /home", "cat /", "cat nope"])
+
+# a path that goes through a file is just not there
+run(["ls welcome.txt/x", "cat welcome.txt/x", "mkdir welcome.txt/x", "touch welcome.txt/x", "rm welcome.txt/x", "mv welcome.txt/x y", "cd welcome.txt/x", "write welcome.txt/x t"])

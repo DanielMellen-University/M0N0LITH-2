@@ -22,3 +22,19 @@ cat: is a folder: /home
 cat: is a folder: /
 /home> cat nope
 cat: not found: /home/nope
+/home> ls welcome.txt/x
+ls: not found: /home/welcome.txt/x
+/home> cat welcome.txt/x
+cat: not found: /home/welcome.txt/x
+/home> mkdir welcome.txt/x
+mkdir: cannot make folder /home/welcome.txt/x
+/home> touch welcome.txt/x
+touch: cannot write /home/welcome.txt/x
+/home> rm welcome.txt/x
+rm: not found: /home/welcome.txt/x
+/home> mv welcome.txt/x y
+mv: not found: /home/welcome.txt/x
+/home> cd welcome.txt/x
+cd: not a folder: /home/welcome.txt/x
+/home> write welcome.txt/x t
+write: cannot write /home/welcome.txt/x
