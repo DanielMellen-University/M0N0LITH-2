@@ -782,13 +782,16 @@ fun _files_full(s, name)
         return "/" + name
     return s.path + "/" + name
 
-fun _files_lines(s)
-    let names = _files_names(s)
-    let out = ["Files: " + s.path]
+fun _files_clamp_selection(s, names)
     if s.sel >= len(names)
         s.sel = len(names) - 1
     if s.sel < 0
         s.sel = 0
+
+fun _files_lines(s)
+    let names = _files_names(s)
+    let out = ["Files: " + s.path]
+    _files_clamp_selection(s, names)
     for i in 0..len(names)
         let mark = "  "
         if i == s.sel
@@ -829,10 +832,7 @@ fun _files_click(s, x, y)
 fun _files_key(s, k)
     let names = _files_names(s)
     # another app may have removed files since the last draw
-    if s.sel >= len(names)
-        s.sel = len(names) - 1
-    if s.sel < 0
-        s.sel = 0
+    _files_clamp_selection(s, names)
     if k == "up"
         if s.sel > 0
             s.sel = s.sel - 1
