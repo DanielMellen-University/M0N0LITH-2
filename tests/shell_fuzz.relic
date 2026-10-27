@@ -1,4 +1,4 @@
-# Random clicks, drags, keys, launches, closes and minimizes (fixed seeds) never
+# Random clicks, drags, keys, launches, closes and minimizes (fixed seeds, a normal and a tiny desktop) never
 # break the desktop: every step checks focus, ids, bounds, drags and row counts.
 use ../shell/wm
 let seed = 0
@@ -35,42 +35,43 @@ fun check(step, what)
         if not found
             print("step", step, what, "drag on a gone window")
 let keys = ["a", "b", "space", "backspace", "return", "up", "down", "ctrl+s", "x", "/", "."]
-for seed0 in [12345, 777, 31337]
-    seed = seed0
-    d = wm.new_desktop(640, 480, wm.default_apps())
-    for step in 0..1500
-        let a = rnd(10)
-        let what = "?"
-        if a == 0
-            wm.click(d, rnd(640), rnd(480))
-            what = "click"
-        else if a == 1
-            wm.motion(d, rnd(700) - 30, rnd(520) - 20)
-            what = "motion"
-        else if a == 2
-            wm.release(d)
-            what = "release"
-        else if a == 3
-            wm.key(d, keys[rnd(len(keys))])
-            what = "key"
-        else if a == 4 and len(d.windows) < 25
-            wm.launch(d, d.apps[rnd(len(d.apps))])
-            what = "launch"
-        else if a == 5 and len(d.windows) > 0
-            wm.close(d, d.windows[rnd(len(d.windows))].id)
-            what = "close"
-        else if a == 6 and len(d.windows) > 0
-            wm.minimize(d, d.windows[rnd(len(d.windows))].id)
-            what = "min"
-        else if a == 7 and len(d.windows) > 0
-            wm.restore(d, d.windows[rnd(len(d.windows))].id)
-            what = "restore"
-        else if a == 8
-            wm.click(d, 20, 470)
-            what = "start"
-        else
-            wm.click(d, 20, 400 - rnd(80))
-            what = "menu"
-        check(step, what)
-    print("done", seed0, len(d.windows))
+for size in [[640, 480], [120, 90]]
+    for seed0 in [12345, 777, 31337]
+        seed = seed0
+        d = wm.new_desktop(size[0], size[1], wm.default_apps())
+        for step in 0..1000
+            let a = rnd(10)
+            let what = "?"
+            if a == 0
+                wm.click(d, rnd(d.width), rnd(d.height))
+                what = "click"
+            else if a == 1
+                wm.motion(d, rnd(d.width + 60) - 30, rnd(d.height + 40) - 20)
+                what = "motion"
+            else if a == 2
+                wm.release(d)
+                what = "release"
+            else if a == 3
+                wm.key(d, keys[rnd(len(keys))])
+                what = "key"
+            else if a == 4 and len(d.windows) < 25
+                wm.launch(d, d.apps[rnd(len(d.apps))])
+                what = "launch"
+            else if a == 5 and len(d.windows) > 0
+                wm.close(d, d.windows[rnd(len(d.windows))].id)
+                what = "close"
+            else if a == 6 and len(d.windows) > 0
+                wm.minimize(d, d.windows[rnd(len(d.windows))].id)
+                what = "min"
+            else if a == 7 and len(d.windows) > 0
+                wm.restore(d, d.windows[rnd(len(d.windows))].id)
+                what = "restore"
+            else if a == 8
+                wm.click(d, 20, d.height - 10)
+                what = "start"
+            else
+                wm.click(d, 20, d.height - 40 - rnd(60))
+                what = "menu"
+            check(step, what)
+        print("done", size, seed0, len(d.windows))
 
