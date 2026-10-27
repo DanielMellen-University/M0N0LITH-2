@@ -20,6 +20,7 @@ let title_height = 16   # window title bar
 let start_width = 56
 let menu_row = 18
 let tab_width = 90
+let min_tab = 24         # the narrowest a tab gets when many windows are open
 let grip = 12           # bottom-right resize handle
 let min_width = 80
 let min_height = 40
@@ -49,7 +50,28 @@ fun menu_item_box(d, i)
     return [0, bar_top(d) - (n - i) * menu_row, 120, menu_row]
 
 # Taskbar button of window i (in launch order is fine, it is by index).
-fun tab_box(d, i) = [start_width + 4 + i * (tab_width + 4), bar_top(d) + 3, tab_width, bar_height - 6]
+fun tab_box(d, i)
+    let w = tab_width_for(d)
+    return [start_width + 4 + i * (w + 4), bar_top(d) + 3, w, bar_height - 6]
+
+# Tabs share the bar: tab_width while they fit, narrower after, never under min_tab.
+fun tab_width_for(d)
+    let n = len(d.windows)
+    if n == 0
+        return tab_width
+    let w = int((d.width - start_width - 4) / n) - 4
+    if w > tab_width
+        return tab_width
+    if w < min_tab
+        return min_tab
+    return w
+
+# A window's tab text, cut to what fits in its tab (the font is 8 pixels wide).
+fun tab_label(d, w)
+    let room = int((tab_width_for(d) - 8) / 8)
+    if room < 1
+        room = 1
+    return slice(w.app.name, 0, room)
 
 fun close_box(w) = [w.x + w.width - title_height, w.y, title_height, title_height]
 

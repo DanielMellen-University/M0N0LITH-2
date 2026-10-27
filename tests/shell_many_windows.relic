@@ -17,3 +17,17 @@ wm.close(d, d.windows[0].id)
 wm.close(d, d.windows[0].id)
 let w = wm.launch(d, apps[0])
 print(w.x, w.y)
+
+# taskbar tabs share the bar: each one stays on screen and clicking it works
+let d2 = wm.new_desktop(640, 480, wm.default_apps())
+for n in [1, 6, 7, 12, 20]
+    while len(d2.windows) < n
+        wm.launch(d2, apps[len(d2.windows) % len(apps)])
+    let last = wm.tab_box(d2, n - 1)
+    let hit = 0
+    let tl = wm.tabs(d2)
+    for i in 0..n
+        let b = wm.tab_box(d2, i)
+        if wm.click(d2, b[0] + b[2] / 2, b[1] + 3) != "bar"
+            hit = hit + 1
+    print(n, "windows: tab width", wm.tab_width_for(d2), "last tab ends at", last[0] + last[2], "of", d2.width, "- label", wm.tab_label(d2, tl[0]), "- clicks that hit a tab:", hit)
