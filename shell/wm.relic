@@ -487,6 +487,27 @@ fun _term_args(s, parts, n, usage)
     _term_reply(s, "usage: " + usage)
     return false
 
+# How many characters of output fit a new Terminal window (280 pixels), so ls
+# does not run off the right edge where the names could not be read.
+let term_width = 34
+
+# The words joined with two spaces, in as few lines of at most width characters
+# as fit; a word longer than that gets a line to itself.
+fun _pack(words, width)
+    let lines = []
+    let line = ""
+    for w in words
+        if line == ""
+            line = w
+        else if len(line) + 2 + len(w) <= width
+            line = line + "  " + w
+        else
+            append(lines, line)
+            line = w
+    if line != ""
+        append(lines, line)
+    return lines
+
 fun _term_ls(s, parts)
     let p = s.cwd
     if len(parts) > 1
@@ -503,8 +524,8 @@ fun _term_ls(s, parts)
             append(names, n + "/")
         else
             append(names, n)
-    if len(names) > 0
-        _term_reply(s, strings.join(names, "  "))
+    for line in _pack(names, term_width)
+        _term_reply(s, line)
 
 fun _term_cat(s, path)
     let p = _term_path(s, path)

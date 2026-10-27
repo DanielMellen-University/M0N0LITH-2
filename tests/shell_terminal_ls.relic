@@ -1,0 +1,31 @@
+# ls fills lines of at most 34 characters, so no name is cut off at the window edge.
+use ../shell/wm
+use std/vfs
+
+let d = wm.new_desktop(640, 480, wm.default_apps())
+let t = wm.launch(d, wm.terminal)
+
+fun type(text)
+    for c in text
+        if c == " "
+            wm.key(d, "space")
+        else
+            wm.key(d, c)
+    wm.key(d, "return")
+
+for i in 10..30
+    vfs.write(t.state.fs, "/tmp/file{i}.txt", "x")
+vfs.write(t.state.fs, "/tmp/a_name_that_is_longer_than_a_whole_line_of_output.txt", "x")
+vfs.make_dir(t.state.fs, "/tmp/folder")
+t.state.buf = []
+type("ls /tmp")
+let widest = 0
+for line in slice(t.state.buf, 1, len(t.state.buf))
+    print(line)
+    if len(line) > widest and line != "/home> ls /tmp"
+        widest = len(line)
+print(widest)
+t.state.buf = []
+type("ls /home")
+type("ls /tmp/folder")
+print(t.state.buf)

@@ -55,7 +55,8 @@ usage: ls [path]
 /home> mv a.txt b.txt c.txt
 usage: mv <from> <to>
 /home> ls
-a.txt  b.txt  new/  sub/  welcome.txt
+a.txt  b.txt  new/  sub/
+welcome.txt
 /home> ls -l
 ls: no options, not even -l
 /home> rm -r sub
@@ -70,7 +71,8 @@ cd: no options, not even -
 -n hi
 /home> touch ./-odd
 /home> ls
--odd  a.txt  b.txt  new/  sub/  welcome.txt
+-odd  a.txt  b.txt  new/  sub/
+welcome.txt
 /home> rm ./-odd
 /home> mv a.txt -b
 mv: no options, not even -b

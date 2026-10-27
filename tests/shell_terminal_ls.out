@@ -1,0 +1,10 @@
+a_name_that_is_longer_than_a_whole_line_of_output.txt
+file10.txt  file11.txt  file12.txt
+file13.txt  file14.txt  file15.txt
+file16.txt  file17.txt  file18.txt
+file19.txt  file20.txt  file21.txt
+file22.txt  file23.txt  file24.txt
+file25.txt  file26.txt  file27.txt
+file28.txt  file29.txt  folder/
+53
+["/home> ls /home", "welcome.txt", "/home> ls /tmp/folder"]
