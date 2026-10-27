@@ -36,7 +36,7 @@
 > cd welcome.txt
   cd: not a folder: /home/welcome.txt
 > cat d
-  cat: cannot read /home/d
+  cat: not found: /home/d
 > cat
   usage: cat <path>
 > touch

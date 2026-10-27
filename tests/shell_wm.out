@@ -74,7 +74,7 @@ home/  tmp/
 /> _
 /> cd home
 /home> cat nope.txt
-cat: cannot read /home/nope.txt
+cat: not found: /home/nope.txt
 /home> cd welcome.txt
 cd: not a folder: /home/welcome.txt
 /home> rm notes

@@ -21,3 +21,6 @@ fun run(cmds)
 
 # mv of a folder into itself
 run(["mkdir /home/sub", "mv /home /home/sub", "mv /home /home", "mv / /home/sub", "mv /home/welcome.txt /home/welcome.txt", "ls /home"])
+
+# mkdir of something that is already there, cat of a folder
+run(["mkdir /tmp", "mkdir /home/welcome.txt", "mkdir /home/new", "mkdir /home/new", "cat /home", "cat /", "cat nope"])

@@ -9,3 +9,16 @@ mv: cannot move / into itself
 mv: already there: /home/welcome.txt
 /home> ls /home
 sub/  welcome.txt
+/home> mkdir /tmp
+mkdir: already there: /tmp
+/home> mkdir /home/welcome.txt
+mkdir: already there: /home/welcome.txt
+/home> mkdir /home/new
+/home> mkdir /home/new
+mkdir: already there: /home/new
+/home> cat /home
+cat: is a folder: /home
+/home> cat /
+cat: is a folder: /
+/home> cat nope
+cat: not found: /home/nope
