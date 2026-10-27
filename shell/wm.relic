@@ -392,8 +392,13 @@ fun _term_lines(s)
 fun _term_click(s, x, y)
     return none
 
+# Older output falls off the top, so `cat` of a big file cannot grow the buffer (and the frame time) without limit.
+let term_history = 200
+
 fun _term_reply(s, line)
     append(s.buf, line)
+    if len(s.buf) > term_history
+        s.buf = slice(s.buf, len(s.buf) - term_history, len(s.buf))
 
 fun _term_path(s, p) = paths.normalize(paths.join(s.cwd, p))
 
@@ -511,7 +516,7 @@ fun _words(line)
 
 fun _term_run(s, line)
     let trimmed = strings.trim(line)
-    append(s.buf, s.cwd + "> " + line)
+    _term_reply(s, s.cwd + "> " + line)
     if trimmed == ""
         return
     let parts = _words(trimmed)

@@ -1,0 +1,30 @@
+# The Terminal keeps the last 200 lines of output, however much a command prints.
+use ../shell/wm
+use std/vfs
+
+let d = wm.new_desktop(640, 480, wm.default_apps())
+let t = wm.launch(d, wm.terminal)
+
+fun type(text)
+    for c in text
+        if c == " "
+            wm.key(d, "space")
+        else
+            wm.key(d, c)
+    wm.key(d, "return")
+
+print(len(t.state.buf), t.state.buf[0])
+for i in 0..150
+    type("echo n{i}")
+print(len(t.state.buf), t.state.buf[0], t.state.buf[199])
+
+let big = ""
+for i in 0..500
+    big = big + "row {i}\n"
+vfs.write(t.state.fs, "/home/big.txt", big)
+type("cat big.txt")
+print(len(t.state.buf), t.state.buf[0], t.state.buf[199])
+type("clear")
+print(len(t.state.buf))
+type("echo after")
+print(t.state.buf)

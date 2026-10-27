@@ -1,0 +1,5 @@
+1 Terminal. Type help.
+200 /home> echo n50 n149
+200 row 300 row 499
+0
+["/home> echo after", "after"]
