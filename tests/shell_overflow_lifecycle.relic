@@ -1,0 +1,33 @@
+# Focus and stacking when windows change while the overflow list is open.
+use ../shell/wm
+let d = wm.new_desktop(640, 480, wm.default_apps())
+for i in 0..15
+    wm.launch(d, wm.notes)
+fun ids(ws)
+    let out = []
+    for w in ws
+        append(out, w.id)
+    return out
+fun open()
+    let b = wm.overflow_box(d)
+    wm.click(d, b[0], b[1])
+fun shown(id)
+    for w in wm.shown_tabs(d)
+        if w.id == id
+            return true
+    return false
+wm.restore(d, 12)
+wm.restore(d, 13)
+wm.minimize(d, 15)
+open()
+print("opened", ids(wm.hidden_tabs(d)), wm.focused(d).id, shown(wm.focused(d).id))
+wm.minimize(d, 13)
+print("minimize focused", d.overflow_open, wm.focused(d).id, shown(wm.focused(d).id), ids(wm.hidden_tabs(d)))
+wm.close(d, 12)
+print("close next", d.overflow_open, wm.focused(d).id, shown(wm.focused(d).id), ids(wm.hidden_tabs(d)))
+let hidden = wm.hidden_tabs(d)
+let row = wm.overflow_item_box(d, 0)
+let chosen = hidden[0]
+print("pick minimized", chosen.id, chosen.minimized, wm.click(d, row[0], row[1]), chosen.minimized, wm.focused(d).id)
+wm.close(d, chosen.id)
+print("closed focused", wm.focused(d).id, ids(d.windows), ids(wm.tabs(d)), wm.overflow_box(d))

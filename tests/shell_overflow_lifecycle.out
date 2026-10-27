@@ -1,0 +1,5 @@
+opened [12, 14, 15] 13 true
+minimize focused true 12 true [13, 14, 15]
+close next true 14 true [13, 15]
+pick minimized 13 true tab false 13
+closed focused 14 [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 14, 15] [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 14, 15] none
