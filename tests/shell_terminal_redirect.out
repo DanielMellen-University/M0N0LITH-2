@@ -1,0 +1,8 @@
+["/home> echo hi >", "echo: missing redirect path"]
+["/home> echo >>", "echo: missing redirect path"]
+["/home> echo hi > >", "echo: missing redirect path"]
+["/home> echo > /tmp/empty-line"]
+["/home> echo hi >> /tmp/empty-line"]
+
+hi
+

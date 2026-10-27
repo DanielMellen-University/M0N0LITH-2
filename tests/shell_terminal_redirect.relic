@@ -1,0 +1,19 @@
+# An incomplete redirect is an error; it must not print or change a file.
+use ../shell/wm
+use std/vfs
+let t = wm.terminal.init()
+fun run(line)
+    t.buf = []
+    for c in line
+        if c == " "
+            wm.terminal.on_key(t, "space")
+        else
+            wm.terminal.on_key(t, c)
+    wm.terminal.on_key(t, "return")
+    print(t.buf)
+run("echo hi >")
+run("echo >>")
+run("echo hi > >")
+run("echo > /tmp/empty-line")
+run("echo hi >> /tmp/empty-line")
+print(vfs.read(t.fs, "/tmp/empty-line"))

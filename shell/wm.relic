@@ -617,7 +617,9 @@ fun _term_write(s, cmd, path, text, add)
 
 fun _term_echo(s, parts)
     let n = len(parts)
-    if n >= 3 and (parts[n - 2] == ">" or parts[n - 2] == ">>")
+    if n >= 2 and (parts[n - 1] == ">" or parts[n - 1] == ">>")
+        _term_reply(s, "echo: missing redirect path")
+    else if n >= 3 and (parts[n - 2] == ">" or parts[n - 2] == ">>")
         _term_write(s, "echo", parts[n - 1], strings.join(slice(parts, 1, n - 2), " "), parts[n - 2] == ">>")
     else
         _term_reply(s, strings.join(slice(parts, 1, n), " "))
