@@ -647,8 +647,9 @@ fun _term_run(s, line)
                 return
     if cmd == "help"
         _term_reply(s, "help clear echo apps date")
-        _term_reply(s, "pwd cd ls cat mkdir touch write rm mv")
-        _term_reply(s, "echo text > file, echo text >> file")
+        _term_reply(s, "pwd cd ls cat mkdir touch")
+        _term_reply(s, "write rm mv")
+        _term_reply(s, "echo text > file, >> adds")
     else if cmd == "clear"
         s.buf = []
     else if cmd == "echo"

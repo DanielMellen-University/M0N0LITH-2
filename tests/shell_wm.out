@@ -42,8 +42,9 @@ Welcome to Relic.
 launch
 /home> help
 help clear echo apps date
-pwd cd ls cat mkdir touch write rm mv
-echo text > file, echo text >> file
+pwd cd ls cat mkdir touch
+write rm mv
+echo text > file, >> adds
 /home> pwd
 /home
 /home> ls
