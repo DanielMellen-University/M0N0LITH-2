@@ -1,0 +1,26 @@
+# Missing ids are harmless; tabs stay in launch order as windows are raised and closed.
+use ../shell/wm
+let d = wm.new_desktop(640, 480, wm.default_apps())
+let a = wm.launch(d, wm.notes)
+let b = wm.launch(d, wm.clicker)
+let c = wm.launch(d, wm.notes)
+fun ids(windows)
+    let out = []
+    for w in windows
+        append(out, w.id)
+    return out
+wm.restore(d, a.id)
+print("raise", ids(d.windows), ids(wm.tabs(d)), wm.focused(d).id)
+wm.minimize(d, b.id)
+wm.close(d, 999)
+wm.minimize(d, 999)
+wm.restore(d, 999)
+print("missing", ids(d.windows), ids(wm.tabs(d)), b.minimized, wm.focused(d).id)
+wm.close(d, c.id)
+let e = wm.launch(d, wm.clicker)
+print("new id", e.id, ids(wm.tabs(d)))
+wm.minimize(d, a.id)
+wm.minimize(d, e.id)
+print("all hidden", wm.focused(d), ids(wm.tabs(d)))
+wm.restore(d, b.id)
+print("restore", wm.focused(d).id, ids(wm.tabs(d)))

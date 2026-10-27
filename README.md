@@ -14,6 +14,7 @@ shell/
 tests/
   shell_wm.relic  drives wm.relic with fake clicks and keys; output must match shell_wm.out
   shell_minimize.relic  minimize and restore from the taskbar and the _ box
+  shell_lifecycle.relic  window ids, focus and tab order through lifecycle changes
   shell_terminal.relic  Terminal commands: extra spaces, folders, redirects, errors
   shell_start_menu.relic  the Start button opens and closes the menu
   shell_many_windows.relic  windows cascade and wrap, taskbar tabs shrink to fit

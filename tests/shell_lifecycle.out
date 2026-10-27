@@ -1,0 +1,5 @@
+raise [2, 3, 1] [1, 2, 3] 1
+missing [2, 3, 1] [1, 2, 3] true 1
+new id 4 [1, 2, 4]
+all hidden none [1, 2, 4]
+restore 2 [1, 2, 4]
