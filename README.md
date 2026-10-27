@@ -52,6 +52,7 @@ tests/
   shell_input.relic  graphics events turned into keys and clicks (ctrl+s, text, the mouse)
   shell_event_keys.relic  named keys, modifiers and ignored events
   shell_altgr.relic  AltGr (Ctrl+Alt) typing is text, not Ctrl+S
+  shell_held_keys.relic  repeated key_down events from held keys, and key_up
   shell_mouse_buttons.relic  left and right mouse buttons during a drag
   shell_clip.relic  text cut to the window, Files scrolling to the selection
   shell_render_modes.relic  clipping and row selection for plain and tail apps

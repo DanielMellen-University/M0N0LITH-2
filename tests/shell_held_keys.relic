@@ -1,0 +1,27 @@
+# Held keys: SDL sends repeat key_down events while a key is held, and the
+# apps treat each like a press (Backspace keeps deleting, Return keeps entering
+# lines). key_up events and repeated modifier keys do nothing.
+use ../shell/wm
+fun ev(k, repeat) = {type: "key_down", key: k, repeat: repeat, shift: false, ctrl: false, alt: false}
+fun up(k) = {type: "key_up", key: k, repeat: false, shift: false, ctrl: false, alt: false}
+let d = wm.new_desktop(640, 480, wm.default_apps())
+let n = wm.launch(d, wm.notes)
+wm.handle(d, {type: "text", text: "hello world"})
+wm.handle(d, ev("backspace", false))
+for i in 0..4
+    wm.handle(d, ev("backspace", true))
+wm.handle(d, up("backspace"))
+print("notes", n.state.text)
+for i in 0..20
+    wm.handle(d, ev("backspace", true))
+print("notes emptied", n.state.text == "", wm.visible_lines(n))
+let t = wm.launch(d, wm.terminal)
+wm.handle(d, {type: "text", text: "pwd"})
+wm.handle(d, ev("return", false))
+wm.handle(d, ev("return", true))
+wm.handle(d, ev("return", true))
+wm.handle(d, up("return"))
+print("terminal", t.state.buf)
+for k in ["left shift", "left ctrl", "left alt", "tab"]
+    wm.handle(d, ev(k, true))
+print("terminal input", t.state.input == "", len(t.state.buf))
