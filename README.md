@@ -17,6 +17,7 @@ tests/
   shell_terminal.relic  Terminal commands: extra spaces, folders, redirects, errors
   shell_start_menu.relic  the Start button opens and closes the menu
   shell_many_windows.relic  windows cascade and wrap, taskbar tabs shrink to fit
+  shell_launch_small.relic  cascaded windows fit a small desktop
   shell_files_click.relic  clicking rows in Files
   shell_files_hidden.relic  clicks below the visible Files rows do nothing
   shell_drag_resize.relic  dragging and resizing keep windows reachable

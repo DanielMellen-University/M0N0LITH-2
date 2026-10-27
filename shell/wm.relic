@@ -102,6 +102,9 @@ fun launch(d, app)
     let n = len(d.windows) % cascade_steps
     let w = {id: d.next_id, app: app, state: app.init(), x: 40 + n * 24, y: 30 + n * 20, width: app.width, height: app.height, minimized: false}
     d.next_id = d.next_id + 1
+    # Leave room for the minimum size before fitting a cascaded window.
+    w.x = math.min(w.x, math.max(0, d.width - min_width))
+    w.y = math.min(w.y, math.max(0, bar_top(d) - title_height - min_height))
     _clamp_size(d, w)   # a small desktop cuts the window to fit, as a resize would
     _clamp_pos(d, w)
     append(d.windows, w)

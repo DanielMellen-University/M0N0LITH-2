@@ -1,0 +1,6 @@
+# Cascaded launches fit within a small desktop when its minimum window fits.
+use ../shell/wm
+let d = wm.new_desktop(120, 90, wm.default_apps())
+for i in 0..10
+    let w = wm.launch(d, wm.notes)
+    print(i, w.x, w.y, w.width, w.height, w.x + w.width <= d.width, w.y + wm.title_height + w.height <= wm.bar_top(d))
