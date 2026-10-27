@@ -23,6 +23,7 @@ let tab_width = 90
 let grip = 12           # bottom-right resize handle
 let min_width = 80
 let min_height = 40
+let cascade_steps = 10   # windows per cascade before it wraps
 
 # Shared in-memory VFS for Files, Editor and Terminal (not the host disk).
 let _shell_fs = vfs.new()
@@ -59,8 +60,10 @@ fun resize_box(w) = [w.x + w.width - grip, w.y + title_height + w.height - grip,
 
 fun _inside(b, x, y) = x >= b[0] and x < b[0] + b[2] and y >= b[1] and y < b[1] + b[3]
 
+# New windows cascade down and right, then start over after cascade_steps, so
+# they never open off the desktop.
 fun launch(d, app)
-    let n = len(d.windows)
+    let n = len(d.windows) % cascade_steps
     let w = {id: d.next_id, app: app, state: app.init(), x: 40 + n * 24, y: 30 + n * 20, width: app.width, height: app.height, minimized: false}
     d.next_id = d.next_id + 1
     append(d.windows, w)

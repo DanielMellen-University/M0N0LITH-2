@@ -1,0 +1,19 @@
+# many windows: new ones cascade and wrap, so every one opens on the desktop
+use ../shell/wm
+let d = wm.new_desktop(640, 480, wm.default_apps())
+let apps = wm.default_apps()
+let off = 0
+let xs = []
+for i in 0..45
+    let w = wm.launch(d, apps[i % len(apps)])
+    if w.x < 0 or w.y < 0 or w.x + 40 > d.width or w.y + wm.title_height > wm.bar_top(d)
+        off = off + 1
+    if i < 12
+        append(xs, [w.x, w.y])
+print(len(d.windows), "windows,", off, "off the desktop")
+print(xs)
+# closing windows leaves room: the next one cascades from the count that is left
+wm.close(d, d.windows[0].id)
+wm.close(d, d.windows[0].id)
+let w = wm.launch(d, apps[0])
+print(w.x, w.y)
