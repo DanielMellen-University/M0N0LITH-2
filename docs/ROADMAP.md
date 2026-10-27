@@ -9,7 +9,7 @@ M0N0LITH-2 is the MONOLITH 2 desktop written in Relic. The language roadmap is i
 
 ## Phase 2: Desktop shell
 
-- [x] Window manager, taskbar and Start menu: windows raise, close, drag, resize and minimize (the _ box, or the front window's taskbar button; click the button again to restore); taskbar buttons raise; Start menu launches the apps. Tests `shell_wm` and `shell_minimize`
+- [x] Window manager, taskbar and Start menu: windows raise, close, drag, resize and minimize (the _ box, or the front window's taskbar button; click the button again to restore); taskbar buttons raise, and past 13 windows the extra ones go behind a +N button with a list; Start menu launches the apps. Tests `shell_wm`, `shell_minimize` and `shell_taskbar_overflow`
 - [x] Apps share one in-memory filesystem (`std/vfs` from Relic)
 
 ## Phase 3: Apps as proof
