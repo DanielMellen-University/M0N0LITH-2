@@ -1,0 +1,24 @@
+# Long names are clipped on screen but a click opens the full path.
+use ../shell/wm
+use std/vfs
+let d = wm.new_desktop(640, 480, wm.default_apps())
+let f = wm.launch(d, wm.files_app)
+let fs = f.state.fs
+vfs.make_dir(fs, "/tmp/long")
+let name = "a very long file name with spaces and symbols !@#.txt"
+vfs.write(fs, "/tmp/long/" + name, "full path")
+f.state.path = "/tmp/long"
+print("drawn", wm.visible_lines(f))
+let y = f.y + wm.title_height + wm.text_top + 2 * wm.line_height + 7
+print("click", wm.click(d, f.x + 20, y))
+let e = wm.launch(d, wm.editor)
+print("opened full name", e.state.path == "/tmp/long/" + name, e.state.text)
+wm.restore(d, f.id)
+vfs.remove(fs, "/tmp/long/" + name)
+vfs.write(fs, "/tmp/long/other", "replacement")
+wm.key(d, "return")
+print("deleted selection", f.state.path, wm.visible_lines(f))
+wm.key(d, "down")
+wm.key(d, "return")
+let e2 = wm.launch(d, wm.editor)
+print("new selection", e2.state.path, e2.state.text)

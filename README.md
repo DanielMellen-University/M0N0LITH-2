@@ -27,6 +27,7 @@ tests/
   shell_launch_small.relic  cascaded windows fit a small desktop
   shell_files_click.relic  clicking rows in Files
   shell_files_boundaries.relic  root, empty folders, unusual names and reopening Files
+  shell_files_long_names.relic  clipped names open the full path and deleted selections do not open replacements
   shell_files_hidden.relic  clicks below the visible Files rows do nothing
   shell_drag_resize.relic  dragging and resizing keep windows reachable
   shell_resize_offset.relic  resizing follows the point grabbed in the handle

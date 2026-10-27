@@ -1,0 +1,5 @@
+drawn ["Files: /tmp/long", "> ..", "  a very long file name with sp"]
+click app
+opened full name true full path
+deleted selection /tmp/long ["Files: /tmp/long", "> ..", "  other"]
+new selection /tmp/long/other replacement
