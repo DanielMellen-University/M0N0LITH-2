@@ -1100,10 +1100,18 @@ fun _editor_init()
     let path = _shell_open.path
     let text = ""
     let status = "open"
-    try
-        text = vfs.read(_shell_fs, path)
-    catch err
-        status = err.message
+    if vfs.is_dir(_shell_fs, path)
+        status = "is a folder"
+    else if not vfs.exists(_shell_fs, path)
+        # nothing to read yet: Ctrl+S makes it, unless a part of the path is wrong
+        status = "new file"
+        if _why_not_new(_shell_fs, path) != none
+            status = _why_not_new(_shell_fs, path)
+    else
+        try
+            text = vfs.read(_shell_fs, path)
+        catch err
+            status = err.message
     return {fs: _shell_fs, path: path, text: text, status: status, rows: 0}
 
 # The last `count` lines of text, split on newlines (all of them when count is 0).

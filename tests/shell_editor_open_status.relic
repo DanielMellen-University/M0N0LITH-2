@@ -1,0 +1,28 @@
+# What the Editor title says when it opens the file Files picked last: open
+# for a file, new file when it was removed (Ctrl+S makes it again), and the
+# reason when the path cannot be a file any more.
+use ../shell/wm
+use std/vfs
+let d = wm.new_desktop(640, 480, wm.default_apps())
+let f = wm.launch(d, wm.files_app)
+let fs = f.state.fs
+vfs.make_dir(fs, "/tmp/eo")
+vfs.write(fs, "/tmp/eo/a.txt", "hello")
+f.state.path = "/tmp/eo"
+wm.key(d, "down")
+wm.key(d, "return")   # picks /tmp/eo/a.txt for the next Editor
+fun status()
+    let e = wm.launch(d, wm.editor)
+    let s = e.state.status
+    wm.close(d, e.id)
+    return s
+print("file:", status())
+vfs.remove(fs, "/tmp/eo/a.txt")
+print("removed:", status())
+vfs.make_dir(fs, "/tmp/eo/a.txt")
+print("now a folder:", status())
+vfs.remove(fs, "/tmp/eo/a.txt")
+vfs.remove(fs, "/tmp/eo")
+print("folder gone:", status())
+vfs.write(fs, "/tmp/eo", "a file where the folder was")
+print("folder is a file:", status())
