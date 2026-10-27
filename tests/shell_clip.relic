@@ -1,5 +1,5 @@
 # lines that do not fit a window: Terminal, Editor and Notes keep the cursor line in view,
-# Files shows its first lines; long lines are cut to the window width
+# Files follows its selection; long lines are cut to the window width
 use ../shell/wm
 use std/vfs
 let d = wm.new_desktop(640, 480, wm.default_apps())
@@ -33,7 +33,7 @@ print(wm.rows_fit(e), wm.visible_lines(e))
 let n = wm.launch(d, wm.notes)
 type_in(d, "0123456789012345678901234567890123456789")
 print(wm.cols_fit(n), wm.visible_lines(n))
-# Files: first rows only, however many files there are
+# Files: initially the first rows, however many files there are
 let f = wm.launch(d, wm.files_app)
 f.state.path = "/tmp"
 for i in 10..24
