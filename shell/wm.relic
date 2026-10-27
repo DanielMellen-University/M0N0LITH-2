@@ -8,6 +8,8 @@
 # what fits, and that is what desktop.relic draws. An app may also have:
 #   tail: true, pinned: n   keep the first n lines and the last ones (Terminal, Editor, Notes)
 #   selected(state)         the line to keep in view (Files)
+# visible_lines puts the window's rows and cols in the state of a tail app,
+# and cols in the state of a selected app, before it calls lines().
 # Input comes in as key(d, name) and click(d, x, y), or as a graphics event
 # through handle(d, e). Drag and resize use press (via click), motion, and
 # release. drag on the desktop is none, or {id, mode, ox, oy} with mode "move"
