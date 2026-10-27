@@ -1,8 +1,12 @@
 start 40 30 220 60
 title
-dragged far up left -180 0
+dragged far up left -148 0
+right edge 72 boxes from 40
 dragged far down right 600 440
 after release 600 440
+title
+title title
+dragged back 51 96
 resize
 resized small 80 40
 resized big 540 340 right edge 640 bottom edge 456

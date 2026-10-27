@@ -249,10 +249,12 @@ fun restore(d, id)
     d.windows[i].minimized = false
     _raise(d, i)
 
-# Keep enough of the title bar on screen so the window stays reachable.
+# Keep enough of the title bar on screen so the window stays reachable: 40
+# pixels of it at either edge. Off the left edge the _ and x boxes sit in the part
+# that shows, so 40 more than those are kept there (it used to leave 8 to grab).
 fun _clamp_pos(d, w)
     let max_x = d.width - 40
-    let min_x = 40 - w.width
+    let min_x = 40 + 2 * title_height - w.width
     if w.x < min_x
         w.x = min_x
     if w.x > max_x

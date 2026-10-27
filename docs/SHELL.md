@@ -18,7 +18,7 @@ Input goes in through four calls, or through `handle(d, e)`, which takes one `gr
 | `release(d)` | ends a drag |
 | `key(d, name)` | a key for the window on top; `space` for the space bar, `ctrl+s` for Ctrl+S |
 
-Launch fits the initial window to the desktop, and moving it keeps part of the title bar reachable. Resizing limits its right and bottom edges to the desktop and taskbar where the minimum size permits. A moved window can extend beyond those edges; resizing does not move its top-left corner.
+Launch fits the initial window to the desktop, and moving it keeps 40 pixels of the title bar on screen to grab (beside the _ and x boxes when it is off the left edge). Resizing limits its right and bottom edges to the desktop and taskbar where the minimum size permits. A moved window can extend beyond those edges; resizing does not move its top-left corner.
 
 ## The taskbar
 

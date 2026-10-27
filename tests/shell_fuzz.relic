@@ -22,7 +22,7 @@ fun check(step, what)
             print("step", step, what, "short", w.height)
         if w.y < 0 or w.y > wm.bar_top(d) - wm.title_height
             print("step", step, what, "y out", w.y)
-        if w.x < 40 - w.width or w.x > d.width - 40
+        if w.x < 40 + 2 * wm.title_height - w.width or w.x > d.width - 40
             print("step", step, what, "x out", w.x)
         let lines = wm.visible_lines(w)
         if len(lines) > wm.rows_fit(w)
