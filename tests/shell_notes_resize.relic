@@ -1,0 +1,18 @@
+# Notes shows the end of its line after a resize without losing the buffer.
+use ../shell/wm
+let d = wm.new_desktop(640, 480, wm.default_apps())
+let n = wm.launch(d, wm.notes)
+wm.handle(d, {type: "text", text: "0123456789abcdefghij"})
+print("wide", wm.cols_fit(n), wm.visible_lines(n))
+let b = wm.resize_box(n)
+print("grab", wm.click(d, b[0] + 4, b[1] + 4))
+wm.motion(d, n.x + 80 - 8, n.y + wm.title_height + n.height - 8)
+wm.release(d)
+print("narrow", n.width, wm.cols_fit(n), wm.visible_lines(n), n.state.text)
+wm.key(d, "backspace")
+print("edit", wm.visible_lines(n), n.state.text)
+b = wm.resize_box(n)
+wm.click(d, b[0] + 4, b[1] + 4)
+wm.motion(d, n.x + 220 - 8, n.y + wm.title_height + n.height - 8)
+wm.release(d)
+print("wide again", n.width, wm.visible_lines(n))

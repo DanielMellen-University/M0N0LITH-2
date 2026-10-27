@@ -1,0 +1,5 @@
+wide 26 ["Type something:", "0123456789abcdefghij_"]
+grab resize
+narrow 80 9 ["Type some", "cdefghij_"] 0123456789abcdefghij
+edit ["Type some", "bcdefghi_"] 0123456789abcdefghi
+wide again 220 ["Type something:", "0123456789abcdefghi_"]
