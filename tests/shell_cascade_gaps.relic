@@ -1,0 +1,40 @@
+# A new window does not open exactly on top of another one after closes: it
+# takes the next cascade step no window is sitting on. Without closes the
+# cascade is unchanged, and a full cascade still wraps.
+use ../shell/wm
+let d = wm.new_desktop(640, 480, wm.default_apps())
+fun spots()
+    let out = []
+    for w in d.windows
+        append(out, "{w.id}@{w.x},{w.y}")
+    return out
+fun stacked()
+    let n = 0
+    for a in d.windows
+        for b in d.windows
+            if a.id < b.id and a.x == b.x and a.y == b.y
+                n = n + 1
+    return n
+for i in 0..3
+    wm.launch(d, wm.notes)
+print(spots())
+wm.close(d, d.windows[0].id)
+wm.launch(d, wm.notes)
+print(spots(), "stacked:", stacked())
+# moving a window away does not change where the count starts
+d.windows[0].x = 300
+wm.launch(d, wm.clicker)
+print(spots(), "stacked:", stacked())
+# a minimized window still holds its step, since restoring shows it there
+wm.minimize(d, d.windows[1].id)
+wm.close(d, d.windows[0].id)
+wm.launch(d, wm.notes)
+print(spots(), "stacked:", stacked())
+# ten steps full: the count decides, as before
+let e = wm.new_desktop(640, 480, wm.default_apps())
+for i in 0..12
+    wm.launch(e, wm.clicker)
+let line = []
+for w in e.windows
+    append(line, "{w.x},{w.y}")
+print(line)

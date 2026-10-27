@@ -175,7 +175,7 @@ fun _inside(b, x, y) = x >= b[0] and x < b[0] + b[2] and y >= b[1] and y < b[1] 
 # New windows cascade down and right, then start over after cascade_steps, so
 # they never open off the desktop.
 fun launch(d, app)
-    let n = len(d.windows) % cascade_steps
+    let n = _cascade_slot(d)
     let w = {id: d.next_id, app: app, state: app.init(), x: 40 + n * 24, y: 30 + n * 20, width: app.width, height: app.height, minimized: false}
     d.next_id = d.next_id + 1
     # Leave room for the minimum size before fitting a cascaded window.
@@ -185,6 +185,21 @@ fun launch(d, app)
     _clamp_pos(d, w)
     append(d.windows, w)
     return w
+
+# The cascade step for a new window: the window count, or the next step after it
+# that no window is sitting on. Counting alone put a new window exactly on top of
+# another one after a close (open three, close the first, open one more).
+fun _cascade_slot(d)
+    let n = len(d.windows) % cascade_steps
+    for k in 0..cascade_steps
+        let slot = (n + k) % cascade_steps
+        let taken = false
+        for w in d.windows
+            if w.x == 40 + slot * 24 and w.y == 30 + slot * 20
+                taken = true
+        if not taken
+            return slot
+    return n
 
 # The top window that is not minimized, or none.
 fun focused(d)
