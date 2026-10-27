@@ -32,10 +32,13 @@ fun draw(d)
         let mb = wm.minimize_box(w)
         draw_box(mb, 110, 110, 125)
         graphics.text(mb[0] + 4, mb[1] + 2, "_", 255, 255, 255)
+        # nothing an app draws goes outside its window
+        graphics.clip(w.x, w.y + wm.title_height, w.width, w.height)
         let row = 0
         for line in wm.visible_lines(w)
             graphics.text(w.x + 6, w.y + wm.title_height + 6 + row * 14, line, 20, 20, 20)
             row = row + 1
+        graphics.unclip()
         let rb = wm.resize_box(w)
         draw_box(rb, 160, 160, 170)
     let bt = wm.bar_top(d)
