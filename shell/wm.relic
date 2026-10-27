@@ -373,18 +373,23 @@ fun _clicker_key(s, k)
     if k == "space"
         s.count = s.count + 1
 
+# What typing key k does to text: backspace drops the last character, space and
+# any single character are added. Any other key leaves it alone.
+fun _typed(text, k)
+    if k == "backspace"
+        return slice(text, 0, math.max(0, len(text) - 1))
+    if k == "space"
+        return text + " "
+    if len(k) == 1
+        return text + k
+    return text
+
 fun _notes_init() = {text: ""}
 fun _notes_lines(s) = ["Type something:", s.text + "_"]
 fun _notes_click(s, x, y)
     return none
 fun _notes_key(s, k)
-    if k == "backspace"
-        if len(s.text) > 0
-            s.text = slice(s.text, 0, len(s.text) - 1)
-    else if k == "space"
-        s.text = s.text + " "
-    else if len(k) == 1
-        s.text = s.text + k
+    s.text = _typed(s.text, k)
 
 # Seconds since 1970 as "2026-10-27 05:12:16 UTC" (days to a date by Howard Hinnant's civil_from_days).
 fun format_time(secs)
@@ -615,13 +620,8 @@ fun _term_key(s, k)
     if k == "return" or k == "enter"
         _term_run(s, s.input)
         s.input = ""
-    else if k == "backspace"
-        if len(s.input) > 0
-            s.input = slice(s.input, 0, len(s.input) - 1)
-    else if k == "space"
-        s.input = s.input + " "
-    else if len(k) == 1
-        s.input = s.input + k
+    else
+        s.input = _typed(s.input, k)
 
 # Files: browse the shared VFS. Click a row or use up/down/return/backspace.
 fun _files_init() = {fs: _shell_fs, path: "/home", sel: 0, first: 1}
@@ -750,19 +750,15 @@ fun _editor_key(s, k)
             s.status = "saved"
         catch err
             s.status = err.message
-    else if k == "backspace"
-        if len(s.text) > 0
-            s.text = slice(s.text, 0, len(s.text) - 1)
+    else
+        let text = s.text
+        if k == "return" or k == "enter"
+            text = text + "\n"
+        else
+            text = _typed(text, k)
+        if text != s.text
+            s.text = text
             s.status = "edited"
-    else if k == "return" or k == "enter"
-        s.text = s.text + "\n"
-        s.status = "edited"
-    else if k == "space"
-        s.text = s.text + " "
-        s.status = "edited"
-    else if len(k) == 1
-        s.text = s.text + k
-        s.status = "edited"
 
 let clicker = {name: "Clicker", width: 180, height: 60, init: _clicker_init, lines: _clicker_lines, on_click: _clicker_click, on_key: _clicker_key}
 let notes = {name: "Notes", width: 220, height: 60, init: _notes_init, lines: _notes_lines, on_click: _notes_click, on_key: _notes_key, tail: true, pinned: 1}
