@@ -25,7 +25,7 @@ Launch fits the initial window to the desktop, and moving it keeps 40 pixels of 
 
 Every window has a tab in launch order (`tabs(d)`). Tabs are `tab_width` (90) pixels wide while they fit, then shrink together down to `min_tab` (40, four letters of the name). `tab_box(d, i)` is the box of shown tab `i`.
 
-When even `min_tab` tabs would run off the bar (more than 13 windows on a 640 pixel desktop), `tab_capacity(d)` tabs are shown and the rest are hidden behind a button at the right end of the bar:
+When even `min_tab` tabs would run off the bar (more than 13 windows on a 640 pixel desktop), `tab_capacity(d)` tabs are shown (12 there, since the button needs room too) and the rest are hidden behind a button at the right end of the bar:
 
 - `shown_tabs(d)` is the tabs that get a button: the first ones in launch order. If the focused window is not among them it takes the place of the last one, so the focused window always has a tab. `hidden_tabs(d)` is the others, in launch order.
 - `overflow_box(d)` is the `+N` button (`overflow_label(d)` is its text), or `none` when every window has a tab. Pressing it toggles `d.overflow_open` and gives `overflow`.
