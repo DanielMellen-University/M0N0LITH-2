@@ -1,4 +1,4 @@
 1 ["Files: /home", "  ..", "> welcome.txt"]
-/ 0
-["Files: /", "> home/", "  tmp/"]
+/home 0
+["Files: /home", "> .."]
 0

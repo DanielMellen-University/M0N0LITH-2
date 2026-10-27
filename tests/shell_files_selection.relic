@@ -1,0 +1,41 @@
+# Keep the selected name when other apps alter the directory; never open a replacement.
+use ../shell/wm
+use std/vfs
+let d = wm.new_desktop(640, 480, wm.default_apps())
+let f = wm.launch(d, wm.files_app)
+f.state.path = "/tmp"
+vfs.write(f.state.fs, "/tmp/b.txt", "b")
+vfs.write(f.state.fs, "/tmp/c.txt", "c")
+print(wm.visible_lines(f))
+wm.key(d, "down")
+wm.key(d, "down")
+print("selected", wm.visible_lines(f))
+vfs.write(f.state.fs, "/tmp/a.txt", "a")
+print("inserted", wm.visible_lines(f))
+vfs.remove(f.state.fs, "/tmp/a.txt")
+print("removed earlier", wm.visible_lines(f))
+vfs.remove(f.state.fs, "/tmp/c.txt")
+wm.key(d, "return")
+print("removed selection", f.state.path, wm.visible_lines(f))
+let e = wm.launch(d, wm.editor)
+print("editor", e.state.path)
+# Renaming the selected entry also invalidates it.
+wm.restore(d, f.id)
+wm.key(d, "down")
+print("before rename", wm.visible_lines(f))
+vfs.rename(f.state.fs, "/tmp/b.txt", "/tmp/d.txt")
+wm.key(d, "return")
+print("renamed", f.state.path, wm.visible_lines(f))
+# A removed current folder falls back to its parent without also opening '..'.
+vfs.make_dir(f.state.fs, "/tmp/gone")
+f.state.path = "/tmp/gone"
+print("in folder", wm.visible_lines(f))
+vfs.remove(f.state.fs, "/tmp/gone")
+wm.key(d, "return")
+print("folder removed", f.state.path, wm.visible_lines(f))
+vfs.make_dir(f.state.fs, "/tmp/gone")
+f.state.path = "/tmp/gone"
+wm.visible_lines(f)
+vfs.remove(f.state.fs, "/tmp/gone")
+wm.key(d, "backspace")
+print("backspace after removal", f.state.path, wm.visible_lines(f))

@@ -23,6 +23,7 @@ tests/
   shell_resize_offset.relic  resizing follows the point grabbed in the handle
   shell_small_apps.relic  Editor, Notes and Clicker
   shell_files_stale.relic  Files when another app removed the selected file
+  shell_files_selection.relic  Files keeps its selection across directory changes
   shell_input.relic  graphics events turned into keys and clicks (ctrl+s, text, the mouse)
   shell_clip.relic  text cut to the window, Files scrolling to the selection
   shell_big_file.relic  the Editor on a file of thousands of lines stays quick

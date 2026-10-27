@@ -728,15 +728,35 @@ fun _term_key(s, k)
         s.input = _typed(s.input, k)
 
 # Files: browse the shared VFS. Click a row or use up/down/return/backspace.
-fun _files_init() = {fs: _shell_fs, path: "/home", sel: 0, first: 1, rows: 0}
+fun _files_init() = {fs: _shell_fs, path: "/home", sel: 0, first: 1, rows: 0, names: [], names_path: "", stale: false, recovered: false}
 
 fun _files_names(s)
+    let old_path = s.path
     s.path = _existing_dir(s.fs, s.path)
+    s.recovered = old_path != s.path
     let names = []
     if s.path != "/"
         append(names, "..")
     for n in vfs.list(s.fs, s.path)
         append(names, n)
+    s.stale = false
+    if s.names_path == s.path and s.sel < len(s.names) and s.sel >= 0
+        let selected = s.names[s.sel]
+        let found = false
+        for i in 0..len(names)
+            if names[i] == selected
+                s.sel = i
+                found = true
+        if not found
+            s.sel = 0
+            s.stale = true
+    else if s.names_path != "" and s.names_path != s.path
+        s.sel = 0
+    if s.recovered
+        s.sel = 0
+        s.stale = true
+    s.names = names
+    s.names_path = s.path
     return names
 
 fun _files_full(s, name)
@@ -804,10 +824,10 @@ fun _files_key(s, k)
         if s.sel < len(names) - 1
             s.sel = s.sel + 1
     else if k == "return" or k == "enter"
-        if len(names) > 0
+        if len(names) > 0 and not s.stale
             _files_open(s, names[s.sel])
     else if k == "backspace"
-        if s.path != "/"
+        if s.path != "/" and not s.recovered
             s.path = paths.dir(s.path)
             s.sel = 0
 

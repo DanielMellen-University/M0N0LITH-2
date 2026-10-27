@@ -114,4 +114,4 @@ tab Terminal
 /home> rm notes/todo.txt
 /home> rm notes/plan.txt
 /home> rm notes
-["Files: /home", "  ..", "> welcome.txt"]
+["Files: /home", "> ..", "  welcome.txt"]

@@ -1,0 +1,11 @@
+["Files: /tmp", "> ..", "  b.txt", "  c.txt"]
+selected ["Files: /tmp", "  ..", "  b.txt", "> c.txt"]
+inserted ["Files: /tmp", "  ..", "  a.txt", "  b.txt", "> c.txt"]
+removed earlier ["Files: /tmp", "  ..", "  b.txt", "> c.txt"]
+removed selection /tmp ["Files: /tmp", "> ..", "  b.txt"]
+editor /home/welcome.txt
+before rename ["Files: /tmp", "  ..", "> b.txt"]
+renamed /tmp ["Files: /tmp", "> ..", "  d.txt"]
+in folder ["Files: /tmp/gone", "> .."]
+folder removed /tmp ["Files: /tmp", "> ..", "  d.txt"]
+backspace after removal /tmp ["Files: /tmp", "> ..", "  d.txt"]
