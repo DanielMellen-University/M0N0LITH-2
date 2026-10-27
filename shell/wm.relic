@@ -4,9 +4,14 @@
 # A desktop has apps (what the Start menu can launch) and windows (running
 # apps, last one on top). An app is a map:
 #   {name, width, height, init(), lines(state), on_click(state, x, y), on_key(state, key)}
-# lines() gives the text rows the desktop draws inside the window.
-# Drag and resize use press (via click), motion, and release. drag on the
-# desktop is none, or {id, mode, ox, oy} with mode "move" or "resize".
+# lines() gives the text rows for the window. visible_lines(w) cuts them to
+# what fits, and that is what desktop.relic draws. An app may also have:
+#   tail: true, pinned: n   keep the first n lines and the last ones (Terminal, Editor, Notes)
+#   selected(state)         the line to keep in view (Files)
+# Input comes in as key(d, name) and click(d, x, y), or as a graphics event
+# through handle(d, e). Drag and resize use press (via click), motion, and
+# release. drag on the desktop is none, or {id, mode, ox, oy} with mode "move"
+# or "resize".
 # A minimized window stays in windows and on the taskbar but is not drawn,
 # takes no clicks or keys, and is never focused.
 
