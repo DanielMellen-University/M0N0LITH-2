@@ -1,7 +1,7 @@
-["Terminal. Type help.", "/home> echo text > /tmp", "echo: cannot write /tmp"]
-["/home> echo text >> /tmp", "echo: cannot append /tmp"]
-["/home> echo text > /tmp/missing/file", "echo: cannot write /tmp/missing/file"]
-["/home> echo text >> /tmp/keep/child", "echo: cannot write /tmp/keep/child"]
+["Terminal. Type help.", "/home> echo text > /tmp", "echo: is a folder: /tmp"]
+["/home> echo text >> /tmp", "echo: is a folder: /tmp"]
+["/home> echo text > /tmp/missing/file", "echo: no folder: /tmp/missing"]
+["/home> echo text >> /tmp/keep/child", "echo: not a folder: /tmp/keep"]
 ["/home> echo text >", "echo: missing redirect path"]
 unchanged original true
 ["/home> echo 'hello world' > /tmp/quoted"]

@@ -5,4 +5,4 @@ folder true
 /home> touch /tmp/new
 /home> touch /tmp/new
 empty true
-touch: cannot write /tmp/missing/new
+touch: no folder: /tmp/missing

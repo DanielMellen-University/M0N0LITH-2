@@ -70,6 +70,7 @@ tests/
   shell_terminal_cat_big.relic  cat of a 100,000-line file stays quick
   shell_terminal_extra_words.relic  clear, apps, date and pwd reject extra words
   shell_terminal_dash_paths.relic  write and echo > refuse paths starting with -
+  shell_terminal_why.relic  errors name the missing folder or the part that is a file
   shell_terminal_slash.relic  a path ending in / must be a folder
   shell_terminal_redirect.relic  echo redirects and missing destinations
   shell_terminal_redirect_errors.relic  failed redirects and output after clear

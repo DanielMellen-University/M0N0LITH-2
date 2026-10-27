@@ -5,5 +5,5 @@ words true
 empty text true
 /home> write /tmp/write-test replacement
 replaced true
-write: cannot write /tmp
+write: is a folder: /tmp
 directory intact true

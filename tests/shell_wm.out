@@ -83,9 +83,9 @@ rm: folder not empty: /home/notes
 /home> rm nope
 rm: not found: /home/nope
 /home> mkdir welcome.txt/x
-mkdir: cannot make folder /home/welcome.txt/x
+mkdir: not a folder: /home/welcome.txt
 /home> touch /no/such/file
-touch: cannot write /no/such/file
+touch: no folder: /no/such
 /home> mv nope x
 mv: not found: /home/nope
 /home> mv notes notes/old
