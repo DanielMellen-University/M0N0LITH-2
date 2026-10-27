@@ -1,0 +1,19 @@
+# Escape first closes the Start menu or the hidden-windows list (dismiss gives
+# true and nothing else changes); with neither open it gives false, which is
+# when desktop.relic quits.
+use ../shell/wm
+let d = wm.new_desktop(640, 480, wm.default_apps())
+print("nothing open", wm.dismiss(d))
+print(wm.click(d, 10, d.height - 10), d.menu_open)
+print("menu", wm.dismiss(d), d.menu_open, wm.dismiss(d))
+for i in 0..20
+    wm.launch(d, d.apps[i % len(d.apps)])
+let top = wm.focused(d).id
+let ob = wm.overflow_box(d)
+print(wm.click(d, ob[0] + 2, ob[1] + 2), d.overflow_open)
+print("list", wm.dismiss(d), d.overflow_open, wm.overflow_box(d) != none)
+print("same windows", len(d.windows), wm.focused(d).id == top)
+# a drag in progress is left alone
+let w = wm.focused(d)
+print(wm.click(d, w.x + 5, w.y + 4))
+print(wm.dismiss(d), d.drag != none)

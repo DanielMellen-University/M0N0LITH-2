@@ -16,6 +16,7 @@ Input goes in through four calls, or through `handle(d, e)`, which takes one `gr
 | `click(d, x, y)` | a press: Start, a tab, a window's x or _ box, its title (starts a move), its corner (starts a resize), or the app inside. Gives a word for what it hit: `launch`, `start`, `overflow`, `tab`, `minimize`, `bar`, `close`, `title`, `resize`, `app`, `desktop` |
 | `motion(d, x, y)` | moves or resizes the window being dragged, if any |
 | `release(d)` | ends a drag |
+| `dismiss(d)` | closes the Start menu and the hidden-windows list; true if one was open (desktop.relic quits on an Escape that closed nothing) |
 | `key(d, name)` | a key for the window on top; `space` for the space bar, `ctrl+s` for Ctrl+S |
 
 Launch fits the initial window to the desktop, and moving it keeps 40 pixels of the title bar on screen to grab (beside the _ and x boxes when it is off the left edge). Resizing limits its right and bottom edges to the desktop and taskbar where the minimum size permits. A moved window can extend beyond those edges; resizing does not move its top-left corner.

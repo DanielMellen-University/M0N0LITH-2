@@ -423,6 +423,15 @@ fun motion(d, x, y)
 fun release(d)
     d.drag = none
 
+# Escape closes the Start menu or the hidden-windows list if one is open, and
+# gives true; desktop.relic quits on an Escape that closed nothing. Quitting
+# drops the whole in-memory filesystem, so it should not be how a menu closes.
+fun dismiss(d)
+    let was_open = d.menu_open or d.overflow_open
+    d.menu_open = false
+    d.overflow_open = false
+    return was_open
+
 # A key press goes to the window on top.
 fun key(d, k)
     let w = focused(d)

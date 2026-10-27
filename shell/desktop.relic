@@ -6,7 +6,7 @@
 # to the front, or minimizes it if it is already in front; click it again to
 # restore. With more windows than tabs fit, a +N button at the end of the bar
 # opens a list of the windows without a tab. Ctrl+S saves in the Editor.
-# Escape quits.
+# Escape closes the Start menu or that list, or quits when neither is open.
 # Input comes as graphics events and wm.handle turns them into app input, so
 # typed text keeps its case and symbols.
 use wm
@@ -92,7 +92,9 @@ else
         let e = graphics.next_event()
         while e != none
             if e.type == "key_down" and e.key == "escape"
-                running = false
+                # a held Escape repeats: only a fresh press quits, after any menu is closed
+                if not wm.dismiss(d) and not e.repeat
+                    running = false
             else
                 wm.handle(d, e)
             e = graphics.next_event()
