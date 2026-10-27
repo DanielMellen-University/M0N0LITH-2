@@ -32,6 +32,7 @@ tests/
   shell_files_ancestor.relic  Files and Terminal recover after an ancestor folder moves
   shell_files_selection.relic  Files keeps its selection across directory changes
   shell_files_changed_click.relic  Files ignores a click on rows changed since drawing
+  shell_files_resize_click.relic  Files waits for a redraw after a resize before accepting a row click
   shell_input.relic  graphics events turned into keys and clicks (ctrl+s, text, the mouse)
   shell_mouse_buttons.relic  left and right mouse buttons during a drag
   shell_clip.relic  text cut to the window, Files scrolling to the selection

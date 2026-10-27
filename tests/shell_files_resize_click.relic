@@ -1,0 +1,18 @@
+# A Files click after resize waits for a redraw before using the new row layout.
+use ../shell/wm
+use std/vfs
+let d = wm.new_desktop(640, 480, wm.default_apps())
+let f = wm.launch(d, wm.files_app)
+f.state.path = "/tmp"
+for i in 10..20
+    vfs.write(f.state.fs, "/tmp/file{i}", "x")
+for i in 0..8
+    wm.key(d, "down")
+print("drawn", wm.rows_fit(f), wm.visible_lines(f))
+f.height = 70
+let y = f.y + wm.title_height + wm.text_top + wm.line_height + 7
+print("before redraw", wm.click(d, f.x + 20, y), f.state.sel)
+print("redrawn", wm.rows_fit(f), wm.visible_lines(f))
+print("after redraw", wm.click(d, f.x + 20, y), f.state.sel)
+let e = wm.launch(d, wm.editor)
+print("opened", e.state.path)
