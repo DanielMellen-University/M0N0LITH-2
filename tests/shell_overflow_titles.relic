@@ -1,0 +1,27 @@
+# Titles with empty, long and non-ASCII names remain associated with their windows.
+use ../shell/wm
+let d = wm.new_desktop(640, 480, wm.default_apps())
+fun app(name)
+    return {name: name, width: wm.notes.width, height: wm.notes.height, init: wm.notes.init, lines: wm.notes.lines, on_click: wm.notes.on_click, on_key: wm.notes.on_key}
+for i in 0..11
+    wm.launch(d, wm.notes)
+let a = wm.launch(d, app(""))
+let b = wm.launch(d, app("Long window name exceeding the available space"))
+let c = wm.launch(d, app("é界abc"))
+fun show(w)
+    print(w.id, "[" + wm.title_text(w) + "]", "[" + wm.tab_label(d, w) + "]")
+show(a)
+show(b)
+show(c)
+fun pick(id)
+    let hidden = wm.hidden_tabs(d)
+    let index = 0
+    while hidden[index].id != id
+        index = index + 1
+    let ob = wm.overflow_box(d)
+    wm.click(d, ob[0], ob[1])
+    let row = wm.overflow_item_box(d, index)
+    print("pick", id, wm.click(d, row[0] + 1, row[1] + 1), wm.focused(d).id, wm.shown_tabs(d)[11].id)
+pick(a.id)
+pick(b.id)
+pick(c.id)

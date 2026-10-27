@@ -1,0 +1,6 @@
+12 [] []
+13 [Long window name exceed] [Long]
+14 [é界abc] [é界ab]
+pick 12 tab 12 12
+pick 13 tab 13 13
+pick 14 tab 14 14

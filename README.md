@@ -23,6 +23,7 @@ tests/
   shell_overflow_edges.relic  overflow threshold and list row boundaries
   shell_overflow_lifecycle.relic  focus and stacking as windows change with the list open
   shell_overflow_limit.relic  the last visible row and the 200-row list limit
+  shell_overflow_titles.relic  empty, long and non-ASCII window names in overflow
   shell_launch_small.relic  cascaded windows fit a small desktop
   shell_files_click.relic  clicking rows in Files
   shell_files_hidden.relic  clicks below the visible Files rows do nothing
