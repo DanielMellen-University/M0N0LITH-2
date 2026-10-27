@@ -6,7 +6,7 @@ Terminal
 ctrl+s none up none
 launch
 none saved
-Editor ["Editor: /home/welcome.txt  (ctrl+s save)  [saved]", "Welcome to Relic.", "Hi there_"]
+Editor ["Editor [saved] /home/welcome.txt  (ctrl+s save)", "Welcome to Relic.", "Hi there_"]
 launch
 1
 title

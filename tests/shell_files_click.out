@@ -11,4 +11,4 @@ app /
 app /home
 ["Files: /home", "> ..", "  welcome.txt"]
 app /home
-Editor: /home/welcome.txt  (ctrl+s save)  [open]
+Editor [open] /home/welcome.txt  (ctrl+s save)

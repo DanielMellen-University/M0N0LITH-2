@@ -35,8 +35,8 @@ Files: /
 Files: /home
 launch
 Editor
-Editor: /home/welcome.txt  (ctrl+s save)  [open]
-Editor: /home/welcome.txt  (ctrl+s save)  [saved]
+Editor [open] /home/welcome.txt  (ctrl+s save)
+Editor [saved] /home/welcome.txt  (ctrl+s save)
 Welcome to Relic.
 !_
 launch
@@ -107,7 +107,7 @@ launch
 ["Files: /home", "> ..", "  notes/", "  welcome.txt"]
 ["Files: /home/notes", "> ..", "  plan.txt", "  todo.txt"]
 launch
-["Editor: /home/notes/todo.txt  (ctrl+s save)  [open]", "buy milk", "call home", "_"]
+["Editor [open] /home/notes/todo.txt  (ctrl+s save)", "buy milk", "call home", "_"]
 Files /home/notes
 tab Terminal
 /home> rm notes/todo.txt

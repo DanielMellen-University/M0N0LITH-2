@@ -791,9 +791,9 @@ fun last_lines(text, count)
         return strings.split(text, "\n")
     return strings.split(slice(text, i + 2, len(text)), "\n")
 
-# The title line, then one line per line of text (the font has no newline glyph); the cursor is on the last.
+# The title line (the status first: a window is often too narrow for the end of it), then one line per line of text (the font has no newline glyph); the cursor is on the last.
 fun _editor_lines(s)
-    let out = ["Editor: " + s.path + "  (ctrl+s save)  [" + s.status + "]"]
+    let out = ["Editor [" + s.status + "] " + s.path + "  (ctrl+s save)"]
     for line in last_lines(s.text + "_", s.rows)
         append(out, line)
     return out
