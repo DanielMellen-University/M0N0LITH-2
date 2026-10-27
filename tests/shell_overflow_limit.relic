@@ -1,0 +1,17 @@
+# The last row that fits is clickable; further rows lie outside the desktop.
+use ../shell/wm
+let d = wm.new_desktop(640, 480, wm.default_apps())
+for i in 0..213
+    wm.launch(d, wm.notes)
+let hidden = wm.hidden_tabs(d)
+let last = wm.overflow_item_box(d, 199)
+let beyond = wm.overflow_item_box(d, 200)
+print("limit", len(hidden), wm.overflow_rows(d), wm.overflow_shown(d), last, beyond)
+let b = wm.overflow_box(d)
+wm.click(d, b[0], b[1])
+let want = hidden[199].id
+print("last", wm.click(d, last[0], last[1] + last[3] - 1), wm.focused(d).id, want, d.overflow_open)
+wm.click(d, b[0], b[1])
+print("off screen", wm.click(d, beyond[0], beyond[1]), d.overflow_open, wm.focused(d).id)
+wm.close(d, 1)
+print("after close", len(wm.hidden_tabs(d)), wm.overflow_shown(d), wm.overflow_item_box(d, 199))
