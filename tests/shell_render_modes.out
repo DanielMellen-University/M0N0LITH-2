@@ -1,0 +1,5 @@
+dimensions 3 9
+plain ["heading-l", "first-lon", "middle-lo"]
+tail ["heading-l", "middle-lo", "st-longer"] 3 9
+all plain ["heading-l", "first-lon", "middle-lo", "last-long"]
+all tail ["heading-l", "first-lon", "middle-lo", "st-longer"]

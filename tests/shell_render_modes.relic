@@ -1,0 +1,18 @@
+# Generic apps clip their first rows; tail apps retain pinned rows and the end.
+use ../shell/wm
+fun init() = {}
+fun lines(s) = ["heading-long", "first-long", "middle-long", "last-longer"]
+fun click(s, x, y) = none
+fun key(s, k) = none
+let plain = {name: "Plain", width: 80, height: 46, init: init, lines: lines, on_click: click, on_key: key}
+let tail = {name: "Tail", width: 80, height: 46, init: init, lines: lines, on_click: click, on_key: key, tail: true, pinned: 1}
+let d = wm.new_desktop(640, 480, [])
+let p = wm.launch(d, plain)
+let t = wm.launch(d, tail)
+print("dimensions", wm.rows_fit(p), wm.cols_fit(p))
+print("plain", wm.visible_lines(p))
+print("tail", wm.visible_lines(t), t.state.rows, t.state.cols)
+p.height = 100
+t.height = 100
+print("all plain", wm.visible_lines(p))
+print("all tail", wm.visible_lines(t))

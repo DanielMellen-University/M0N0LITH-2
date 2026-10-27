@@ -49,6 +49,7 @@ tests/
   shell_event_keys.relic  named keys, modifiers and ignored events
   shell_mouse_buttons.relic  left and right mouse buttons during a drag
   shell_clip.relic  text cut to the window, Files scrolling to the selection
+  shell_render_modes.relic  clipping and row selection for plain and tail apps
   shell_big_file.relic  the Editor on a file of thousands of lines stays quick
   shell_terminal_history.relic  the Terminal keeps its last 200 lines
   shell_terminal_errors.relic  Terminal error messages (mv, mkdir, cat, paths through a file)
