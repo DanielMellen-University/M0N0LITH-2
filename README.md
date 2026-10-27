@@ -20,6 +20,7 @@ tests/
   shell_menu_edges.relic  Start menu row and taskbar hit boundaries
   shell_many_windows.relic  windows cascade and wrap, taskbar tabs shrink to fit
   shell_taskbar_overflow.relic  the +N button and hidden-windows list at 14 to 300 windows
+  shell_overflow_edges.relic  overflow threshold and list row boundaries
   shell_launch_small.relic  cascaded windows fit a small desktop
   shell_files_click.relic  clicking rows in Files
   shell_files_hidden.relic  clicks below the visible Files rows do nothing

@@ -1,0 +1,37 @@
+# Overflow threshold and list row boundaries, including the column seam.
+use ../shell/wm
+let d = wm.new_desktop(640, 480, wm.default_apps())
+fun fill(n)
+    while len(d.windows) < n
+        wm.launch(d, wm.notes)
+fun ids(ws)
+    let out = []
+    for w in ws
+        append(out, w.id)
+    return out
+for n in [13, 14, 15]
+    fill(n)
+    print(n, len(wm.shown_tabs(d)), ids(wm.hidden_tabs(d)), wm.overflow_box(d) != none)
+# 38 hidden rows form two columns; each corner and the seam pick the drawn row.
+fill(50)
+fun hit(i, dx, dy)
+    let hidden = wm.hidden_tabs(d)
+    let want = hidden[i].id
+    let button = wm.overflow_box(d)
+    wm.click(d, button[0], button[1])
+    let box = wm.overflow_item_box(d, i)
+    let result = wm.click(d, box[0] + dx, box[1] + dy)
+    print(i, result, wm.focused(d).id == want, not d.overflow_open)
+let b = wm.overflow_item_box(d, 0)
+hit(0, 0, 0)
+hit(0, b[2] - 1, b[3] - 1)
+hit(24, 0, b[3] - 1)
+hit(25, b[2] - 1, 0)
+# The area above the first row and immediately left of the last column is not a row.
+let ob = wm.overflow_box(d)
+wm.click(d, ob[0], ob[1])
+let first = wm.overflow_item_box(d, 0)
+print("above", wm.click(d, first[0], first[1] - 1), d.overflow_open)
+wm.click(d, ob[0], ob[1])
+let last = wm.overflow_item_box(d, wm.overflow_shown(d) - 1)
+print("left", wm.click(d, last[0] - 1, last[1]), d.overflow_open)
