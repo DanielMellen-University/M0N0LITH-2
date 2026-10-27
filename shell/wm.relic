@@ -688,7 +688,10 @@ fun _term_not_folder(s, cmd, word, creates)
     let p = _term_path(s, word)
     if vfs.is_dir(s.fs, p) or not (creates or vfs.exists(s.fs, p))
         return false
-    _term_reply(s, cmd + ": not a folder: " + p)
+    if vfs.exists(s.fs, p)
+        _term_reply(s, cmd + ": not a folder: " + p)
+    else
+        _term_reply(s, cmd + ": no folder: " + p)   # touch new/ when there is no new
     return true
 
 # cd and ls accept an optional path, with different defaults.
