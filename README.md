@@ -21,6 +21,7 @@ tests/
   shell_menu_edges.relic  Start menu row and taskbar hit boundaries
   shell_many_windows.relic  windows cascade and wrap, taskbar tabs shrink to fit
   shell_taskbar_overflow.relic  the +N button and hidden-windows list at 14 to 300 windows
+  shell_taskbar_narrow.relic  taskbar tabs and the +N button on narrow desktops and with many windows
   shell_overflow_edges.relic  overflow threshold and list row boundaries
   shell_overflow_lifecycle.relic  focus and stacking as windows change with the list open
   shell_overflow_all_minimized.relic  overflow tabs and restore when no window is focused
@@ -30,6 +31,8 @@ tests/
   shell_launch_small.relic  cascaded windows fit a small desktop
   shell_cascade_gaps.relic  a new window does not open on top of another after closes
   shell_files_click.relic  clicking rows in Files
+  shell_files_back.relic  Backspace and ".." select the folder you came from
+  shell_files_double_click.relic  the second click of a double-click is ignored
   shell_files_boundaries.relic  root, empty folders, unusual names and reopening Files
   shell_files_long_names.relic  clipped names open the full path and deleted selections do not open replacements
   shell_files_title.relic  Files keeps the end of a long folder path in its title
@@ -46,6 +49,10 @@ tests/
   shell_editor_open_status.relic  Editor status on opening: open, new file, or why not
   shell_editor_stale.relic  Editor reports a file removed before opening
   shell_editor_edges.relic  Editor empty buffers, line edges and failed saves
+  shell_editor_disk_changed.relic  Ctrl+S warns once when another app changed the file
+  shell_editor_undo.relic  Ctrl+Z undoes edits one step at a time, up to 500
+  shell_editor_select.relic  Shift+arrows and Ctrl+A select; typing and Backspace replace the selection
+  shell_editor_cursor.relic  arrows, Home, End and Ctrl+arrow word jumps move the cursor
   shell_editor_long_line.relic  long-line clipping, ignored movement and saving the full buffer
   shell_editor_replaced.relic  saving after a file is removed or replaced by a folder
   shell_files_stale.relic  Files when another app removed the selected file
