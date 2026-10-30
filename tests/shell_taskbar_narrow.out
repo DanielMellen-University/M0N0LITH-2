@@ -1,0 +1,8 @@
+120 wide, 4 windows: 1 tab of width 12 ends at 72 - button +3 at 78 width 40 - overlaps: false - label inside: true - tab text inside: true - start clear: true
+130 wide, 4 windows: 1 tab of width 22 ends at 82 - button +3 at 88 width 40 - overlaps: false - label inside: true - tab text inside: true - start clear: true
+150 wide, 4 windows: 1 tab of width 42 ends at 102 - button +3 at 108 width 40 - overlaps: false - label inside: true - tab text inside: true - start clear: true
+200 wide, 4 windows: 2 tab of width 44 ends at 152 - button +2 at 158 width 40 - overlaps: false - label inside: true - tab text inside: true - start clear: true
+press on the front window's tab minimize 1
+button press overflow true
+640 wide, 999 windows: 12 tab of width 40 ends at 584 - button +987 at 598 width 40 - overlaps: false - label inside: true - tab text inside: true - start clear: true
+640 wide, 1013 windows: 12 tab of width 40 ends at 584 - button +1001 at 590 width 48 - overlaps: false - label inside: true - tab text inside: true - start clear: true

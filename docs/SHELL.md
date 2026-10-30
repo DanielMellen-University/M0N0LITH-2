@@ -28,7 +28,8 @@ Every window has a tab in launch order (`tabs(d)`). Tabs are `tab_width` (90) pi
 When even `min_tab` tabs would run off the bar (more than 13 windows on a 640 pixel desktop), `tab_capacity(d)` tabs are shown (12 there, since the button needs room too) and the rest are hidden behind a button at the right end of the bar:
 
 - `shown_tabs(d)` is the tabs that get a button: the first ones in launch order. If the focused window is not among them it takes the place of the last one, so the focused window always has a tab. `hidden_tabs(d)` is the others, in launch order.
-- `overflow_box(d)` is the `+N` button (`overflow_label(d)` is its text), or `none` when every window has a tab. Pressing it toggles `d.overflow_open` and gives `overflow`.
+- `overflow_box(d)` is the `+N` button (`overflow_label(d)` is its text), or `none` when every window has a tab. It is 40 pixels wide, wider from 1,000 windows on so the label fits. Pressing it toggles `d.overflow_open` and gives `overflow`.
+- On a bar too narrow for one `min_tab` tab beside the button (under about 150 pixels), the one shown tab gets the room that is left, so it never overlaps the button; its label is cut to what fits, or empty.
 - While the list is open, `overflow_item_box(d, i)` is the row for `hidden_tabs(d)[i]`. It stacks upward from the bar at the right edge, like the Start menu, and starts a new column to the left when it reaches the top of the desktop. Pressing a row restores that window and brings it to the front (so it gets a tab) and gives `tab`. Rows are drawn and take presses up to `overflow_shown(d)`, which is what fits across the desktop (200 at 640 by 480).
 - Any other press closes the list and then does what it normally does. Closing windows until everything fits removes the button and the list.
 

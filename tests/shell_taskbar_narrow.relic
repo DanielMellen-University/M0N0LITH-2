@@ -1,0 +1,39 @@
+# Taskbar edge cases: on a narrow bar the one shown tab stays clear of the +N
+# button, and a long +N label stays inside its button.
+use ../shell/wm
+let apps = wm.default_apps()
+
+fun fill(d, n)
+    while len(d.windows) < n
+        wm.launch(d, wm.notes)
+
+# the gap between the last tab and the button, and the label's right end against the button's
+fun report(d)
+    let shown = wm.shown_tabs(d)
+    let ob = wm.overflow_box(d)
+    let last = wm.tab_box(d, len(shown) - 1)
+    let label = wm.overflow_label(d)
+    let label_end = ob[0] + 6 + len(label) * wm.char_width
+    let text_end = last[0] + 6 + len(wm.tab_label(d, shown[len(shown) - 1])) * wm.char_width
+    print(d.width, "wide,", len(d.windows), "windows:", len(shown), "tab of width", last[2], "ends at", last[0] + last[2], "- button", label, "at", ob[0], "width", ob[2], "- overlaps:", last[0] + last[2] > ob[0], "- label inside:", label_end <= ob[0] + ob[2], "- tab text inside:", text_end <= last[0] + last[2], "- start clear:", last[0] >= wm.start_width)
+
+for width in [120, 130, 150, 200]
+    let d = wm.new_desktop(width, 300, apps)
+    fill(d, 4)
+    report(d)
+
+# the one tab on a 120 pixel bar still focuses its window, and the button still opens the list
+let n = wm.new_desktop(120, 300, apps)
+fill(n, 3)
+wm.minimize(n, 3)
+let t = wm.tab_box(n, 0)
+print("press on the front window's tab", wm.click(n, t[0], t[1] + 2), wm.focused(n).id)
+let ob = wm.overflow_box(n)
+print("button press", wm.click(n, ob[0], ob[1] + 2), n.overflow_open)
+
+# 1,013 windows on 640 pixels: +1001 needs a wider button; tabs still clear of it
+let big = wm.new_desktop(640, 480, apps)
+fill(big, 999)
+report(big)
+fill(big, 1013)
+report(big)

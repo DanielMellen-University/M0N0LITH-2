@@ -32,7 +32,7 @@ let start_width = 56
 let menu_row = 18
 let tab_width = 90
 let min_tab = 40         # the narrowest a tab gets: four letters of the name
-let overflow_width = 40  # the "+N" button at the end of the tab strip
+let overflow_width = 40  # the "+N" button at the end of the tab strip (wider for a long N)
 let overflow_col = 80    # a column of the hidden-windows list
 let grip = 12           # bottom-right resize handle
 let min_width = 80
@@ -76,7 +76,7 @@ fun tab_capacity(d)
     let room = d.width - start_width - 4
     if len(d.windows) * (min_tab + 4) <= room
         return len(d.windows)
-    return math.max(1, int((room - overflow_width - 4) / (min_tab + 4)))
+    return math.max(1, int((room - overflow_width_for(d) - 4) / (min_tab + 4)))
 
 # The tabs that get a button: all of them while they fit, else the first ones in
 # launch order, with the focused window's tab in place of the last one.
@@ -115,9 +115,15 @@ fun hidden_tabs(d)
 fun overflow_box(d)
     if tab_capacity(d) >= len(d.windows)
         return none
-    return [d.width - overflow_width - 2, bar_top(d) + 3, overflow_width, bar_height - 6]
+    let w = overflow_width_for(d)
+    return [d.width - w - 2, bar_top(d) + 3, w, bar_height - 6]
 
 fun overflow_label(d) = "+{len(d.windows) - tab_capacity(d)}"
+
+# The +N button's width: overflow_width, or wider when the window count has
+# enough digits that the label (drawn 6 pixels in) would not fit. It goes by
+# the window count, which N never passes, so the width does not depend on N.
+fun overflow_width_for(d) = math.max(overflow_width, 8 + (1 + len("{len(d.windows)}")) * char_width)
 
 # How many windows have no tab: the same as len(hidden_tabs(d)), without building
 # the list, since the list layout below asks for it once per row.
@@ -138,7 +144,9 @@ fun overflow_item_box(d, i)
 # How many list rows get drawn and take clicks: what fits across the desktop.
 fun overflow_shown(d) = math.min(_hidden_count(d), overflow_rows(d) * int(d.width / overflow_col))
 
-# Tabs share the bar: tab_width while they fit, narrower after, never under min_tab.
+# Tabs share the bar: tab_width while they fit, narrower after, never under
+# min_tab, except on a bar too narrow for even one min_tab tab beside the +N
+# button: there the one tab gets what is left, so it never overlaps the button.
 fun tab_width_for(d)
     let n = len(d.windows)
     if n == 0
@@ -146,17 +154,20 @@ fun tab_width_for(d)
     let shown = math.min(n, tab_capacity(d))
     let room = d.width - start_width - 4
     if shown < n
-        room = room - overflow_width - 4
+        room = room - overflow_width_for(d) - 4
     let w = int(room / shown) - 4
     if w > tab_width
         return tab_width
     if w < min_tab
+        if shown < n
+            return math.max(1, w)
         return min_tab
     return w
 
-# A window's tab text, cut to what fits in its tab (the font is 8 pixels wide).
+# A window's tab text, cut to what fits in its tab (the font is 8 pixels wide);
+# empty in a tab too narrow for one letter.
 fun tab_label(d, w)
-    let room = math.max(1, int((tab_width_for(d) - char_width) / char_width))
+    let room = math.max(0, int((tab_width_for(d) - char_width) / char_width))
     return slice(w.app.name, 0, room)
 
 fun close_box(w) = [w.x + w.width - title_height, w.y, title_height, title_height]
