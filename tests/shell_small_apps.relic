@@ -10,7 +10,7 @@ let e = wm.launch(d, wm.editor)
 print(e.app.lines(e.state))
 keys(["backspace", "backspace", "x", "space", "enter", "y", "ctrl+s"])
 print(e.app.lines(e.state))
-# keys it does not know change nothing, status included
+# keys it does not know, and Delete at the end of the text, change nothing, status included
 keys(["tab", "shift", "delete", "escape", "ctrl+x", "F1"])
 print(e.app.lines(e.state))
 # backspace on an empty buffer does nothing; saving writes the empty text

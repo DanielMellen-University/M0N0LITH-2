@@ -1276,6 +1276,14 @@ fun _editor_backspace(s)
     else if _editor_pos(s) > 0
         _editor_change(s, _editor_pos(s) - 1, 1, "")
 
+# Delete: the selection, or the character after the cursor (none at the end).
+fun _editor_delete(s)
+    let sel = _editor_selection(s)
+    if sel != none
+        _editor_change(s, sel[0], sel[1] - sel[0], "")
+    else if _editor_pos(s) < len(s.text)
+        _editor_change(s, _editor_pos(s), 1, "")
+
 # The cursor's new position for a movement key: left, right, up, down
 # (same column, or the end of a shorter line).
 fun _editor_moved(s, k)
@@ -1558,6 +1566,8 @@ fun _editor_key(s, k)
             _editor_type(s, "\n")
         else if k == "backspace"
             _editor_backspace(s)
+        else if k == "delete"
+            _editor_delete(s)
         else
             let typed = _typed("", k)
             if typed != ""

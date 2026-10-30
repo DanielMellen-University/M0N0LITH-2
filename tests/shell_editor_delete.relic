@@ -1,0 +1,28 @@
+# Editor: Delete removes the character after the cursor (a new line too, which
+# joins two lines), or the selection; at the end of the text it does nothing.
+# Ctrl+Z puts back what it removed.
+use ../shell/wm
+let d = wm.new_desktop(640, 480, wm.default_apps())
+let e = wm.launch(d, wm.editor)
+e.state.text = "one\ntwo"
+fun keys(list)
+    for k in list
+        wm.key(d, k)
+fun state(label)
+    print(label, "[" + e.state.status + "]", len(e.state.undo), [e.state.text], e.state.back)
+wm.key(d, "delete")
+state("at the end")
+keys(["home", "delete"])
+state("first of two")
+keys(["up", "end", "delete"])
+state("joins the lines")
+keys(["home", "shift+right", "shift+right", "delete"])
+state("selection")
+keys(["ctrl+z"])
+state("undo selection")
+keys(["ctrl+z", "ctrl+z"])
+state("undo all")
+keys(["ctrl+a", "delete"])
+state("everything")
+wm.key(d, "delete")
+state("empty")

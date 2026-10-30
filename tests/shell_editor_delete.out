@@ -1,0 +1,8 @@
+at the end [open] 0 ["one\ntwo"] 0
+first of two [edited] 1 ["one\nwo"] 2
+joins the lines [edited] 2 ["onewo"] 2
+selection [edited] 3 ["ewo"] 3
+undo selection [undone] 2 ["onewo"] 3
+undo all [undone] 0 ["one\ntwo"] 2
+everything [edited] 1 [""] 0
+empty [edited] 1 [""] 0

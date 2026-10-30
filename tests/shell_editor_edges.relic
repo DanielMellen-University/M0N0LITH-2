@@ -1,4 +1,4 @@
-# Empty backspace and keys the Editor ignores (tab, delete) are no-ops.
+# Empty backspace, tab and Delete at the end of the text are no-ops.
 use ../shell/wm
 use std/vfs
 let d = wm.new_desktop(640, 480, wm.default_apps())
