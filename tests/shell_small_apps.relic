@@ -11,7 +11,7 @@ print(e.app.lines(e.state))
 keys(["backspace", "backspace", "x", "space", "enter", "y", "ctrl+s"])
 print(e.app.lines(e.state))
 # keys it does not know change nothing, status included
-keys(["tab", "shift", "left", "escape", "ctrl+x", "F1"])
+keys(["tab", "shift", "delete", "escape", "ctrl+x", "F1"])
 print(e.app.lines(e.state))
 # backspace on an empty buffer does nothing; saving writes the empty text
 for i in 0..40

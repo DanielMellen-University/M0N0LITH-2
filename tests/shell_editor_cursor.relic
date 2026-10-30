@@ -1,0 +1,89 @@
+# Editor cursor: arrows, home/end and ctrl+left/right move it; typing,
+# Backspace and new lines happen where it is.
+use ../shell/wm
+let d = wm.new_desktop(640, 480, wm.default_apps())
+let e = wm.launch(d, wm.editor)
+e.state.text = "first line\nsecond\nthe third line"
+fun show(label)
+    let lines = wm.visible_lines(e)
+    let shown = []
+    for i in 1..len(lines)
+        append(shown, lines[i])
+    print(label, shown)
+fun keys(list)
+    for k in list
+        wm.key(d, k)
+show("start")
+keys(["home"])
+show("home")
+keys(["ctrl+right"])
+show("word right")
+keys(["ctrl+right", "ctrl+right"])
+show("two more")
+keys(["ctrl+right"])
+show("at the end")
+keys(["ctrl+left", "ctrl+left"])
+show("two words left")
+keys(["up"])
+show("up: the same column")
+keys(["up"])
+show("up")
+keys(["up"])
+show("up on the first line: its start")
+keys(["end", "right"])
+show("end, right: next line")
+keys(["down", "down"])
+show("down twice")
+keys(["left", "left", "X", "Y"])
+show("typed in the middle")
+keys(["backspace"])
+show("backspace in the middle")
+keys(["return"])
+show("new line in the middle")
+keys(["ctrl+z", "ctrl+z"])
+show("undone twice")
+# left at the start and right at the end stay put
+keys(["ctrl+a", "left"])
+show("selection collapses left")
+keys(["left", "left"])
+show("still at the start")
+keys(["ctrl+a", "right", "right"])
+show("collapses right, stays at the end")
+# shift+home selects to the line start; a plain arrow ends the selection
+keys(["up", "shift+home"])
+wm.visible_lines(e)
+print("selected", e.state.marks)
+keys(["down"])
+wm.visible_lines(e)
+print("after down", e.state.marks)
+show("down")
+# word jumps over punctuation and non-ASCII words
+e.state.text = "x = foo.bar(é, ünï) + 42"
+e.state.back = 0
+e.state.mark = none
+let stops = []
+keys(["home"])
+for i in 0..9
+    wm.key(d, "ctrl+right")
+    append(stops, len(e.state.text) - e.state.back)
+print("ctrl+right stops", stops)
+let back = []
+for i in 0..9
+    wm.key(d, "ctrl+left")
+    append(back, len(e.state.text) - e.state.back)
+print("ctrl+left stops", back)
+# the event keys
+fun k(key, shift, ctrl)
+    return wm.key_of_event({type: "key_down", key: key, shift: shift, ctrl: ctrl, alt: false})
+print(k("home", false, false), k("end", true, false), k("left", false, true), k("right", true, true), k("delete", false, false))
+# Files and Terminal ignore the new keys
+let t = wm.launch(d, wm.terminal)
+keys(["e", "c", "h", "o", "left", "home", "end", "ctrl+left"])
+print(t.state.input)
+# up onto a shorter line ends at its end
+wm.restore(d, e.id)
+e.state.text = "ab\nlonger"
+e.state.back = 0
+e.state.mark = none
+wm.key(d, "up")
+show("up onto a shorter line")

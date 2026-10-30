@@ -1,4 +1,4 @@
-# Edits happen at the end; empty backspace and ignored movement keys are no-ops.
+# Empty backspace and keys the Editor ignores (tab, delete) are no-ops.
 use ../shell/wm
 use std/vfs
 let d = wm.new_desktop(640, 480, wm.default_apps())
@@ -11,11 +11,11 @@ wm.key(d, "return")
 let e = wm.launch(d, wm.editor)
 print(wm.visible_lines(e))
 wm.key(d, "backspace")
-wm.key(d, "left")
+wm.key(d, "tab")
 print(e.state.status, e.state.text == "")
 wm.key(d, "return")
 wm.key(d, "x")
-wm.key(d, "up")
+wm.key(d, "delete")
 wm.key(d, "backspace")
 wm.key(d, "backspace")
 print(wm.visible_lines(e))

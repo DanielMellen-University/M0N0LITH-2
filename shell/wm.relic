@@ -456,8 +456,8 @@ fun key(d, k)
 
 # Keys that are not typed text; the apps handle these by name. Letters, digits,
 # punctuation and space come as text events, which carry shift, layout and Unicode.
-let _named_keys = ["return", "backspace", "tab", "up", "down", "left", "right", "delete"]
-let _shift_keys = ["left", "right", "up", "down"]   # shift+left and so on select in the Editor
+let _named_keys = ["return", "backspace", "tab", "up", "down", "left", "right", "delete", "home", "end"]
+let _shift_keys = ["left", "right", "up", "down", "home", "end"]   # shift+left and so on select in the Editor
 let _modifier_keys = ["left ctrl", "right ctrl", "left shift", "right shift", "left alt", "right alt", "left gui", "right gui"]
 
 # The app key for a key_down event, or none when it needs no key. With ctrl held
@@ -1279,7 +1279,15 @@ fun _editor_moved(s, k)
         return pos - 1
     if k == "right"
         return pos + 1
+    if k == "ctrl+left"
+        return _word_left(s.text, pos)
+    if k == "ctrl+right"
+        return _word_right(s.text, pos)
+    if k == "end"
+        return _line_end(s.text, pos)
     let start = _line_start(s.text, pos)
+    if k == "home"
+        return start
     let col = pos - start
     if k == "up"
         if start == 0
@@ -1292,6 +1300,58 @@ fun _editor_moved(s, k)
             return len(s.text)
         return math.min(end + 1 + col, _line_end(s.text, end + 1))
     return pos
+
+# Letters, digits, _ and anything past ASCII make up words for ctrl+left/right.
+fun _word_char(c) = (c >= "a" and c <= "z") or (c >= "A" and c <= "Z") or (c >= "0" and c <= "9") or c == "_" or ord(c) > 127
+
+# ctrl+left: to the start of the word before the cursor (past any spaces and
+# punctuation first); ctrl+right: to the end of the next word. Both read the
+# text in chunks.
+fun _word_left(text, pos)
+    let in_word = false
+    let stop = pos
+    while stop > 0
+        let start = math.max(0, stop - _scan_chunk)
+        let cs = []
+        for c in slice(text, start, stop)
+            append(cs, c)
+        let j = len(cs) - 1
+        while j >= 0
+            if _word_char(cs[j])
+                in_word = true
+            else if in_word
+                return start + j + 1
+            j = j - 1
+        stop = start
+    return 0
+
+fun _word_right(text, pos)
+    let n = len(text)
+    let in_word = false
+    let start = pos
+    while start < n
+        let stop = math.min(n, start + _scan_chunk)
+        let j = 0
+        for c in slice(text, start, stop)
+            if _word_char(c)
+                in_word = true
+            else if in_word
+                return start + j
+            j = j + 1
+        start = stop
+    return n
+
+# A movement key without shift: a selection collapses to its left or right end
+# for left and right; otherwise the cursor moves and the selection goes.
+fun _editor_move(s, k)
+    let sel = _editor_selection(s)
+    s.mark = none
+    if sel != none and k == "left"
+        _editor_set_pos(s, sel[0])
+    else if sel != none and k == "right"
+        _editor_set_pos(s, sel[1])
+    else
+        _editor_set_pos(s, _editor_moved(s, k))
 
 # Shift and a movement key: move the cursor and keep the other end of the selection.
 fun _editor_select(s, k)
@@ -1481,9 +1541,12 @@ fun _editor_key(s, k)
         s.overwrite = false
         s.mark = len(s.text)
         s.back = 0
-    else if k in ["shift+left", "shift+right", "shift+up", "shift+down"]
+    else if k in ["shift+left", "shift+right", "shift+up", "shift+down", "shift+home", "shift+end"]
         s.overwrite = false
         _editor_select(s, slice(k, 6, len(k)))
+    else if k in ["left", "right", "up", "down", "home", "end", "ctrl+left", "ctrl+right"]
+        s.overwrite = false
+        _editor_move(s, k)
     else
         s.overwrite = false   # the second Ctrl+S has to come right after the warning
         if k == "return" or k == "enter"
