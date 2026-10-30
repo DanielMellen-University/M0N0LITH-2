@@ -786,11 +786,11 @@ fun _term_ls(s, parts)
         _term_reply(s, paths.base(p))
         return
     let names = []
-    for n in vfs.list(s.fs, p)
-        if vfs.is_dir(s.fs, paths.join(p, n))
-            append(names, n + "/")
+    for e in vfs.entries(s.fs, p)
+        if e[1]
+            append(names, e[0] + "/")
         else
-            append(names, n)
+            append(names, e[0])
     for line in _pack(names, s.cols)
         _term_reply(s, line)
 
@@ -1039,17 +1039,21 @@ fun _term_key(s, k)
         s.input = _typed(s.input, k)
 
 # Files: browse the shared VFS. Click a row or use up/down/return/backspace.
-fun _files_init() = {fs: _shell_fs, path: "/home", sel: 0, first: 1, rows: 0, names: [], names_path: "", stale: false, recovered: false}
+fun _files_init() = {fs: _shell_fs, path: "/home", sel: 0, first: 1, rows: 0, names: [], dirs: [], names_path: "", stale: false, recovered: false}
 
 fun _files_names(s)
     let old_path = s.path
     s.path = _existing_dir(s.fs, s.path)
     s.recovered = old_path != s.path
     let names = []
+    let dirs = []   # dirs[i]: names[i] is a folder (".." is not marked)
     if s.path != "/"
         append(names, "..")
-    for n in vfs.list(s.fs, s.path)
-        append(names, n)
+        append(dirs, false)
+    for e in vfs.entries(s.fs, s.path)
+        append(names, e[0])
+        append(dirs, e[1])
+    s.dirs = dirs
     s.stale = false
     if s.names_path == s.path and s.sel < len(s.names) and s.sel >= 0
         let selected = s.names[s.sel]
@@ -1105,11 +1109,10 @@ fun _files_lines(s)
         let mark = "  "
         if i == s.sel
             mark = "> "
-        let name = names[i]
-        if name != ".." and vfs.is_dir(s.fs, _files_full(s, name))
-            append(out, mark + name + "/")
+        if s.dirs[i]
+            append(out, mark + names[i] + "/")
         else
-            append(out, mark + name)
+            append(out, mark + names[i])
     return out
 
 # The line of _files_lines that holds the selection (line 0 is the title).
