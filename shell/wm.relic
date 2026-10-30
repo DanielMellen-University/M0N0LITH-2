@@ -457,6 +457,7 @@ fun key(d, k)
 # Keys that are not typed text; the apps handle these by name. Letters, digits,
 # punctuation and space come as text events, which carry shift, layout and Unicode.
 let _named_keys = ["return", "backspace", "tab", "up", "down", "left", "right", "delete"]
+let _shift_keys = ["left", "right", "up", "down"]   # shift+left and so on select in the Editor
 let _modifier_keys = ["left ctrl", "right ctrl", "left shift", "right shift", "left alt", "right alt", "left gui", "right gui"]
 
 # The app key for a key_down event, or none when it needs no key. With ctrl held
@@ -469,6 +470,8 @@ fun key_of_event(e)
     let altgr = e.ctrl and "alt" in e and e.alt
     if e.ctrl and not altgr and not e.key in _modifier_keys
         return "ctrl+" + e.key
+    if "shift" in e and e.shift and e.key in _shift_keys
+        return "shift+" + e.key
     if e.key == "keypad enter"
         return "return"
     if e.key in _named_keys
@@ -546,8 +549,28 @@ fun visible_lines(w)
         w.state.drawn_rows = rows
     let cols = cols_fit(w)
     let out = []
-    for i in _shown(w, lines, rows, tail)
+    let shown = _shown(w, lines, rows, tail)
+    for i in shown
         append(out, _fit(lines[i], cols, tail and i == len(lines) - 1))
+    if "marks" in w.app
+        w.state.shown_lines = shown
+    return out
+
+# The highlighted parts (the Editor's selection) as [x, y, w, h] boxes, for the
+# lines the last visible_lines(w) gave. An app with marks(state) gives them as
+# [line, from, to] in the lines it returned.
+fun mark_boxes(w)
+    let out = []
+    if not "marks" in w.app or not "shown_lines" in w.state
+        return out
+    let cols = cols_fit(w)
+    for m in w.app.marks(w.state)
+        for row in 0..len(w.state.shown_lines)
+            if w.state.shown_lines[row] == m[0]
+                let a = math.min(m[1], cols)
+                let b = math.min(m[2], cols)
+                if b > a
+                    append(out, [w.x + text_left + a * char_width, w.y + title_height + text_top + row * line_height, (b - a) * char_width, line_height])
     return out
 
 # The indexes of the lines visible_lines shows, in order.
@@ -1166,7 +1189,55 @@ fun _editor_init()
     let disk = none
     if status == "open"
         disk = text
-    return {fs: _shell_fs, path: path, text: text, status: status, rows: 0, disk: disk, overwrite: false, undo: []}
+    return {fs: _shell_fs, path: path, text: text, status: status, rows: 0, disk: disk, overwrite: false, undo: [], back: 0, mark: none}
+
+# The cursor is `back` characters before the end of the text (0: at the end, so
+# text set from outside keeps the cursor at its end). A selection runs from the
+# cursor to `mark`, also counted from the end, or there is none.
+fun _editor_pos(s) = math.max(0, len(s.text) - s.back)
+
+fun _editor_set_pos(s, pos)
+    s.back = len(s.text) - math.min(math.max(0, pos), len(s.text))
+
+# The selected range [from, to) of the text, or none.
+fun _editor_selection(s)
+    if s.mark == none
+        return none
+    let a = _editor_pos(s)
+    let b = math.max(0, len(s.text) - s.mark)
+    if a == b
+        return none
+    return [math.min(a, b), math.max(a, b)]
+
+# Where the line holding position i starts, and where it ends (at its newline
+# or the end of the text). They scan in chunks, like last_lines.
+fun _line_start(text, i)
+    let stop = i
+    while stop > 0
+        let start = math.max(0, stop - _scan_chunk)
+        let cs = []
+        for c in slice(text, start, stop)
+            append(cs, c)
+        let j = len(cs) - 1
+        while j >= 0
+            if cs[j] == "\n"
+                return start + j + 1
+            j = j - 1
+        stop = start
+    return 0
+
+fun _line_end(text, i)
+    let n = len(text)
+    let start = i
+    while start < n
+        let stop = math.min(n, start + _scan_chunk)
+        let j = 0
+        for c in slice(text, start, stop)
+            if c == "\n"
+                return start + j
+            j = j + 1
+        start = stop
+    return n
 
 # Ctrl+Z steps back one edit (a typed character, a Backspace, a new line), up
 # to the last _undo_steps edits. Saving does not clear it. An edit is kept as
@@ -1180,7 +1251,53 @@ fun _editor_change(s, at, count, added)
     append(s.undo, {at: at, removed: removed, added: added})
     if len(s.undo) > _undo_steps
         remove(s.undo, 0)
+    _editor_set_pos(s, at + len(added))
+    s.mark = none
     s.status = "edited"
+
+# Typing replaces the selection, if there is one; else it goes in at the cursor.
+fun _editor_type(s, added)
+    let sel = _editor_selection(s)
+    if sel != none
+        _editor_change(s, sel[0], sel[1] - sel[0], added)
+    else
+        _editor_change(s, _editor_pos(s), 0, added)
+
+# Backspace removes the selection, or the character before the cursor.
+fun _editor_backspace(s)
+    let sel = _editor_selection(s)
+    if sel != none
+        _editor_change(s, sel[0], sel[1] - sel[0], "")
+    else if _editor_pos(s) > 0
+        _editor_change(s, _editor_pos(s) - 1, 1, "")
+
+# The cursor's new position for a movement key: left, right, up, down
+# (same column, or the end of a shorter line).
+fun _editor_moved(s, k)
+    let pos = _editor_pos(s)
+    if k == "left"
+        return pos - 1
+    if k == "right"
+        return pos + 1
+    let start = _line_start(s.text, pos)
+    let col = pos - start
+    if k == "up"
+        if start == 0
+            return 0
+        let prev = _line_start(s.text, start - 1)
+        return math.min(prev + col, start - 1)
+    if k == "down"
+        let end = _line_end(s.text, pos)
+        if end >= len(s.text)
+            return len(s.text)
+        return math.min(end + 1 + col, _line_end(s.text, end + 1))
+    return pos
+
+# Shift and a movement key: move the cursor and keep the other end of the selection.
+fun _editor_select(s, k)
+    if s.mark == none
+        s.mark = s.back
+    _editor_set_pos(s, _editor_moved(s, k))
 
 fun _editor_undo(s)
     if len(s.undo) == 0
@@ -1189,6 +1306,8 @@ fun _editor_undo(s)
     let u = s.undo[len(s.undo) - 1]
     remove(s.undo, len(s.undo) - 1)
     s.text = slice(s.text, 0, u.at) + u.removed + slice(s.text, u.at + len(u.added), len(s.text))
+    _editor_set_pos(s, u.at + len(u.removed))
+    s.mark = none
     s.status = "undone"
 
 # Ctrl+S on a file another app changed since the Editor opened or saved it warns
@@ -1232,21 +1351,105 @@ fun last_lines(text, count)
         return [text]
     return strings.split(text, "\n")
 
-# The title line (the status first: a window is often too narrow for the end of it), then one line per line of text (the font has no newline glyph); the cursor is on the last.
+# The first `count` lines of text (all of them when count is 0).
+fun first_lines(text, count)
+    let out = []
+    let start = 0
+    let n = len(text)
+    while count <= 0 or len(out) < count - 1
+        let end = _line_end(text, start)
+        if end >= n
+            break
+        append(out, slice(text, start, end))
+        start = end + 1
+    append(out, slice(text, start, _line_end(text, start)))
+    return out
+
+# The title line (the status first: a window is often too narrow for the end of
+# it), then one line per line of text (the font has no newline glyph), with "_"
+# for the cursor. The line with the cursor is the bottom one when the text above
+# it fills the window, else the text from its start fills it.
 # When the whole title does not fit, the save hint goes first, then the start
 # of the path, so the file name stays in view. A status too long to leave room
 # for the path (an error) keeps the old cut: the status matters more.
+# Each line is cut to the window's cols: the cursor's line keeps the cursor in
+# view, the others their start. s.marks gets the selected part of each line as
+# [line, from, to] (line 0 is the title), for marks().
 fun _editor_lines(s)
     let head = "Editor [" + s.status + "] "
     let title = head + s.path + "  (ctrl+s save)"
-    if "cols" in s and s.cols > 0 and len(title) > s.cols
+    let cols = 0
+    if "cols" in s and s.cols > 0
+        cols = s.cols
+    if cols > 0 and len(title) > cols
         title = head + s.path
-        if len(head) + 4 <= s.cols
-            title = _fit_path(head, s.path, s.cols)
+        if len(head) + 4 <= cols
+            title = _fit_path(head, s.path, cols)
+    let rows = s.rows
+    if rows >= 2
+        rows = rows - 1   # the title takes one
+    let pos = _editor_pos(s)
+    let n = len(s.text)
+    let line_end = _line_end(s.text, pos)
+    let up = last_lines(slice(s.text, 0, pos) + "_" + slice(s.text, pos, line_end), rows)
+    let cursor_line = len(up) - 1
+    let below = []
+    if line_end < n and (rows <= 0 or len(up) < rows)
+        let want = 0
+        if rows > 0
+            want = rows - len(up)
+        below = first_lines(slice(s.text, line_end + 1, n), want)
+    # where in the text each shown line starts (the cursor's line counts its "_")
+    let first = line_end - (len(up[cursor_line]) - 1)
+    for i in 0..cursor_line
+        first = first - len(up[i]) - 1
     let out = [title]
-    for line in last_lines(s.text + "_", s.rows)
+    let starts = []
+    let at = first
+    for i in 0..len(up)
+        append(out, up[i])
+        append(starts, at)
+        at = at + len(up[i]) + 1
+    at = at - 1   # the "_" is not in the text
+    for line in below
         append(out, line)
+        append(starts, at)
+        at = at + len(line) + 1
+    # cut to cols; the cursor's line keeps the cursor and the character after it in view
+    let shift = []
+    for i in 0..len(out) - 1
+        let line = out[i + 1]
+        let off = 0
+        if cols > 0 and len(line) > cols
+            if i == cursor_line
+                off = math.min(len(line) - cols, math.max(0, pos - starts[i] + 2 - cols))
+            out[i + 1] = slice(line, off, off + cols)
+        append(shift, off)
+    s.marks = []
+    let sel = _editor_selection(s)
+    if sel != none
+        for i in 0..len(starts)
+            let ls = starts[i]
+            let le = ls + len(out[i + 1]) + shift[i]
+            if i == cursor_line
+                le = le - 1
+            let a = math.max(sel[0], ls) - ls
+            let b = math.min(sel[1], le) - ls
+            if i == cursor_line and pos == sel[0]
+                a = a + 1   # the "_" comes before the selection
+                b = b + 1
+            a = math.max(0, a - shift[i])
+            b = b - shift[i]
+            if cols > 0
+                b = math.min(b, cols)
+            if b > a
+                append(s.marks, [i + 1, a, b])
     return out
+
+fun _editor_marks(s)
+    if "marks" in s
+        return s.marks
+    return []
 
 fun _editor_click(s, x, y)
     return none
@@ -1274,22 +1477,27 @@ fun _editor_key(s, k)
     else if k == "ctrl+z"
         s.overwrite = false
         _editor_undo(s)
+    else if k == "ctrl+a"
+        s.overwrite = false
+        s.mark = len(s.text)
+        s.back = 0
+    else if k in ["shift+left", "shift+right", "shift+up", "shift+down"]
+        s.overwrite = false
+        _editor_select(s, slice(k, 6, len(k)))
     else
         s.overwrite = false   # the second Ctrl+S has to come right after the warning
-        let n = len(s.text)
         if k == "return" or k == "enter"
-            _editor_change(s, n, 0, "\n")
+            _editor_type(s, "\n")
         else if k == "backspace"
-            if n > 0
-                _editor_change(s, n - 1, 1, "")
+            _editor_backspace(s)
         else
             let typed = _typed("", k)
             if typed != ""
-                _editor_change(s, n, 0, typed)
+                _editor_type(s, typed)
 
 let clicker = {name: "Clicker", width: 180, height: 60, init: _clicker_init, lines: _clicker_lines, on_click: _clicker_click, on_key: _clicker_key}
 let notes = {name: "Notes", width: 220, height: 60, init: _notes_init, lines: _notes_lines, on_click: _notes_click, on_key: _notes_key, tail: true, pinned: 1}
 let terminal = {name: "Terminal", width: 280, height: 120, init: _term_init, lines: _term_lines, on_click: _term_click, on_key: _term_key, tail: true, pinned: 0}
 let files_app = {name: "Files", width: 260, height: 140, init: _files_init, lines: _files_lines, on_click: _files_click, on_key: _files_key, selected: _files_selected}
-let editor = {name: "Editor", width: 320, height: 80, init: _editor_init, lines: _editor_lines, on_click: _editor_click, on_key: _editor_key, tail: true, pinned: 1}
+let editor = {name: "Editor", width: 320, height: 80, init: _editor_init, lines: _editor_lines, on_click: _editor_click, on_key: _editor_key, tail: true, pinned: 1, marks: _editor_marks}
 fun default_apps() = [clicker, notes, terminal, files_app, editor]

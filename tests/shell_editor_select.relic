@@ -1,0 +1,60 @@
+# Editor selection: shift+arrows move the cursor and select from where it was,
+# ctrl+a selects everything; typing replaces the selection and Backspace removes
+# it, and Ctrl+Z puts it back. The selection is drawn as boxes (mark_boxes).
+use ../shell/wm
+let d = wm.new_desktop(640, 480, wm.default_apps())
+let e = wm.launch(d, wm.editor)
+e.state.text = "one\ntwo\nthree"
+fun show(label)
+    let lines = wm.visible_lines(e)
+    let shown = []
+    for i in 1..len(lines)
+        append(shown, lines[i])
+    print(label, shown, e.state.marks, "back", e.state.back)
+show("start")
+wm.key(d, "shift+left")
+wm.key(d, "shift+left")
+show("two left")
+wm.key(d, "shift+right")
+show("one back right")
+wm.key(d, "X")
+show("typed over")
+wm.key(d, "ctrl+z")
+show("undone")
+wm.key(d, "shift+up")
+show("shift+up")
+wm.key(d, "shift+up")
+show("shift+up again")
+wm.key(d, "shift+up")
+show("at the top")
+wm.key(d, "backspace")
+show("removed")
+wm.key(d, "ctrl+z")
+show("back")
+wm.key(d, "ctrl+a")
+show("all")
+wm.key(d, "return")
+show("replaced by a new line")
+wm.key(d, "ctrl+z")
+show("undone")
+# shift+down to a shorter line ends there; down from the last line goes to its end
+e.state.text = "abcdef\nxy\nlonger line"
+e.state.back = len(e.state.text) - 5
+e.state.mark = none
+wm.key(d, "shift+down")
+show("down to a shorter line")
+wm.key(d, "shift+down")
+show("down again")
+wm.key(d, "shift+down")
+show("down on the last line")
+# the selection's boxes on screen, and the event keys
+let boxes = wm.mark_boxes(e)
+print("boxes", boxes)
+print(wm.key_of_event({type: "key_down", key: "left", shift: true, ctrl: false, alt: false}), wm.key_of_event({type: "key_down", key: "left", shift: false, ctrl: false, alt: false}), wm.key_of_event({type: "key_down", key: "a", shift: true, ctrl: true, alt: false}))
+# a long cursor line keeps the cursor in view in a narrow window
+let n = wm.launch(d, wm.editor)
+n.width = 100
+n.state.text = "0123456789abcdefghijklmnopqrstuvwxyz\nshort"
+n.state.back = 6 + 10
+n.state.mark = n.state.back + 3
+print(wm.visible_lines(n), n.state.marks, wm.mark_boxes(n))

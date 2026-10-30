@@ -1,0 +1,19 @@
+start ["one", "two", "three_"] [] back 0
+two left ["one", "two", "thr_ee"] [[3, 4, 6]] back 2
+one back right ["one", "two", "thre_e"] [[3, 5, 6]] back 1
+typed over ["one", "two", "threX_"] [] back 0
+undone ["one", "two", "three_"] [] back 0
+shift+up ["one", "two_", "three"] [[3, 0, 5]] back 6
+shift+up again ["one_", "two", "three"] [[2, 0, 3], [3, 0, 5]] back 10
+at the top ["_one", "two", "three"] [[1, 1, 4], [2, 0, 3], [3, 0, 5]] back 13
+removed ["_"] [] back 0
+back ["one", "two", "three_"] [] back 0
+all ["one", "two", "three_"] [[1, 0, 3], [2, 0, 3], [3, 0, 5]] back 0
+replaced by a new line ["", "_"] [] back 0
+undone ["one", "two", "three_"] [] back 0
+down to a shorter line ["abcdef", "xy_", "longer line"] [[1, 5, 6], [2, 0, 2]] back 12
+down again ["abcdef", "xy", "lo_nger line"] [[1, 5, 6], [2, 0, 2], [3, 0, 2]] back 9
+down on the last line ["abcdef", "xy", "longer line_"] [[1, 5, 6], [2, 0, 2], [3, 0, 11]] back 0
+boxes [[86, 66, 8, 14], [46, 80, 16, 14], [46, 94, 88, 14]]
+shift+left left ctrl+a
+["Editor [ope", "hijklmnop_q", "short"] [[1, 6, 9]] [[118, 86, 24, 14]]

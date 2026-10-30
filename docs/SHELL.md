@@ -17,7 +17,7 @@ Input goes in through four calls, or through `handle(d, e)`, which takes one `gr
 | `motion(d, x, y)` | moves or resizes the window being dragged, if any |
 | `release(d)` | ends a drag |
 | `dismiss(d)` | closes the Start menu and the hidden-windows list; true if one was open (desktop.relic quits on an Escape that closed nothing) |
-| `key(d, name)` | a key for the window on top; `space` for the space bar, `ctrl+s` for Ctrl+S, `ctrl+z` for Ctrl+Z (Editor undo) |
+| `key(d, name)` | a key for the window on top; `space` for the space bar, `ctrl+s` for Ctrl+S, `ctrl+z` for Ctrl+Z (Editor undo), `ctrl+a`, and `shift+left` (and right, up, down) for Shift with an arrow key |
 
 Launch fits the initial window to the desktop, and moving it keeps 40 pixels of the title bar on screen to grab (beside the _ and x boxes when it is off the left edge). Resizing limits its right and bottom edges to the desktop and taskbar where the minimum size permits. A moved window can extend beyond those edges; resizing does not move its top-left corner.
 
@@ -38,6 +38,7 @@ When even `min_tab` tabs would run off the bar (more than 13 windows on a 640 pi
 An app is a map: `name`, `width`, `height`, `init()`, `lines(state)`, `on_click(state, x, y)` and `on_key(state, key)`. `lines` gives the text rows. `visible_lines(w)` cuts them to what fits the window, which is what `desktop.relic` draws, so no text leaves its window. Two optional fields change how rows are chosen:
 
 - `tail: true` and `pinned: n` for an app you type into at the end (Terminal, Editor, Notes): the first `n` lines stay, then the last ones that fit. Before it asks an app of this kind for `lines`, `visible_lines` puts the window's `rows` and `cols` in the app's state; Editor builds only `rows` lines of a big file, and Terminal wraps its output to `cols` and builds only the last `rows` rows.
+- `marks(state)` for highlighted text (the Editor's selection): `[line, from, to]` in the lines `lines` gave. `mark_boxes(w)` turns them into `[x, y, w, h]` boxes for the lines the last `visible_lines(w)` showed, and `desktop.relic` draws them behind the text.
 - `selected(state)` for a list (Files): the title line stays and the list scrolls just far enough to show the selected line. `visible_lines` puts the window's `cols` in its state too, and Files shortens a long folder path in its title to fit.
 
 Terminal, Files and Editor work on one in-memory filesystem (`std/vfs`), so a change in one shows in the others. An app has to cope with that: a folder or file can be gone between two frames. Editor keeps the text it last read or saved (`disk`) and warns before a Ctrl+S would overwrite a change another app made (a second Ctrl+S in a row writes).

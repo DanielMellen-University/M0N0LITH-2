@@ -30,8 +30,11 @@ fun draw_window(d, w)
     graphics.text(mb[0] + 4, mb[1] + 2, "_", 255, 255, 255)
     # nothing an app draws goes outside its window
     graphics.clip(w.x, w.y + wm.title_height, w.width, w.height)
+    let lines = wm.visible_lines(w)
+    for b in wm.mark_boxes(w)   # the Editor's selection, behind its text
+        draw_box(b, 170, 200, 240)
     let row = 0
-    for line in wm.visible_lines(w)
+    for line in lines
         graphics.text(w.x + wm.text_left, w.y + wm.title_height + wm.text_top + row * wm.line_height, line, 20, 20, 20)
         row = row + 1
     graphics.unclip()
