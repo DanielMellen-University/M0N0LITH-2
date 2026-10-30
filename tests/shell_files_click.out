@@ -6,7 +6,7 @@ app
 app
 ["Files: /tmp", "> .."]
 app /
-["Files: /", "> home/", "  tmp/"]
+["Files: /", "  home/", "> tmp/"]
 app /
 app /home
 ["Files: /home", "> ..", "  welcome.txt"]

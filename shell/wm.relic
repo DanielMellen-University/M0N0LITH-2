@@ -1081,9 +1081,21 @@ fun _files_lines(s)
 fun _files_selected(s)
     return s.sel + 1
 
+# Go to the parent folder with the folder you were in selected, so going back
+# down is one key. Used by backspace and by opening "..".
+fun _files_up(s)
+    let child = paths.base(s.path)
+    s.path = paths.dir(s.path)
+    let names = _files_names(s)
+    for i in 0..len(names)
+        if names[i] == child
+            s.sel = i
+
 fun _files_open(s, name)
     let full = _files_full(s, name)
-    if name == ".." or vfs.is_dir(s.fs, full)
+    if name == ".."
+        _files_up(s)
+    else if vfs.is_dir(s.fs, full)
         s.path = full
         s.sel = 0
     else
@@ -1118,8 +1130,7 @@ fun _files_key(s, k)
             _files_open(s, names[s.sel])
     else if k == "backspace"
         if s.path != "/" and not s.recovered
-            s.path = paths.dir(s.path)
-            s.sel = 0
+            _files_up(s)
 
 # Editor: text buffer over a VFS path. Type like Notes; ctrl+s saves.
 # It opens the file last opened in Files, or /home/welcome.txt.

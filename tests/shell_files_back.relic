@@ -1,0 +1,49 @@
+# Going up in Files (backspace, or opening "..") selects the folder you came
+# from, so return goes straight back in.
+use ../shell/wm
+use std/vfs
+let d = wm.new_desktop(640, 480, wm.default_apps())
+let f = wm.launch(d, wm.files_app)
+let fs = f.state.fs
+for n in ["a", "b", "c", "d"]
+    vfs.make_dir(fs, "/home/" + n)
+vfs.make_dir(fs, "/home/c/inner")
+f.state.path = "/home/c/inner"
+print(wm.visible_lines(f))
+wm.key(d, "backspace")
+print("backspace", f.state.path, wm.visible_lines(f))
+wm.key(d, "backspace")
+print("backspace", f.state.path, f.state.sel, wm.visible_lines(f))
+wm.key(d, "return")
+print("return", f.state.path)
+# ".." by key and by click
+wm.key(d, "up")
+wm.key(d, "up")
+wm.key(d, "up")
+print("on", f.state.sel, wm.visible_lines(f)[f.state.sel + 1])
+wm.key(d, "return")
+print(".. by return", f.state.path, wm.visible_lines(f)[f.state.sel + 1])
+wm.key(d, "return")
+wm.visible_lines(f)
+wm.click(d, f.x + 10, f.y + wm.title_height + wm.text_top + wm.line_height + 2)
+print(".. by click", f.state.path, wm.visible_lines(f)[f.state.sel + 1])
+# at the root backspace does nothing; from a top folder it selects that folder
+wm.key(d, "backspace")
+print("root", f.state.path, wm.visible_lines(f)[f.state.sel + 1])
+wm.key(d, "backspace")
+print("root again", f.state.path, f.state.sel)
+# far down a long list the selection is kept in view
+for i in 0..60
+    vfs.make_dir(fs, "/tmp/z{i}")
+f.state.path = "/tmp/z59"
+wm.visible_lines(f)
+wm.key(d, "backspace")
+let lines = wm.visible_lines(f)
+print("long list", f.state.path, f.state.sel, lines[len(lines) - 1], len(lines))
+# the folder you are in was removed meanwhile: Files falls back to its parent and that key does nothing more
+vfs.make_dir(fs, "/tmp/gone")
+f.state.path = "/tmp/gone"
+wm.visible_lines(f)
+vfs.remove(fs, "/tmp/gone")
+wm.key(d, "backspace")
+print("removed", f.state.path, f.state.sel)

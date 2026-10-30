@@ -1,0 +1,11 @@
+["Files: /home/c/inner", "> .."]
+backspace /home/c ["Files: /home/c", "  ..", "> inner/"]
+backspace /home 3 ["Files: /home", "  ..", "  a/", "  b/", "> c/", "  d/", "  welcome.txt"]
+return /home/c
+on 0 > ..
+.. by return /home > c/
+.. by click /home > c/
+root / > home/
+root again / 0
+long list /tmp 56 > z59/ 9
+removed /tmp 0

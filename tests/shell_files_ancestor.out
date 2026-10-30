@@ -1,4 +1,4 @@
 before ["Files: /tmp/tree/child", "> .."]
 terminal ["Terminal. Type help.", "/tmp> _"] /tmp
 files /tmp ["Files: /tmp", "> ..", "  moved/"]
-next return / ["Files: /", "> home/", "  tmp/"]
+next return / ["Files: /", "  home/", "> tmp/"]
