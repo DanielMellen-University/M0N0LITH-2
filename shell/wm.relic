@@ -1166,7 +1166,30 @@ fun _editor_init()
     let disk = none
     if status == "open"
         disk = text
-    return {fs: _shell_fs, path: path, text: text, status: status, rows: 0, disk: disk, overwrite: false}
+    return {fs: _shell_fs, path: path, text: text, status: status, rows: 0, disk: disk, overwrite: false, undo: []}
+
+# Ctrl+Z steps back one edit (a typed character, a Backspace, a new line), up
+# to the last _undo_steps edits. Saving does not clear it. An edit is kept as
+# {at, removed, added}, not a copy of the text, so a big file stays cheap.
+let _undo_steps = 500
+
+# Replace `count` characters at `at` with `added`, and remember how to go back.
+fun _editor_change(s, at, count, added)
+    let removed = slice(s.text, at, at + count)
+    s.text = slice(s.text, 0, at) + added + slice(s.text, at + count, len(s.text))
+    append(s.undo, {at: at, removed: removed, added: added})
+    if len(s.undo) > _undo_steps
+        remove(s.undo, 0)
+    s.status = "edited"
+
+fun _editor_undo(s)
+    if len(s.undo) == 0
+        s.status = "nothing to undo"
+        return
+    let u = s.undo[len(s.undo) - 1]
+    remove(s.undo, len(s.undo) - 1)
+    s.text = slice(s.text, 0, u.at) + u.removed + slice(s.text, u.at + len(u.added), len(s.text))
+    s.status = "undone"
 
 # Ctrl+S on a file another app changed since the Editor opened or saved it warns
 # first; a second Ctrl+S in a row overwrites. A file that was removed meanwhile
@@ -1248,16 +1271,21 @@ fun _editor_key(s, k)
             s.disk = s.text
         catch err
             s.status = err.message
+    else if k == "ctrl+z"
+        s.overwrite = false
+        _editor_undo(s)
     else
         s.overwrite = false   # the second Ctrl+S has to come right after the warning
-        let text = s.text
+        let n = len(s.text)
         if k == "return" or k == "enter"
-            text = text + "\n"
+            _editor_change(s, n, 0, "\n")
+        else if k == "backspace"
+            if n > 0
+                _editor_change(s, n - 1, 1, "")
         else
-            text = _typed(text, k)
-        if text != s.text
-            s.text = text
-            s.status = "edited"
+            let typed = _typed("", k)
+            if typed != ""
+                _editor_change(s, n, 0, typed)
 
 let clicker = {name: "Clicker", width: 180, height: 60, init: _clicker_init, lines: _clicker_lines, on_click: _clicker_click, on_key: _clicker_key}
 let notes = {name: "Notes", width: 220, height: 60, init: _notes_init, lines: _notes_lines, on_click: _notes_click, on_key: _notes_key, tail: true, pinned: 1}

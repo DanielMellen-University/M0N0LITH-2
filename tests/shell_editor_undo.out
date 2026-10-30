@@ -1,0 +1,17 @@
+nothing yet [nothing to undo] ab 0
+typed [edited] abc d 7
+undo backspace [undone] abc d
+ 6
+undo backspace [undone] abc d
+e 5
+undo e [undone] abc d
+ 4
+undo return [undone] abc d 3
+typed after undo [edited] abc df 4
+back to the start [undone] ab 0
+again [nothing to undo] ab 0
+no edits [nothing to undo]  0
+undo after save [undone]  0
+saved true saved
+steps kept 500 left 100
+utf8 [undone] é 1

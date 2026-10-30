@@ -15,7 +15,7 @@ M0N0LITH-2 is the MONOLITH 2 desktop written in Relic. The language roadmap is i
 ## Phase 3: Apps as proof
 
 - [ ] Terminal (started: help, clear, echo, apps, date, pwd, cd, ls, cat, mkdir, touch, write, rm, mv, and `echo text > file` or `>>`; it keeps the last 200 lines of output)
-- [ ] Text editor (started: edits and saves VFS files with ctrl+s, which the desktop now delivers; a file opened in Files opens in the next Editor; a big file stays quick)
+- [ ] Text editor (started: edits and saves VFS files with ctrl+s, which the desktop now delivers, and warns first when another app changed the file; ctrl+z undo; a file opened in Files opens in the next Editor; a big file stays quick)
 - [ ] File browser (started: browses the VFS with keys or clicks; a long list follows the selected row, and opening a file selects it for the next Editor)
 - [ ] Drawing app
 - [ ] At least one game

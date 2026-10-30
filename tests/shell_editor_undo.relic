@@ -1,0 +1,59 @@
+# Editor: Ctrl+Z undoes the last edit, one step at a time: a typed character,
+# a Backspace, a new line. Saving does not clear it; the last 500 edits are kept.
+use ../shell/wm
+use std/vfs
+let d = wm.new_desktop(640, 480, wm.default_apps())
+let e = wm.launch(d, wm.editor)
+e.state.text = "ab"
+fun show(label)
+    print(label, "[" + e.state.status + "]", e.state.text, len(e.state.undo))
+wm.key(d, "ctrl+z")
+show("nothing yet")
+for k in ["c", "space", "d", "return", "e", "backspace", "backspace"]
+    wm.key(d, k)
+show("typed")
+wm.key(d, "ctrl+z")
+show("undo backspace")
+wm.key(d, "ctrl+z")
+show("undo backspace")
+wm.key(d, "ctrl+z")
+show("undo e")
+wm.key(d, "ctrl+z")
+show("undo return")
+wm.key(d, "f")
+show("typed after undo")
+for i in 0..4
+    wm.key(d, "ctrl+z")
+show("back to the start")
+wm.key(d, "ctrl+z")
+show("again")
+# a Backspace on empty text and a key that types nothing are not edits
+e.state.text = ""
+wm.key(d, "backspace")
+wm.key(d, "up")
+wm.key(d, "tab")
+show("no edits")
+# saving keeps the steps; undo after a save is an edit to save again
+vfs.write(e.state.fs, "/home/u.txt", "")
+e.state.path = "/home/u.txt"
+e.state.disk = ""
+wm.key(d, "x")
+wm.key(d, "ctrl+s")
+wm.key(d, "ctrl+z")
+show("undo after save")
+wm.key(d, "ctrl+s")
+print("saved", vfs.read(e.state.fs, "/home/u.txt") == "", e.state.status)
+# only the last 500 edits
+for i in 0..600
+    wm.key(d, "y")
+let n = 0
+while len(e.state.undo) > 0
+    wm.key(d, "ctrl+z")
+    n = n + 1
+print("steps kept", n, "left", len(e.state.text))
+# multi-byte characters undo whole
+e.state.text = ""
+e.state.undo = []
+wm.handle(d, {type: "text", text: "é€"})
+wm.key(d, "ctrl+z")
+show("utf8")
