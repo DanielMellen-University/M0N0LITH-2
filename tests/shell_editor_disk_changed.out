@@ -1,0 +1,12 @@
+plain save [saved] disk: one!
+first ctrl+s [changed on disk: ctrl+s again] disk: from terminal
+second ctrl+s [saved] disk: one!?
+after overwrite [saved] disk: one!?x
+warned [changed on disk: ctrl+s again] disk: again
+typed, warned again [changed on disk: ctrl+s again] disk: again
+then overwrites [saved] disk: one!?xy
+same text again [saved] disk: one!?xyz
+removed [saved] disk: one!?xyz
+new file [changed on disk: ctrl+s again] made by terminal
+new file [saved] n
+Editor [changed on disk: ctrl+s again] 

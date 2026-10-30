@@ -1,0 +1,71 @@
+# Ctrl+S warns when another app changed the file since the Editor opened or
+# saved it; a second Ctrl+S right after overwrites. Any other key first means
+# the next Ctrl+S warns again.
+use ../shell/wm
+use std/vfs
+let d = wm.new_desktop(640, 480, wm.default_apps())
+let fs = wm.launch(d, wm.files_app).state.fs
+vfs.write(fs, "/home/a.txt", "one")
+let e = wm.launch(d, wm.editor)
+e.state = wm.editor.init()
+e.state.path = "/home/a.txt"
+e.state.text = "one"
+e.state.disk = "one"
+e.state.status = "open"
+fun show(label)
+    print(label, "[" + e.state.status + "]", "disk:", vfs.read(fs, "/home/a.txt"))
+# nothing changed on disk: saves at once
+wm.key(d, "!")
+wm.key(d, "ctrl+s")
+show("plain save")
+# the Terminal writes the file: warn, then overwrite
+vfs.write(fs, "/home/a.txt", "from terminal")
+wm.key(d, "?")
+wm.key(d, "ctrl+s")
+show("first ctrl+s")
+wm.key(d, "ctrl+s")
+show("second ctrl+s")
+# after a save the Editor's copy is the disk's: no warning
+wm.key(d, "x")
+wm.key(d, "ctrl+s")
+show("after overwrite")
+# a key between the warning and the next Ctrl+S: it warns again
+vfs.write(fs, "/home/a.txt", "again")
+wm.key(d, "ctrl+s")
+show("warned")
+wm.key(d, "y")
+wm.key(d, "ctrl+s")
+show("typed, warned again")
+wm.key(d, "ctrl+s")
+show("then overwrites")
+# changed on disk to exactly what the Editor saved last: nothing to lose, no warning
+vfs.write(fs, "/home/a.txt", "back")
+vfs.write(fs, "/home/a.txt", e.state.disk)
+wm.key(d, "z")
+wm.key(d, "ctrl+s")
+show("same text again")
+# removed meanwhile: written again with no warning
+vfs.remove(fs, "/home/a.txt")
+wm.key(d, "ctrl+s")
+show("removed")
+# a new file that another app created before the first save
+let f = wm.launch(d, wm.files_app)
+vfs.write(fs, "/home/b.txt", "x")
+vfs.remove(fs, "/home/b.txt")
+f.state.path = "/home"
+let e2 = wm.launch(d, wm.editor)
+e2.state.path = "/home/b.txt"
+e2.state.status = "new file"
+e2.state.text = ""
+e2.state.disk = none
+wm.key(d, "n")
+vfs.write(fs, "/home/b.txt", "made by terminal")
+wm.key(d, "ctrl+s")
+print("new file", "[" + e2.state.status + "]", vfs.read(fs, "/home/b.txt"))
+wm.key(d, "ctrl+s")
+print("new file", "[" + e2.state.status + "]", vfs.read(fs, "/home/b.txt"))
+# the warning in the title of the default window
+wm.key(d, "m")
+vfs.write(fs, "/home/b.txt", "changed")
+wm.key(d, "ctrl+s")
+print(wm.visible_lines(e2)[0])

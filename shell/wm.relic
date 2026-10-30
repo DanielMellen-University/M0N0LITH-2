@@ -1162,7 +1162,24 @@ fun _editor_init()
             text = vfs.read(_shell_fs, path)
         catch err
             status = err.message
-    return {fs: _shell_fs, path: path, text: text, status: status, rows: 0}
+    # disk: the file as the Editor last read or saved it (none: no file then)
+    let disk = none
+    if status == "open"
+        disk = text
+    return {fs: _shell_fs, path: path, text: text, status: status, rows: 0, disk: disk, overwrite: false}
+
+# Ctrl+S on a file another app changed since the Editor opened or saved it warns
+# first; a second Ctrl+S in a row overwrites. A file that was removed meanwhile
+# is just written again: nothing is lost.
+let _editor_changed = "changed on disk: ctrl+s again"  # fits the default window's title
+
+fun _editor_disk_changed(s)
+    if not vfs.exists(s.fs, s.path) or vfs.is_dir(s.fs, s.path)
+        return false
+    try
+        return vfs.read(s.fs, s.path) != s.disk
+    catch err
+        return false
 
 # The last `count` lines of text, split on newlines (all of them when count is 0).
 # It scans back from the end, so a big file costs a few rows, not a split of everything.
@@ -1220,12 +1237,19 @@ fun _editor_key(s, k)
         if not vfs.exists(s.fs, s.path) and _why_not_new(s.fs, s.path) != none
             s.status = _why_not_new(s.fs, s.path)
             return
+        if not s.overwrite and _editor_disk_changed(s)
+            s.status = _editor_changed
+            s.overwrite = true
+            return
+        s.overwrite = false
         try
             vfs.write(s.fs, s.path, s.text)
             s.status = "saved"
+            s.disk = s.text
         catch err
             s.status = err.message
     else
+        s.overwrite = false   # the second Ctrl+S has to come right after the warning
         let text = s.text
         if k == "return" or k == "enter"
             text = text + "\n"
