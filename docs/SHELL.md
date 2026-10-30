@@ -17,7 +17,7 @@ Input goes in through four calls, or through `handle(d, e)`, which takes one `gr
 | `motion(d, x, y)` | moves or resizes the window being dragged, if any |
 | `release(d)` | ends a drag |
 | `dismiss(d)` | closes the Start menu and the hidden-windows list; true if one was open (desktop.relic quits on an Escape that closed nothing) |
-| `key(d, name)` | a key for the window on top; `space` for the space bar, `ctrl+s` for Ctrl+S, `ctrl+z` for Ctrl+Z (Editor undo), `ctrl+a`, `home` and `end`, `ctrl+left` and `ctrl+right`, and `shift+left` (and right, up, down, home, end) for Shift with those keys |
+| `key(d, name)` | a key for the window on top; `space` for the space bar, `ctrl+s` for Ctrl+S, `ctrl+z` for Ctrl+Z (Editor undo), `ctrl+a`, `home` and `end`, `ctrl+left` and `ctrl+right`, and `shift+left` (and right, up, down, home, end) for Shift with those keys. `key_of_event` gives Cmd (the `gui` field, the Windows or Super key elsewhere) with a letter as `ctrl+` and the letter, so Cmd+S saves on macOS |
 
 Launch fits the initial window to the desktop, and moving it keeps 40 pixels of the title bar on screen to grab (beside the _ and x boxes when it is off the left edge). Resizing limits its right and bottom edges to the desktop and taskbar where the minimum size permits. A moved window can extend beyond those edges; resizing does not move its top-left corner.
 

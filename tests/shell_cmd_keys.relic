@@ -1,0 +1,22 @@
+# Cmd (the gui flag on key events, Relic 1.0.40) with a letter acts like Ctrl
+# with it, so Cmd+S saves on macOS, Cmd+Z undoes and Cmd+A selects all. Cmd
+# with other keys, and events without a gui field, change nothing.
+use ../shell/wm
+use std/vfs
+fun ev(k, gui) = {type: "key_down", key: k, ctrl: false, alt: false, shift: false, repeat: false, gui: gui}
+print(wm.key_of_event(ev("s", true)), wm.key_of_event(ev("z", true)), wm.key_of_event(ev("a", true)), wm.key_of_event(ev("s", false)))
+print(wm.key_of_event(ev("left", true)), wm.key_of_event(ev("left gui", true)), wm.key_of_event(ev("return", true)))
+print(wm.key_of_event({type: "key_down", key: "s", ctrl: false, alt: false, shift: false}))
+let d = wm.new_desktop(640, 480, wm.default_apps())
+let e = wm.launch(d, wm.editor)
+let fs = e.state.fs
+let before = vfs.read(fs, e.state.path)
+# typing then Cmd+S, the way SDL sends them on macOS: text for the letter, no text with Cmd
+wm.handle(d, {type: "text", text: "!"})
+wm.handle(d, ev("s", true))
+print(e.state.status, vfs.read(fs, e.state.path) == before + "!")
+wm.handle(d, ev("z", true))
+print(e.state.status, e.state.text == before)
+wm.handle(d, ev("a", true))
+wm.visible_lines(e)
+print("selected lines", len(e.state.marks))

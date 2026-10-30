@@ -461,7 +461,8 @@ let _shift_keys = ["left", "right", "up", "down", "home", "end"]   # shift+left 
 let _modifier_keys = ["left ctrl", "right ctrl", "left shift", "right shift", "left alt", "right alt", "left gui", "right gui"]
 
 # The app key for a key_down event, or none when it needs no key. With ctrl held
-# the key is "ctrl+" and its name ("ctrl+s"); text events do not come with ctrl.
+# the key is "ctrl+" and its name ("ctrl+s"), and the same with Cmd (gui) and a
+# letter; text events do not come with ctrl.
 # Ctrl and Alt together is AltGr on Windows, which types characters such as the
 # Polish s with an accent (AltGr+S): that comes as text, so it is not Ctrl+S.
 fun key_of_event(e)
@@ -469,6 +470,10 @@ fun key_of_event(e)
         return none
     let altgr = e.ctrl and "alt" in e and e.alt
     if e.ctrl and not altgr and not e.key in _modifier_keys
+        return "ctrl+" + e.key
+    # Cmd on macOS (gui, since Relic 1.0.40) with a letter is the Ctrl shortcut
+    # there: Cmd+S saves, Cmd+Z undoes, Cmd+A selects all.
+    if "gui" in e and e.gui and len(e.key) == 1
         return "ctrl+" + e.key
     if "shift" in e and e.shift and e.key in _shift_keys
         return "shift+" + e.key
