@@ -7,7 +7,7 @@ Two files in `shell/`:
 
 ## The model
 
-`new_desktop(width, height, apps)` gives a map with `windows` (running apps, the last one on top), `apps` (what Start can launch), `menu_open`, `overflow_open` (the hidden-windows list below) and `drag`. A window is `{id, app, state, x, y, width, height, minimized}`. `state` belongs to the app.
+`new_desktop(width, height, apps)` gives a map with `windows` (running apps, the last one on top), `apps` (what Start can launch), `menu_open`, `overflow_open` (the hidden-windows list below), `drag` and `clicks` (1, or the `clicks` count of the `mouse_down` that `handle` is passing on, so 2 for the second press of a double-click). A window is `{id, app, state, x, y, width, height, minimized}`. `state` belongs to the app.
 
 Input goes in through four calls, or through `handle(d, e)`, which takes one `graphics.next_event()` map and calls the right one:
 
@@ -42,7 +42,7 @@ An app is a map: `name`, `width`, `height`, `init()`, `lines(state)`, `on_click(
 
 Terminal, Files and Editor work on one in-memory filesystem (`std/vfs`), so a change in one shows in the others. An app has to cope with that: a folder or file can be gone between two frames.
 
-Files remembers the last row content and available row count when drawn. Once it has been drawn, a row click after a directory change or resize is ignored until the next draw supplies the current layout; keyboard navigation refreshes the directory independently. Opening a file in Files sets the path used by the next Editor window. The filesystem and that path are module-level state, shared even across desktop maps created in the same process.
+Files opens a row on a single click and ignores the second press of a double-click (`_click_in` puts `d.clicks` in its state), so double-clicking a folder enters it once. Files remembers the last row content and available row count when drawn. Once it has been drawn, a row click after a directory change or resize is ignored until the next draw supplies the current layout; keyboard navigation refreshes the directory independently. Opening a file in Files sets the path used by the next Editor window. The filesystem and that path are module-level state, shared even across desktop maps created in the same process.
 
 ## Tests
 

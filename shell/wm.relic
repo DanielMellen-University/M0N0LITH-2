@@ -57,7 +57,7 @@ fun _existing_dir(fs, p)
     return x
 
 fun new_desktop(width, height, apps)
-    return {width: width, height: height, apps: apps, windows: [], menu_open: false, overflow_open: false, next_id: 1, drag: none}
+    return {width: width, height: height, apps: apps, windows: [], menu_open: false, overflow_open: false, next_id: 1, drag: none, clicks: 1}
 
 fun bar_top(d) = d.height - bar_height
 
@@ -411,6 +411,7 @@ fun _click_in(d, w, x, y)
             return "app"
         w.state.first = _first_row(w, lines)
         w.state.rows = rows_fit(w)
+        w.state.clicks = d.clicks
     w.app.on_click(w.state, x - w.x, y - w.y - title_height)
     return "app"
 
@@ -489,7 +490,13 @@ fun handle(d, e)
         if k != none
             key(d, k)
     else if e.type == "mouse_down" and e.button == 1
-        return click(d, e.x, e.y)
+        # clicks is 2 for the second press of a double-click (3 for a triple)
+        d.clicks = 1
+        if "clicks" in e
+            d.clicks = e.clicks
+        let r = click(d, e.x, e.y)
+        d.clicks = 1
+        return r
     else if e.type == "mouse_move"
         motion(d, e.x, e.y)
     else if e.type == "mouse_up" and e.button == 1
@@ -1103,7 +1110,12 @@ fun _files_open(s, name)
         _shell_open.path = full
 
 # Line r covers y from text_top + line_height * r. Line 0 is the title.
+# A row opens on a single click. The second press of a double-click is
+# ignored, so double-clicking a folder enters it once instead of also opening
+# the row that lands under the pointer inside.
 fun _files_click(s, x, y)
+    if "clicks" in s and s.clicks >= 2
+        return
     if y < text_top
         return
     let row = int((y - text_top) / line_height)

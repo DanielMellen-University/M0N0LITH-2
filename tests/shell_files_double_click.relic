@@ -1,0 +1,40 @@
+# Files opens a row on a single click; the second press of a double-click is
+# ignored, so double-clicking a folder enters it and stops there.
+use ../shell/wm
+use std/vfs
+let d = wm.new_desktop(640, 480, wm.default_apps())
+let f = wm.launch(d, wm.files_app)
+let fs = f.state.fs
+vfs.make_dir(fs, "/home/proj")
+vfs.make_dir(fs, "/home/proj/deep")
+vfs.write(fs, "/home/proj/deep/x.txt", "x")
+fun row_y(r) = f.y + wm.title_height + wm.text_top + r * wm.line_height + 2
+fun press(r, n)
+    let e = {type: "mouse_down", button: 1, x: f.x + 10, y: row_y(r), clicks: n}
+    let res = wm.handle(d, e)
+    wm.handle(d, {type: "mouse_up", button: 1, x: e.x, y: e.y, clicks: n})
+    wm.visible_lines(f)   # a frame is drawn between the presses
+    return res
+wm.visible_lines(f)
+print(wm.visible_lines(f))
+# row 2 is proj/ in /home; inside proj row 2 is deep/
+print("first press", press(2, 1), f.state.path)
+print("second press", press(2, 2), f.state.path)
+print("third press", press(2, 3), f.state.path)
+print("a new single click", press(2, 1), f.state.path)
+# a press without a clicks field counts as a single click, as does click()
+f.state.path = "/home"
+wm.visible_lines(f)
+print("no clicks field", wm.handle(d, {type: "mouse_down", button: 1, x: f.x + 10, y: row_y(2)}), f.state.path)
+f.state.path = "/home"
+wm.visible_lines(f)
+print("click()", wm.click(d, f.x + 10, row_y(2)), f.state.path, d.clicks)
+# double-clicking a title bar still starts a drag, and other apps still get the press
+wm.release(d)
+print("title double press", wm.handle(d, {type: "mouse_down", button: 1, x: f.x + 10, y: f.y + 2, clicks: 2}))
+wm.release(d)
+let c = wm.launch(d, wm.clicker)
+let before = wm.visible_lines(c)
+wm.handle(d, {type: "mouse_down", button: 1, x: c.x + 10, y: c.y + wm.title_height + 10, clicks: 1})
+wm.handle(d, {type: "mouse_down", button: 1, x: c.x + 10, y: c.y + wm.title_height + 10, clicks: 2})
+print("clicker", before, wm.visible_lines(c))
