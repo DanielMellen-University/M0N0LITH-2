@@ -1,0 +1,12 @@
+["hello world\nsecond line"] 0
+["linehello world\nsecond line"] 1
+["world"] 5
+["hello "]
+["world"]
+["hello world"]
+["ahello world"]
+hello world
+true
+got hello world
+[""]
+["use std/os\nprint(\"got \" + os.read_line())\n"]

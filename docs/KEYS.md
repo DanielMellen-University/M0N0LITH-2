@@ -29,6 +29,7 @@ Every key and click the desktop and its apps act on, checked against `shell/wm.r
 |---|---|
 | Typing | adds to the one line of text |
 | Backspace | removes the last character |
+| Ctrl+V | adds the first line of the clipboard |
 
 ## Terminal
 
@@ -37,6 +38,7 @@ Every key and click the desktop and its apps act on, checked against `shell/wm.r
 | Typing | adds to the command line |
 | Backspace | removes the last character |
 | Return | runs the command |
+| Ctrl+V | adds the first line of the clipboard |
 | Up, Down | the command before, or after, from the last 50 run; Down past the newest gives back the line being typed |
 
 The commands are in [the Terminal doc](apps/TERMINAL.md).
@@ -64,7 +66,9 @@ The commands are in [the Terminal doc](apps/TERMINAL.md).
 | Ctrl+Left, Ctrl+Right | the start of the word before, or the end of the word after |
 | Shift with an arrow, Home or End | selects from the cursor |
 | Ctrl+A | selects everything |
-| Ctrl+Z | undoes the last edit, up to 500 |
+| Ctrl+C, Ctrl+X | copies, or cuts, the selection to the desktop's clipboard (shared by all windows, not the system's) |
+| Ctrl+V | pastes it, over any selection |
+| Ctrl+Z | undoes the last edit (a cut or a paste is one), up to 500 |
 | Ctrl+S | saves. If another app changed the file since it was opened or saved, the first Ctrl+S warns and writes nothing, and a second one right after overwrites |
 
 ## IDE
@@ -81,6 +85,7 @@ While a run waits for input:
 | Input | What it does |
 |---|---|
 | Typing, Space, Backspace | edit the input line |
+| Ctrl+V | adds the first line of the clipboard |
 | Return | sends the line, and the run goes on |
 | Escape | stops the run |
 | Ctrl+S | saves the program; the run keeps waiting |

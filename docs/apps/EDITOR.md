@@ -24,6 +24,8 @@ The status is one of:
 | Ctrl+Left, Ctrl+Right | the start of the word before the cursor, or the end of the word after it. Letters, digits, `_` and anything past ASCII count as word characters |
 | Shift with an arrow, Home or End | selects from the cursor |
 | Ctrl+A | selects everything |
+| Ctrl+C, Ctrl+X | copies, or cuts, the selection to the desktop's clipboard (nothing without a selection) |
+| Ctrl+V | pastes the clipboard at the cursor, over any selection; a cut and a paste are one undo step each |
 | Ctrl+Z | undoes the last edit |
 | Ctrl+S | saves |
 
@@ -48,3 +50,5 @@ Only the lines that fit the window are built each frame, so a file of thousands 
 ## In the code
 
 `editor` in `shell/wm.relic`, `_editor_*`. The IDE reuses all of it. Tests: the `shell_editor_*` goldens, `shell_small_apps`, `shell_big_file` and `shell_last_lines*` (see [the test list](../TESTING.md)).
+
+The clipboard is the desktop's own, one for all its windows, not the system's: what the Editor or the IDE copies, Notes, the Terminal and an IDE run waiting for input can paste (its first line).

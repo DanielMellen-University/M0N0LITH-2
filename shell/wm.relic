@@ -672,6 +672,18 @@ fun _clicker_key(s, k)
 # What typing key k does to text: backspace drops the last character, space and
 # any single character except a newline are added. Return is handled separately
 # by the Editor; Notes and Terminal keep their input on one line.
+# The desktop's clipboard, one for all windows: Ctrl+C and Ctrl+X in the
+# Editor and the IDE put the selection in it, and Ctrl+V pastes it there, or
+# its first line in Notes, the Terminal and the IDE's input line. It is not
+# the system's clipboard.
+let _clip = {text: ""}
+
+fun _clip_line()
+    let i = strings.find(_clip.text, "\n")
+    if i < 0
+        return _clip.text
+    return slice(_clip.text, 0, i)
+
 fun _typed(text, k)
     if k == "backspace"
         return slice(text, 0, math.max(0, len(text) - 1))
@@ -686,7 +698,10 @@ fun _notes_lines(s) = ["Type something:", s.text + "_"]
 fun _notes_click(s, x, y)
     return none
 fun _notes_key(s, k)
-    s.text = _typed(s.text, k)
+    if k == "ctrl+v"
+        s.text = s.text + _clip_line()
+    else
+        s.text = _typed(s.text, k)
 
 # Seconds since 1970 as "2026-10-27 05:12:16 UTC" (days to a date by Howard Hinnant's civil_from_days).
 fun format_time(secs)
@@ -1119,6 +1134,8 @@ fun _term_key(s, k)
                 s.input = s.draft
             else
                 s.input = s.past[len(s.past) - s.back]
+    else if k == "ctrl+v"
+        s.input = s.input + _clip_line()
     else
         s.input = _typed(s.input, k)
 
@@ -1653,6 +1670,17 @@ fun _editor_key(s, k)
         s.overwrite = false
         s.mark = len(s.text)
         s.back = 0
+    else if k == "ctrl+c" or k == "ctrl+x"
+        s.overwrite = false
+        let sel = _editor_selection(s)
+        if sel != none
+            _clip.text = slice(s.text, sel[0], sel[1])
+            if k == "ctrl+x"
+                _editor_change(s, sel[0], sel[1] - sel[0], "")
+    else if k == "ctrl+v"
+        s.overwrite = false
+        if _clip.text != ""
+            _editor_type(s, _clip.text)
     else if k in ["shift+left", "shift+right", "shift+up", "shift+down", "shift+home", "shift+end"]
         s.overwrite = false
         _editor_select(s, slice(k, 6, len(k)))
@@ -1772,6 +1800,8 @@ fun _ide_input_key(s, k)
             s.input = slice(s.input, 0, len(s.input) - 1)
     else if k == "space"
         s.input = s.input + " "
+    else if k == "ctrl+v"
+        s.input = s.input + _clip_line()
     else if len(k) == 1
         s.input = s.input + k
 

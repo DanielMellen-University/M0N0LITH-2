@@ -23,6 +23,7 @@ Ctrl+R runs the text in the buffer, saved or not. The program runs in Relic's se
 | Input | What it does |
 |---|---|
 | Typing, Space, Backspace | edit the input line |
+| Ctrl+V | adds the first line of the desktop's clipboard to it |
 | Return | sends the line, and the run goes on |
 | Escape | stops the run; the pane shows `stopped` |
 | Ctrl+R | starts the run again from the top |

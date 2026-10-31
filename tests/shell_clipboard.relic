@@ -1,0 +1,55 @@
+# The desktop's clipboard: Ctrl+C and Ctrl+X in the Editor and the IDE take
+# the selection, Ctrl+V pastes it over any selection (one undo step each), and
+# Notes, the Terminal and an IDE run waiting for input paste its first line.
+use ../shell/wm
+use std/vfs
+let d = wm.new_desktop(640, 480, wm.default_apps())
+let e = wm.launch(d, wm.editor)
+let s = e.state
+s.text = "hello world\nsecond line"
+s.back = 0
+fun keys(w, ks)
+    for k in ks
+        w.app.on_key(w.state, k)
+# nothing selected: copy and cut do nothing, and an empty clipboard pastes nothing
+keys(e, ["ctrl+c", "ctrl+x", "ctrl+v"])
+print([s.text], len(s.undo))
+# select "line" (the last four characters) and copy it, then paste at the start
+keys(e, ["shift+left", "shift+left", "shift+left", "shift+left", "ctrl+c", "ctrl+a", "left", "ctrl+v"])
+print([s.text], len(s.undo))
+# cut "hello " (selected by hand: the cursor and mark count from the end), then
+# paste it over "world": one undo step for each
+s.text = "hello world"
+s.undo = []
+s.back = 11
+s.mark = 5
+keys(e, ["ctrl+x"])
+print([s.text], s.back)
+s.mark = 0
+keys(e, ["ctrl+v"])
+print([s.text])
+keys(e, ["ctrl+z"])
+print([s.text])
+keys(e, ["ctrl+z"])
+print([s.text])
+s.text = "hello world\nsecond line"
+s.back = 0
+# copying all of it takes both lines; Notes and the Terminal take the first
+keys(e, ["ctrl+a", "ctrl+c"])
+let n = wm.launch(d, wm.notes)
+keys(n, ["a", "ctrl+v"])
+print([n.state.text])
+let t = wm.launch(d, wm.terminal)
+keys(t, ["e", "c", "h", "o", "space", "ctrl+v", "return"])
+print(t.state.buf[len(t.state.buf) - 1])
+# the IDE shares it: paste into the buffer, and into a run waiting for input
+let i = wm.launch(d, wm.ide)
+i.state.text = "use std/os\nprint(\"got \" + os.read_line())\n"
+keys(i, ["ctrl+r"])
+print(i.state.run != none)
+keys(i, ["ctrl+v", "return"])
+print(wm.visible_lines(i)[len(wm.visible_lines(i)) - 1])
+keys(i, ["ctrl+a", "ctrl+x"])
+print([i.state.text])
+keys(e, ["ctrl+a", "ctrl+v"])
+print([s.text])
