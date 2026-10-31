@@ -2,7 +2,7 @@
 
 Two files in `shell/`:
 
-- `wm.relic` is the model: windows, the taskbar, the Start menu and the seven apps (Clicker, Notes, Terminal, Files, Editor, IDE and Paint, in Start menu order). It draws nothing, so the tests run it without SDL.
+- `wm.relic` is the model: windows, the taskbar, the Start menu and the eight apps (Clicker, Notes, Terminal, Files, Editor, IDE, Paint and Snake, in Start menu order). It draws nothing, so the tests run it without SDL.
 - `desktop.relic` draws the model with `std/graphics` and runs the event loop. It is the only file that needs SDL.
 
 ## The model
@@ -14,7 +14,8 @@ Input goes in through four calls, or through `handle(d, e)`, which takes one `gr
 | Call | What it does |
 |---|---|
 | `click(d, x, y)` | a press: Start, a tab, a window's x or _ box, its title (starts a move), its corner (starts a resize), or the app inside. Gives a word for what it hit: `launch`, `start`, `overflow`, `tab`, `minimize`, `bar`, `close`, `title`, `resize`, `app`, `desktop` |
-| `motion(d, x, y)` | moves or resizes the window being dragged, if any |
+| `motion(d, x, y)` | moves or resizes the window being dragged, if any, or passes the pointer to an app with `on_drag` after a press in it (Paint) |
+| `tick(d, ms)` | the clock for the focused window's app, if it has `on_tick` (Snake) |
 | `release(d)` | ends a drag |
 | `dismiss(d)` | Escape: closes the Start menu and the hidden-windows list, or else passes Escape to the focused window's `on_escape` if its app has one (the IDE stops a run waiting for input). True if something took it; desktop.relic quits on an Escape that nothing took, unless the key is held down and repeating |
 | `key(d, name)` | a key for the window on top. Typed text comes one character at a time, with `space` for the space bar. Named keys are `return` (the keypad's Enter too), `backspace`, `tab`, `delete`, `up`, `down`, `left`, `right`, `home` and `end`. Ctrl with any key is `ctrl+` and the key's name (`ctrl+s` save, `ctrl+z` undo, `ctrl+a` select all, `ctrl+left` and `ctrl+right` word jumps, `ctrl+r` and `ctrl+e` in the IDE). Shift with an arrow, Home or End is `shift+left` and so on. `key_of_event` gives Cmd (the `gui` field, the Windows or Super key elsewhere) with a letter as `ctrl+` and the letter, so Cmd+S saves on macOS, and Ctrl+Alt (AltGr) typing stays text |
@@ -42,7 +43,8 @@ An app is a map: `name`, `width`, `height`, `init()`, `lines(state)`, `on_click(
 - `selected(state)` for a list (Files): the title line stays and the list scrolls just far enough to show the selected line. `visible_lines` puts the window's `cols` in its state too, and Files shortens a long folder path in its title to fit.
 - `on_escape(state)` for an app that takes Escape (the IDE): `dismiss(d)` calls it for the focused window once no menu or list was open to close, and it gives true when it used the key. The IDE uses it to stop a run that waits for input; any other time it gives false and Escape quits as before.
 - `on_drag(state, x, y)` for an app you draw in (Paint): after a press inside the window's content, `motion(d, x, y)` passes the pointer to it, in content coordinates, until `release(d)`.
-- `paint(state)` for an app that draws more than text (Paint): `[x, y, w, h, r, g, b]` boxes in content coordinates. `paint_boxes(w)` cuts them to the window's content and moves them to desktop coordinates, and `desktop.relic` draws them under the text.
+- `on_tick(state, ms)` for an app that moves on its own (Snake): `tick(d, ms)` passes the clock in milliseconds to the focused window's app; `desktop.relic` calls it every frame with `graphics.ticks()`, and tests pass their own times.
+- `paint(state)` for an app that draws more than text (Paint, Snake): `[x, y, w, h, r, g, b]` boxes in content coordinates. `paint_boxes(w)` cuts them to the window's content and moves them to desktop coordinates, and `desktop.relic` draws them under the text.
 
 Terminal, Files and Editor work on one in-memory filesystem (`std/vfs`), so a change in one shows in the others. An app has to cope with that: a folder or file can be gone between two frames. Editor keeps the text it last read or saved (`disk`) and warns before a Ctrl+S would overwrite a change another app made (a second Ctrl+S in a row writes).
 

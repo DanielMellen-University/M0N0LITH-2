@@ -94,3 +94,11 @@ While a run waits for input:
 | c | clears the canvas |
 | Ctrl+Z | undoes the last stroke or clear, up to 20 |
 | Ctrl+S | saves the picture |
+
+## Snake
+
+| Input | What it does |
+|---|---|
+| Arrows or W, A, S, D | start the game and turn the snake (not straight back) |
+| Space | pauses and goes on; also starts a game |
+| R | plays again after a game ends |

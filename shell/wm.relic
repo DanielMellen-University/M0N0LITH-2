@@ -11,7 +11,8 @@
 #   marks(state)            highlighted [line, from, to] parts (the Editor and IDE selection)
 #   on_escape(state)        takes Escape when no menu is open; true if it used it (the IDE)
 #   on_drag(state, x, y)    the pointer moved with the button held after a press inside (Paint)
-#   paint(state)            colored [x, y, w, h, r, g, b] boxes under the text, in window content coordinates (Paint)
+#   paint(state)            colored [x, y, w, h, r, g, b] boxes under the text, in window content coordinates (Paint, Snake)
+#   on_tick(state, ms)      the clock, in milliseconds, each frame while the window is focused (Snake)
 # visible_lines puts the window's rows and cols in the state of a tail app,
 # and cols in the state of a selected app, before it calls lines().
 # Input comes in as key(d, name) and click(d, x, y), or as a graphics event
@@ -446,6 +447,14 @@ fun motion(d, x, y)
             d.drag = none
         else
             w.app.on_drag(w.state, x - w.x, y - w.y - title_height)
+
+# The clock for the focused window's app, if it has on_tick (Snake moves on
+# it). desktop.relic calls this every frame with graphics.ticks(); tests pass
+# their own times.
+fun tick(d, ms)
+    let w = focused(d)
+    if w != none and "on_tick" in w.app
+        w.app.on_tick(w.state, ms)
 
 # Mouse button up ends any drag or resize.
 fun release(d)
@@ -1995,6 +2004,142 @@ fun _paint_paint(s)
             x = e
     return out
 
+# ---- Snake ----
+# The snake moves one cell at a time on a _snake_w by _snake_h board, on the
+# clock from wm.tick, and only while its window is focused. Arrows or W A S D
+# turn it (not straight back), Space pauses and goes on, R starts again after
+# a game ends. Eating the red food makes it one longer and a little faster;
+# running into a wall or itself ends the game. The best score lasts as long
+# as the desktop.
+let _snake_w = 24
+let _snake_h = 16
+let _snake_cell = 8
+let _snake_left = 6
+let _snake_top = 36
+let _snake_best = {score: 0}
+let _snake_dirs = {up: [0, -1], down: [0, 1], left: [-1, 0], right: [1, 0], w: [0, -1], s: [0, 1], a: [-1, 0], d: [1, 0]}
+
+fun _snake_init()
+    let s = {now: 0, seed: 1}
+    _snake_reset(s)
+    return s
+
+fun _snake_reset(s)
+    # body runs from the tail to the head, which is last
+    s.body = [[3, 8], [4, 8], [5, 8]]
+    s.dir = [1, 0]
+    s.turns = []     # turns pressed since the last step, at most 2 kept
+    s.score = 0
+    s.state = "ready"
+    s.next_at = none
+    s.seed = (s.seed * 7 + s.now) % 2147483647 + 1
+    _snake_place_food(s)
+
+# A little LCG so a game can be played again the same way in a test.
+fun _snake_rand(s, n)
+    s.seed = (s.seed * 48271) % 2147483647
+    return s.seed % n
+
+fun _snake_on(s, c)
+    for b in s.body
+        if b[0] == c[0] and b[1] == c[1]
+            return true
+    return false
+
+# Food goes on a free cell, picked among the free ones, so it never lands on the snake.
+fun _snake_place_food(s)
+    let free = []
+    for y in 0.._snake_h
+        for x in 0.._snake_w
+            if not _snake_on(s, [x, y])
+                append(free, [x, y])
+    if len(free) == 0
+        s.food = none
+        return
+    s.food = free[_snake_rand(s, len(free))]
+
+fun _snake_interval(s) = math.max(70, 150 - 5 * s.score)
+
+fun _snake_step(s)
+    if len(s.turns) > 0
+        s.dir = remove(s.turns, 0)
+    let h = s.body[len(s.body) - 1]
+    let n = [h[0] + s.dir[0], h[1] + s.dir[1]]
+    let eats = s.food != none and n[0] == s.food[0] and n[1] == s.food[1]
+    let tail = none
+    if not eats
+        tail = remove(s.body, 0)   # the tail moves on first, so the head may take its cell
+    if n[0] < 0 or n[1] < 0 or n[0] >= _snake_w or n[1] >= _snake_h or _snake_on(s, n)
+        if tail != none
+            insert(s.body, 0, tail)   # the game ends with the snake where it was
+        s.state = "over"
+        return
+    append(s.body, n)
+    if eats
+        s.score = s.score + 1
+        if s.score > _snake_best.score
+            _snake_best.score = s.score
+        _snake_place_food(s)
+        if s.food == none
+            s.state = "won"
+
+fun _snake_tick(s, ms)
+    s.now = ms
+    if s.state != "playing"
+        s.next_at = none
+        return
+    let iv = _snake_interval(s)
+    # after a pause, a lost focus or a slow frame, start the beat again instead of catching up
+    if s.next_at == none or ms - s.next_at > 3 * iv
+        s.next_at = ms + iv
+        return
+    while ms >= s.next_at and s.state == "playing"
+        _snake_step(s)
+        s.next_at = s.next_at + _snake_interval(s)
+
+fun _snake_key(s, k)
+    if k in _snake_dirs
+        if s.state == "over" or s.state == "won"
+            return
+        let d = _snake_dirs[k]
+        let last = s.dir
+        if len(s.turns) > 0
+            last = s.turns[len(s.turns) - 1]
+        # no turning straight back, and no repeat of the same way
+        if d[0] != -last[0] or d[1] != -last[1]
+            if (d[0] != last[0] or d[1] != last[1]) and len(s.turns) < 2
+                append(s.turns, d)
+        if s.state == "ready"
+            s.state = "playing"
+    else if k == "space"
+        if s.state == "playing"
+            s.state = "paused"
+        else if s.state == "paused" or s.state == "ready"
+            s.state = "playing"
+    else if k == "r"
+        if s.state == "over" or s.state == "won"
+            _snake_reset(s)
+
+fun _snake_click(s, x, y) = none
+
+fun _snake_lines(s)
+    let help = {ready: "arrows or space to start", playing: "space to pause", paused: "paused: space to go on", over: "game over: r to play", won: "you won! r to play again"}
+    return ["Snake  score {s.score}  best {_snake_best.score}", help[s.state]]
+
+fun _snake_paint(s)
+    let c = _snake_cell
+    let out = [[_snake_left - 1, _snake_top - 1, _snake_w * c + 2, _snake_h * c + 2, 90, 90, 100], [_snake_left, _snake_top, _snake_w * c, _snake_h * c, 30, 70, 40]]
+    if s.food != none
+        append(out, [_snake_left + s.food[0] * c + 1, _snake_top + s.food[1] * c + 1, c - 2, c - 2, 220, 50, 50])
+    let n = len(s.body)
+    for i in 0..n
+        let b = s.body[i]
+        if i == n - 1
+            append(out, [_snake_left + b[0] * c, _snake_top + b[1] * c, c, c, 250, 230, 90])
+        else
+            append(out, [_snake_left + b[0] * c + 1, _snake_top + b[1] * c + 1, c - 2, c - 2, 120, 210, 110])
+    return out
+
 let clicker = {name: "Clicker", width: 180, height: 60, init: _clicker_init, lines: _clicker_lines, on_click: _clicker_click, on_key: _clicker_key}
 let notes = {name: "Notes", width: 220, height: 60, init: _notes_init, lines: _notes_lines, on_click: _notes_click, on_key: _notes_key, tail: true, pinned: 1}
 let terminal = {name: "Terminal", width: 280, height: 120, init: _term_init, lines: _term_lines, on_click: _term_click, on_key: _term_key, tail: true, pinned: 0}
@@ -2002,4 +2147,5 @@ let files_app = {name: "Files", width: 260, height: 140, init: _files_init, line
 let editor = {name: "Editor", width: 320, height: 80, init: _editor_init, lines: _editor_lines, on_click: _editor_click, on_key: _editor_key, tail: true, pinned: 1, marks: _editor_marks}
 let ide = {name: "IDE", width: 320, height: 200, init: _ide_init, lines: _ide_lines, on_click: _editor_click, on_key: _ide_key, on_escape: _ide_escape, tail: true, pinned: 1, marks: _editor_marks}
 let paint_app = {name: "Paint", width: 256, height: 190, init: _paint_init, lines: _paint_lines, on_click: _paint_click, on_key: _paint_key, on_drag: _paint_drag, paint: _paint_paint}
-fun default_apps() = [clicker, notes, terminal, files_app, editor, ide, paint_app]
+let snake = {name: "Snake", width: 210, height: 170, init: _snake_init, lines: _snake_lines, on_click: _snake_click, on_key: _snake_key, on_tick: _snake_tick, paint: _snake_paint}
+fun default_apps() = [clicker, notes, terminal, files_app, editor, ide, paint_app, snake]

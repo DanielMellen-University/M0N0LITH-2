@@ -1,0 +1,18 @@
+start ready 0 [[3, 8], [4, 8], [5, 8]] [2, 9] ["Snake  score 0  best 0", "arrows or space to start"]
+ready does not move [[3, 8], [4, 8], [5, 8]]
+first beat playing 0 [[3, 8], [4, 8], [5, 8]] [2, 9] ["Snake  score 0  best 0", "space to pause"]
+three more playing 0 [[6, 8], [7, 8], [8, 8]] [2, 9] ["Snake  score 0  best 0", "space to pause"]
+no reverse [1, 0] [9, 8]
+up [0, -1] [9, 7]
+left [-1, 0] [8, 7]
+paused paused true paused: space to go on
+on again [7, 7]
+unfocused true
+ate four playing 4 [[7, 12], [7, 11], [7, 10], [7, 9], [7, 8], [7, 7], [7, 6]] [5, 3] ["Snake  score 4  best 4", "space to pause"]
+speed 130 7
+wall over 4 [[7, 6], [7, 5], [7, 4], [7, 3], [7, 2], [7, 1], [7, 0]] [5, 3] ["Snake  score 4  best 4", "game over: r to play"]
+over stays true
+keys ignored over
+again ready 0 [[3, 8], [4, 8], [5, 8]] [20, 7] ["Snake  score 0  best 4", "arrows or space to start"]
+itself over 0 [[5, 5], [6, 5], [7, 5], [8, 5], [8, 6], [7, 6]] [20, 7] ["Snake  score 0  best 4", "game over: r to play"]
+9

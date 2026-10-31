@@ -7,7 +7,8 @@
 # restore. With more windows than tabs fit, a +N button at the end of the bar
 # opens a list of the windows without a tab. Ctrl+S (Cmd+S on macOS) saves in
 # the Editor, the IDE and Paint; Ctrl+R runs the IDE's program. In Paint, press
-# and drag on the canvas to draw.
+# and drag on the canvas to draw. Snake moves on the clock while its window
+# is focused.
 # Escape closes the Start menu or that list, else stops an IDE run that waits
 # for input, or quits when none of those took it.
 # Input comes as graphics events and wm.handle turns them into app input, so
@@ -106,6 +107,7 @@ else
             else
                 wm.handle(d, e)
             e = graphics.next_event()
+        wm.tick(d, graphics.ticks())   # Snake moves on the clock
         draw(d)
         graphics.wait(16)
     graphics.close()

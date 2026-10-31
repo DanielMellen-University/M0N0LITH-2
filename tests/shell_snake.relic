@@ -1,0 +1,112 @@
+# Snake: it moves on the clock only while playing and focused, turns but not
+# straight back, eats and grows, speeds up, ends at a wall or itself, pauses,
+# and starts again. The food comes from a seeded generator, so this replays.
+use ../shell/wm
+let d = wm.new_desktop(640, 480, wm.default_apps())
+let w = wm.launch(d, wm.snake)
+let s = w.state
+let now = 1000
+fun show(label)
+    print(label, s.state, s.score, s.body, s.food, wm.visible_lines(w))
+# ms of clock, ticking every 10 ms as frames would
+fun run(ms)
+    let stop = now + ms
+    while now < stop
+        now = now + 10
+        wm.tick(d, now)
+wm.tick(d, now)
+show("start")
+run(1000)
+print("ready does not move", s.body)
+wm.key(d, "right")
+run(150)
+show("first beat")
+run(450)
+show("three more")
+# straight back is ignored; up then left in one beat both count, one per step
+wm.key(d, "left")
+run(150)
+print("no reverse", s.dir, s.body[len(s.body) - 1])
+wm.key(d, "up")
+wm.key(d, "left")
+run(150)
+print("up", s.dir, s.body[len(s.body) - 1])
+run(150)
+print("left", s.dir, s.body[len(s.body) - 1])
+# pause: nothing moves, and going on does not catch up
+wm.key(d, "space")
+let held = s.body[len(s.body) - 1]
+run(2000)
+print("paused", s.state, s.body[len(s.body) - 1] == held, wm.visible_lines(w)[1])
+wm.key(d, "space")
+run(150)
+run(150)
+print("on again", s.body[len(s.body) - 1])
+# another window on top: Snake does not move
+let n = wm.launch(d, wm.notes)
+let h2 = s.body[len(s.body) - 1]
+run(1000)
+print("unfocused", s.body[len(s.body) - 1] == h2)
+wm.close(d, n.id)
+# eat: steer the head to the food, never into a wall or itself, one turn a step
+fun free(c)
+    if c[0] < 0 or c[1] < 0 or c[0] >= 24 or c[1] >= 16
+        return false
+    for p in s.body
+        if p[0] == c[0] and p[1] == c[1]
+            return false
+    return true
+fun steer()
+    let h = s.body[len(s.body) - 1]
+    let f = s.food
+    let want = []
+    if f[0] > h[0]
+        append(want, ["right", 1, 0])
+    if f[0] < h[0]
+        append(want, ["left", -1, 0])
+    if f[1] > h[1]
+        append(want, ["down", 0, 1])
+    if f[1] < h[1]
+        append(want, ["up", 0, -1])
+    for o in [["up", 0, -1], ["down", 0, 1], ["left", -1, 0], ["right", 1, 0]]
+        append(want, o)
+    for o in want
+        let back = o[1] == -s.dir[0] and o[2] == -s.dir[1]
+        if not back and free([h[0] + o[1], h[1] + o[2]])
+            wm.key(d, o[0])
+            return
+let steps = 0
+while s.score < 4 and s.state == "playing" and steps < 400
+    steer()
+    let head = s.body[len(s.body) - 1]
+    let len_before = len(s.body)
+    while s.body[len(s.body) - 1] == head and s.state == "playing"
+        now = now + 10
+        wm.tick(d, now)
+    steps = steps + 1
+show("ate four")
+print("speed", 150 - 5 * s.score, len(s.body))
+# into the wall: head straight up until it ends
+wm.key(d, "up")
+let guard = 0
+while s.state == "playing" and guard < 40
+    run(130)
+    guard = guard + 1
+show("wall")
+let body_over = s.body
+run(1000)
+print("over stays", s.body == body_over)
+wm.key(d, "down")
+print("keys ignored", s.state)
+wm.key(d, "r")
+show("again")
+# into itself: a long snake turning back on itself
+wm.key(d, "right")
+run(150)
+s.body = [[5, 5], [6, 5], [7, 5], [8, 5], [8, 6], [7, 6]]
+s.dir = [-1, 0]
+s.turns = []
+wm.key(d, "up")
+run(150)
+show("itself")
+print(len(wm.paint_boxes(w)))
