@@ -14,9 +14,9 @@ M0N0LITH-2 is the MONOLITH 2 desktop written in Relic. The language roadmap is i
 
 ## Phase 3: Apps as proof
 
-- [ ] Terminal (started: help, clear, echo, apps, date, pwd, cd, ls, cat, mkdir, touch, write, rm, mv, and `echo text > file` or `>>`; it keeps the last 200 lines of output)
-- [ ] Text editor (started: edits and saves VFS files with ctrl+s, which the desktop now delivers, and warns first when another app changed the file; ctrl+z undo; Delete; arrows, home/end and ctrl+arrow word jumps move the cursor; shift+arrows and ctrl+a select; a file opened in Files opens in the next Editor; a big file stays quick)
-- [ ] File browser (started: browses the VFS with keys or clicks; a long list follows the selected row, and opening a file selects it for the next Editor)
+- [ ] Terminal (started: help, clear, echo, apps, date, pwd, cd, ls, cat, mkdir, touch, write, rm, mv, and `echo text > file` or `>>`; it keeps the last 200 lines of output and wraps to the window. Not yet: scrollback, quoted paths. See [Terminal](apps/TERMINAL.md))
+- [ ] Text editor (started: edits and saves VFS files with Ctrl+S, or Cmd+S on macOS, and warns first when another app changed the file; Ctrl+Z undo up to 500 steps; Delete; arrows, Home/End and Ctrl+arrow word jumps move the cursor; Shift+arrows and Ctrl+A select; a file opened in Files opens in the next Editor; a big file stays quick. Not yet: opening a file by path, moving the cursor with a click, copy and paste. See [Editor](apps/EDITOR.md))
+- [ ] File browser (started: browses the VFS with keys or clicks, folders marked with `/`; a double-click enters a folder once; Backspace goes up with the old folder selected; a long list follows the selected row, and opening a file selects it for the next Editor. See [Files](apps/FILES.md))
 - [ ] Drawing app
 - [ ] At least one game
 - [ ] Relic IDE (started Oct 30 2026, Daniel approved with "your design calls": the Editor on a .relic file, Ctrl+R runs the text, saved or not, with an output pane under it, an error shows as `line L: message` and Ctrl+E puts the cursor on that line). Design calls:
