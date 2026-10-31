@@ -158,7 +158,7 @@ Write `tests/shell_<topic>.relic`, run it, read its output, and save that as `te
 
 | Test | What it covers |
 |---|---|
-| `shell_paint` | Paint: a drag with no gaps, the fill tool (side by side only, no-op fills, undo), the line and rectangle tools (the shape follows the drag, its end stays on the canvas, one undo step, brush size), save as (a typed name, `.paint` added, whole paths, Esc, no name, a folder, a file that is not a picture, a folder that is not there), swatches and keys, brush sizes, the eraser, undo and clear, a stroke off the canvas and back, boxes cut to the window, save and open again from Files, a file that is not a picture, another size, a failed save |
+| `shell_paint` | Paint: a drag with no gaps, the fill tool (side by side only, no-op fills, undo), the line, rectangle and ellipse tools, outline and filled (the shape follows the drag, its end stays on the canvas, one undo step, brush size), save as (a typed name, `.paint` added, whole paths, Esc, no name, a folder, a file that is not a picture, a folder that is not there), swatches and keys, brush sizes, the eraser, undo and clear, a stroke off the canvas and back, boxes cut to the window, save and open again from Files, a file that is not a picture, another size, a failed save |
 
 ### Snake
 

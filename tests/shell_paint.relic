@@ -1,6 +1,6 @@
 # Paint: swatches, brush and eraser, brush size, a drag that leaves no gaps,
-# clear and undo, save to the desktop's files and open again, fill, line and
-# rectangle tools, save as a typed name.
+# clear and undo, save to the desktop's files and open again, fill, line,
+# rectangle and ellipse tools (outline and filled), save as a typed name.
 use ../shell/wm
 use std/vfs
 use std/strings
@@ -269,3 +269,49 @@ print(save_as("pics"), save_as("old.d"), save_as("/home/pics/one"), save_as("/ho
 print(save_as(""), save_as("   "), save_as("/home/pics/"))
 # saving as over another picture writes it; the old file stays as it was
 print(save_as("my cat.paint"), vfs.exists(ss.fs, "/home/pics/one.paint"))
+# R: a filled rectangle; o and O: an ellipse in the box from one corner to
+# the other, as an outline in the brush size or filled
+let wo = wm.launch(d, wm.paint_app)
+let so = wo.state
+fun ocount(k)
+    let n = 0
+    for c in so.cells
+        if c == k
+            n = n + 1
+    return n
+fun orows(y0, y1, x0, x1)
+    for y in y0..y1
+        let out = ""
+        for x in x0..x1
+            out = out + str(so.cells[y * 60 + x])
+        print(out)
+wo.app.on_key(so, "c")
+wo.app.on_key(so, "R")
+wo.app.on_key(so, "5")
+print(wo.app.lines(so))
+wo.app.on_click(so, cell(4, 4)[0], cell(4, 4)[1])
+wo.app.on_drag(so, cell(1, 2)[0], cell(1, 2)[1])
+print(ocount(5))
+orows(1, 6, 0, 6)
+wo.app.on_key(so, "c")
+wo.app.on_key(so, "o")
+print(wo.app.lines(so))
+wo.app.on_click(so, cell(2, 2)[0], cell(2, 2)[1])
+wo.app.on_drag(so, cell(12, 8)[0], cell(12, 8)[1])
+orows(1, 10, 1, 14)
+wo.app.on_key(so, "O")
+wo.app.on_key(so, "2")
+print(wo.app.lines(so))
+wo.app.on_click(so, cell(20, 2)[0], cell(20, 2)[1])
+wo.app.on_drag(so, cell(28, 9)[0], cell(28, 9)[1])
+orows(1, 11, 19, 30)
+# one cell, a thin one, and a drag back over the first corner; undo takes the ellipse in one step
+wo.app.on_click(so, cell(40, 20)[0], cell(40, 20)[1])
+print(ocount(2), so.cells[20 * 60 + 40])
+wo.app.on_drag(so, cell(40, 24)[0], cell(40, 24)[1])
+orows(20, 25, 39, 42)
+wo.app.on_drag(so, cell(37, 17)[0], cell(37, 17)[1])
+orows(16, 22, 36, 42)
+let before = ocount(2)
+wo.app.on_key(so, "ctrl+z")
+print(before, ocount(2), ocount(5))

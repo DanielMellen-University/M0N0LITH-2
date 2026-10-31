@@ -52,3 +52,44 @@ brush true none ["Paint [saved] yellow 1 my cat.paint"] false
 ["saved", "/home/pics.paint"] ["not saved: old.d is a folder", "/home/pics.paint"] ["saved", "/home/pics/one.paint"] ["cannot write /home/none/two.paint", "/home/pics/one.paint"]
 ["not saved: no name", "/home/pics/one.paint"] ["not saved: no name", "/home/pics/one.paint"] ["not saved: no name", "/home/pics/one.paint"]
 ["saved", "/home/my cat.paint"] true
+["Paint [edited] green filled rect small.paint"]
+12
+000000
+055550
+055550
+055550
+000000
+["Paint [edited] green oval 1 small.paint"]
+0000000000000
+0000555550000
+0055000005500
+0500000000050
+0500000000050
+0500000000050
+0055000005500
+0000555550000
+0000000000000
+["Paint [edited] red filled oval small.paint"]
+00000000000
+00022222000
+00222222200
+02222222220
+02222222220
+02222222220
+02222222220
+00222222200
+00022222000
+00000000000
+61 2
+020
+020
+020
+020
+020
+000000
+002200
+022220
+022220
+002200
+000000
+72 60 24
