@@ -15,3 +15,7 @@ undo after save [undone]  0
 saved true saved
 steps kept 500 left 100
 utf8 [undone] é 1
+undone two [undone] a 1
+redo one [redone] ab 2
+redo past the end [nothing to redo] abc 3
+edit ends redo [nothing to redo] abx 3

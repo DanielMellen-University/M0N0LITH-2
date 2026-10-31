@@ -1310,7 +1310,7 @@ fun _editor_init()
     let disk = none
     if status == "open"
         disk = text
-    return {fs: _shell_fs, path: path, text: text, status: status, rows: 0, disk: disk, overwrite: false, undo: [], back: 0, mark: none}
+    return {fs: _shell_fs, path: path, text: text, status: status, rows: 0, disk: disk, overwrite: false, undo: [], redo: [], back: 0, mark: none}
 
 # The cursor is `back` characters before the end of the text (0: at the end, so
 # text set from outside keeps the cursor at its end). A selection runs from the
@@ -1372,6 +1372,7 @@ fun _editor_change(s, at, count, added)
     append(s.undo, {at: at, removed: removed, added: added})
     if len(s.undo) > _undo_steps
         remove(s.undo, 0)
+    s.redo = []   # a new edit ends what Ctrl+Y could bring back
     _editor_set_pos(s, at + len(added))
     s.mark = none
     s.status = "edited"
@@ -1555,6 +1556,20 @@ fun _editor_undo(s)
     _editor_set_pos(s, u.at + len(u.removed))
     s.mark = none
     s.status = "undone"
+    append(s.redo, u)
+
+# Ctrl+Y does again what Ctrl+Z undid, newest first, until another edit.
+fun _editor_redo(s)
+    if len(s.redo) == 0
+        s.status = "nothing to redo"
+        return
+    let u = s.redo[len(s.redo) - 1]
+    remove(s.redo, len(s.redo) - 1)
+    s.text = slice(s.text, 0, u.at) + u.added + slice(s.text, u.at + len(u.removed), len(s.text))
+    append(s.undo, u)
+    _editor_set_pos(s, u.at + len(u.added))
+    s.mark = none
+    s.status = "redone"
 
 # Ctrl+S on a file another app changed since the Editor opened or saved it warns
 # first; a second Ctrl+S in a row overwrites. A file that was removed meanwhile
@@ -1723,6 +1738,9 @@ fun _editor_key(s, k)
     else if k == "ctrl+z"
         s.overwrite = false
         _editor_undo(s)
+    else if k == "ctrl+y"
+        s.overwrite = false
+        _editor_redo(s)
     else if k == "ctrl+a"
         s.overwrite = false
         s.mark = len(s.text)

@@ -144,7 +144,7 @@ Write `tests/shell_<topic>.relic`, run it, read its output, and save that as `te
 | `shell_editor_stale` | Editor reports a file removed before opening |
 | `shell_editor_edges` | Editor empty buffers, line edges and failed saves |
 | `shell_editor_disk_changed` | Ctrl+S warns once when another app changed the file |
-| `shell_editor_undo` | Ctrl+Z undoes edits one step at a time, up to 500 |
+| `shell_editor_undo` | Ctrl+Z undoes edits one step at a time, up to 500, and Ctrl+Y redoes them until the next edit |
 | `shell_editor_select` | Shift+arrows and Ctrl+A select; typing and Backspace replace the selection |
 | `shell_editor_cursor` | arrows, Home, End and Ctrl+arrow word jumps move the cursor |
 | `shell_editor_delete` | Delete removes the next character or the selection; Ctrl+Z puts it back |

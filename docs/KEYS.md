@@ -74,6 +74,7 @@ The commands are in [the Terminal doc](apps/TERMINAL.md).
 | Ctrl+C, Ctrl+X | copies, or cuts, the selection to the desktop's clipboard (shared by all windows, not the system's) |
 | Ctrl+V | pastes it, over any selection |
 | Ctrl+Z | undoes the last edit (a cut or a paste is one), up to 500 |
+| Ctrl+Y | redoes what Ctrl+Z undid, newest first; a new edit ends it |
 | Ctrl+S | saves. If another app changed the file since it was opened or saved, the first Ctrl+S warns and writes nothing, and a second one right after overwrites |
 
 ## IDE

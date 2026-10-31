@@ -57,3 +57,20 @@ e.state.undo = []
 wm.handle(d, {type: "text", text: "é€"})
 wm.key(d, "ctrl+z")
 show("utf8")
+# Ctrl+Y redoes what Ctrl+Z undid, newest first; a new edit ends it
+e.state.text = ""
+e.state.undo = []
+e.state.redo = []
+e.state.back = 0
+for k in ["a", "b", "c", "ctrl+z", "ctrl+z"]
+    wm.key(d, k)
+show("undone two")
+wm.key(d, "ctrl+y")
+show("redo one")
+wm.key(d, "ctrl+y")
+wm.key(d, "ctrl+y")
+show("redo past the end")
+wm.key(d, "ctrl+z")
+wm.key(d, "x")
+wm.key(d, "ctrl+y")
+show("edit ends redo")

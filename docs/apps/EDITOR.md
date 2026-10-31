@@ -32,6 +32,7 @@ The status is one of:
 | Ctrl+C, Ctrl+X | copies, or cuts, the selection to the desktop's clipboard (nothing without a selection) |
 | Ctrl+V | pastes the clipboard at the cursor, over any selection; a cut and a paste are one undo step each |
 | Ctrl+Z | undoes the last edit |
+| Ctrl+Y | does again what Ctrl+Z undid, until the next edit |
 | Ctrl+S | saves |
 
 On macOS, Cmd with a letter works as Ctrl with it. Clicks inside the window do not move the cursor.
