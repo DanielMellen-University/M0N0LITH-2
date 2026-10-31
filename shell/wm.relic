@@ -715,7 +715,7 @@ fun _two(n)
 
 # Relic-native terminal (no host process spawn). It works on the shared VFS
 # from a current folder that starts at /home. Paths may be relative to it.
-fun _term_init() = {buf: ["Terminal. Type help."], input: "", cwd: "/home", fs: _shell_fs, cols: term_width}
+fun _term_init() = {buf: ["Terminal. Type help."], input: "", cwd: "/home", fs: _shell_fs, cols: term_width, past: [], back: 0, draft: ""}
 
 # A line cut into pieces of at most width characters, so a long line wraps
 # in the window instead of losing its end.
@@ -1090,10 +1090,35 @@ fun _term_run(s, line)
     else
         _term_reply(s, "unknown: " + cmd)
 
+# Up and Down go through the commands run before (the last _term_recall_keep,
+# a command the same as the one before it kept once); Down past the newest
+# gives back the line that was being typed.
+let _term_recall_keep = 50
+
 fun _term_key(s, k)
     if k == "return" or k == "enter"
-        _term_run(s, s.input)
+        let line = s.input
+        if strings.trim(line) != "" and (len(s.past) == 0 or s.past[len(s.past) - 1] != line)
+            append(s.past, line)
+            if len(s.past) > _term_recall_keep
+                remove(s.past, 0)
+        s.back = 0
+        s.draft = ""
+        _term_run(s, line)
         s.input = ""
+    else if k == "up"
+        if s.back < len(s.past)
+            if s.back == 0
+                s.draft = s.input
+            s.back = s.back + 1
+            s.input = s.past[len(s.past) - s.back]
+    else if k == "down"
+        if s.back > 0
+            s.back = s.back - 1
+            if s.back == 0
+                s.input = s.draft
+            else
+                s.input = s.past[len(s.past) - s.back]
     else
         s.input = _typed(s.input, k)
 

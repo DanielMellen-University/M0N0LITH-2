@@ -37,6 +37,7 @@ Every key and click the desktop and its apps act on, checked against `shell/wm.r
 | Typing | adds to the command line |
 | Backspace | removes the last character |
 | Return | runs the command |
+| Up, Down | the command before, or after, from the last 50 run; Down past the newest gives back the line being typed |
 
 The commands are in [the Terminal doc](apps/TERMINAL.md).
 

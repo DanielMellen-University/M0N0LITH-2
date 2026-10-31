@@ -6,7 +6,7 @@ The filesystem starts with `/home`, `/tmp` and `/home/welcome.txt` (`vfs.new()` 
 
 ## Using it
 
-Type a command and press Return. The prompt is the current folder and `> `; a new Terminal starts in `/home`. Backspace removes the last character. Paths may be absolute or relative to the current folder, and `.` and `..` work.
+Type a command and press Return. The prompt is the current folder and `> `; a new Terminal starts in `/home`. Backspace removes the last character. Up and Down go back and forth through the commands run before (the last 50; a blank line, or the same command twice in a row, is kept once at most), and Down past the newest gives back what you were typing. Paths may be absolute or relative to the current folder, and `.` and `..` work.
 
 Commands split on spaces. Quotes are ordinary characters and do not group words, so a path with a space in it cannot be given as one argument.
 

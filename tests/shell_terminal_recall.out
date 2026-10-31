@@ -1,0 +1,5 @@
+["", ""]
+["echo one", "pwd", "echo two"]
+["echo two", "pwd", "echo one", "echo one", "pwd", "echo two", "ls", "ls"]
+twx ["echo one", "pwd", "echo two", "echo twx"] echo twx
+50 echo 10 echo 59

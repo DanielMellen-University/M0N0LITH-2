@@ -1,0 +1,36 @@
+# Up and Down bring back earlier commands; Down past the newest gives back the
+# line being typed; blank lines and a repeat of the last command are not kept.
+use ../shell/wm
+let t = wm.terminal.init()
+fun typed(line)
+    for ch in line
+        if ch == " "
+            wm.terminal.on_key(t, "space")
+        else
+            wm.terminal.on_key(t, ch)
+fun run(line)
+    typed(line)
+    wm.terminal.on_key(t, "return")
+fun key(k)
+    wm.terminal.on_key(t, k)
+    return t.input
+print([key("up"), key("down")])
+run("echo one")
+run("pwd")
+run("pwd")
+run("  ")
+run("echo two")
+print(t.past)
+typed("ls")
+print([key("up"), key("up"), key("up"), key("up"), key("down"), key("down"), key("down"), key("down")])
+# a recalled line can be edited and run; it goes on the end, and recall starts again from the newest
+key("up")
+key("backspace")
+key("x")
+key("return")
+print(t.buf[len(t.buf) - 1], t.past, key("up"))
+key("down")
+# the last 50 are kept
+for i in 0..60
+    run("echo {i}")
+print(len(t.past), t.past[0], t.past[49])
