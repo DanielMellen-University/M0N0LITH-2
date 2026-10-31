@@ -1,0 +1,28 @@
+# Ctrl+Tab brings the lowest window that is not minimized to the front, so it
+# goes round them; minimized windows stay down, and no app sees the key.
+use ../shell/wm
+let d = wm.new_desktop(640, 480, wm.default_apps())
+fun order()
+    let names = []
+    for w in d.windows
+        if not w.minimized
+            append(names, w.app.name)
+    return names
+wm.key(d, "ctrl+tab")
+print(order())
+let n = wm.launch(d, wm.notes)
+let t = wm.launch(d, wm.terminal)
+let c = wm.launch(d, wm.clicker)
+print(order(), wm.focused(d).app.name)
+let seen = []
+for i in 0..4
+    wm.key(d, "ctrl+tab")
+    append(seen, wm.focused(d).app.name)
+print(seen)
+wm.minimize(d, t.id)
+seen = []
+for i in 0..3
+    wm.key(d, "ctrl+tab")
+    append(seen, wm.focused(d).app.name)
+print(seen, [n.state.text, t.state.input], c.state.count)
+print(wm.key_of_event({type: "key_down", key: "tab", ctrl: true, shift: false}))

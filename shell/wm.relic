@@ -478,7 +478,16 @@ fun dismiss(d)
     return false
 
 # A key press goes to the window on top.
+# Ctrl+Tab is the desktop's: it brings the lowest window that is not
+# minimized to the front, so pressing it again goes round all of them. Every
+# other key goes to the window in front.
 fun key(d, k)
+    if k == "ctrl+tab"
+        for i in 0..len(d.windows)
+            if not d.windows[i].minimized
+                _raise(d, i)
+                return
+        return
     let w = focused(d)
     if w != none
         w.app.on_key(w.state, k)

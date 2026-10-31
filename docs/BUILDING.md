@@ -22,7 +22,7 @@ ctest --test-dir build -C Release --output-on-failure
 
 Already cloned without the submodule? Run `git submodule update --init`.
 
-Checked on Oct 31 2026 on Linux (GCC, CMake 4.4, Ninja, with `-G Ninja` added to both configure lines since that machine has no Make) at Relic 1.0.48: all 99 tests pass. CI runs the same steps without `-G` on Linux, macOS and Windows.
+Checked on Oct 31 2026 on Linux (GCC, CMake 4.4, Ninja, with `-G Ninja` added to both configure lines since that machine has no Make) at Relic 1.0.48: all 100 tests pass. CI runs the same steps without `-G` on Linux, macOS and Windows.
 
 ### Why `-DRELIC_BUILD_HOST=ON`
 
