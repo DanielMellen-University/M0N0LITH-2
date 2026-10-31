@@ -1,0 +1,18 @@
+# Editor keys with Ctrl beyond the word moves: Ctrl+Home and Ctrl+End go to
+# the start and end of the file, and drop any selection.
+use ../shell/wm
+let d = wm.new_desktop(640, 480, wm.default_apps())
+let e = wm.launch(d, wm.editor)
+let s = e.state
+fun keys(ks)
+    for k in ks
+        e.app.on_key(s, k)
+    return [s.text, len(s.text) - s.back]
+s.text = "one two\nthree four\nfive"
+s.back = 12
+print(keys(["ctrl+home"]), keys(["ctrl+end"]), keys(["ctrl+home", "x"]))
+s.back = 3
+s.mark = 0
+print(keys(["ctrl+end"]), s.mark)
+# the desktop names them so
+print(wm.key_of_event({type: "key_down", key: "home", ctrl: true}), wm.key_of_event({type: "key_down", key: "end", ctrl: true}))

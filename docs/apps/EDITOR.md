@@ -22,6 +22,7 @@ The status is one of:
 | Left, Right, Up, Down | move the cursor. Up and Down keep the column, or go to the end of a shorter line. With a selection, Left and Right go to its start or end |
 | Home, End | the start or end of the line |
 | Ctrl+Left, Ctrl+Right | the start of the word before the cursor, or the end of the word after it. Letters, digits, `_` and anything past ASCII count as word characters |
+| Ctrl+Home, Ctrl+End | the start or end of the file |
 | Shift with an arrow, Home or End | selects from the cursor |
 | Return | a new line that starts with the same spaces as the one before (up to the cursor); in the IDE, 4 more after a line that opens a block (`if`, `else`, `for`, `while`, `fun` without `=`, `try`, `catch`) |
 | Tab | spaces to the next multiple of 4 columns (Relic's indent), over any selection; never a tab character |

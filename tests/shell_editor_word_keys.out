@@ -1,0 +1,3 @@
+["one two\nthree four\nfive", 0] ["one two\nthree four\nfive", 23] ["xone two\nthree four\nfive", 1]
+["xone two\nthree four\nfive", 24] none
+ctrl+home ctrl+end

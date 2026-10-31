@@ -1449,6 +1449,10 @@ fun _editor_moved(s, k)
         return _word_left(s.text, pos)
     if k == "ctrl+right"
         return _word_right(s.text, pos)
+    if k == "ctrl+home"
+        return 0
+    if k == "ctrl+end"
+        return len(s.text)
     if k == "end"
         return _line_end(s.text, pos)
     let start = _line_start(s.text, pos)
@@ -1724,7 +1728,7 @@ fun _editor_key(s, k)
     else if k in ["shift+left", "shift+right", "shift+up", "shift+down", "shift+home", "shift+end"]
         s.overwrite = false
         _editor_select(s, slice(k, 6, len(k)))
-    else if k in ["left", "right", "up", "down", "home", "end", "ctrl+left", "ctrl+right"]
+    else if k in ["left", "right", "up", "down", "home", "end", "ctrl+left", "ctrl+right", "ctrl+home", "ctrl+end"]
         s.overwrite = false
         _editor_move(s, k)
     else

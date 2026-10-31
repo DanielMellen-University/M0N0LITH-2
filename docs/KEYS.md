@@ -64,6 +64,7 @@ The commands are in [the Terminal doc](apps/TERMINAL.md).
 | Left, Right, Up, Down | move the cursor; with a selection, Left and Right go to its start or end |
 | Home, End | the start or end of the line |
 | Ctrl+Left, Ctrl+Right | the start of the word before, or the end of the word after |
+| Ctrl+Home, Ctrl+End | the start or end of the file |
 | Shift with an arrow, Home or End | selects from the cursor |
 | Return | a new line with the same leading spaces (in the IDE 4 more after `if`, `else`, `for`, `while`, `fun`, `try`, `catch`) |
 | Tab | spaces to the next multiple of 4 columns, over any selection |
