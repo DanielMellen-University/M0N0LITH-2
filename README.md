@@ -3,7 +3,7 @@ M0N0LITH written in [Relic](https://github.com/DanielMellen-University/Relic).
 
 This repo is the MONOLITH 2 desktop environment: the window manager, taskbar, Start menu and the apps, all written in [Relic](https://github.com/DanielMellen-University/Relic). The language itself (host, std, self-host) lives in the Relic repo. Language changes go there, desktop and app changes go here.
 
-> Status: early. The shell started inside the Relic repo during its M11 milestone and moved here with its history in Relic 1.0.1. It has a window model with drag, resize and minimize, a taskbar, a Start menu, and Clicker, Notes, Terminal, Files, Editor and IDE apps. Terminal, Files and Editor share one in-memory filesystem (`std/vfs` from Relic). The IDE is the Editor plus Ctrl+R to run a .relic file in an output pane and Ctrl+E to jump to its error; see the [roadmap](docs/ROADMAP.md).
+> Status: early. The shell started inside the Relic repo during its M11 milestone and moved here with its history in Relic 1.0.1. It has a window model with drag, resize and minimize, a taskbar with a +N button for windows that do not fit, a Start menu, and six apps: Clicker, Notes, Terminal, Files, Editor and IDE. Terminal, Files, the Editor and the IDE share one in-memory filesystem (`std/vfs` from Relic). The IDE is the Editor plus Ctrl+R to run a Relic program in an output pane, with input, `use` of your own files and Ctrl+E to jump to an error. Next up is in the [roadmap](docs/ROADMAP.md).
 
 ## Layout
 
@@ -29,7 +29,7 @@ CONTRIBUTING.md  how changes are made here
 
 ## How it depends on Relic
 
-Relic is a git submodule at `relic/`, pinned to one commit. Building that commit gives the `relic` program, and its `std/` folder comes with it. To move to a newer Relic, check out the new commit inside `relic/`, run the tests, and commit the submodule change.
+Relic is a git submodule at `relic/`, pinned to one commit, now Relic 1.0.45 (`ef22fd0`). Building that commit gives the `relic` program, and its `std/` folder comes with it. To move to a newer Relic, check out the new commit inside `relic/`, run the tests, and commit the submodule change.
 
 ## Build and test
 
