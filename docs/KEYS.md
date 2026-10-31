@@ -92,8 +92,9 @@ While a run waits for input:
 | 1 to 8 | black, red, orange, yellow, green, blue, purple, brown |
 | e or 0 | the eraser |
 | + or =, - | brush size 1 to 4 cells |
+| f, b | the fill tool (a click fills the area of one color), and back to the brush |
 | c | clears the canvas |
-| Ctrl+Z | undoes the last stroke or clear, up to 20 |
+| Ctrl+Z | undoes the last stroke, fill or clear, up to 20 |
 | Ctrl+S | saves the picture |
 
 ## Snake

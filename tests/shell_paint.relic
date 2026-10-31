@@ -142,3 +142,43 @@ print(w4.state.status, c4[0], c4[1], c4[2], c4[3], c4[60], c4[61], c4[62])
 w4.state.path = "/nope/x.paint"
 wm.key(d, "ctrl+s")
 print(w4.state.status)
+# fill: f, then a click fills the area of one color under it, side by side only
+let wf = wm.launch(d, wm.paint_app)
+let sf = wf.state
+fun fcount(k)
+    let n = 0
+    for c in sf.cells
+        if c == k
+            n = n + 1
+    return n
+# a blank canvas with a black box from (10, 10) to (20, 20), and a black cell
+# at (21, 21) that only touches it corner to corner
+for i in 0..len(sf.cells)
+    sf.cells[i] = 0
+sf.color = 1
+for i in 10..21
+    for c in [[i, 10], [i, 20], [10, i], [20, i]]
+        sf.cells[c[1] * 60 + c[0]] = 1
+sf.cells[21 * 60 + 21] = 1
+wf.app.on_key(sf, "f")
+wf.app.on_key(sf, "6")
+print(wf.app.lines(sf))
+let pf = cell(15, 15)
+wf.app.on_click(sf, pf[0], pf[1])
+print(fcount(6), fcount(1), sf.status)
+# drag does nothing with the fill tool
+wf.app.on_drag(sf, cell(2, 2)[0], cell(2, 2)[1])
+print(fcount(6))
+# filling with the same color changes nothing; filling outside fills the rest but not the box inside
+wf.app.on_click(sf, pf[0], pf[1])
+print(fcount(6), len(sf.undo))
+wf.app.on_key(sf, "3")
+let po = cell(30, 30)
+wf.app.on_click(sf, po[0], po[1])
+print(fcount(3), fcount(6), fcount(1), sf.cells[21 * 60 + 21])
+# undo the outside fill, then b goes back to the brush
+wf.app.on_key(sf, "ctrl+z")
+print(fcount(3), fcount(0))
+wf.app.on_key(sf, "b")
+wf.app.on_click(sf, po[0], po[1])
+print(sf.tool, fcount(3), wf.app.lines(sf))

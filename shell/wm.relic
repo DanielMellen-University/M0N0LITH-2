@@ -1800,8 +1800,9 @@ fun _ide_key(s, k)
 # A picture of _paint_w by _paint_h cells, each _paint_cell pixels, with a row
 # of color swatches above it. Press and drag on the canvas to draw with the
 # brush (a square of 1 to 4 cells), the eraser draws white. Keys: 1 to 8 pick a
-# color, e or 0 the eraser, + and - the brush size, c clears, Ctrl+Z undoes a
-# stroke or a clear, Ctrl+S saves. A picture is a text file in the desktop's
+# color, e or 0 the eraser, + and - the brush size, f the fill tool (a click
+# fills the area of one color under it) and b the brush again, c clears,
+# Ctrl+Z undoes a stroke, a fill or a clear, Ctrl+S saves. A picture is a text file in the desktop's
 # files: "paint W H" and then H lines of W digits (0 is white). Paint opens the
 # file Files last opened when its name ends in .paint, else /home/picture.paint.
 let _paint_w = 60
@@ -1825,7 +1826,7 @@ fun _paint_init()
     let path = "/home/picture.paint"
     if strings.ends_with(_shell_open.path, ".paint")
         path = _shell_open.path
-    let s = {fs: _shell_fs, path: path, cells: _paint_blank(), color: 1, size: 1, last: none, stroke: false, undo: [], status: "new file", foreign: false}
+    let s = {fs: _shell_fs, path: path, cells: _paint_blank(), color: 1, size: 1, last: none, stroke: false, undo: [], status: "new file", foreign: false, tool: "brush"}
     if vfs.exists(_shell_fs, path) and not vfs.is_dir(_shell_fs, path)
         _paint_load(s, vfs.read(_shell_fs, path))
     return s
@@ -1914,6 +1915,26 @@ fun _paint_line(s, from, to)
     for i in 0..n + 1
         _paint_stamp(s, from[0] + int(math.round(dx * i / n)), from[1] + int(math.round(dy * i / n)))
 
+# Fill: every cell joined to (cx, cy) through cells of its color, side by side
+# (not corner to corner), takes the chosen color.
+fun _paint_fill(s, cx, cy)
+    let from = s.cells[cy * _paint_w + cx]
+    let to = s.color
+    if from == to
+        return
+    let todo = [cy * _paint_w + cx]
+    s.cells[cy * _paint_w + cx] = to
+    while len(todo) > 0
+        let i = pop(todo)
+        let x = i % _paint_w
+        let y = int((i - x) / _paint_w)
+        for n in [[x - 1, y], [x + 1, y], [x, y - 1], [x, y + 1]]
+            if n[0] >= 0 and n[1] >= 0 and n[0] < _paint_w and n[1] < _paint_h
+                let j = n[1] * _paint_w + n[0]
+                if s.cells[j] == from
+                    s.cells[j] = to
+                    append(todo, j)
+
 # Which swatch (a color index) is at content point (x, y), or none.
 fun _paint_swatch_at(x, y)
     if y < _swatch_top or y >= _swatch_top + _swatch
@@ -1936,11 +1957,16 @@ fun _paint_click(s, x, y)
     let c = _paint_cell_at(x, y)
     if c == none
         return
+    if s.tool == "fill" and s.cells[c[1] * _paint_w + c[0]] == s.color
+        return   # a fill that would change nothing is not an undo step
     _paint_snapshot(s)
+    s.status = "edited"
+    if s.tool == "fill"
+        _paint_fill(s, c[0], c[1])
+        return
     _paint_stamp(s, c[0], c[1])
     s.last = c
     s.stroke = true
-    s.status = "edited"
 
 # Dragging off the canvas pauses the stroke; it goes on from where it comes back.
 fun _paint_drag(s, x, y)
@@ -1965,6 +1991,10 @@ fun _paint_key(s, k)
         s.size = math.min(4, s.size + 1)
     else if k == "-"
         s.size = math.max(1, s.size - 1)
+    else if k == "f"
+        s.tool = "fill"
+    else if k == "b"
+        s.tool = "brush"
     else if k == "c"
         _paint_snapshot(s)
         s.cells = _paint_blank()
@@ -1976,7 +2006,11 @@ fun _paint_key(s, k)
     else if k == "ctrl+s"
         _paint_save(s)
 
-fun _paint_lines(s) = ["Paint [{s.status}] {_paint_names[s.color]} {s.size} {paths.base(s.path)}"]
+fun _paint_lines(s)
+    let tool = str(s.size)
+    if s.tool == "fill"
+        tool = "fill"
+    return ["Paint [{s.status}] {_paint_names[s.color]} {tool} {paths.base(s.path)}"]
 
 # The swatches (the chosen one framed), the canvas frame, white, and then runs
 # of one color along each row, so a picture is a few hundred boxes at most.
