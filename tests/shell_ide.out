@@ -45,8 +45,8 @@ ran ["hello ANN"]
 error ["line 1: cannot find module 'nothere' (no file nothere.relic)"] 1
 error ["/home/bad.relic line 1: unclosed '('"] none
 waiting for input []
--- waiting [waiting for input] none
-IDE [waiting for input] ...llo.relic
+-- waiting [saved, waiting for input] none
+IDE [saved, waiting for input] ...ic
 use std/os
 let name = os.prompt("name? ")
 print("hi " + name)
@@ -59,7 +59,7 @@ print("bye")
 _
 -- input (return: send, esc: stop) --
 name? Ann B_
-waiting for input ["name? Ann B", "hi Ann B"] [false]
+waiting for input ["name? Ann B", "hi Ann B"] [true]
 ran ["name? Ann B", "hi Ann B", "1", "got 1", "end", "bye"]
 -- after input [ran] none
 IDE [ran] /home/hello.relic

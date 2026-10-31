@@ -70,6 +70,7 @@ print(s.status, s.out, s.err_line)
 s.text = "use std/os\nlet name = os.prompt(\"name? \")\nprint(\"hi \" + name)\nwhile true\n    let l = os.read_line()\n    if l == \"end\"\n        break\n    print(\"got\", l)\nprint(\"bye\")\n"
 wm.key(d, "ctrl+r")
 print(s.status, s.out)
+# typing goes to the input line; Ctrl+S saves the program and the run keeps waiting
 for k in ["A", "n", "x", "backspace", "n", "space", "B", "left", "ctrl+s"]
     wm.key(d, k)
 show("waiting")

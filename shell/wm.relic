@@ -1782,7 +1782,12 @@ fun _ide_lines(s)
     return out
 
 fun _ide_key(s, k)
-    if s.run != none and k != "ctrl+r"
+    if s.run != none and k == "ctrl+s"
+        # saving does not stop a run that waits for input (decided Oct 31)
+        _editor_key(s, k)
+        if s.status == "saved"
+            s.status = "saved, waiting for input"
+    else if s.run != none and k != "ctrl+r"
         _ide_input_key(s, k)
     else if k == "ctrl+r"
         _ide_run(s)

@@ -27,7 +27,7 @@ Ctrl+R runs the text in the buffer, saved or not. The program runs in Relic's se
 | Escape | stops the run; the pane shows `stopped` |
 | Ctrl+R | starts the run again from the top |
 
-Other keys, Ctrl+S among them, are ignored while the run waits. Press Escape first to save. Escape goes to the IDE only while a run waits; at any other time it closes menus or quits the desktop as usual.
+Ctrl+S saves the program and the run keeps waiting; the status reads `saved, waiting for input` (decided Oct 31 2026). Other keys are ignored while the run waits. Escape goes to the IDE only while a run waits; at any other time it closes menus or quits the desktop as usual.
 
 ## Limits
 

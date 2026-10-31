@@ -80,7 +80,8 @@ While a run waits for input:
 | Typing, Space, Backspace | edit the input line |
 | Return | sends the line, and the run goes on |
 | Escape | stops the run |
-| Other keys | ignored until the run ends (Ctrl+S included: press Escape first) |
+| Ctrl+S | saves the program; the run keeps waiting |
+| Other keys | ignored until the run ends |
 
 ## Paint
 
