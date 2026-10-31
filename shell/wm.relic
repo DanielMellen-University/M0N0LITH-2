@@ -1,4 +1,4 @@
-# shell/wm.relic: the MONOLITH 2 desktop model (M11). No drawing here, so it
+# shell/wm.relic: the MONOLITH 2 desktop model (begun in Relic's M11). No drawing here, so it
 # runs and tests without SDL. shell/desktop.relic draws it with std/graphics.
 #
 # A desktop has apps (what the Start menu can launch) and windows (running
@@ -6,8 +6,10 @@
 #   {name, width, height, init(), lines(state), on_click(state, x, y), on_key(state, key)}
 # lines() gives the text rows for the window. visible_lines(w) cuts them to
 # what fits, and that is what desktop.relic draws. An app may also have:
-#   tail: true, pinned: n   keep the first n lines and the last ones (Terminal, Editor, Notes)
+#   tail: true, pinned: n   keep the first n lines and the last ones (Terminal, Editor, IDE, Notes)
 #   selected(state)         the line to keep in view (Files)
+#   marks(state)            highlighted [line, from, to] parts (the Editor and IDE selection)
+#   on_escape(state)        takes Escape when no menu is open; true if it used it (the IDE)
 # visible_lines puts the window's rows and cols in the state of a tail app,
 # and cols in the state of a selected app, before it calls lines().
 # Input comes in as key(d, name) and click(d, x, y), or as a graphics event
