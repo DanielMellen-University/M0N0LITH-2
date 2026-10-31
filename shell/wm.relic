@@ -1136,6 +1136,14 @@ fun _term_key(s, k)
                 s.input = s.past[len(s.past) - s.back]
     else if k == "ctrl+v"
         s.input = s.input + _clip_line()
+    else if k == "ctrl+c"
+        # gives up the line, as a shell does: shown with ^C, not run, not kept
+        _term_reply(s, s.cwd + "> " + s.input + "^C")
+        s.input = ""
+        s.back = 0
+        s.draft = ""
+    else if k == "ctrl+l"
+        s.buf = []   # what clear does, keeping the line being typed
     else
         s.input = _typed(s.input, k)
 

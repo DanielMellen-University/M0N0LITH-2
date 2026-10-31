@@ -1,0 +1,4 @@
+["Terminal. Type help.", "/home> rm welcome.txt^C"] [] [""]
+["pwd", ""] ["pwd"]
+[] ["ec"]
+["/home> ec^C"] [""]

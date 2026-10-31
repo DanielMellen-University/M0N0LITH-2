@@ -1,0 +1,28 @@
+# Terminal Ctrl keys: Ctrl+C gives up the line being typed (shown with ^C, not
+# run, not kept for Up, and it ends a recall); Ctrl+L empties the output like
+# clear and keeps the line being typed.
+use ../shell/wm
+let t = wm.terminal.init()
+fun typed(line)
+    for ch in line
+        if ch == " "
+            wm.terminal.on_key(t, "space")
+        else
+            wm.terminal.on_key(t, ch)
+fun key(k)
+    wm.terminal.on_key(t, k)
+    return t.input
+typed("rm welcome.txt")
+key("ctrl+c")
+print(t.buf, t.past, [t.input])
+typed("pwd")
+key("return")
+key("up")
+key("ctrl+c")
+print([key("up"), key("down")], t.past)
+key("ctrl+c")
+typed("ec")
+key("ctrl+l")
+print(t.buf, [t.input])
+key("ctrl+c")
+print(t.buf, [t.input])

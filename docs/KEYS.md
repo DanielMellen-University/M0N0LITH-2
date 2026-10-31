@@ -40,6 +40,8 @@ Every key and click the desktop and its apps act on, checked against `shell/wm.r
 | Return | runs the command |
 | Ctrl+V | adds the first line of the clipboard |
 | Up, Down | the command before, or after, from the last 50 run; Down past the newest gives back the line being typed |
+| Ctrl+C | gives up the line: shown with ^C, not run |
+| Ctrl+L | empties the output, like `clear` |
 
 The commands are in [the Terminal doc](apps/TERMINAL.md).
 
