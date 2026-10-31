@@ -315,3 +315,11 @@ orows(16, 22, 36, 42)
 let before = ocount(2)
 wo.app.on_key(so, "ctrl+z")
 print(before, ocount(2), ocount(5))
+# Shift or Caps Lock: capital letters pick the same tools, but R and O are the filled shapes
+let wk = wm.launch(d, wm.paint_app)
+let sk = wk.state
+let seen = []
+for k in ["F", "L", "B", "E", "R", "O", "N"]
+    wk.app.on_key(sk, k)
+    append(seen, [sk.tool, sk.color, sk.naming])
+print(seen)

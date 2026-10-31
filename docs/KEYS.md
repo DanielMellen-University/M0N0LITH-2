@@ -101,6 +101,8 @@ While a run waits for input:
 | Ctrl+S | saves the picture |
 | n | save as: type a name on the status line, Return saves, Backspace deletes, Esc gives up |
 
+With Shift or Caps Lock a letter works as its small one (`F` is the fill tool), except `R` and `O`, which are the filled shapes.
+
 ## Snake
 
 | Input | What it does |
@@ -108,3 +110,5 @@ While a run waits for input:
 | Arrows or W, A, S, D | start the game and turn the snake (not straight back) |
 | Space | pauses and goes on; also starts a game |
 | R | plays again after a game ends |
+
+The letters work the same with Shift or Caps Lock.

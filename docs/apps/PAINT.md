@@ -13,6 +13,7 @@ The status line reads `Paint [status] color tool file` (the tool is the brush si
 - `f` picks the fill tool: a click fills the area of one color under it with the chosen color (cells joined side by side, not corner to corner). `b` goes back to the brush. The status line shows `fill` in place of the brush size.
 - `l` picks the line tool and `r` the rectangle tool. Press at one end (or corner) and drag to the other: until the button is let go the shape follows the pointer, drawn over the picture as it was at the press. Past the canvas, the far end stays on the nearest edge. Lines and rectangle outlines use the brush size, and the status line shows `line 2` or `rect 2`.
 - `o` picks the ellipse tool: the ellipse that fits the box from the press to the pointer, as an outline in the brush size (`oval 2`). Shift with the letter fills the shape: `R` a filled rectangle and `O` a filled ellipse (`filled rect`, `filled oval`; the brush size does not matter). They follow the drag and undo the same way.
+- With Shift or Caps Lock a letter key works as its small one (`F` the fill tool, `E` the eraser), except `R` and `O`.
 - `c` clears the canvas. Ctrl+Z undoes the last stroke, fill, shape or clear, up to 20. A fill that would change nothing is not an undo step.
 
 ## Files

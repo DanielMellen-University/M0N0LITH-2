@@ -4,7 +4,7 @@ The game. Its window is 210 by 170: a score line, a help line, and a board of 24
 
 ## Playing
 
-- An arrow key or W, A, S, D starts the game and turns the snake. It cannot turn straight back. Two turns pressed within one step both count, one step each, so a quick U-turn works.
+- An arrow key or W, A, S, D starts the game and turns the snake. It cannot turn straight back. Two turns pressed within one step both count, one step each, so a quick U-turn works. Capital letters (Shift or Caps Lock) work the same.
 - The snake moves one cell a step: every 150 ms at first, 5 ms quicker for each food eaten, down to 70 ms.
 - Eating the red food makes it one cell longer. New food goes on a free cell.
 - Running into a wall or into itself ends the game, with the snake left where it was. Filling the whole board wins.

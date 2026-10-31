@@ -21,3 +21,6 @@ Snake  score 0  best 4
 Snake  score 0  best 9
 Snake  score 0  best 0
 Snake  score 0  best 0
+playing [[0, -1]]
+[[0, -1], [-1, 0]]
+ready

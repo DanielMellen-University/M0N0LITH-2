@@ -2142,6 +2142,10 @@ fun _paint_key(s, k)
     if s.naming != none
         _paint_name_key(s, k)
         return
+    # with Shift or Caps Lock a letter works as its small one, but R and O
+    # are the filled shapes
+    if len(k) == 1 and k != "R" and k != "O" and strings.upper(k) == k
+        k = strings.lower(k)
     if len(k) == 1 and ord(k) >= 49 and ord(k) <= 56
         s.color = ord(k) - 48
     else if k == "e" or k == "0"
@@ -2331,6 +2335,8 @@ fun _snake_tick(s, ms)
         s.next_at = s.next_at + _snake_interval(s)
 
 fun _snake_key(s, k)
+    if len(k) == 1
+        k = strings.lower(k)   # Shift or Caps Lock: W, A, S, D and R work the same
     if k in _snake_dirs
         if s.state == "over" or s.state == "won"
             return

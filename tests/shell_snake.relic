@@ -126,3 +126,13 @@ print(w3.app.lines(w3.state)[0])
 vfs.write(s.fs, "/home/snake-best.txt", "2.5")
 let w4 = wm.launch(d, wm.snake)
 print(w4.app.lines(w4.state)[0])
+# Shift or Caps Lock: capital W, A, S, D turn the snake and R plays again
+let wc = wm.launch(d, wm.snake)
+let sc = wc.state
+wc.app.on_key(sc, "W")
+print(sc.state, sc.turns)
+wc.app.on_key(sc, "A")
+print(sc.turns)
+sc.state = "over"
+wc.app.on_key(sc, "R")
+print(sc.state)
