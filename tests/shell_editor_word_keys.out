@@ -1,3 +1,7 @@
 ["one two\nthree four\nfive", 0] ["one two\nthree four\nfive", 23] ["xone two\nthree four\nfive", 1]
 ["xone two\nthree four\nfive", 24] none
 ctrl+home ctrl+end
+["let total = a + ", 16] ["let ", 4] [" ", 0] ["", 0]
+["", 0] ["", 0] 6
+[" ", 1]
+["abf", 2] ["f", 0]

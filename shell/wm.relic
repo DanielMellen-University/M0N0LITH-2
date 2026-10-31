@@ -1437,6 +1437,22 @@ fun _editor_delete(s)
     else if _editor_pos(s) < len(s.text)
         _editor_change(s, _editor_pos(s), 1, "")
 
+# Ctrl+Backspace and Ctrl+Delete: the selection, or back to where Ctrl+Left
+# would go, or on to where Ctrl+Right would (one undo step each).
+fun _editor_delete_word(s, k)
+    let sel = _editor_selection(s)
+    let pos = _editor_pos(s)
+    if sel != none
+        _editor_change(s, sel[0], sel[1] - sel[0], "")
+    else if k == "ctrl+backspace"
+        let to = _word_left(s.text, pos)
+        if to < pos
+            _editor_change(s, to, pos - to, "")
+    else
+        let to = _word_right(s.text, pos)
+        if to > pos
+            _editor_change(s, pos, to - pos, "")
+
 # The cursor's new position for a movement key: left, right, up, down
 # (same column, or the end of a shorter line).
 fun _editor_moved(s, k)
@@ -1725,6 +1741,9 @@ fun _editor_key(s, k)
     else if k == "shift+tab"
         s.overwrite = false
         _editor_dedent(s)
+    else if k == "ctrl+backspace" or k == "ctrl+delete"
+        s.overwrite = false
+        _editor_delete_word(s, k)
     else if k in ["shift+left", "shift+right", "shift+up", "shift+down", "shift+home", "shift+end"]
         s.overwrite = false
         _editor_select(s, slice(k, 6, len(k)))

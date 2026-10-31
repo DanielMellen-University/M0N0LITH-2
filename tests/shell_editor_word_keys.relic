@@ -1,5 +1,6 @@
 # Editor keys with Ctrl beyond the word moves: Ctrl+Home and Ctrl+End go to
-# the start and end of the file, and drop any selection.
+# the start and end of the file, and drop any selection; Ctrl+Backspace and
+# Ctrl+Delete remove a word (as far as Ctrl+Left and Ctrl+Right go).
 use ../shell/wm
 let d = wm.new_desktop(640, 480, wm.default_apps())
 let e = wm.launch(d, wm.editor)
@@ -16,3 +17,14 @@ s.mark = 0
 print(keys(["ctrl+end"]), s.mark)
 # the desktop names them so
 print(wm.key_of_event({type: "key_down", key: "home", ctrl: true}), wm.key_of_event({type: "key_down", key: "end", ctrl: true}))
+s.text = "let total = a + b"
+s.back = 0
+s.mark = none
+print(keys(["ctrl+backspace"]), keys(["ctrl+backspace", "ctrl+backspace"]), keys(["ctrl+home", "ctrl+delete"]), keys(["ctrl+delete"]))
+print(keys(["ctrl+end", "ctrl+delete"]), keys(["ctrl+home", "ctrl+backspace"]), len(s.undo))
+keys(["ctrl+z"])
+print(keys([]))
+s.text = "abc def"
+s.back = 5
+s.mark = 1
+print(keys(["ctrl+backspace"]), keys(["ctrl+backspace"]))
