@@ -1,0 +1,60 @@
+# Random app input on all eight apps (fixed seeds): every app's keys (Paint's
+# tools and save as, Snake's turns, the IDE's run and input, the Editor's
+# selection), double clicks, drags in and out of windows, clock ticks and
+# Escape, on a desktop where Files, Paint and the IDE share one filesystem.
+# Nothing may fail, and after every step each window's lines fit it and its
+# boxes stay inside its content.
+use ../shell/wm
+let seed = 0
+fun rnd(n)
+    seed = (seed * 1103515245 + 12345) % 2147483648
+    return int(seed / 65536) % n
+let app_keys = ["a", "b", "c", "e", "f", "l", "r", "n", "s", "w", "d", "1", "2", "5", "0", "+", "-", "=", "/", ".", "\"", "{{", "(", "space", "return", "backspace", "tab", "up", "down", "left", "right", "delete", "home", "end", "shift+left", "shift+right", "shift+up", "ctrl+s", "ctrl+z", "ctrl+r", "ctrl+e", "ctrl+a", "ctrl+c", "ctrl+v", "ctrl+x"]
+let d = none
+let bad = 0
+fun check(step, what)
+    for w in d.windows
+        let lines = wm.visible_lines(w)
+        if len(lines) > wm.rows_fit(w)
+            print("step", step, what, w.app.name, "too many lines")
+            bad = bad + 1
+        let top = w.y + wm.title_height
+        for b in wm.paint_boxes(w)
+            if b[0] < w.x or b[1] < top or b[0] + b[2] > w.x + w.width or b[1] + b[3] > top + w.height or b[2] <= 0 or b[3] <= 0
+                print("step", step, what, w.app.name, "box out", b)
+                bad = bad + 1
+for seed0 in [2026, 4242]
+    seed = seed0
+    d = wm.new_desktop(640, 480, wm.default_apps())
+    let ms = 0
+    let counts = {}
+    for step in 0..1500
+        let a = rnd(100)
+        let what = "?"
+        if a < 8 and len(d.windows) < 12
+            let w = wm.launch(d, d.apps[rnd(len(d.apps))])
+            what = "launch"
+            counts[w.app.name] = true
+        else if a < 30
+            d.clicks = 1 + rnd(2)
+            wm.click(d, rnd(640), rnd(480))
+            d.clicks = 1
+            what = "click"
+        else if a < 45
+            wm.motion(d, rnd(700) - 30, rnd(540) - 30)
+            what = "motion"
+        else if a < 50
+            wm.release(d)
+            what = "release"
+        else if a < 85
+            wm.key(d, app_keys[rnd(len(app_keys))])
+            what = "key"
+        else if a < 95
+            ms = ms + rnd(400)
+            wm.tick(d, ms)
+            what = "tick"
+        else
+            wm.dismiss(d)
+            what = "escape"
+        check(step, what)
+    print("done", seed0, len(d.windows), len(keys(counts)), bad)

@@ -15,9 +15,9 @@ One test: `ctest --test-dir build -C Release -R golden_shell_ide`. Or run it str
 
 ## How they are checked
 
-CMake finds every `tests/*.relic` and adds it as `golden_<name>`. `tools/run_golden.cmake` runs it from `tests/`, and it passes when it exits with 0 and its standard output matches `<name>.out` exactly (Windows line endings are ignored). A test with no `.out` file must print nothing. One more test, `check_shell`, runs `relic check` on `wm.relic` and `desktop.relic`, which catches syntax errors and undefined names in the drawing code no test runs. That is 90 tests in all, and CI runs them on Linux, macOS and Windows.
+CMake finds every `tests/*.relic` and adds it as `golden_<name>`. `tools/run_golden.cmake` runs it from `tests/`, and it passes when it exits with 0 and its standard output matches `<name>.out` exactly (Windows line endings are ignored). A test with no `.out` file must print nothing. One more test, `check_shell`, runs `relic check` on `wm.relic` and `desktop.relic`, which catches syntax errors and undefined names in the drawing code no test runs. That is 91 tests in all, and CI runs them on Linux, macOS and Windows.
 
-`shell_fuzz` and `shell_apps_fuzz` use fixed seeds, so their output is the same on every run. `shell_fuzz` checks the window model's invariants after every random step on two desktop sizes; `shell_apps_fuzz` sends random commands from two Terminals while Files and the Editor work on the same filesystem.
+`shell_fuzz`, `shell_apps_fuzz` and `shell_events_fuzz` use fixed seeds, so their output is the same on every run. `shell_fuzz` checks the window model's invariants after every random step on two desktop sizes; `shell_apps_fuzz` sends random commands from two Terminals while Files and the Editor work on the same filesystem.
 
 ## Adding or changing one
 
@@ -173,3 +173,4 @@ Write `tests/shell_<topic>.relic`, run it, read its output, and save that as `te
 | `shell_shared_desktops` | shared filesystem and Editor path across desktop maps |
 | `shell_fuzz` | random input against the window model, checking invariants each step |
 | `shell_apps_fuzz` | random Terminal commands with Files and Editor on the same filesystem |
+| `shell_events_fuzz` | random input for all eight apps (their keys, double clicks, drags, clock ticks, Escape): nothing fails, lines fit, boxes stay in the window |
