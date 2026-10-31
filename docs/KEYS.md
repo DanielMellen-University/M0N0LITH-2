@@ -81,3 +81,16 @@ While a run waits for input:
 | Return | sends the line, and the run goes on |
 | Escape | stops the run |
 | Other keys | ignored until the run ends (Ctrl+S included: press Escape first) |
+
+## Paint
+
+| Input | What it does |
+|---|---|
+| Press and drag on the canvas | draws with the brush; off the canvas the stroke pauses |
+| Click a swatch | picks that color, or the eraser (the last one) |
+| 1 to 8 | black, red, orange, yellow, green, blue, purple, brown |
+| e or 0 | the eraser |
+| + or =, - | brush size 1 to 4 cells |
+| c | clears the canvas |
+| Ctrl+Z | undoes the last stroke or clear, up to 20 |
+| Ctrl+S | saves the picture |

@@ -1,0 +1,29 @@
+["Paint [new file] black 1 pictur"] 21
+app app
+11 00110000000000 00000011100000 00000000000110
+app 2
+4
+9 02220 02220 02220 00000
+0 ["Paint [edited] eraser 3 picture"]
+8 9
+11 9
+11 0
+001000011110
+true
+8 8
+e 0
+3 3
+0 0
+5 5
+1
+28
+18 true
+["Paint [save"]
+paint 60 36 37
+2160 edited
+true
+open true
+not a picture /home/bad.paint true
+not saved: not a picture ["hello\n"]
+open 1 2 3 0 4 5 0
+cannot write /nope/x.paint

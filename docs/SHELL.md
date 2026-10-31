@@ -2,7 +2,7 @@
 
 Two files in `shell/`:
 
-- `wm.relic` is the model: windows, the taskbar, the Start menu and the six apps (Clicker, Notes, Terminal, Files, Editor and IDE, in Start menu order). It draws nothing, so the tests run it without SDL.
+- `wm.relic` is the model: windows, the taskbar, the Start menu and the seven apps (Clicker, Notes, Terminal, Files, Editor, IDE and Paint, in Start menu order). It draws nothing, so the tests run it without SDL.
 - `desktop.relic` draws the model with `std/graphics` and runs the event loop. It is the only file that needs SDL.
 
 ## The model
@@ -41,6 +41,8 @@ An app is a map: `name`, `width`, `height`, `init()`, `lines(state)`, `on_click(
 - `marks(state)` for highlighted text (the selection in the Editor and the IDE): `[line, from, to]` in the lines `lines` gave. `mark_boxes(w)` turns them into `[x, y, w, h]` boxes for the lines the last `visible_lines(w)` showed, and `desktop.relic` draws them behind the text.
 - `selected(state)` for a list (Files): the title line stays and the list scrolls just far enough to show the selected line. `visible_lines` puts the window's `cols` in its state too, and Files shortens a long folder path in its title to fit.
 - `on_escape(state)` for an app that takes Escape (the IDE): `dismiss(d)` calls it for the focused window once no menu or list was open to close, and it gives true when it used the key. The IDE uses it to stop a run that waits for input; any other time it gives false and Escape quits as before.
+- `on_drag(state, x, y)` for an app you draw in (Paint): after a press inside the window's content, `motion(d, x, y)` passes the pointer to it, in content coordinates, until `release(d)`.
+- `paint(state)` for an app that draws more than text (Paint): `[x, y, w, h, r, g, b]` boxes in content coordinates. `paint_boxes(w)` cuts them to the window's content and moves them to desktop coordinates, and `desktop.relic` draws them under the text.
 
 Terminal, Files and Editor work on one in-memory filesystem (`std/vfs`), so a change in one shows in the others. An app has to cope with that: a folder or file can be gone between two frames. Editor keeps the text it last read or saved (`disk`) and warns before a Ctrl+S would overwrite a change another app made (a second Ctrl+S in a row writes).
 

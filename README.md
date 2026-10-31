@@ -12,7 +12,7 @@ shell/
   wm.relic        desktop model: windows, taskbar, Start menu, the apps. No drawing, runs without SDL
   desktop.relic   draws the model with std/graphics and runs the event loop
 tests/
-  shell_*.relic   87 programs that drive wm.relic with fake clicks and keys; each one's output must match its .out file
+  shell_*.relic   88 programs that drive wm.relic with fake clicks and keys; each one's output must match its .out file
 tools/
   run_golden.cmake  golden test runner (Relic's, cut down to what these tests use)
 relic/            Relic, pinned as a git submodule
@@ -23,7 +23,7 @@ docs/
   BUILDING.md    build, test, run, and moving the Relic pin
   TESTING.md     how the tests work, and the list of them by area
   ROADMAP.md     what is done and what is next, with the design calls
-  apps/          one page per part: WINDOWS, TASKBAR, TERMINAL, FILES, EDITOR, IDE, SMALL_APPS
+  apps/          one page per part: WINDOWS, TASKBAR, TERMINAL, FILES, EDITOR, IDE, PAINT, SMALL_APPS
 CONTRIBUTING.md  how changes are made here
 ```
 
@@ -48,7 +48,7 @@ Already cloned without submodules? Run `git submodule update --init`.
 
 `-DRELIC_BUILD_HOST=ON` matters. Since Relic 1.0.7 the default Relic build is C only and makes `relicc` (the compiler to C), not the `relic` program the tests and `relic check` use. The flag builds the C++ host that provides `relic`.
 
-CMake discovers every `tests/*.relic` program and compares its standard output with the matching `.out` file (or empty output if there is no `.out`). It also runs `relic check` on both shell files, 88 tests in all. CI runs the same steps on Linux, macOS and Windows. More in [Building](docs/BUILDING.md) and [Tests](docs/TESTING.md).
+CMake discovers every `tests/*.relic` program and compares its standard output with the matching `.out` file (or empty output if there is no `.out`). It also runs `relic check` on both shell files, 89 tests in all. CI runs the same steps on Linux, macOS and Windows. More in [Building](docs/BUILDING.md) and [Tests](docs/TESTING.md).
 
 ## Run the desktop
 
@@ -69,9 +69,10 @@ The machine these docs were last checked on has no SDL2, so these run steps were
 - **Windows:** click Start, pick an app. Drag a title bar to move a window and its bottom-right corner to resize it; the _ box minimizes and the x box closes. New windows cascade from the top left. See [Windows and the Start menu](docs/apps/WINDOWS.md).
 - **Taskbar:** a button brings its window to the front, or minimizes it if it is already there. Buttons shrink as windows open; from the 14th window on the 640 pixel bar, the extra ones go behind a +N button with a list. See [Taskbar](docs/apps/TASKBAR.md).
 - **Terminal:** `help`, `clear`, `echo`, `apps`, `date`, `pwd`, `cd`, `ls`, `cat`, `mkdir`, `touch`, `write`, `rm` and `mv` on the shared files, plus `echo text > path` and `>>`. See [Terminal](docs/apps/TERMINAL.md).
-- **Files:** click a row, or use Up, Down and Return; Backspace goes up a folder. Opening a file picks it for the next Editor or IDE window. See [Files](docs/apps/FILES.md).
+- **Files:** click a row, or use Up, Down and Return; Backspace goes up a folder. Opening a file picks it for the next Editor or IDE window, or Paint for a `.paint` file. See [Files](docs/apps/FILES.md).
 - **Editor:** arrows, Home, End and Ctrl+arrow move; Shift selects, Ctrl+A selects all; Ctrl+Z undoes up to 500 edits; Ctrl+S saves and warns once if another app changed the file. See [Editor](docs/apps/EDITOR.md).
 - **IDE:** the Editor plus Ctrl+R to run the program in an output pane, Ctrl+E to jump to an error, and an input line when the program reads one (Return sends, Escape stops). Runs stop after 200,000 steps between inputs and cannot change files on the real disk. See [IDE](docs/apps/IDE.md).
+- **Paint:** drag on the canvas to draw; swatches or `1` to `8` pick a color, `e` the eraser, `+` and `-` the brush size, `c` clears, Ctrl+Z undoes, Ctrl+S saves a `.paint` file. See [Paint](docs/apps/PAINT.md).
 - **Clicker and Notes:** a click counter and a one-line note. See [Clicker and Notes](docs/apps/SMALL_APPS.md).
 
 On macOS, Cmd with a letter works as Ctrl with it. Escape closes the Start menu or the +N list, stops an IDE run that waits for input, and otherwise quits, which loses the in-memory files. All the keys are in [Keyboard and mouse](docs/KEYS.md).
@@ -81,7 +82,7 @@ On macOS, Cmd with a letter works as Ctrl with it. Escape closes the Start menu 
 - [Architecture](docs/ARCHITECTURE.md): how the pieces fit together
 - [How the shell is put together](docs/SHELL.md): the model's functions and what an app is
 - [Keyboard and mouse](docs/KEYS.md)
-- The parts: [Windows and the Start menu](docs/apps/WINDOWS.md), [Taskbar](docs/apps/TASKBAR.md), [Terminal](docs/apps/TERMINAL.md), [Files](docs/apps/FILES.md), [Editor](docs/apps/EDITOR.md), [IDE](docs/apps/IDE.md), [Clicker and Notes](docs/apps/SMALL_APPS.md)
+- The parts: [Windows and the Start menu](docs/apps/WINDOWS.md), [Taskbar](docs/apps/TASKBAR.md), [Terminal](docs/apps/TERMINAL.md), [Files](docs/apps/FILES.md), [Editor](docs/apps/EDITOR.md), [IDE](docs/apps/IDE.md), [Paint](docs/apps/PAINT.md), [Clicker and Notes](docs/apps/SMALL_APPS.md)
 - [Building and running](docs/BUILDING.md) and [Tests](docs/TESTING.md)
 - [Roadmap](docs/ROADMAP.md)
 - [Contributing](CONTRIBUTING.md)

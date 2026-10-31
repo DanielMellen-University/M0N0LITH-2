@@ -10,12 +10,14 @@
 #   selected(state)         the line to keep in view (Files)
 #   marks(state)            highlighted [line, from, to] parts (the Editor and IDE selection)
 #   on_escape(state)        takes Escape when no menu is open; true if it used it (the IDE)
+#   on_drag(state, x, y)    the pointer moved with the button held after a press inside (Paint)
+#   paint(state)            colored [x, y, w, h, r, g, b] boxes under the text, in window content coordinates (Paint)
 # visible_lines puts the window's rows and cols in the state of a tail app,
 # and cols in the state of a selected app, before it calls lines().
 # Input comes in as key(d, name) and click(d, x, y), or as a graphics event
 # through handle(d, e). Drag and resize use press (via click), motion, and
-# release. drag on the desktop is none, or {id, mode, ox, oy} with mode "move"
-# or "resize".
+# release. drag on the desktop is none, or {id, mode, ox, oy} with mode "move",
+# "resize" or "app" (a press inside an app with on_drag).
 # When the tabs would be narrower than min_tab, the ones that do not fit go
 # behind a "+N" button at the end of the bar. It opens a list of those windows
 # (d.overflow_open). The focused window always keeps a tab.
@@ -418,6 +420,8 @@ fun _click_in(d, w, x, y)
         w.state.rows = rows_fit(w)
         w.state.clicks = d.clicks
     w.app.on_click(w.state, x - w.x, y - w.y - title_height)
+    if "on_drag" in w.app
+        d.drag = {id: w.id, mode: "app", ox: 0, oy: 0}
     return "app"
 
 # Mouse move while a button may be held. Updates a drag or resize in progress.
@@ -437,6 +441,11 @@ fun motion(d, x, y)
         w.width = x - w.x - d.drag.ox
         w.height = y - w.y - title_height - d.drag.oy
         _clamp_size(d, w)
+    else if d.drag.mode == "app"
+        if w.minimized
+            d.drag = none
+        else
+            w.app.on_drag(w.state, x - w.x, y - w.y - title_height)
 
 # Mouse button up ends any drag or resize.
 fun release(d)
@@ -589,6 +598,22 @@ fun mark_boxes(w)
                 let b = math.min(m[2], cols)
                 if b > a
                     append(out, [w.x + text_left + a * char_width, w.y + title_height + text_top + row * line_height, (b - a) * char_width, line_height])
+    return out
+
+# An app's painted boxes (Paint's canvas and swatches) in desktop coordinates,
+# cut to the window's content so nothing spills over the edges.
+fun paint_boxes(w)
+    let out = []
+    if not "paint" in w.app
+        return out
+    let top = w.y + title_height
+    for b in w.app.paint(w.state)
+        let x0 = math.max(b[0], 0)
+        let y0 = math.max(b[1], 0)
+        let x1 = math.min(b[0] + b[2], w.width)
+        let y1 = math.min(b[1] + b[3], w.height)
+        if x1 > x0 and y1 > y0
+            append(out, [w.x + x0, top + y0, x1 - x0, y1 - y0, b[4], b[5], b[6]])
     return out
 
 # The indexes of the lines visible_lines shows, in order.
@@ -1757,10 +1782,224 @@ fun _ide_key(s, k)
     else
         _editor_key(s, k)
 
+# ---- Paint ----
+# A picture of _paint_w by _paint_h cells, each _paint_cell pixels, with a row
+# of color swatches above it. Press and drag on the canvas to draw with the
+# brush (a square of 1 to 4 cells), the eraser draws white. Keys: 1 to 8 pick a
+# color, e or 0 the eraser, + and - the brush size, c clears, Ctrl+Z undoes a
+# stroke or a clear, Ctrl+S saves. A picture is a text file in the desktop's
+# files: "paint W H" and then H lines of W digits (0 is white). Paint opens the
+# file Files last opened when its name ends in .paint, else /home/picture.paint.
+let _paint_w = 60
+let _paint_h = 36
+let _paint_cell = 4
+let _paint_left = 6     # canvas position in the window's content
+let _paint_top = 40
+let _swatch_top = 22
+let _swatch = 14        # swatch size; one every 18 pixels from _paint_left
+let _paint_undo_keep = 20
+let _paint_colors = [[255, 255, 255], [20, 20, 20], [210, 40, 40], [240, 140, 30], [240, 210, 40], [50, 160, 70], [50, 100, 210], [140, 70, 180], [130, 80, 40]]
+let _paint_names = ["eraser", "black", "red", "orange", "yellow", "green", "blue", "purple", "brown"]
+
+fun _paint_blank()
+    let cells = []
+    for i in 0.._paint_w * _paint_h
+        append(cells, 0)
+    return cells
+
+fun _paint_init()
+    let path = "/home/picture.paint"
+    if strings.ends_with(_shell_open.path, ".paint")
+        path = _shell_open.path
+    let s = {fs: _shell_fs, path: path, cells: _paint_blank(), color: 1, size: 1, last: none, stroke: false, undo: [], status: "new file", foreign: false}
+    if vfs.exists(_shell_fs, path) and not vfs.is_dir(_shell_fs, path)
+        _paint_load(s, vfs.read(_shell_fs, path))
+    return s
+
+# Reads a saved picture into s; a picture of another size keeps the part that fits.
+fun _paint_load(s, text)
+    let rows = strings.split(text, "\n")
+    let head = strings.split(rows[0], " ")
+    if len(head) != 3 or head[0] != "paint"
+        s.status = "not a picture"
+        s.foreign = true
+        return
+    let w = 0
+    let h = 0
+    try
+        w = int(num(head[1]))
+        h = int(num(head[2]))
+    catch e
+        s.status = "not a picture"
+        s.foreign = true
+        return
+    let cells = _paint_blank()
+    for y in 0..math.min(h, _paint_h)
+        if y + 1 < len(rows)
+            let row = rows[y + 1]
+            for x in 0..math.min(math.min(w, len(row)), _paint_w)
+                let k = ord(row[x]) - 48
+                if k >= 0 and k < len(_paint_colors)
+                    cells[y * _paint_w + x] = k
+    s.cells = cells
+    s.status = "open"
+
+fun _paint_text(s)
+    let rows = ["paint {_paint_w} {_paint_h}"]
+    for y in 0.._paint_h
+        let row = ""
+        for x in 0.._paint_w
+            row = row + str(s.cells[y * _paint_w + x])
+        append(rows, row)
+    return strings.join(rows, "\n") + "\n"
+
+# A file that is not a picture is never written over.
+fun _paint_save(s)
+    if s.foreign
+        s.status = "not saved: not a picture"
+        return
+    try
+        vfs.write(s.fs, s.path, _paint_text(s))
+        s.status = "saved"
+    catch e
+        s.status = e.message
+
+fun _paint_snapshot(s)
+    append(s.undo, slice(s.cells, 0, len(s.cells)))
+    if len(s.undo) > _paint_undo_keep
+        remove(s.undo, 0)
+
+# The cell under content point (x, y), or none outside the canvas.
+fun _paint_cell_at(x, y)
+    let cx = math.floor((x - _paint_left) / _paint_cell)
+    let cy = math.floor((y - _paint_top) / _paint_cell)
+    if cx < 0 or cy < 0 or cx >= _paint_w or cy >= _paint_h
+        return none
+    return [int(cx), int(cy)]
+
+# The brush, a square of s.size cells, centered on (cx, cy) as near as it can be.
+fun _paint_stamp(s, cx, cy)
+    let k = s.color
+    let a = int((s.size - 1) / 2)
+    for dy in 0..s.size
+        let y = cy - a + dy
+        if y >= 0 and y < _paint_h
+            for dx in 0..s.size
+                let x = cx - a + dx
+                if x >= 0 and x < _paint_w
+                    s.cells[y * _paint_w + x] = k
+
+# Stamps every cell on the way from one point to the next, so a quick drag leaves no gaps.
+fun _paint_line(s, from, to)
+    let dx = to[0] - from[0]
+    let dy = to[1] - from[1]
+    let n = math.max(math.abs(dx), math.abs(dy))
+    if n == 0
+        _paint_stamp(s, to[0], to[1])
+        return
+    for i in 0..n + 1
+        _paint_stamp(s, from[0] + int(math.round(dx * i / n)), from[1] + int(math.round(dy * i / n)))
+
+# Which swatch (a color index) is at content point (x, y), or none.
+fun _paint_swatch_at(x, y)
+    if y < _swatch_top or y >= _swatch_top + _swatch
+        return none
+    let i = math.floor((x - _paint_left) / 18)
+    if i < 0 or i >= len(_paint_colors) or x - _paint_left - i * 18 >= _swatch
+        return none
+    # swatches run black, red, ... brown, then the eraser last
+    if i == len(_paint_colors) - 1
+        return 0
+    return int(i) + 1
+
+fun _paint_click(s, x, y)
+    s.last = none
+    s.stroke = false
+    let sw = _paint_swatch_at(x, y)
+    if sw != none
+        s.color = sw
+        return
+    let c = _paint_cell_at(x, y)
+    if c == none
+        return
+    _paint_snapshot(s)
+    _paint_stamp(s, c[0], c[1])
+    s.last = c
+    s.stroke = true
+    s.status = "edited"
+
+# Dragging off the canvas pauses the stroke; it goes on from where it comes back.
+fun _paint_drag(s, x, y)
+    if not s.stroke
+        return
+    let c = _paint_cell_at(x, y)
+    if c == none
+        s.last = none
+        return
+    if s.last == none
+        _paint_stamp(s, c[0], c[1])
+    else
+        _paint_line(s, s.last, c)
+    s.last = c
+
+fun _paint_key(s, k)
+    if len(k) == 1 and ord(k) >= 49 and ord(k) <= 56
+        s.color = ord(k) - 48
+    else if k == "e" or k == "0"
+        s.color = 0
+    else if k == "+" or k == "="
+        s.size = math.min(4, s.size + 1)
+    else if k == "-"
+        s.size = math.max(1, s.size - 1)
+    else if k == "c"
+        _paint_snapshot(s)
+        s.cells = _paint_blank()
+        s.status = "edited"
+    else if k == "ctrl+z"
+        if len(s.undo) > 0
+            s.cells = pop(s.undo)
+            s.status = "edited"
+    else if k == "ctrl+s"
+        _paint_save(s)
+
+fun _paint_lines(s) = ["Paint [{s.status}] {_paint_names[s.color]} {s.size} {paths.base(s.path)}"]
+
+# The swatches (the chosen one framed), the canvas frame, white, and then runs
+# of one color along each row, so a picture is a few hundred boxes at most.
+fun _paint_paint(s)
+    let out = []
+    for i in 0..len(_paint_colors)
+        let k = i + 1
+        if i == len(_paint_colors) - 1
+            k = 0
+        let x = _paint_left + i * 18
+        if k == s.color
+            append(out, [x - 2, _swatch_top - 2, _swatch + 4, _swatch + 4, 60, 90, 160])
+        let c = _paint_colors[k]
+        append(out, [x, _swatch_top, _swatch, _swatch, 120, 120, 130])
+        append(out, [x + 1, _swatch_top + 1, _swatch - 2, _swatch - 2, c[0], c[1], c[2]])
+    let cw = _paint_w * _paint_cell
+    let ch = _paint_h * _paint_cell
+    append(out, [_paint_left - 1, _paint_top - 1, cw + 2, ch + 2, 120, 120, 130])
+    append(out, [_paint_left, _paint_top, cw, ch, 255, 255, 255])
+    for y in 0.._paint_h
+        let x = 0
+        while x < _paint_w
+            let k = s.cells[y * _paint_w + x]
+            let e = x + 1
+            while e < _paint_w and s.cells[y * _paint_w + e] == k
+                e = e + 1
+            if k != 0
+                let c = _paint_colors[k]
+                append(out, [_paint_left + x * _paint_cell, _paint_top + y * _paint_cell, (e - x) * _paint_cell, _paint_cell, c[0], c[1], c[2]])
+            x = e
+    return out
+
 let clicker = {name: "Clicker", width: 180, height: 60, init: _clicker_init, lines: _clicker_lines, on_click: _clicker_click, on_key: _clicker_key}
 let notes = {name: "Notes", width: 220, height: 60, init: _notes_init, lines: _notes_lines, on_click: _notes_click, on_key: _notes_key, tail: true, pinned: 1}
 let terminal = {name: "Terminal", width: 280, height: 120, init: _term_init, lines: _term_lines, on_click: _term_click, on_key: _term_key, tail: true, pinned: 0}
 let files_app = {name: "Files", width: 260, height: 140, init: _files_init, lines: _files_lines, on_click: _files_click, on_key: _files_key, selected: _files_selected}
 let editor = {name: "Editor", width: 320, height: 80, init: _editor_init, lines: _editor_lines, on_click: _editor_click, on_key: _editor_key, tail: true, pinned: 1, marks: _editor_marks}
 let ide = {name: "IDE", width: 320, height: 200, init: _ide_init, lines: _ide_lines, on_click: _editor_click, on_key: _ide_key, on_escape: _ide_escape, tail: true, pinned: 1, marks: _editor_marks}
-fun default_apps() = [clicker, notes, terminal, files_app, editor, ide]
+let paint_app = {name: "Paint", width: 256, height: 190, init: _paint_init, lines: _paint_lines, on_click: _paint_click, on_key: _paint_key, on_drag: _paint_drag, paint: _paint_paint}
+fun default_apps() = [clicker, notes, terminal, files_app, editor, ide, paint_app]

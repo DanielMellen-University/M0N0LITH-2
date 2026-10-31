@@ -1,0 +1,144 @@
+# Paint: swatches, brush and eraser, brush size, a drag that leaves no gaps,
+# clear and undo, save to the desktop's files and open again.
+use ../shell/wm
+use std/vfs
+let d = wm.new_desktop(640, 480, wm.default_apps())
+let w = wm.launch(d, wm.paint_app)
+let s = w.state
+# content point (x, y) to desktop coordinates
+fun at(x, y) = [w.x + x, w.y + wm.title_height + y]
+fun press(x, y)
+    let p = at(x, y)
+    return wm.click(d, p[0], p[1])
+fun move(x, y)
+    let p = at(x, y)
+    wm.motion(d, p[0], p[1])
+# the cell (cx, cy) on the canvas, as a content point in its middle
+fun cell(cx, cy) = [6 + cx * 4 + 2, 40 + cy * 4 + 2]
+fun count(k)
+    let n = 0
+    for c in s.cells
+        if c == k
+            n = n + 1
+    return n
+fun row(y, a, b)
+    let out = ""
+    for x in a..b
+        out = out + str(s.cells[y * 60 + x])
+    return out
+
+print(wm.visible_lines(w), len(wm.paint_boxes(w)))
+# a dot, then a drag from (2, 2) to (12, 6) in one move: every cell on the way
+let p = cell(2, 2)
+print(press(p[0], p[1]), d.drag.mode)
+p = cell(12, 6)
+move(p[0], p[1])
+wm.release(d)
+print(count(1), row(2, 0, 14), row(4, 0, 14), row(6, 0, 14))
+# red from its swatch (black, red, ... brown, eraser), size 3
+print(press(6 + 18 + 3, 22 + 3), s.color)
+wm.release(d)
+wm.key(d, "+")
+wm.key(d, "+")
+wm.key(d, "+")
+wm.key(d, "+")
+print(s.size)
+wm.key(d, "-")
+p = cell(30, 20)
+press(p[0], p[1])
+wm.release(d)
+print(count(2), row(19, 28, 33), row(20, 28, 33), row(21, 28, 33), row(22, 28, 33))
+# the eraser (last swatch) takes out part of the black line
+press(6 + 8 * 18 + 3, 22 + 3)
+print(s.color, wm.visible_lines(w))
+p = cell(5, 3)
+press(p[0], p[1])
+wm.release(d)
+print(count(1), count(2))
+# undo the eraser stroke, then the red dot
+wm.key(d, "ctrl+z")
+print(count(1), count(2))
+wm.key(d, "ctrl+z")
+print(count(1), count(2))
+# a drag off the canvas and back in goes on from where it comes back
+wm.key(d, "1")
+wm.key(d, "-")
+wm.key(d, "-")
+p = cell(50, 30)
+press(p[0], p[1])
+move(300, p[1])
+move(cell(55, 30)[0], p[1])
+move(cell(58, 30)[0], p[1])
+wm.release(d)
+print(row(30, 48, 60))
+# a press outside the canvas and a drag in do not draw
+let before = count(1)
+press(100, 10)
+p = cell(40, 10)
+move(p[0], p[1])
+wm.release(d)
+print(count(1) == before)
+# colors by key, the eraser by key, sizes stay 1 to 4
+for k in ["8", "e", "3", "0", "5"]
+    wm.key(d, k)
+    print(k, s.color)
+wm.key(d, "-")
+wm.key(d, "-")
+print(s.size)
+# boxes: runs of one color per row, cut to the window
+print(len(wm.paint_boxes(w)))
+w.width = 100
+w.height = 60
+let inside = true
+for b in wm.paint_boxes(w)
+    if b[0] < w.x or b[1] < w.y + wm.title_height or b[0] + b[2] > w.x + w.width or b[1] + b[3] > w.y + wm.title_height + w.height
+        inside = false
+print(len(wm.paint_boxes(w)), inside)
+# save, clear, undo the clear, and open the saved picture in a new window
+wm.key(d, "ctrl+s")
+print(wm.visible_lines(w))
+let text = vfs.read(s.fs, s.path)
+let newlines = 0
+for c in text
+    if c == "\n"
+        newlines = newlines + 1
+print(slice(text, 0, 11), newlines)
+let saved = count(1)
+wm.key(d, "c")
+print(count(0), s.status)
+wm.key(d, "ctrl+z")
+print(count(1) == saved)
+let w2 = wm.launch(d, wm.paint_app)
+print(w2.state.status, w2.state.cells == s.cells)
+# a file that is not a picture, and one of another size
+vfs.write(s.fs, "/home/bad.paint", "hello\n")
+vfs.write(s.fs, "/home/small.paint", "paint 3 2\n123\n45\n")
+# open a file from Files: the next Paint opens it when its name ends in .paint
+let f = wm.launch(d, wm.files_app)
+fun open_in_files(name)
+    let i = 0
+    for e in vfs.entries(s.fs, "/home")
+        if e[0] == name
+            f.state.sel = i + 1   # row 0 is ".."
+        i = i + 1
+    f.app.on_key(f.state, "return")
+open_in_files("bad.paint")
+let w3 = wm.launch(d, wm.paint_app)
+let blank = true
+for c in w3.state.cells
+    if c != 0
+        blank = false
+print(w3.state.status, w3.state.path, blank)
+w3.app.on_key(w3.state, "5")
+let p3 = cell(1, 1)
+w3.app.on_click(w3.state, p3[0], p3[1])
+w3.app.on_key(w3.state, "ctrl+s")
+print(w3.state.status, [vfs.read(s.fs, "/home/bad.paint")])
+open_in_files("small.paint")
+let w4 = wm.launch(d, wm.paint_app)
+let c4 = w4.state.cells
+print(w4.state.status, c4[0], c4[1], c4[2], c4[3], c4[60], c4[61], c4[62])
+# a save that cannot happen says why
+w4.state.path = "/nope/x.paint"
+wm.key(d, "ctrl+s")
+print(w4.state.status)

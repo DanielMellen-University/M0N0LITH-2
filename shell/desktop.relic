@@ -6,7 +6,8 @@
 # to the front, or minimizes it if it is already in front; click it again to
 # restore. With more windows than tabs fit, a +N button at the end of the bar
 # opens a list of the windows without a tab. Ctrl+S (Cmd+S on macOS) saves in
-# the Editor and the IDE; Ctrl+R runs the IDE's program.
+# the Editor, the IDE and Paint; Ctrl+R runs the IDE's program. In Paint, press
+# and drag on the canvas to draw.
 # Escape closes the Start menu or that list, else stops an IDE run that waits
 # for input, or quits when none of those took it.
 # Input comes as graphics events and wm.handle turns them into app input, so
@@ -32,6 +33,8 @@ fun draw_window(d, w)
     graphics.text(mb[0] + 4, mb[1] + 2, "_", 255, 255, 255)
     # nothing an app draws goes outside its window
     graphics.clip(w.x, w.y + wm.title_height, w.width, w.height)
+    for b in wm.paint_boxes(w)   # Paint's canvas and swatches
+        graphics.rect(b[0], b[1], b[2], b[3], b[4], b[5], b[6])
     let lines = wm.visible_lines(w)
     for b in wm.mark_boxes(w)   # the Editor's selection, behind its text
         draw_box(b, 170, 200, 240)

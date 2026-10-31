@@ -30,7 +30,7 @@ An app is a map of functions (`init`, `lines`, `on_click`, `on_key` and some opt
 Two things in `wm.relic` are module-level, so every window and even every desktop map in the same process shares them:
 
 - `_shell_fs`, one in-memory filesystem from Relic's `std/vfs`. Terminal, Files, the Editor and the IDE all read and write it, so a change in one shows in the others, and each app checks again what is there rather than trusting what it saw last frame. Nothing reaches the real disk.
-- `_shell_open`, the path the next Editor or IDE window opens. Files sets it.
+- `_shell_open`, the path the next Editor or IDE window opens (or Paint, when it ends in `.paint`). Files sets it.
 
 ## The IDE's runs
 
