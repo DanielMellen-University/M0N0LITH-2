@@ -117,6 +117,7 @@ While a run waits for input:
 | R, O | the filled rectangle and filled ellipse |
 | c | clears the canvas |
 | Ctrl+Z | undoes the last stroke, fill, shape or clear, up to 20 |
+| Ctrl+Y | redoes what Ctrl+Z undid, until the next change |
 | Ctrl+S | saves the picture |
 | n | save as: type a name on the status line, Return saves, Backspace deletes, Esc gives up |
 

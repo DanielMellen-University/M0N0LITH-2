@@ -323,3 +323,21 @@ for k in ["F", "L", "B", "E", "R", "O", "N"]
     wk.app.on_key(sk, k)
     append(seen, [sk.tool, sk.color, sk.naming])
 print(seen)
+# Ctrl+Y puts back what Ctrl+Z took, newest first, until the next change
+wo.app.on_key(so, "c")
+so.undo = []
+so.redo = []
+so.color = 3
+so.tool = "brush"
+for c in [[2, 2], [10, 10]]
+    let p = cell(c[0], c[1])
+    wo.app.on_click(so, p[0], p[1])
+let steps = [ocount(3)]
+for k in ["ctrl+z", "ctrl+z", "ctrl+z", "ctrl+y", "ctrl+y", "ctrl+y", "ctrl+z"]
+    wo.app.on_key(so, k)
+    append(steps, ocount(3))
+print(steps)
+let p2 = cell(20, 20)
+wo.app.on_click(so, p2[0], p2[1])
+wo.app.on_key(so, "ctrl+y")
+print(ocount(3), len(so.redo))

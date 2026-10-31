@@ -2039,7 +2039,7 @@ fun _paint_init()
     let path = "/home/picture.paint"
     if strings.ends_with(_shell_open.path, ".paint")
         path = _shell_open.path
-    let s = {fs: _shell_fs, path: path, cells: _paint_blank(), color: 1, size: 1, last: none, stroke: false, undo: [], status: "new file", foreign: false, tool: "brush", anchor: none, base: none, naming: none}
+    let s = {fs: _shell_fs, path: path, cells: _paint_blank(), color: 1, size: 1, last: none, stroke: false, undo: [], redo: [], status: "new file", foreign: false, tool: "brush", anchor: none, base: none, naming: none}
     if vfs.exists(_shell_fs, path) and not vfs.is_dir(_shell_fs, path)
         _paint_load(s, vfs.read(_shell_fs, path))
     return s
@@ -2096,6 +2096,7 @@ fun _paint_snapshot(s)
     append(s.undo, slice(s.cells, 0, len(s.cells)))
     if len(s.undo) > _paint_undo_keep
         remove(s.undo, 0)
+    s.redo = []   # a new change ends what Ctrl+Y could bring back
 
 # The cell under content point (x, y), or none outside the canvas.
 fun _paint_cell_at(x, y)
@@ -2348,7 +2349,14 @@ fun _paint_key(s, k)
         s.status = "edited"
     else if k == "ctrl+z"
         if len(s.undo) > 0
+            append(s.redo, s.cells)
             s.cells = pop(s.undo)
+            s.status = "edited"
+    else if k == "ctrl+y"
+        # what Ctrl+Z took back, newest first, until the next change
+        if len(s.redo) > 0
+            append(s.undo, s.cells)
+            s.cells = pop(s.redo)
             s.status = "edited"
     else if k == "ctrl+s"
         _paint_save(s)
