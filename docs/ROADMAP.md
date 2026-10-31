@@ -5,12 +5,12 @@ M0N0LITH-2 is the MONOLITH 2 desktop written in Relic. The language roadmap is i
 ## Phase 1: Move in
 
 - [x] Shell moved from Relic with its history (`shell/wm.relic`, `shell/desktop.relic`, `shell_wm` test)
-- [x] Relic pinned as a submodule; CI builds it (with the host, `-DRELIC_BUILD_HOST=ON`) and runs the tests on Linux, macOS and Windows. Pin at Relic 1.0.45 (`ef22fd0`)
+- [x] Relic pinned as a submodule; CI builds it (with the host, `-DRELIC_BUILD_HOST=ON`) and runs the tests on Linux, macOS and Windows. Pin at Relic 1.0.45 (`ef22fd0`); the pin moved six times on Oct 30 2026 alone (1.0.40 to 1.0.45), each in a `Pin Relic` commit that names what it brings. How to move it: [Building](BUILDING.md#moving-to-a-newer-relic)
 
 ## Phase 2: Desktop shell
 
-- [x] Window manager, taskbar and Start menu: windows raise, close, drag, resize and minimize (the _ box, or the front window's taskbar button; click the button again to restore); taskbar buttons raise, and on the 640 pixel desktop, past 13 windows the extra ones go behind a +N button with a list; Start menu launches the apps. Tests `shell_wm`, `shell_minimize` and `shell_taskbar_overflow`
-- [x] Apps share one in-memory filesystem (`std/vfs` from Relic)
+- [x] Window manager, taskbar and Start menu: windows raise, close, drag, resize and minimize (the _ box, or the front window's taskbar button; click the button again to restore); taskbar buttons raise, and on the 640 pixel desktop, past 13 windows the extra ones go behind a +N button with a list; Start menu launches the apps. Tests `shell_wm`, `shell_minimize`, `shell_taskbar_*` and `shell_overflow_*`; on narrow desktops the buttons and the +N button never overlap (Oct 30). See [Windows](apps/WINDOWS.md) and [Taskbar](apps/TASKBAR.md)
+- [x] Apps share one in-memory filesystem (`std/vfs` from Relic); Terminal, Files, the Editor and the IDE all use it
 
 ## Phase 3: Apps as proof
 
