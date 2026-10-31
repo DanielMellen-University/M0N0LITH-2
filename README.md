@@ -48,7 +48,7 @@ Already cloned without submodules? Run `git submodule update --init`.
 
 `-DRELIC_BUILD_HOST=ON` matters. Since Relic 1.0.7 the default Relic build is C only and makes `relicc` (the compiler to C), not the `relic` program the tests and `relic check` use. The flag builds the C++ host that provides `relic`.
 
-CMake discovers every `tests/*.relic` program and compares its standard output with the matching `.out` file (or empty output if there is no `.out`). It also runs `relic check` on both shell files. CI runs the same steps on Linux, macOS and Windows.
+CMake discovers every `tests/*.relic` program and compares its standard output with the matching `.out` file (or empty output if there is no `.out`). It also runs `relic check` on both shell files, 88 tests in all. CI runs the same steps on Linux, macOS and Windows. More in [Building](docs/BUILDING.md) and [Tests](docs/TESTING.md).
 
 ## Run the desktop
 
@@ -78,8 +78,13 @@ On macOS, Cmd with a letter works as Ctrl with it. Escape closes the Start menu 
 
 ## Docs
 
-- [How the shell is put together](docs/SHELL.md)
+- [Architecture](docs/ARCHITECTURE.md): how the pieces fit together
+- [How the shell is put together](docs/SHELL.md): the model's functions and what an app is
+- [Keyboard and mouse](docs/KEYS.md)
+- The parts: [Windows and the Start menu](docs/apps/WINDOWS.md), [Taskbar](docs/apps/TASKBAR.md), [Terminal](docs/apps/TERMINAL.md), [Files](docs/apps/FILES.md), [Editor](docs/apps/EDITOR.md), [IDE](docs/apps/IDE.md), [Clicker and Notes](docs/apps/SMALL_APPS.md)
+- [Building and running](docs/BUILDING.md) and [Tests](docs/TESTING.md)
 - [Roadmap](docs/ROADMAP.md)
+- [Contributing](CONTRIBUTING.md)
 - Relic language docs: [Relic/docs](https://github.com/DanielMellen-University/Relic/tree/main/docs)
 
 ## License
