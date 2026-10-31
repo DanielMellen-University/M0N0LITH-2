@@ -3,6 +3,7 @@
 # Ctrl+Delete remove a word (as far as Ctrl+Left and Ctrl+Right go). Home
 # stops after the leading spaces first.
 use ../shell/wm
+use std/strings
 let d = wm.new_desktop(640, 480, wm.default_apps())
 let e = wm.launch(d, wm.editor)
 let s = e.state
@@ -36,3 +37,22 @@ s.mark = none
 print(keys(["home"]), keys(["home"]), keys(["home"]), keys(["right", "right", "home"]))
 s.back = 0
 print(keys(["home"]), keys(["shift+home"]), s.mark)
+# Page Down and Page Up: the lines that show under the title, less one; with
+# Shift they select
+let many = ""
+for i in 0..30
+    many = many + "line " + str(i) + "\n"
+s.text = many
+s.back = len(many)
+s.mark = none
+wm.visible_lines(e)
+fun line_no() = len(strings.split(slice(s.text, 0, len(s.text) - s.back), "\n")) - 1
+let at = [s.rows]
+for k in ["pagedown", "pagedown", "pageup", "pagedown", "pagedown", "pagedown", "pagedown", "pagedown", "pageup"]
+    e.app.on_key(s, k)
+    append(at, line_no())
+print(at)
+e.app.on_key(s, "ctrl+home")
+e.app.on_key(s, "shift+pagedown")
+print(line_no(), s.mark == len(s.text))
+print(wm.key_of_event({type: "key_down", key: "pagedown", ctrl: false, shift: true}))

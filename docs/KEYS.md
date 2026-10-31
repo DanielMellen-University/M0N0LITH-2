@@ -71,8 +71,9 @@ The commands are in [the Terminal doc](apps/TERMINAL.md).
 | Home, End | the first character after the leading spaces (Home again: the very start), or the end of the line |
 | Ctrl+Left, Ctrl+Right | the start of the word before, or the end of the word after |
 | Ctrl+Home, Ctrl+End | the start or end of the file |
+| Page Up, Page Down | a window of lines less one, up or down |
 | Ctrl+Backspace, Ctrl+Delete | removes the selection, or the word before or after the cursor |
-| Shift with an arrow, Home or End | selects from the cursor |
+| Shift with an arrow, Home, End, Page Up or Page Down | selects from the cursor |
 | Return | a new line with the same leading spaces (in the IDE 4 more after `if`, `else`, `for`, `while`, `fun`, `try`, `catch`) |
 | Tab | spaces to the next multiple of 4 columns, over any selection |
 | Shift+Tab | takes one indent (to the multiple of 4 before) off the line |

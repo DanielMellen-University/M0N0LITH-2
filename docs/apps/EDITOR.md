@@ -23,8 +23,9 @@ The status is one of:
 | Home, End | Home goes to the first character after the line's leading spaces, and from there to the very start; End goes to the end of the line |
 | Ctrl+Left, Ctrl+Right | the start of the word before the cursor, or the end of the word after it. Letters, digits, `_` and anything past ASCII count as word characters |
 | Ctrl+Home, Ctrl+End | the start or end of the file |
+| Page Up, Page Down | as many lines up or down as the window shows less one, so one stays in view; with Shift they select |
 | Ctrl+Backspace, Ctrl+Delete | removes the selection, or back to where Ctrl+Left goes, or on to where Ctrl+Right goes |
-| Shift with an arrow, Home or End | selects from the cursor |
+| Shift with an arrow, Home, End, Page Up or Page Down | selects from the cursor |
 | Return | a new line that starts with the same spaces as the one before (up to the cursor); in the IDE, 4 more after a line that opens a block (`if`, `else`, `for`, `while`, `fun` without `=`, `try`, `catch`) |
 | Tab | spaces to the next multiple of 4 columns (Relic's indent), over any selection; never a tab character |
 | Shift+Tab | takes the line's leading spaces back to the multiple of 4 before; the cursor stays on its character |

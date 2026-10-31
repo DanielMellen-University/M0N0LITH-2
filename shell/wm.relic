@@ -488,7 +488,7 @@ fun key(d, k)
 # Keys that are not typed text; the apps handle these by name. Letters, digits,
 # punctuation and space come as text events, which carry shift, layout and Unicode.
 let _named_keys = ["return", "backspace", "tab", "up", "down", "left", "right", "delete", "home", "end", "pageup", "pagedown"]
-let _shift_keys = ["left", "right", "up", "down", "home", "end", "tab"]   # shift+left and so on select in the Editor; shift+tab takes out an indent
+let _shift_keys = ["left", "right", "up", "down", "home", "end", "tab", "pageup", "pagedown"]   # shift+left and so on select in the Editor; shift+tab takes out an indent
 let _modifier_keys = ["left ctrl", "right ctrl", "left shift", "right shift", "left alt", "right alt", "left gui", "right gui"]
 
 # The app key for a key_down event, or none when it needs no key. With ctrl held
@@ -1508,6 +1508,17 @@ fun _editor_moved(s, k)
         return _word_right(s.text, pos)
     if k == "ctrl+home"
         return 0
+    if k == "pageup" or k == "pagedown"
+        # as many lines as show under the title, less one, so one stays in view
+        let step = "up"
+        if k == "pagedown"
+            step = "down"
+        let at = pos
+        for i in 0..math.max(1, s.rows - 2)
+            _editor_set_pos(s, at)
+            at = _editor_moved(s, step)
+        _editor_set_pos(s, pos)
+        return at
     if k == "ctrl+end"
         return len(s.text)
     if k == "end"
@@ -1809,10 +1820,10 @@ fun _editor_key(s, k)
     else if k == "ctrl+backspace" or k == "ctrl+delete"
         s.overwrite = false
         _editor_delete_word(s, k)
-    else if k in ["shift+left", "shift+right", "shift+up", "shift+down", "shift+home", "shift+end"]
+    else if k in ["shift+left", "shift+right", "shift+up", "shift+down", "shift+home", "shift+end", "shift+pageup", "shift+pagedown"]
         s.overwrite = false
         _editor_select(s, slice(k, 6, len(k)))
-    else if k in ["left", "right", "up", "down", "home", "end", "ctrl+left", "ctrl+right", "ctrl+home", "ctrl+end"]
+    else if k in ["left", "right", "up", "down", "home", "end", "ctrl+left", "ctrl+right", "ctrl+home", "ctrl+end", "pageup", "pagedown"]
         s.overwrite = false
         _editor_move(s, k)
     else
