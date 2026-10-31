@@ -616,13 +616,25 @@ fun paint_boxes(w)
     if not "paint" in w.app
         return out
     let top = w.y + title_height
+    # plain comparisons, not math.max / math.min: a busy picture is ~2,000 boxes a frame
+    let wx = w.x
+    let ww = w.width
+    let wh = w.height
     for b in w.app.paint(w.state)
-        let x0 = math.max(b[0], 0)
-        let y0 = math.max(b[1], 0)
-        let x1 = math.min(b[0] + b[2], w.width)
-        let y1 = math.min(b[1] + b[3], w.height)
+        let x0 = b[0]
+        let y0 = b[1]
+        let x1 = x0 + b[2]
+        let y1 = y0 + b[3]
+        if x0 < 0
+            x0 = 0
+        if y0 < 0
+            y0 = 0
+        if x1 > ww
+            x1 = ww
+        if y1 > wh
+            y1 = wh
         if x1 > x0 and y1 > y0
-            append(out, [w.x + x0, top + y0, x1 - x0, y1 - y0, b[4], b[5], b[6]])
+            append(out, [wx + x0, top + y0, x1 - x0, y1 - y0, b[4], b[5], b[6]])
     return out
 
 # The indexes of the lines visible_lines shows, in order.
