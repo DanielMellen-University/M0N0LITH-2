@@ -67,6 +67,7 @@ The commands are in [the Terminal doc](apps/TERMINAL.md).
 | Shift with an arrow, Home or End | selects from the cursor |
 | Return | a new line with the same leading spaces (in the IDE 4 more after `if`, `else`, `for`, `while`, `fun`, `try`, `catch`) |
 | Tab | spaces to the next multiple of 4 columns, over any selection |
+| Shift+Tab | takes one indent (to the multiple of 4 before) off the line |
 | Ctrl+A | selects everything |
 | Ctrl+C, Ctrl+X | copies, or cuts, the selection to the desktop's clipboard (shared by all windows, not the system's) |
 | Ctrl+V | pastes it, over any selection |

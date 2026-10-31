@@ -2,3 +2,6 @@
 11 ["    a   bcd \n    xy"]
 ["if x\nabc "]
 ["fun f()\n        "]
+["a\n    b\nc"] 3 ["a\nb\nc"] 3 ["a\nb\nc"] 13
+["a\n    b\nc"]
+shift+tab tab

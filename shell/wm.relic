@@ -488,7 +488,7 @@ fun key(d, k)
 # Keys that are not typed text; the apps handle these by name. Letters, digits,
 # punctuation and space come as text events, which carry shift, layout and Unicode.
 let _named_keys = ["return", "backspace", "tab", "up", "down", "left", "right", "delete", "home", "end"]
-let _shift_keys = ["left", "right", "up", "down", "home", "end"]   # shift+left and so on select in the Editor
+let _shift_keys = ["left", "right", "up", "down", "home", "end", "tab"]   # shift+left and so on select in the Editor; shift+tab takes out an indent
 let _modifier_keys = ["left ctrl", "right ctrl", "left shift", "right shift", "left alt", "right alt", "left gui", "right gui"]
 
 # The app key for a key_down event, or none when it needs no key. With ctrl held
@@ -1405,6 +1405,22 @@ fun _editor_indent(s)
             pad = pad + "    "
     return pad
 
+# Shift+Tab takes the line's leading spaces back to the multiple of 4 before
+# (one undo step); the cursor stays on the same character.
+fun _editor_dedent(s)
+    let pos = _editor_pos(s)
+    let start = _line_start(s.text, pos)
+    let n = 0
+    while start + n < len(s.text) and s.text[start + n] == " "
+        n = n + 1
+    let r = n % 4
+    if r == 0
+        r = math.min(4, n)
+    if r == 0
+        return
+    _editor_change(s, start, r, "")
+    _editor_set_pos(s, math.max(start, pos - r))
+
 # Backspace removes the selection, or the character before the cursor.
 fun _editor_backspace(s)
     let sel = _editor_selection(s)
@@ -1702,6 +1718,9 @@ fun _editor_key(s, k)
         s.overwrite = false
         if _clip.text != ""
             _editor_type(s, _clip.text)
+    else if k == "shift+tab"
+        s.overwrite = false
+        _editor_dedent(s)
     else if k in ["shift+left", "shift+right", "shift+up", "shift+down", "shift+home", "shift+end"]
         s.overwrite = false
         _editor_select(s, slice(k, 6, len(k)))

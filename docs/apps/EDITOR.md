@@ -25,6 +25,7 @@ The status is one of:
 | Shift with an arrow, Home or End | selects from the cursor |
 | Return | a new line that starts with the same spaces as the one before (up to the cursor); in the IDE, 4 more after a line that opens a block (`if`, `else`, `for`, `while`, `fun` without `=`, `try`, `catch`) |
 | Tab | spaces to the next multiple of 4 columns (Relic's indent), over any selection; never a tab character |
+| Shift+Tab | takes the line's leading spaces back to the multiple of 4 before; the cursor stays on its character |
 | Ctrl+A | selects everything |
 | Ctrl+C, Ctrl+X | copies, or cuts, the selection to the desktop's clipboard (nothing without a selection) |
 | Ctrl+V | pastes the clipboard at the cursor, over any selection; a cut and a paste are one undo step each |

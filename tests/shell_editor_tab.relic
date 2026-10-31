@@ -1,5 +1,6 @@
 # Tab in the Editor (and so the IDE) types spaces to the next multiple of 4,
 # over any selection, in one undo step; it never puts in a tab character.
+# Shift+Tab takes an indent back out.
 use ../shell/wm
 let d = wm.new_desktop(640, 480, wm.default_apps())
 let e = wm.launch(d, wm.editor)
@@ -23,3 +24,17 @@ i.state.back = 0
 wm.key(d, "return")
 wm.key(d, "tab")
 print([i.state.text])
+# Shift+Tab takes the line's leading spaces back to the multiple of 4 before,
+# keeping the cursor on its character; with none it does nothing
+e.state.text = "a\n      b\nc"
+e.state.back = 3
+e.state.mark = none
+fun ekeys(ks)
+    for k in ks
+        e.app.on_key(e.state, k)
+    return [e.state.text]
+print(ekeys(["shift+tab"]), e.state.back, ekeys(["shift+tab"]), e.state.back, ekeys(["shift+tab"]), len(e.state.undo))
+ekeys(["ctrl+z"])
+print([e.state.text])
+# the desktop names Shift with Tab "shift+tab"
+print(wm.key_of_event({type: "key_down", key: "tab", ctrl: false, shift: true}), wm.key_of_event({type: "key_down", key: "tab", ctrl: false, shift: false}))
