@@ -65,6 +65,7 @@ The commands are in [the Terminal doc](apps/TERMINAL.md).
 | Home, End | the start or end of the line |
 | Ctrl+Left, Ctrl+Right | the start of the word before, or the end of the word after |
 | Shift with an arrow, Home or End | selects from the cursor |
+| Tab | spaces to the next multiple of 4 columns, over any selection |
 | Ctrl+A | selects everything |
 | Ctrl+C, Ctrl+X | copies, or cuts, the selection to the desktop's clipboard (shared by all windows, not the system's) |
 | Ctrl+V | pastes it, over any selection |

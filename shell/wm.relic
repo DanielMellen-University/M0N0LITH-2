@@ -1691,6 +1691,13 @@ fun _editor_key(s, k)
         s.overwrite = false   # the second Ctrl+S has to come right after the warning
         if k == "return" or k == "enter"
             _editor_type(s, "\n")
+        else if k == "tab"
+            # spaces to the next multiple of 4 (Relic's indent); never a tab character
+            let pos = _editor_pos(s)
+            if _editor_selection(s) != none
+                pos = _editor_selection(s)[0]
+            let col = pos - _line_start(s.text, pos)
+            _editor_type(s, strings.repeat(" ", 4 - col % 4))
         else if k == "backspace"
             _editor_backspace(s)
         else if k == "delete"

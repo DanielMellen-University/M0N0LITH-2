@@ -31,7 +31,7 @@ show("again")
 e.state.text = ""
 wm.key(d, "backspace")
 wm.key(d, "up")
-wm.key(d, "tab")
+wm.key(d, "escape")
 show("no edits")
 # saving keeps the steps; undo after a save is an edit to save again
 vfs.write(e.state.fs, "/home/u.txt", "")

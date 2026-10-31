@@ -1,0 +1,25 @@
+# Tab in the Editor (and so the IDE) types spaces to the next multiple of 4,
+# over any selection, in one undo step; it never puts in a tab character.
+use ../shell/wm
+let d = wm.new_desktop(640, 480, wm.default_apps())
+let e = wm.launch(d, wm.editor)
+let s = e.state
+s.text = ""
+fun keys(ks)
+    for k in ks
+        wm.key(d, k)
+    return [s.text]
+print(keys(["tab"]), keys(["a", "tab"]), keys(["b", "c", "d", "tab"]), keys(["return", "x", "y", "tab"]))
+print(len(s.undo), keys(["ctrl+z"]))
+# with a selection the spaces replace it, counted from where it starts
+s.text = "if x\nabcdef"
+s.back = 0
+s.mark = none
+print(keys(["shift+left", "shift+left", "shift+left", "tab"]))
+# the IDE has it too
+let i = wm.launch(d, wm.ide)
+i.state.text = "fun f()"
+i.state.back = 0
+wm.key(d, "return")
+wm.key(d, "tab")
+print([i.state.text])
