@@ -12,98 +12,19 @@ shell/
   wm.relic        desktop model: windows, taskbar, Start menu, the apps. No drawing, runs without SDL
   desktop.relic   draws the model with std/graphics and runs the event loop
 tests/
-  shell_wm.relic  drives wm.relic with fake clicks and keys; output must match shell_wm.out
-  shell_minimize.relic  minimize and restore from the taskbar and the _ box
-  shell_lifecycle.relic  window ids, focus and tab order through lifecycle changes
-  shell_terminal.relic  Terminal commands: extra spaces, folders, redirects, errors
-  shell_start_menu.relic  the Start button opens and closes the menu
-  shell_menu_focus.relic  keyboard focus while the Start menu or the +N list is open
-  shell_menu_edges.relic  Start menu row and taskbar hit boundaries
-  shell_many_windows.relic  windows cascade and wrap, taskbar tabs shrink to fit
-  shell_taskbar_overflow.relic  the +N button and hidden-windows list at 14 to 300 windows
-  shell_taskbar_narrow.relic  taskbar tabs and the +N button on narrow desktops and with many windows
-  shell_overflow_edges.relic  overflow threshold and list row boundaries
-  shell_overflow_lifecycle.relic  focus and stacking as windows change with the list open
-  shell_overflow_all_minimized.relic  overflow tabs and restore when no window is focused
-  shell_overflow_limit.relic  the last visible row and the 200-row list limit
-  shell_overflow_titles.relic  empty, long and non-ASCII window names in overflow
-  shell_overflow_speed.relic  the hidden-windows list stays quick at 300 windows
-  shell_launch_small.relic  cascaded windows fit a small desktop
-  shell_cascade_gaps.relic  a new window does not open on top of another after closes
-  shell_files_click.relic  clicking rows in Files
-  shell_files_back.relic  Backspace and ".." select the folder you came from
-  shell_files_double_click.relic  the second click of a double-click is ignored
-  shell_files_boundaries.relic  root, empty folders, unusual names and reopening Files
-  shell_files_long_names.relic  clipped names open the full path and deleted selections do not open replacements
-  shell_files_title.relic  Files keeps the end of a long folder path in its title
-  shell_files_hidden.relic  clicks below the visible Files rows do nothing
-  shell_drag_resize.relic  dragging and resizing keep windows reachable
-  shell_resize_offset.relic  resizing follows the point grabbed in the handle
-  shell_small_apps.relic  Editor, Notes and Clicker
-  shell_clicker_edges.relic  rapid input and Clicker state after reopening
-  shell_app_focus.relic  Notes and Clicker state across focus and window controls
-  shell_shared_desktops.relic  shared filesystem and Editor path across desktop maps
-  shell_notes_resize.relic  Notes text clipping and edits across resizes
-  shell_notes_input_edges.relic  single-line input and reopening Notes
-  shell_editor_title.relic  Editor title keeps the file name and the status in view
-  shell_editor_open_status.relic  Editor status on opening: open, new file, or why not
-  shell_editor_stale.relic  Editor reports a file removed before opening
-  shell_editor_edges.relic  Editor empty buffers, line edges and failed saves
-  shell_editor_disk_changed.relic  Ctrl+S warns once when another app changed the file
-  shell_editor_undo.relic  Ctrl+Z undoes edits one step at a time, up to 500
-  shell_editor_select.relic  Shift+arrows and Ctrl+A select; typing and Backspace replace the selection
-  shell_editor_cursor.relic  arrows, Home, End and Ctrl+arrow word jumps move the cursor
-  shell_editor_delete.relic  Delete removes the next character or the selection; Ctrl+Z puts it back
-  shell_ide.relic  IDE: run with Ctrl+R, output pane, error line and Ctrl+E, stopped loops, refused host calls, `use` of desktop files, input lines and Esc
-  shell_editor_long_line.relic  long-line clipping, ignored movement and saving the full buffer
-  shell_editor_replaced.relic  saving after a file is removed or replaced by a folder
-  shell_files_stale.relic  Files when another app removed the selected file
-  shell_files_ancestor.relic  Files and Terminal recover after an ancestor folder moves
-  shell_files_selection.relic  Files keeps its selection across directory changes
-  shell_files_changed_click.relic  Files ignores a click on rows changed since drawing
-  shell_files_resize_click.relic  Files waits for a redraw after a resize before accepting a row click
-  shell_input.relic  graphics events turned into keys and clicks (ctrl+s, text, the mouse)
-  shell_event_keys.relic  named keys, modifiers and ignored events
-  shell_altgr.relic  AltGr (Ctrl+Alt) typing is text, not Ctrl+S
-  shell_cmd_keys.relic  Cmd with a letter acts like Ctrl (Cmd+S, Cmd+Z, Cmd+A on macOS)
-  shell_escape.relic  Escape closes the Start menu or +N list before it quits
-  shell_held_keys.relic  repeated key_down events from held keys, and key_up
-  shell_mouse_buttons.relic  left and right mouse buttons during a drag
-  shell_clip.relic  text cut to the window, Files scrolling to the selection
-  shell_render_modes.relic  clipping and row selection for plain and tail apps
-  shell_big_file.relic  the Editor on a file of thousands of lines stays quick
-  shell_last_lines.relic  Editor line splitting at empty and trailing newline boundaries
-  shell_last_lines_long.relic  the Editor on a 200,000-character line stays quick
-  shell_terminal_history.relic  the Terminal keeps its last 200 lines
-  shell_terminal_errors.relic  Terminal error messages (mv, mkdir, cat, paths through a file)
-  shell_terminal_touch.relic  touch preserves existing entries and creates empty files
-  shell_terminal_write.relic  write replaces content and handles empty text
-  shell_terminal_cat_blank.relic  cat preserves blank lines in files
-  shell_terminal_cat_big.relic  cat of a 100,000-line file stays quick
-  shell_terminal_extra_words.relic  clear, apps, date and pwd reject extra words
-  shell_terminal_dash_paths.relic  write and echo > refuse paths starting with -
-  shell_terminal_why.relic  errors name the missing folder or the part that is a file
-  shell_terminal_slash.relic  a path ending in / must be a folder
-  shell_terminal_redirect.relic  echo redirects and missing destinations
-  shell_terminal_redirect_errors.relic  failed redirects and output after clear
-  shell_terminal_edges.relic  Terminal path and input boundaries
-  shell_terminal_root.relic  root and normalized path operations
-  shell_terminal_stale.relic  Terminal recovers when its current folder is removed
-  shell_terminal_ls.relic  Terminal packs directory listings to the window width
-  shell_terminal_wrap.relic  Terminal wraps long lines to the window width
-  shell_terminal_frame.relic  Terminal builds only the rows that fit, matching a full wrap
-  shell_help.relic  Terminal help and app names match the available commands and apps
-  shell_title.relic  window titles fit beside the title bar buttons
-  shell_date.relic  the date command and its UTC format
-  shell_missed_release.relic  a lost mouse-up does not leave a drag running
-  shell_outside_click.relic  presses outside the desktop do not hit its controls
-  shell_fuzz.relic  random input against the window model, checking invariants each step
-  shell_apps_fuzz.relic  random Terminal commands with Files and Editor on the same filesystem
+  shell_*.relic   87 programs that drive wm.relic with fake clicks and keys; each one's output must match its .out file
 tools/
   run_golden.cmake  golden test runner (Relic's, cut down to what these tests use)
 relic/            Relic, pinned as a git submodule
-docs/SHELL.md  the model, the input calls, what an app is
-docs/ROADMAP.md
+docs/
+  SHELL.md       the model, the input calls, what an app is
+  ARCHITECTURE.md  how the desktop, Relic and the self-hosted interpreter fit together
+  KEYS.md        every key and click
+  BUILDING.md    build, test, run, and moving the Relic pin
+  TESTING.md     how the tests work, and the list of them by area
+  ROADMAP.md     what is done and what is next, with the design calls
+  apps/          one page per part: WINDOWS, TASKBAR, TERMINAL, FILES, EDITOR, IDE, SMALL_APPS
+CONTRIBUTING.md  how changes are made here
 ```
 
 ## How it depends on Relic
