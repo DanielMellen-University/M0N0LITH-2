@@ -2,7 +2,7 @@
 
 Two files in `shell/`:
 
-- `wm.relic` is the model: windows, the taskbar, the Start menu and the five apps. It draws nothing, so the tests run it without SDL.
+- `wm.relic` is the model: windows, the taskbar, the Start menu and the six apps (Clicker, Notes, Terminal, Files, Editor and IDE, in Start menu order). It draws nothing, so the tests run it without SDL.
 - `desktop.relic` draws the model with `std/graphics` and runs the event loop. It is the only file that needs SDL.
 
 ## The model
