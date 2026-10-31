@@ -1,0 +1,36 @@
+# Files: Home and End go to the first and last row, and a letter or digit to
+# the next name that starts with it (any case, going round, never "..").
+use ../shell/wm
+use std/vfs
+let d = wm.new_desktop(640, 480, wm.default_apps())
+let f = wm.launch(d, wm.files_app)
+for name in ["apple.txt", "Avocado.txt", "banana.txt", "cherry.txt", "2026.txt"]
+    vfs.write(f.state.fs, "/tmp/" + name, "x")
+vfs.make_dir(f.state.fs, "/tmp/art")
+f.state.path = "/tmp"
+fun sel()
+    return f.state.sel
+print(wm.visible_lines(f))
+wm.key(d, "end")
+print(sel())
+wm.key(d, "home")
+print(sel())
+let seen = []
+for k in ["a", "a", "a", "a", "B", "c", "c", "2", "z", ".", "/"]
+    wm.key(d, k)
+    append(seen, sel())
+print(seen)
+# in the root there is no "..": Home is the first name
+f.state.path = "/"
+f.state.sel = 0
+wm.key(d, "end")
+wm.key(d, "home")
+wm.key(d, "t")
+print(wm.visible_lines(f), sel())
+# an empty folder: nothing to go to
+vfs.make_dir(f.state.fs, "/tmp/empty")
+f.state.path = "/tmp/empty"
+f.state.sel = 0
+wm.key(d, "end")
+wm.key(d, "x")
+print(wm.visible_lines(f), sel())

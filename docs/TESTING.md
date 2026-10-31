@@ -15,7 +15,7 @@ One test: `ctest --test-dir build -C Release -R golden_shell_ide`. Or run it str
 
 ## How they are checked
 
-CMake finds every `tests/*.relic` and adds it as `golden_<name>`. `tools/run_golden.cmake` runs it from `tests/`, and it passes when it exits with 0 and its standard output matches `<name>.out` exactly (Windows line endings are ignored). A test with no `.out` file must print nothing. One more test, `check_shell`, runs `relic check` on `wm.relic` and `desktop.relic`, which catches syntax errors and undefined names in the drawing code no test runs. That is 92 tests in all, and CI runs them on Linux, macOS and Windows.
+CMake finds every `tests/*.relic` and adds it as `golden_<name>`. `tools/run_golden.cmake` runs it from `tests/`, and it passes when it exits with 0 and its standard output matches `<name>.out` exactly (Windows line endings are ignored). A test with no `.out` file must print nothing. One more test, `check_shell`, runs `relic check` on `wm.relic` and `desktop.relic`, which catches syntax errors and undefined names in the drawing code no test runs. That is 93 tests in all, and CI runs them on Linux, macOS and Windows.
 
 `shell_fuzz`, `shell_apps_fuzz` and `shell_events_fuzz` use fixed seeds, so their output is the same on every run. `shell_fuzz` checks the window model's invariants after every random step on two desktop sizes; `shell_apps_fuzz` sends random commands from two Terminals while Files and the Editor work on the same filesystem.
 
@@ -123,6 +123,7 @@ Write `tests/shell_<topic>.relic`, run it, read its output, and save that as `te
 | `shell_files_boundaries` | root, empty folders, unusual names and reopening Files |
 | `shell_files_long_names` | clipped names open the full path and deleted selections do not open replacements |
 | `shell_files_title` | Files keeps the end of a long folder path in its title |
+| `shell_files_keys` | Home, End, and a letter or digit going to the next name with it (any case, round, never `..`), the root, an empty folder |
 | `shell_files_hidden` | clicks below the visible Files rows do nothing |
 | `shell_files_stale` | Files when another app removed the selected file |
 | `shell_files_ancestor` | Files and Terminal recover after an ancestor folder moves |
