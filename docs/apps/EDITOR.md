@@ -17,7 +17,7 @@ The status is one of:
 | Input | What it does |
 |---|---|
 | Typing, Return | insert at the cursor, replacing any selection |
-| Backspace | removes the selection, or the character before the cursor |
+| Backspace | removes the selection, or the character before the cursor; in a line's leading spaces, back to the multiple of 4 before (one Tab) |
 | Delete | removes the selection, or the character after the cursor |
 | Left, Right, Up, Down | move the cursor. Up and Down keep the column, or go to the end of a shorter line. With a selection, Left and Right go to its start or end |
 | Home, End | Home goes to the first character after the line's leading spaces, and from there to the very start; End goes to the end of the line |

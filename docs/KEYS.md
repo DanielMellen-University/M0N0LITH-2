@@ -64,7 +64,7 @@ The commands are in [the Terminal doc](apps/TERMINAL.md).
 | Input | What it does |
 |---|---|
 | Typing, Return | insert at the cursor, replacing any selection |
-| Backspace | removes the selection, or the character before the cursor |
+| Backspace | removes the selection, or the character before the cursor; in a line's leading spaces, back to the multiple of 4 before (one Tab) |
 | Delete | removes the selection, or the character after the cursor |
 | Left, Right, Up, Down | move the cursor; with a selection, Left and Right go to its start or end |
 | Home, End | the first character after the leading spaces (Home again: the very start), or the end of the line |

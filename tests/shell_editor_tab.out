@@ -5,3 +5,7 @@
 ["a\n    b\nc"] 3 ["a\nb\nc"] 3 ["a\nb\nc"] 13
 ["a\n    b\nc"]
 shift+tab tab
+["      x\n"] ["      x"] ["      "]
+["    x"] ["x"] ["x"]
+["a  \t"]
+["\t  "] true

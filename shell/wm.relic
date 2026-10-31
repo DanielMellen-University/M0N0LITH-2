@@ -1443,13 +1443,23 @@ fun _editor_dedent(s)
     _editor_change(s, start, r, "")
     _editor_set_pos(s, math.max(start, pos - r))
 
-# Backspace removes the selection, or the character before the cursor.
+# Backspace removes the selection, or the character before the cursor. In the
+# leading spaces of a line it takes them back to the multiple of 4 before, so
+# it undoes a Tab in one press.
 fun _editor_backspace(s)
     let sel = _editor_selection(s)
+    let pos = _editor_pos(s)
     if sel != none
         _editor_change(s, sel[0], sel[1] - sel[0], "")
-    else if _editor_pos(s) > 0
-        _editor_change(s, _editor_pos(s) - 1, 1, "")
+    else if pos > 0
+        let start = _line_start(s.text, pos)
+        let col = pos - start
+        let n = 1
+        if col > 0 and slice(s.text, start, pos) == strings.repeat(" ", col)
+            n = col % 4
+            if n == 0
+                n = 4
+        _editor_change(s, pos - n, n, "")
 
 # Delete: the selection, or the character after the cursor (none at the end).
 fun _editor_delete(s)

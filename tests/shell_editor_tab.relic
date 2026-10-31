@@ -1,6 +1,7 @@
 # Tab in the Editor (and so the IDE) types spaces to the next multiple of 4,
 # over any selection, in one undo step; it never puts in a tab character.
-# Shift+Tab takes an indent back out.
+# Shift+Tab takes an indent back out, and Backspace in the leading spaces takes
+# them back to the multiple of 4 before.
 use ../shell/wm
 let d = wm.new_desktop(640, 480, wm.default_apps())
 let e = wm.launch(d, wm.editor)
@@ -38,3 +39,18 @@ ekeys(["ctrl+z"])
 print([e.state.text])
 # the desktop names Shift with Tab "shift+tab"
 print(wm.key_of_event({type: "key_down", key: "tab", ctrl: false, shift: true}), wm.key_of_event({type: "key_down", key: "tab", ctrl: false, shift: false}))
+# Backspace in leading spaces goes back one indent; after other text, or with
+# a tab character among the spaces, one character
+e.state.text = "      x\n    "
+e.state.back = 0
+e.state.mark = none
+print(ekeys(["backspace"]), ekeys(["backspace"]), ekeys(["backspace"]))
+e.state.text = "      x"
+e.state.back = 1
+print(ekeys(["backspace"]), ekeys(["backspace"]), ekeys(["backspace"]))
+e.state.text = "a  " + "\t" + "  "
+e.state.back = 0
+print(ekeys(["backspace", "backspace"]))
+e.state.text = "\t   "
+e.state.back = 0
+print(ekeys(["backspace"]), len(e.state.undo) > 0)
