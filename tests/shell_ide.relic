@@ -53,3 +53,47 @@ wm.key(d, "ctrl+s")
 print(s.status, [vfs.read(s.fs, s.path)])
 wm.key(d, "ctrl+r")
 print(s.status, s.out)
+# a `use` of another file reads it from the desktop's files, saved text only
+vfs.make_dir(s.fs, "/home/lib")
+vfs.write(s.fs, "/home/lib/greet.relic", "use std/strings\nfun hello(n) = \"hello \" + strings.upper(n)\n")
+vfs.write(s.fs, "/home/bad.relic", "fun hello(\n")
+s.text = "use lib/greet\nprint(greet.hello(\"ann\"))\n"
+wm.key(d, "ctrl+r")
+print(s.status, s.out)
+s.text = "use nothere\n"
+wm.key(d, "ctrl+r")
+print(s.status, s.out, s.err_line)
+s.text = "use bad\n"
+wm.key(d, "ctrl+r")
+print(s.status, s.out, s.err_line)
+# reading input: the run pauses on an input line; typing goes there
+s.text = "use std/os\nlet name = os.prompt(\"name? \")\nprint(\"hi \" + name)\nwhile true\n    let l = os.read_line()\n    if l == \"end\"\n        break\n    print(\"got\", l)\nprint(\"bye\")\n"
+wm.key(d, "ctrl+r")
+print(s.status, s.out)
+for k in ["A", "n", "x", "backspace", "n", "space", "B", "left", "ctrl+s"]
+    wm.key(d, k)
+show("waiting")
+wm.key(d, "return")
+print(s.status, s.out, [s.text == vfs.read(s.fs, s.path)])
+for k in ["1", "return", "e", "n", "d", "return"]
+    wm.key(d, k)
+print(s.status, s.out)
+show("after input")
+# Esc stops a waiting run; with no run waiting the desktop gets it as before
+wm.key(d, "ctrl+r")
+print(wm.dismiss(d), s.status, s.out)
+print(wm.dismiss(d))
+# Ctrl+R while waiting starts again
+wm.key(d, "ctrl+r")
+wm.key(d, "z")
+wm.key(d, "ctrl+r")
+print(s.status, s.out, [s.input])
+# a loop between inputs still stops; the limit starts again at each input
+s.text = "use std/os\nlet n = 0\nwhile true\n    let l = os.read_line()\n    if l == \"spin\"\n        while true\n            n = n + 1\n    print(\"line\", l)\n"
+wm.key(d, "ctrl+r")
+for k in ["a", "return", "b", "return"]
+    wm.key(d, k)
+print(s.status, s.out)
+for k in ["s", "p", "i", "n", "return"]
+    wm.key(d, k)
+print(s.status, s.out, s.run)

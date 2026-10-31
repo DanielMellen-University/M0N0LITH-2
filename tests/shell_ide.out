@@ -41,3 +41,43 @@ _
 0299
 saved ["p"]
 error ["line 1: 'p' is not defined"]
+ran ["hello ANN"]
+error ["line 1: cannot find module 'nothere' (no file nothere.relic)"] 1
+error ["/home/bad.relic line 1: unclosed '('"] none
+waiting for input []
+-- waiting [waiting for input] none
+IDE [waiting for input] ...llo.relic
+use std/os
+let name = os.prompt("name? ")
+print("hi " + name)
+while true
+    let l = os.read_line()
+    if l == "end"
+        break
+    print("got", l)
+print("bye")
+_
+-- input (return: send, esc: stop) --
+name? Ann B_
+waiting for input ["name? Ann B", "hi Ann B"] [false]
+ran ["name? Ann B", "hi Ann B", "1", "got 1", "end", "bye"]
+-- after input [ran] none
+IDE [ran] /home/hello.relic
+    let l = os.read_line()
+    if l == "end"
+        break
+    print("got", l)
+print("bye")
+_
+-- output --
+name? Ann B
+hi Ann B
+1
+got 1
+end
+bye
+true stopped ["stopped"]
+false
+waiting for input [] [""]
+waiting for input ["a", "line a", "b", "line b"]
+error ["a", "line a", "b", "line b", "spin", "stopped: the program ran too long (200000 steps)"] none

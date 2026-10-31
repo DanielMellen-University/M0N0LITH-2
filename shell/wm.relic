@@ -440,14 +440,22 @@ fun motion(d, x, y)
 fun release(d)
     d.drag = none
 
-# Escape closes the Start menu or the hidden-windows list if one is open, and
-# gives true; desktop.relic quits on an Escape that closed nothing. Quitting
+# Escape closes the Start menu or the hidden-windows list if one is open, else
+# goes to the window on top when its app has on_escape (the IDE stops a run
+# waiting for input), and gives true when something took it; desktop.relic
+# quits on an Escape that nothing took. Quitting
 # drops the whole in-memory filesystem, so it should not be how a menu closes.
 fun dismiss(d)
     let was_open = d.menu_open or d.overflow_open
     d.menu_open = false
     d.overflow_open = false
-    return was_open
+    if was_open
+        return true
+    # then the window on top, if its app takes Esc (the IDE stops a waiting run)
+    let w = focused(d)
+    if w != none and "on_escape" in w.app
+        return w.app.on_escape(w.state)
+    return false
 
 # A key press goes to the window on top.
 fun key(d, k)
@@ -1581,11 +1589,14 @@ fun _editor_key(s, k)
 
 # IDE: the Editor on a .relic file, with Ctrl+R to run the text (saved or not)
 # and an output pane under it. The program runs in selfhost/interp, inside the
-# desktop: its print and eprint lines go to the pane, it stops after
-# _ide_steps steps (so a loop that never ends cannot hang the desktop), and the
-# host built-ins that would exit, wait for input, open a window or change
-# files on disk are refused. An error shows as "line L: message" and Ctrl+E
-# puts the cursor at the start of that line.
+# desktop: its print and eprint lines go to the pane, a `use` of another file
+# reads it from the desktop's files (std/ from Relic's), and the host built-ins
+# that would exit, open a window or change files on disk are refused. When it
+# reads a line (os.read_line, os.prompt) the run pauses and the pane ends in an
+# input line: typing goes there, Return sends it, Esc stops the run. Between
+# inputs it may take _ide_steps steps, so a loop that never ends cannot hang
+# the desktop. An error shows as "line L: message" and Ctrl+E puts the cursor
+# at the start of that line.
 let _ide_steps = 200000
 let _ide_pane = 6       # output lines shown at most, under a separator line
 let _ide_out_keep = 200 # output lines kept
@@ -1594,11 +1605,13 @@ fun _ide_init()
     let s = _editor_init()
     s.out = []          # the last run's output, then its error if any
     s.err_line = none   # line of the last run's error in this file, or none
+    s.run = none        # a run waiting for a line of input, or none
+    s.input = ""        # the line typed so far for it
     return s
 
 # host_* names a program in the IDE may not call.
 fun _ide_denied()
-    let out = {host_exit: true, host_read_line: true, host_write_file: true, host_remove: true, host_rename: true, host_make_dir: true, host_sleep: true}
+    let out = {host_exit: true, host_write_file: true, host_remove: true, host_rename: true, host_make_dir: true, host_sleep: true}
     for b in host_names()
         if strings.starts_with(b[0], "host_gfx_") or strings.starts_with(b[0], "host_clipboard_")
             out[b[0]] = true
@@ -1607,36 +1620,85 @@ fun _ide_denied()
 fun _ide_run(s)
     s.out = []
     s.err_line = none
+    s.run = none
+    s.input = ""
     let lexed = lexer.lex(s.text)
     let err = lexed.err
-    let rt = none
     if err == none
         let parsed = parser.parse(lexed.tokens)
         err = parsed.err
         if err == none
-            rt = interp.new_runtime()
-            rt.out = []
+            let rt = interp.new_runtime()
+            rt.out = s.out
             rt.steps = _ide_steps
             rt.denied = _ide_denied()
+            rt.input = []
+            let fs = s.fs
+            fun load(path)
+                if vfs.exists(fs, path) and not vfs.is_dir(fs, path)
+                    return vfs.read(fs, path)
+                return none
+            rt.load = load
             interp.set_main(rt, s.path)
             interp.run(rt, parsed.tree)
-            err = rt.err
-            s.out = rt.out
-    if len(s.out) > _ide_out_keep
-        s.out = slice(s.out, len(s.out) - _ide_out_keep, len(s.out))
-    if err == none
+            _ide_after(s, rt)
+            return
+    s.status = "error"
+    _ide_error(s, err)
+
+# After a run stopped or paused: keep the last lines, then the error if any.
+fun _ide_after(s, rt)
+    if len(rt.out) > _ide_out_keep
+        s.out = slice(rt.out, len(rt.out) - _ide_out_keep, len(rt.out))
+        rt.out = s.out
+    if rt.waiting != none
+        s.run = rt
+        s.status = "waiting for input"
+        return
+    s.run = none
+    if rt.err == none
         s.status = "ran"
         return
     s.status = "error"
-    if rt != none and rt.stopped
-        append(s.out, err.msg + " ({_ide_steps} steps)")
+    if rt.stopped
+        append(s.out, rt.err.msg + " ({_ide_steps} steps)")
         return
+    _ide_error(s, rt.err)
+
+fun _ide_error(s, err)
     let where = "line {err.line}"
     if "file" in err and err.file != "" and err.file != s.path
         where = err.file + " line {err.line}"   # inside a module the program used
     else
         s.err_line = err.line
     append(s.out, where + ": " + err.msg)
+
+# Keys while a run waits for a line: typing, Backspace, Return sends it.
+fun _ide_input_key(s, k)
+    if k == "return" or k == "enter"
+        let rt = s.run
+        let line = s.input
+        s.input = ""
+        rt.steps = _ide_steps
+        interp.resume(rt, line)
+        _ide_after(s, rt)
+    else if k == "backspace"
+        if len(s.input) > 0
+            s.input = slice(s.input, 0, len(s.input) - 1)
+    else if k == "space"
+        s.input = s.input + " "
+    else if len(k) == 1
+        s.input = s.input + k
+
+# Esc: stops a run that waits for input. True when it did.
+fun _ide_escape(s)
+    if s.run == none
+        return false
+    s.run = none
+    s.input = ""
+    s.status = "stopped"
+    append(s.out, "stopped")
+    return true
 
 # Ctrl+E: the cursor to the start of the error's line.
 fun _ide_to_error(s)
@@ -1661,9 +1723,17 @@ fun _ide_lines(s)
         pane = ["-- output --"]
         if s.err_line != none
             pane = ["-- output (ctrl+e: to line {s.err_line}) --"]
-        let n = math.min(len(s.out), _ide_pane)
+    if s.run != none
+        pane = ["-- input (return: send, esc: stop) --"]
+    if len(pane) > 0
+        let shown = _ide_pane
+        if s.run != none
+            shown = shown - 1
+        let n = math.min(len(s.out), shown)
         for line in slice(s.out, len(s.out) - n, len(s.out))
             append(pane, line)
+        if s.run != none
+            append(pane, str(s.run.waiting) + s.input + "_")
     let rows = s.rows
     if rows > 0
         s.rows = math.max(2, rows - len(pane))
@@ -1676,7 +1746,9 @@ fun _ide_lines(s)
     return out
 
 fun _ide_key(s, k)
-    if k == "ctrl+r"
+    if s.run != none and k != "ctrl+r"
+        _ide_input_key(s, k)
+    else if k == "ctrl+r"
         _ide_run(s)
     else if k == "ctrl+e"
         _ide_to_error(s)
@@ -1688,5 +1760,5 @@ let notes = {name: "Notes", width: 220, height: 60, init: _notes_init, lines: _n
 let terminal = {name: "Terminal", width: 280, height: 120, init: _term_init, lines: _term_lines, on_click: _term_click, on_key: _term_key, tail: true, pinned: 0}
 let files_app = {name: "Files", width: 260, height: 140, init: _files_init, lines: _files_lines, on_click: _files_click, on_key: _files_key, selected: _files_selected}
 let editor = {name: "Editor", width: 320, height: 80, init: _editor_init, lines: _editor_lines, on_click: _editor_click, on_key: _editor_key, tail: true, pinned: 1, marks: _editor_marks}
-let ide = {name: "IDE", width: 320, height: 200, init: _ide_init, lines: _ide_lines, on_click: _editor_click, on_key: _ide_key, tail: true, pinned: 1, marks: _editor_marks}
+let ide = {name: "IDE", width: 320, height: 200, init: _ide_init, lines: _ide_lines, on_click: _editor_click, on_key: _ide_key, on_escape: _ide_escape, tail: true, pinned: 1, marks: _editor_marks}
 fun default_apps() = [clicker, notes, terminal, files_app, editor, ide]

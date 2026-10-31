@@ -54,7 +54,7 @@ tests/
   shell_editor_select.relic  Shift+arrows and Ctrl+A select; typing and Backspace replace the selection
   shell_editor_cursor.relic  arrows, Home, End and Ctrl+arrow word jumps move the cursor
   shell_editor_delete.relic  Delete removes the next character or the selection; Ctrl+Z puts it back
-  shell_ide.relic  IDE: run with Ctrl+R, output pane, error line and Ctrl+E, stopped loops, refused host calls
+  shell_ide.relic  IDE: run with Ctrl+R, output pane, error line and Ctrl+E, stopped loops, refused host calls, `use` of desktop files, input lines and Esc
   shell_editor_long_line.relic  long-line clipping, ignored movement and saving the full buffer
   shell_editor_replaced.relic  saving after a file is removed or replaced by a folder
   shell_files_stale.relic  Files when another app removed the selected file
