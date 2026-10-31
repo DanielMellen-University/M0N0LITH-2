@@ -5,7 +5,7 @@ M0N0LITH-2 is the MONOLITH 2 desktop written in Relic. The language roadmap is i
 ## Phase 1: Move in
 
 - [x] Shell moved from Relic with its history (`shell/wm.relic`, `shell/desktop.relic`, `shell_wm` test)
-- [x] Relic pinned as a submodule; CI builds it (with the host, `-DRELIC_BUILD_HOST=ON`) and runs the tests on Linux, macOS and Windows. Pin at Relic 1.0.45 (`ef22fd0`); the pin moved six times on Oct 30 2026 alone (1.0.40 to 1.0.45), each in a `Pin Relic` commit that names what it brings. How to move it: [Building](BUILDING.md#moving-to-a-newer-relic)
+- [x] Relic pinned as a submodule; CI builds it (with the host, `-DRELIC_BUILD_HOST=ON`) and runs the tests on Linux, macOS and Windows. Pin at Relic 1.0.46 (`cd8d323`); the pin moved six times on Oct 30 2026 alone (1.0.40 to 1.0.45), each in a `Pin Relic` commit that names what it brings. How to move it: [Building](BUILDING.md#moving-to-a-newer-relic)
 
 ## Phase 2: Desktop shell
 
