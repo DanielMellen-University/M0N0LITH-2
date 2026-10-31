@@ -1,4 +1,4 @@
-["    "] ["    a   "] ["    a   bcd "] ["    a   bcd \nxy  "]
-11 ["    a   bcd \nxy"]
+["    "] ["    a   "] ["    a   bcd "] ["    a   bcd \n    xy  "]
+11 ["    a   bcd \n    xy"]
 ["if x\nabc "]
-["fun f()\n    "]
+["fun f()\n        "]

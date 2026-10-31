@@ -1,0 +1,8 @@
+["a\n  b\n  c"] ["a\n  b\n  c\n  "]
+["        if x\n        "]
+["   \n      x"] 10
+["      x"]
+["fun f(x)\n    if x\n        return 1\n        "]
+["for k in xs\n    print(k)\n    "]
+["fun g() = 1\nlet a = 2\ntry\n    f()\n    "]
+["    else\n        "]

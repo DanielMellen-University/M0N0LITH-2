@@ -1,0 +1,39 @@
+# Return keeps the line's leading spaces (up to the cursor) in the Editor; in
+# the IDE a line that opens a block gets 4 more. One undo step each.
+use ../shell/wm
+let d = wm.new_desktop(640, 480, wm.default_apps())
+let e = wm.launch(d, wm.editor)
+let s = e.state
+fun typed(st, text)
+    for ch in text
+        if ch == " "
+            wm.key(d, "space")
+        else if ch == "\n"
+            wm.key(d, "return")
+        else
+            wm.key(d, ch)
+    return [st.text]
+s.text = ""
+print(typed(s, "a\n  b\nc"), typed(s, "\n"))
+# an Editor does not add a level after "if"; Return in the middle of the spaces keeps only those before the cursor
+s.text = "        if x"
+s.back = 0
+print(typed(s, "\n"))
+s.text = "      x"
+s.back = 4
+print(typed(s, "\n"), len(s.undo))
+wm.key(d, "ctrl+z")
+print([s.text])
+# the IDE: a level more after a block line, the same after others, and a
+# one-line function (fun f() = ...) is not a block
+let i = wm.launch(d, wm.ide)
+let t = i.state
+t.text = ""
+print(typed(t, "fun f(x)\nif x\nreturn 1\n"))
+t.text = ""
+print(typed(t, "for k in xs\nprint(k)\n"))
+t.text = ""
+print(typed(t, "fun g() = 1\nlet a = 2\ntry\nf()\n"))
+t.text = "    else"
+t.back = 0
+print(typed(t, "\n"))

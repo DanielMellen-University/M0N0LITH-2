@@ -23,6 +23,7 @@ The status is one of:
 | Home, End | the start or end of the line |
 | Ctrl+Left, Ctrl+Right | the start of the word before the cursor, or the end of the word after it. Letters, digits, `_` and anything past ASCII count as word characters |
 | Shift with an arrow, Home or End | selects from the cursor |
+| Return | a new line that starts with the same spaces as the one before (up to the cursor); in the IDE, 4 more after a line that opens a block (`if`, `else`, `for`, `while`, `fun` without `=`, `try`, `catch`) |
 | Tab | spaces to the next multiple of 4 columns (Relic's indent), over any selection; never a tab character |
 | Ctrl+A | selects everything |
 | Ctrl+C, Ctrl+X | copies, or cuts, the selection to the desktop's clipboard (nothing without a selection) |

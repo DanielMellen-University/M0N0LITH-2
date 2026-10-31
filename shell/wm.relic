@@ -1384,6 +1384,27 @@ fun _editor_type(s, added)
     else
         _editor_change(s, _editor_pos(s), 0, added)
 
+# Return keeps the spaces the line starts with (up to the cursor). In the
+# IDE a line that opens a block (if, else, for, while, fun, try, catch) gets
+# 4 more, so the next line goes inside it.
+let _block_words = ["if", "else", "for", "while", "fun", "try", "catch"]
+
+fun _editor_indent(s)
+    let pos = _editor_pos(s)
+    if _editor_selection(s) != none
+        pos = _editor_selection(s)[0]
+    let start = _line_start(s.text, pos)
+    let line = slice(s.text, start, pos)
+    let n = 0
+    while n < len(line) and line[n] == " "
+        n = n + 1
+    let pad = slice(line, 0, n)
+    if "run" in s
+        let first = strings.split(strings.trim(line), " ")[0]
+        if first in _block_words and not strings.contains(line, " = ")
+            pad = pad + "    "
+    return pad
+
 # Backspace removes the selection, or the character before the cursor.
 fun _editor_backspace(s)
     let sel = _editor_selection(s)
@@ -1690,7 +1711,7 @@ fun _editor_key(s, k)
     else
         s.overwrite = false   # the second Ctrl+S has to come right after the warning
         if k == "return" or k == "enter"
-            _editor_type(s, "\n")
+            _editor_type(s, "\n" + _editor_indent(s))
         else if k == "tab"
             # spaces to the next multiple of 4 (Relic's indent); never a tab character
             let pos = _editor_pos(s)
