@@ -22,7 +22,7 @@ title
 true true
 launch
 Terminal
-ditor
+ditor, IDE
 /home> apps
 ["/home> _"]
 launch

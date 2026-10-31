@@ -1,0 +1,43 @@
+-- run [ran] none
+IDE [ran] /home/hello.relic
+let xs = [3, 1, 2]
+for x in xs
+    print("x", x)
+eprint("done")
+_
+-- output --
+x 3
+x 1
+x 2
+done
+-- runtime error [error] 3
+IDE [error] /home/hello.relic
+let a = 1
+let b = 2
+print(a + "x")
+print("after")
+_
+-- output (ctrl+e: to line 3) --
+line 3: cannot add an int and a string
+cursor at 20 ["print"]
+["line 1: unclosed '('"] 1
+ran ["caught boom"] none
+error ["stopped: the program ran too long (200000 steps)"]
+error ["before", "line 3: os.exit(): not available here"]
+error ["line 2: files.write(): not available here"]
+ran 200 0100 0299
+-- long output [ran] none
+IDE [ran] /home/hello.relic
+use std/strings
+for n in 0..300
+    print(strings.pad_left(str(n), 4, "
+_
+-- output --
+0294
+0295
+0296
+0297
+0298
+0299
+saved ["p"]
+error ["line 1: 'p' is not defined"]

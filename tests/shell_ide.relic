@@ -1,0 +1,55 @@
+# IDE: the Editor on a .relic file plus Ctrl+R to run it with an output pane,
+# errors as "line L: message", and Ctrl+E to put the cursor on the error line.
+use ../shell/wm
+use std/vfs
+let d = wm.new_desktop(640, 480, wm.default_apps())
+let i = wm.launch(d, wm.ide)
+let s = i.state
+s.path = "/home/hello.relic"
+s.text = "let xs = [3, 1, 2]\nfor x in xs\n    print(\"x\", x)\neprint(\"done\")\n"
+fun show(label)
+    print("--", label, "[" + s.status + "]", s.err_line)
+    for line in wm.visible_lines(i)
+        print(line)
+wm.key(d, "ctrl+r")
+show("run")
+# a runtime error on line 3; Ctrl+E goes to the start of it
+s.text = "let a = 1\nlet b = 2\nprint(a + \"x\")\nprint(\"after\")\n"
+wm.key(d, "ctrl+r")
+show("runtime error")
+wm.key(d, "ctrl+e")
+let pos = len(s.text) - s.back
+print("cursor at", pos, [slice(s.text, pos, pos + 5)])
+# a syntax error
+s.text = "print(1\nprint(2)\n"
+wm.key(d, "ctrl+r")
+print(s.out, s.err_line)
+# an error caught by the program is not an error of the run
+s.text = "try\n    fail(\"boom\")\ncatch e\n    print(\"caught\", e.message)\n"
+wm.key(d, "ctrl+r")
+print(s.status, s.out, s.err_line)
+# a loop that never ends stops, even inside try
+s.text = "try\n    while true\n        let y = 1\ncatch e\n    print(\"caught\")\n"
+wm.key(d, "ctrl+r")
+print(s.status, s.out)
+# the program cannot exit the desktop, read input or write the real disk
+s.text = "use std/os\nprint(\"before\")\nos.exit(3)\n"
+wm.key(d, "ctrl+r")
+print(s.status, s.out)
+s.text = "use std/files\nfiles.write(\"/tmp/ide_should_not_exist.txt\", \"x\")\n"
+wm.key(d, "ctrl+r")
+print(s.status, s.out)
+# std modules work; long output keeps the last lines in the pane
+s.back = 0
+s.text = "use std/strings\nfor n in 0..300\n    print(strings.pad_left(str(n), 4, \"0\"))\n"
+wm.key(d, "ctrl+r")
+print(s.status, len(s.out), s.out[0], s.out[len(s.out) - 1])
+show("long output")
+# typing and Ctrl+S work as in the Editor; a run uses the text, saved or not
+s.text = ""
+s.back = 0
+wm.key(d, "p")
+wm.key(d, "ctrl+s")
+print(s.status, [vfs.read(s.fs, s.path)])
+wm.key(d, "ctrl+r")
+print(s.status, s.out)

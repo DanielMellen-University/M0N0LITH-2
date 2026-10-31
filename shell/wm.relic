@@ -25,6 +25,9 @@ use std/time
 use std/vfs
 use std/paths
 use std/math
+use ../relic/selfhost/lexer
+use ../relic/selfhost/parser
+use ../relic/selfhost/interp
 
 let bar_height = 24     # taskbar along the bottom
 let title_height = 16   # window title bar
@@ -1576,9 +1579,114 @@ fun _editor_key(s, k)
             if typed != ""
                 _editor_type(s, typed)
 
+# IDE: the Editor on a .relic file, with Ctrl+R to run the text (saved or not)
+# and an output pane under it. The program runs in selfhost/interp, inside the
+# desktop: its print and eprint lines go to the pane, it stops after
+# _ide_steps steps (so a loop that never ends cannot hang the desktop), and the
+# host built-ins that would exit, wait for input, open a window or change
+# files on disk are refused. An error shows as "line L: message" and Ctrl+E
+# puts the cursor at the start of that line.
+let _ide_steps = 200000
+let _ide_pane = 6       # output lines shown at most, under a separator line
+let _ide_out_keep = 200 # output lines kept
+
+fun _ide_init()
+    let s = _editor_init()
+    s.out = []          # the last run's output, then its error if any
+    s.err_line = none   # line of the last run's error in this file, or none
+    return s
+
+# host_* names a program in the IDE may not call.
+fun _ide_denied()
+    let out = {host_exit: true, host_read_line: true, host_write_file: true, host_remove: true, host_rename: true, host_make_dir: true, host_sleep: true}
+    for b in host_names()
+        if strings.starts_with(b[0], "host_gfx_") or strings.starts_with(b[0], "host_clipboard_")
+            out[b[0]] = true
+    return out
+
+fun _ide_run(s)
+    s.out = []
+    s.err_line = none
+    let lexed = lexer.lex(s.text)
+    let err = lexed.err
+    let rt = none
+    if err == none
+        let parsed = parser.parse(lexed.tokens)
+        err = parsed.err
+        if err == none
+            rt = interp.new_runtime()
+            rt.out = []
+            rt.steps = _ide_steps
+            rt.denied = _ide_denied()
+            interp.set_main(rt, s.path)
+            interp.run(rt, parsed.tree)
+            err = rt.err
+            s.out = rt.out
+    if len(s.out) > _ide_out_keep
+        s.out = slice(s.out, len(s.out) - _ide_out_keep, len(s.out))
+    if err == none
+        s.status = "ran"
+        return
+    s.status = "error"
+    if rt != none and rt.stopped
+        append(s.out, err.msg + " ({_ide_steps} steps)")
+        return
+    let where = "line {err.line}"
+    if "file" in err and err.file != "" and err.file != s.path
+        where = err.file + " line {err.line}"   # inside a module the program used
+    else
+        s.err_line = err.line
+    append(s.out, where + ": " + err.msg)
+
+# Ctrl+E: the cursor to the start of the error's line.
+fun _ide_to_error(s)
+    if s.err_line == none
+        return
+    let pos = 0
+    let line = 1
+    let n = len(s.text)
+    while line < s.err_line and pos < n
+        let e = _line_end(s.text, pos)
+        if e >= n
+            break
+        pos = e + 1
+        line = line + 1
+    s.mark = none
+    _editor_set_pos(s, pos)
+
+# The Editor's lines over the rows left above the pane, then the pane.
+fun _ide_lines(s)
+    let pane = []
+    if len(s.out) > 0
+        pane = ["-- output --"]
+        if s.err_line != none
+            pane = ["-- output (ctrl+e: to line {s.err_line}) --"]
+        let n = math.min(len(s.out), _ide_pane)
+        for line in slice(s.out, len(s.out) - n, len(s.out))
+            append(pane, line)
+    let rows = s.rows
+    if rows > 0
+        s.rows = math.max(2, rows - len(pane))
+    let out = _editor_lines(s)
+    s.rows = rows
+    out[0] = "IDE" + slice(out[0], 6, len(out[0]))   # "Editor [..." -> "IDE [..."
+    out[0] = strings.replace(out[0], "(ctrl+s save)", "(ctrl+s save, ctrl+r run)")
+    for line in pane
+        append(out, line)
+    return out
+
+fun _ide_key(s, k)
+    if k == "ctrl+r"
+        _ide_run(s)
+    else if k == "ctrl+e"
+        _ide_to_error(s)
+    else
+        _editor_key(s, k)
+
 let clicker = {name: "Clicker", width: 180, height: 60, init: _clicker_init, lines: _clicker_lines, on_click: _clicker_click, on_key: _clicker_key}
 let notes = {name: "Notes", width: 220, height: 60, init: _notes_init, lines: _notes_lines, on_click: _notes_click, on_key: _notes_key, tail: true, pinned: 1}
 let terminal = {name: "Terminal", width: 280, height: 120, init: _term_init, lines: _term_lines, on_click: _term_click, on_key: _term_key, tail: true, pinned: 0}
 let files_app = {name: "Files", width: 260, height: 140, init: _files_init, lines: _files_lines, on_click: _files_click, on_key: _files_key, selected: _files_selected}
 let editor = {name: "Editor", width: 320, height: 80, init: _editor_init, lines: _editor_lines, on_click: _editor_click, on_key: _editor_key, tail: true, pinned: 1, marks: _editor_marks}
-fun default_apps() = [clicker, notes, terminal, files_app, editor]
+let ide = {name: "IDE", width: 320, height: 200, init: _ide_init, lines: _ide_lines, on_click: _editor_click, on_key: _ide_key, tail: true, pinned: 1, marks: _editor_marks}
+fun default_apps() = [clicker, notes, terminal, files_app, editor, ide]

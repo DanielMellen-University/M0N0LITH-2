@@ -19,6 +19,11 @@ M0N0LITH-2 is the MONOLITH 2 desktop written in Relic. The language roadmap is i
 - [ ] File browser (started: browses the VFS with keys or clicks; a long list follows the selected row, and opening a file selects it for the next Editor)
 - [ ] Drawing app
 - [ ] At least one game
-- [ ] Relic IDE (planned, not started; moved here from Relic's roadmap. Needs Daniel's approval before any building starts)
+- [ ] Relic IDE (started Oct 30 2026, Daniel approved with "your design calls": the Editor on a .relic file, Ctrl+R runs the text, saved or not, with an output pane under it, an error shows as `line L: message` and Ctrl+E puts the cursor on that line). Design calls:
+  - It is the Editor's state and keys plus two keys, in `wm.relic` like the other apps, so editing, undo, selection and Ctrl+S work the same.
+  - A run uses Relic's own `selfhost/interp` inside the desktop, not a separate process (the host has no way to start one). Relic 1.0.44 added the hooks: output goes to a list, a run stops after 200,000 steps (a loop that never ends cannot hang the desktop; `try` does not catch the stop), and named host built-ins are refused.
+  - Refused: exit, reading input, sleep, graphics and clipboard (the desktop owns the window), and writing, removing, renaming or making files on the real disk. Reading files and `use std/...` work. The program runs on the host's disk, not the shared VFS, and a `use` of another file of the user's is not found.
+  - The pane shows the last 6 lines and keeps 200. An error inside a std module shows that module's file and line, and Ctrl+E does nothing then.
+  - Not yet: running a program that reads input or draws, `use` of the user's own files from the VFS, clicking an error to jump, and a run that goes on in the background.
 
 Next ideas carried over from Relic (not approved yet): Terminal scrollback, Editor open by path, host-backed mounts if needed. Parked window ideas (not approved): the desktop following the real window size, and maximize.

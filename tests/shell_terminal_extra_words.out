@@ -4,5 +4,5 @@
 []
 ["/home> echo kept", "kept", "/home> clear screen", "usage: clear"]
 ["/home> pwd", "/home"]
-["/home> apps", "Clicker, Notes, Terminal, Files, Editor"]
+["/home> apps", "Clicker, Notes, Terminal, Files, Editor, IDE"]
 []

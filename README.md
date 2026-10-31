@@ -3,7 +3,7 @@ M0N0LITH written in [Relic](https://github.com/DanielMellen-University/Relic).
 
 This repo is the MONOLITH 2 desktop environment: the window manager, taskbar, Start menu and the apps, all written in [Relic](https://github.com/DanielMellen-University/Relic). The language itself (host, std, self-host) lives in the Relic repo. Language changes go there, desktop and app changes go here.
 
-> Status: early. The shell started inside the Relic repo during its M11 milestone and moved here with its history in Relic 1.0.1. It has a window model with drag, resize and minimize, a taskbar, a Start menu, and Clicker, Notes, Terminal, Files and Editor apps. Terminal, Files and Editor share one in-memory filesystem (`std/vfs` from Relic). A Relic IDE is planned as an app here but not started; see the [roadmap](docs/ROADMAP.md).
+> Status: early. The shell started inside the Relic repo during its M11 milestone and moved here with its history in Relic 1.0.1. It has a window model with drag, resize and minimize, a taskbar, a Start menu, and Clicker, Notes, Terminal, Files, Editor and IDE apps. Terminal, Files and Editor share one in-memory filesystem (`std/vfs` from Relic). The IDE is the Editor plus Ctrl+R to run a .relic file in an output pane and Ctrl+E to jump to its error; see the [roadmap](docs/ROADMAP.md).
 
 ## Layout
 
@@ -54,6 +54,7 @@ tests/
   shell_editor_select.relic  Shift+arrows and Ctrl+A select; typing and Backspace replace the selection
   shell_editor_cursor.relic  arrows, Home, End and Ctrl+arrow word jumps move the cursor
   shell_editor_delete.relic  Delete removes the next character or the selection; Ctrl+Z puts it back
+  shell_ide.relic  IDE: run with Ctrl+R, output pane, error line and Ctrl+E, stopped loops, refused host calls
   shell_editor_long_line.relic  long-line clipping, ignored movement and saving the full buffer
   shell_editor_replaced.relic  saving after a file is removed or replaced by a folder
   shell_files_stale.relic  Files when another app removed the selected file
