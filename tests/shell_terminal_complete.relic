@@ -1,0 +1,30 @@
+# Terminal Tab: the first word completes from the command names, a later one
+# from the names in its folder (a folder gets "/", a file a space); several
+# names go as far as they agree, and a Tab that adds nothing lists them under
+# the line, as a shell does.
+use ../shell/wm
+use std/vfs
+let t = wm.terminal.init()
+fun typed(line)
+    for ch in line
+        if ch == " "
+            wm.terminal.on_key(t, "space")
+        else
+            wm.terminal.on_key(t, ch)
+fun tab(line)
+    t.input = ""
+    typed(line)
+    wm.terminal.on_key(t, "tab")
+    return t.input
+vfs.make_dir(t.fs, "/home/docs")
+vfs.write(t.fs, "/home/draft.txt", "x")
+vfs.write(t.fs, "/home/docs/plan.txt", "x")
+vfs.write(t.fs, "/home/docs/plans.txt", "x")
+print([tab("pw"), tab("c"), tab("mk"), tab("zz"), tab("")])
+print([tab("cat w"), tab("cd do"), tab("cat d"), tab("cat docs/p"), tab("cat /home/docs/plans"), tab("ls /nope/x"), tab("cat welcome.txt/x")])
+let before = len(t.buf)
+tab("cat docs/plan")
+wm.terminal.on_key(t, "tab")
+print([t.input], slice(t.buf, before, len(t.buf)))
+t.cwd = "/home/docs"
+print([tab("rm ../dr"), tab("rm p"), tab("rm ./plans")])

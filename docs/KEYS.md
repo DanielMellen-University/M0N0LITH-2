@@ -45,6 +45,7 @@ Every key and click the desktop and its apps act on, checked against `shell/wm.r
 | Ctrl+C | gives up the line: shown with ^C, not run |
 | Ctrl+Backspace | removes the last word |
 | Ctrl+L | empties the output, like `clear` |
+| Tab | completes a command name, or a file or folder name; lists the choices when it cannot add more |
 
 The commands are in [the Terminal doc](apps/TERMINAL.md).
 

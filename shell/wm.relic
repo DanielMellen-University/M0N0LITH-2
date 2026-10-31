@@ -1123,6 +1123,69 @@ fun _term_run(s, line)
 # gives back the line that was being typed.
 let _term_recall_keep = 50
 
+# Tab completes the word being typed: the first word from the command names,
+# a later one from the names in its folder. One match goes in whole (a folder
+# with "/" after it, anything else with a space); several are taken as far as
+# they agree, and when that adds nothing they are listed. No match, or an
+# empty line: nothing.
+let _term_commands = ["apps", "cat", "cd", "clear", "date", "echo", "help", "ls", "mkdir", "mv", "pwd", "rm", "touch", "write"]
+
+fun _common_start(names)
+    let out = names[0]
+    for n in names
+        while not strings.starts_with(n, out)
+            out = slice(out, 0, len(out) - 1)
+    return out
+
+# Where the last c in text is, plus one (0 when there is none).
+fun _after_last(text, c)
+    let i = len(text)
+    while i > 0 and text[i - 1] != c
+        i = i - 1
+    return i
+
+fun _term_complete(s)
+    if strings.trim(s.input) == ""
+        return   # nothing typed: nothing to complete, and no list of every command
+    let cut = _after_last(s.input, " ")
+    let head = slice(s.input, 0, cut)
+    let word = slice(s.input, cut, len(s.input))
+    let folder = ""
+    let names = []
+    let dirs = []
+    if strings.trim(head) == ""
+        names = _term_commands
+    else
+        folder = slice(word, 0, _after_last(word, "/"))
+        let where = s.cwd
+        if folder != ""
+            where = _term_path(s, folder)
+        if not vfs.is_dir(s.fs, where)
+            return
+        for e in vfs.entries(s.fs, where)
+            append(names, e[0])
+            if e[1]
+                append(dirs, e[0])
+    let part = slice(word, len(folder), len(word))
+    let found = []
+    for n in names
+        if strings.starts_with(n, part)
+            append(found, n)
+    if len(found) == 0
+        return
+    if len(found) == 1
+        let end = " "
+        if found[0] in dirs
+            end = "/"
+        s.input = head + folder + found[0] + end
+        return
+    let common = _common_start(found)
+    if len(common) > len(part)
+        s.input = head + folder + common
+    else
+        _term_reply(s, s.cwd + "> " + s.input)
+        _term_reply(s, strings.join(found, "  "))
+
 fun _term_key(s, k)
     if k == "return" or k == "enter"
         let line = s.input
@@ -1159,6 +1222,8 @@ fun _term_key(s, k)
         s.buf = []   # what clear does, keeping the line being typed
     else if k == "ctrl+backspace"
         s.input = _drop_word(s.input)
+    else if k == "tab"
+        _term_complete(s)
     else
         s.input = _typed(s.input, k)
 
