@@ -1,6 +1,7 @@
 # Editor keys with Ctrl beyond the word moves: Ctrl+Home and Ctrl+End go to
 # the start and end of the file, and drop any selection; Ctrl+Backspace and
-# Ctrl+Delete remove a word (as far as Ctrl+Left and Ctrl+Right go).
+# Ctrl+Delete remove a word (as far as Ctrl+Left and Ctrl+Right go). Home
+# stops after the leading spaces first.
 use ../shell/wm
 let d = wm.new_desktop(640, 480, wm.default_apps())
 let e = wm.launch(d, wm.editor)
@@ -28,3 +29,10 @@ s.text = "abc def"
 s.back = 5
 s.mark = 1
 print(keys(["ctrl+backspace"]), keys(["ctrl+backspace"]))
+# Home goes past the leading spaces first, then to the very start, and back
+s.text = "fun f()\n        body\nx"
+s.back = 3
+s.mark = none
+print(keys(["home"]), keys(["home"]), keys(["home"]), keys(["right", "right", "home"]))
+s.back = 0
+print(keys(["home"]), keys(["shift+home"]), s.mark)

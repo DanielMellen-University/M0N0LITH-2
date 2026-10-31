@@ -20,7 +20,7 @@ The status is one of:
 | Backspace | removes the selection, or the character before the cursor |
 | Delete | removes the selection, or the character after the cursor |
 | Left, Right, Up, Down | move the cursor. Up and Down keep the column, or go to the end of a shorter line. With a selection, Left and Right go to its start or end |
-| Home, End | the start or end of the line |
+| Home, End | Home goes to the first character after the line's leading spaces, and from there to the very start; End goes to the end of the line |
 | Ctrl+Left, Ctrl+Right | the start of the word before the cursor, or the end of the word after it. Letters, digits, `_` and anything past ASCII count as word characters |
 | Ctrl+Home, Ctrl+End | the start or end of the file |
 | Ctrl+Backspace, Ctrl+Delete | removes the selection, or back to where Ctrl+Left goes, or on to where Ctrl+Right goes |

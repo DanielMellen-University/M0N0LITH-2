@@ -1495,7 +1495,14 @@ fun _editor_moved(s, k)
         return _line_end(s.text, pos)
     let start = _line_start(s.text, pos)
     if k == "home"
-        return start
+        # the line's first character after its leading spaces; a second Home
+        # from there goes to the very start, as code editors do
+        let first = start
+        while first < len(s.text) and s.text[first] == " "
+            first = first + 1
+        if pos == first or first == start
+            return start
+        return first
     let col = pos - start
     if k == "up"
         if start == 0

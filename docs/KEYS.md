@@ -67,7 +67,7 @@ The commands are in [the Terminal doc](apps/TERMINAL.md).
 | Backspace | removes the selection, or the character before the cursor |
 | Delete | removes the selection, or the character after the cursor |
 | Left, Right, Up, Down | move the cursor; with a selection, Left and Right go to its start or end |
-| Home, End | the start or end of the line |
+| Home, End | the first character after the leading spaces (Home again: the very start), or the end of the line |
 | Ctrl+Left, Ctrl+Right | the start of the word before, or the end of the word after |
 | Ctrl+Home, Ctrl+End | the start or end of the file |
 | Ctrl+Backspace, Ctrl+Delete | removes the selection, or the word before or after the cursor |

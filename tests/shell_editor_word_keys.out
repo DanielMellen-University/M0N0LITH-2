@@ -5,3 +5,5 @@ ctrl+home ctrl+end
 ["", 0] ["", 0] 6
 [" ", 1]
 ["abf", 2] ["f", 0]
+["fun f()\n        body\nx", 16] ["fun f()\n        body\nx", 8] ["fun f()\n        body\nx", 16] ["fun f()\n        body\nx", 16]
+["fun f()\n        body\nx", 21] ["fun f()\n        body\nx", 21] 1
