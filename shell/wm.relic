@@ -445,8 +445,8 @@ fun release(d)
 # Escape closes the Start menu or the hidden-windows list if one is open, else
 # goes to the window on top when its app has on_escape (the IDE stops a run
 # waiting for input), and gives true when something took it; desktop.relic
-# quits on an Escape that nothing took. Quitting
-# drops the whole in-memory filesystem, so it should not be how a menu closes.
+# quits on an Escape that nothing took. Quitting drops the whole in-memory
+# filesystem, so it should not be how a menu closes.
 fun dismiss(d)
     let was_open = d.menu_open or d.overflow_open
     d.menu_open = false
@@ -1260,8 +1260,8 @@ fun _line_end(text, i)
         start = stop
     return n
 
-# Ctrl+Z steps back one edit (a typed character, a Backspace, a new line), up
-# to the last _undo_steps edits. Saving does not clear it. An edit is kept as
+# Ctrl+Z steps back one edit (a typed character, a Backspace, a Delete, a new
+# line, or a selection typed over or removed), up to the last _undo_steps edits. Saving does not clear it. An edit is kept as
 # {at, removed, added}, not a copy of the text, so a big file stays cheap.
 let _undo_steps = 500
 
