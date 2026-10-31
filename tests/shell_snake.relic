@@ -136,3 +136,9 @@ print(sc.turns)
 sc.state = "over"
 wc.app.on_key(sc, "R")
 print(sc.state)
+# P pauses and goes on like Space, with or without Shift
+let states = []
+for k in ["p", "P", "space", "P"]
+    wc.app.on_key(sc, k)
+    append(states, sc.state)
+print(states)

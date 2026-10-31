@@ -2530,7 +2530,7 @@ fun _snake_key(s, k)
                 append(s.turns, d)
         if s.state == "ready"
             s.state = "playing"
-    else if k == "space"
+    else if k == "space" or k == "p"
         if s.state == "playing"
             s.state = "paused"
         else if s.state == "paused" or s.state == "ready"
