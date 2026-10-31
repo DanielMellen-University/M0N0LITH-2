@@ -1,7 +1,9 @@
 # Paint: swatches, brush and eraser, brush size, a drag that leaves no gaps,
-# clear and undo, save to the desktop's files and open again.
+# clear and undo, save to the desktop's files and open again, fill, line and
+# rectangle tools, save as a typed name.
 use ../shell/wm
 use std/vfs
+use std/strings
 let d = wm.new_desktop(640, 480, wm.default_apps())
 let w = wm.launch(d, wm.paint_app)
 let s = w.state
@@ -182,3 +184,88 @@ print(fcount(3), fcount(0))
 wf.app.on_key(sf, "b")
 wf.app.on_click(sf, po[0], po[1])
 print(sf.tool, fcount(3), wf.app.lines(sf))
+# line: l, press at one end, drag to the other; the line follows the pointer
+# and only the last one stays
+let wl = wm.launch(d, wm.paint_app)
+let sl = wl.state
+for i in 0..len(sl.cells)
+    sl.cells[i] = 0
+fun lcount(k)
+    let n = 0
+    for c in sl.cells
+        if c == k
+            n = n + 1
+    return n
+fun lrow(y, a, b)
+    let out = ""
+    for x in a..b
+        out = out + str(sl.cells[y * 60 + x])
+    return out
+wl.app.on_key(sl, "l")
+wl.app.on_key(sl, "2")
+print(wl.app.lines(sl))
+let a = cell(5, 5)
+wl.app.on_click(sl, a[0], a[1])
+print(lcount(2), len(sl.undo))
+wl.app.on_drag(sl, cell(20, 5)[0], cell(20, 5)[1])
+print(lcount(2), lrow(5, 3, 22))
+wl.app.on_drag(sl, cell(5, 15)[0], cell(5, 15)[1])
+print(lcount(2), lrow(5, 3, 22), sl.cells[15 * 60 + 5])
+# a diagonal; past the canvas the end stays on its edge
+wl.app.on_drag(sl, 6 + 70 * 4, 40 - 30)
+print(lcount(2), sl.cells[5 * 60 + 5], sl.cells[0 * 60 + 59])
+wm.release(d)
+# a new press starts a new line on top; undo takes the line back in one step
+wl.app.on_key(sl, "6")
+let b = cell(0, 30)
+wl.app.on_click(sl, b[0], b[1])
+wl.app.on_drag(sl, cell(9, 30)[0], cell(9, 30)[1])
+print(lcount(6), lcount(2), len(sl.undo))
+wl.app.on_key(sl, "ctrl+z")
+print(lcount(6), lcount(2))
+# rect: r, the outline from one corner to the other, in the brush size
+wl.app.on_key(sl, "c")
+wl.app.on_key(sl, "r")
+wl.app.on_key(sl, "3")
+print(wl.app.lines(sl))
+let r1 = cell(10, 10)
+wl.app.on_click(sl, r1[0], r1[1])
+wl.app.on_drag(sl, cell(14, 13)[0], cell(14, 13)[1])
+print(lcount(3), lrow(10, 9, 16), lrow(11, 9, 16), lrow(13, 9, 16))
+# dragged back past the first corner, the rectangle turns the other way
+wl.app.on_drag(sl, cell(8, 8)[0], cell(8, 8)[1])
+print(lcount(3), lrow(8, 7, 12), lrow(9, 7, 12), lrow(10, 7, 12))
+wl.app.on_key(sl, "+")
+wl.app.on_click(sl, cell(30, 20)[0], cell(30, 20)[1])
+wl.app.on_drag(sl, cell(33, 23)[0], cell(33, 23)[1])
+print(wl.app.lines(sl), lrow(20, 29, 35), lrow(21, 29, 35), lrow(22, 29, 35))
+# n: save as a name typed on the status line
+let ws = wm.launch(d, wm.paint_app)
+let ss = ws.state
+ws.app.on_key(ss, "4")
+ws.app.on_click(ss, cell(1, 1)[0], cell(1, 1)[1])
+ws.app.on_key(ss, "n")
+for k in ["m", "y", "space", "c", "a", "x", "backspace", "t"]
+    ws.app.on_key(ss, k)
+print(ws.app.lines(ss), ss.color)
+ws.app.on_key(ss, "return")
+print(ss.status, ss.path, ws.app.lines(ss), strings.split(vfs.read(ss.fs, "/home/my cat.paint"), "\n")[2][1])
+# while typing, the keys are the name, not tools; Esc gives up (and the desktop keeps running)
+ws.app.on_key(ss, "n")
+ws.app.on_key(ss, "r")
+print(ss.tool, wm.dismiss(d), ss.naming, ws.app.lines(ss), wm.dismiss(d))
+# a name with an ending or a whole path is used as it is; a folder that is not there fails and keeps the old name
+vfs.write(ss.fs, "/home/notes.txt", "keep me")
+vfs.make_dir(ss.fs, "/home/pics")
+fun save_as(name)
+    ws.app.on_key(ss, "n")
+    for ch in name
+        ws.app.on_key(ss, ch)
+    ws.app.on_key(ss, "return")
+    return [ss.status, ss.path]
+print(save_as("notes.txt"), vfs.read(ss.fs, "/home/notes.txt"))
+vfs.make_dir(ss.fs, "/home/old.d")
+print(save_as("pics"), save_as("old.d"), save_as("/home/pics/one"), save_as("/home/none/two"))
+print(save_as(""), save_as("   "), save_as("/home/pics/"))
+# saving as over another picture writes it; the old file stays as it was
+print(save_as("my cat.paint"), vfs.exists(ss.fs, "/home/pics/one.paint"))

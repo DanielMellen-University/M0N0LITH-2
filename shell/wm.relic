@@ -1813,8 +1813,11 @@ fun _ide_key(s, k)
 # of color swatches above it. Press and drag on the canvas to draw with the
 # brush (a square of 1 to 4 cells), the eraser draws white. Keys: 1 to 8 pick a
 # color, e or 0 the eraser, + and - the brush size, f the fill tool (a click
-# fills the area of one color under it) and b the brush again, c clears,
-# Ctrl+Z undoes a stroke, a fill or a clear, Ctrl+S saves. A picture is a text file in the desktop's
+# fills the area of one color under it), l the line tool and r the rectangle
+# tool (press at one end or corner and drag to the other; until the button is
+# let go the shape follows the pointer) and b the brush again, c clears,
+# Ctrl+Z undoes a stroke, a fill, a shape or a clear, Ctrl+S saves, n saves as
+# a name typed on the status line (Return saves, Esc gives up). A picture is a text file in the desktop's
 # files: "paint W H" and then H lines of W digits (0 is white). Paint opens the
 # file Files last opened when its name ends in .paint, else /home/picture.paint.
 let _paint_w = 60
@@ -1838,7 +1841,7 @@ fun _paint_init()
     let path = "/home/picture.paint"
     if strings.ends_with(_shell_open.path, ".paint")
         path = _shell_open.path
-    let s = {fs: _shell_fs, path: path, cells: _paint_blank(), color: 1, size: 1, last: none, stroke: false, undo: [], status: "new file", foreign: false, tool: "brush"}
+    let s = {fs: _shell_fs, path: path, cells: _paint_blank(), color: 1, size: 1, last: none, stroke: false, undo: [], status: "new file", foreign: false, tool: "brush", anchor: none, base: none, naming: none}
     if vfs.exists(_shell_fs, path) and not vfs.is_dir(_shell_fs, path)
         _paint_load(s, vfs.read(_shell_fs, path))
     return s
@@ -1927,6 +1930,25 @@ fun _paint_line(s, from, to)
     for i in 0..n + 1
         _paint_stamp(s, from[0] + int(math.round(dx * i / n)), from[1] + int(math.round(dy * i / n)))
 
+# The cell under content point (x, y), moved onto the canvas's nearest edge
+# when it is outside: a shape's far end stays on the canvas.
+fun _paint_cell_near(x, y)
+    let cx = math.floor((x - _paint_left) / _paint_cell)
+    let cy = math.floor((y - _paint_top) / _paint_cell)
+    return [int(math.max(0, math.min(_paint_w - 1, cx))), int(math.max(0, math.min(_paint_h - 1, cy)))]
+
+# The line or rectangle from s.anchor to c, drawn over the picture as it was at the press.
+fun _paint_shape(s, c)
+    s.cells = slice(s.base, 0, len(s.base))
+    let a = s.anchor
+    if s.tool == "line"
+        _paint_line(s, a, c)
+    else
+        _paint_line(s, a, [c[0], a[1]])
+        _paint_line(s, [c[0], a[1]], c)
+        _paint_line(s, c, [a[0], c[1]])
+        _paint_line(s, [a[0], c[1]], a)
+
 # Fill: every cell joined to (cx, cy) through cells of its color, side by side
 # (not corner to corner), takes the chosen color.
 fun _paint_fill(s, cx, cy)
@@ -1962,6 +1984,7 @@ fun _paint_swatch_at(x, y)
 fun _paint_click(s, x, y)
     s.last = none
     s.stroke = false
+    s.anchor = none
     let sw = _paint_swatch_at(x, y)
     if sw != none
         s.color = sw
@@ -1976,12 +1999,20 @@ fun _paint_click(s, x, y)
     if s.tool == "fill"
         _paint_fill(s, c[0], c[1])
         return
+    if s.tool == "line" or s.tool == "rect"
+        s.base = slice(s.cells, 0, len(s.cells))
+        s.anchor = c
+        _paint_shape(s, c)
+        return
     _paint_stamp(s, c[0], c[1])
     s.last = c
     s.stroke = true
 
 # Dragging off the canvas pauses the stroke; it goes on from where it comes back.
 fun _paint_drag(s, x, y)
+    if s.anchor != none
+        _paint_shape(s, _paint_cell_near(x, y))
+        return
     if not s.stroke
         return
     let c = _paint_cell_at(x, y)
@@ -1994,7 +2025,59 @@ fun _paint_drag(s, x, y)
         _paint_line(s, s.last, c)
     s.last = c
 
+# Save as: the typed name is a file in /home (".paint" is added when it has
+# no ending), or a whole path when it starts with "/". A file there that is not
+# a picture, or a folder, is never written over.
+fun _paint_save_as(s, name)
+    let path = name
+    if not strings.starts_with(path, "/")
+        path = "/home/" + path
+    if not strings.contains(paths.base(path), ".")
+        path = path + ".paint"
+    if vfs.exists(s.fs, path)
+        if vfs.is_dir(s.fs, path)
+            s.status = "not saved: {paths.base(path)} is a folder"
+            return
+        let probe = {status: "", foreign: false, cells: none}
+        _paint_load(probe, vfs.read(s.fs, path))
+        if probe.foreign
+            s.status = "not saved: {paths.base(path)} is not a picture"
+            return
+    let was = [s.path, s.foreign]
+    s.path = path
+    s.foreign = false
+    _paint_save(s)
+    if s.status != "saved"
+        s.path = was[0]
+        s.foreign = was[1]
+
+fun _paint_name_key(s, k)
+    if k == "return"
+        let name = strings.trim(s.naming)
+        s.naming = none
+        if name == "" or strings.ends_with(name, "/")
+            s.status = "not saved: no name"
+            return
+        _paint_save_as(s, name)
+    else if k == "backspace"
+        if len(s.naming) > 0
+            s.naming = slice(s.naming, 0, len(s.naming) - 1)
+    else if k == "space"
+        s.naming = s.naming + " "
+    else if len(k) == 1
+        s.naming = s.naming + k
+
+# Esc gives up typing a name; otherwise Paint does not take it.
+fun _paint_escape(s)
+    if s.naming == none
+        return false
+    s.naming = none
+    return true
+
 fun _paint_key(s, k)
+    if s.naming != none
+        _paint_name_key(s, k)
+        return
     if len(k) == 1 and ord(k) >= 49 and ord(k) <= 56
         s.color = ord(k) - 48
     else if k == "e" or k == "0"
@@ -2007,6 +2090,12 @@ fun _paint_key(s, k)
         s.tool = "fill"
     else if k == "b"
         s.tool = "brush"
+    else if k == "l"
+        s.tool = "line"
+    else if k == "r"
+        s.tool = "rect"
+    else if k == "n"
+        s.naming = ""
     else if k == "c"
         _paint_snapshot(s)
         s.cells = _paint_blank()
@@ -2019,9 +2108,13 @@ fun _paint_key(s, k)
         _paint_save(s)
 
 fun _paint_lines(s)
+    if s.naming != none
+        return ["Paint save as: {s.naming}_ (return saves, esc cancels)"]
     let tool = str(s.size)
     if s.tool == "fill"
         tool = "fill"
+    else if s.tool != "brush"
+        tool = "{s.tool} {s.size}"
     return ["Paint [{s.status}] {_paint_names[s.color]} {tool} {paths.base(s.path)}"]
 
 # The swatches (the chosen one framed), the canvas frame, white, and then runs
@@ -2214,6 +2307,6 @@ let terminal = {name: "Terminal", width: 280, height: 120, init: _term_init, lin
 let files_app = {name: "Files", width: 260, height: 140, init: _files_init, lines: _files_lines, on_click: _files_click, on_key: _files_key, selected: _files_selected}
 let editor = {name: "Editor", width: 320, height: 80, init: _editor_init, lines: _editor_lines, on_click: _editor_click, on_key: _editor_key, tail: true, pinned: 1, marks: _editor_marks}
 let ide = {name: "IDE", width: 320, height: 200, init: _ide_init, lines: _ide_lines, on_click: _editor_click, on_key: _ide_key, on_escape: _ide_escape, tail: true, pinned: 1, marks: _editor_marks}
-let paint_app = {name: "Paint", width: 256, height: 190, init: _paint_init, lines: _paint_lines, on_click: _paint_click, on_key: _paint_key, on_drag: _paint_drag, paint: _paint_paint}
+let paint_app = {name: "Paint", width: 256, height: 190, init: _paint_init, lines: _paint_lines, on_click: _paint_click, on_key: _paint_key, on_drag: _paint_drag, on_escape: _paint_escape, paint: _paint_paint}
 let snake = {name: "Snake", width: 210, height: 170, init: _snake_init, lines: _snake_lines, on_click: _snake_click, on_key: _snake_key, on_tick: _snake_tick, paint: _snake_paint}
 fun default_apps() = [clicker, notes, terminal, files_app, editor, ide, paint_app, snake]

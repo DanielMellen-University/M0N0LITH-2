@@ -72,7 +72,7 @@ The machine these docs were last checked on has no SDL2, so these run steps were
 - **Files:** click a row, or use Up, Down and Return; Backspace goes up a folder. Opening a file picks it for the next Editor or IDE window, or Paint for a `.paint` file. See [Files](docs/apps/FILES.md).
 - **Editor:** arrows, Home, End and Ctrl+arrow move; Shift selects, Ctrl+A selects all; Ctrl+Z undoes up to 500 edits; Ctrl+S saves and warns once if another app changed the file. See [Editor](docs/apps/EDITOR.md).
 - **IDE:** the Editor plus Ctrl+R to run the program in an output pane, Ctrl+E to jump to an error, and an input line when the program reads one (Return sends, Escape stops). Runs stop after 200,000 steps between inputs and cannot change files on the real disk. See [IDE](docs/apps/IDE.md).
-- **Paint:** drag on the canvas to draw; swatches or `1` to `8` pick a color, `e` the eraser, `+` and `-` the brush size, `f` fills, `c` clears, Ctrl+Z undoes, Ctrl+S saves a `.paint` file. See [Paint](docs/apps/PAINT.md).
+- **Paint:** drag on the canvas to draw; swatches or `1` to `8` pick a color, `e` the eraser, `+` and `-` the brush size, `f` fills, `l` and `r` draw lines and rectangles, `c` clears, Ctrl+Z undoes, Ctrl+S saves a `.paint` file and `n` saves it as a name you type. See [Paint](docs/apps/PAINT.md).
 - **Snake:** arrows or W A S D start and turn, Space pauses, R plays again; it moves only while its window is focused, and the best score is saved in `/home/snake-best.txt`. See [Snake](docs/apps/SNAKE.md).
 - **Clicker and Notes:** a click counter and a one-line note. See [Clicker and Notes](docs/apps/SMALL_APPS.md).
 

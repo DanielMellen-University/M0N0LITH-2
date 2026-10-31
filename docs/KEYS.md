@@ -93,9 +93,11 @@ While a run waits for input:
 | e or 0 | the eraser |
 | + or =, - | brush size 1 to 4 cells |
 | f, b | the fill tool (a click fills the area of one color), and back to the brush |
+| l, r | the line and rectangle tools: press at one end or corner, drag to the other |
 | c | clears the canvas |
-| Ctrl+Z | undoes the last stroke, fill or clear, up to 20 |
+| Ctrl+Z | undoes the last stroke, fill, shape or clear, up to 20 |
 | Ctrl+S | saves the picture |
+| n | save as: type a name on the status line, Return saves, Backspace deletes, Esc gives up |
 
 ## Snake
 

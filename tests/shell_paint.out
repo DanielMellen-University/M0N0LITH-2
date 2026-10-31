@@ -34,3 +34,21 @@ cannot write /nope/x.paint
 2038 81 41 1
 0 2038
 brush 1 ["Paint [edited] orange 1 small.paint"]
+["Paint [open] red line 1 small.paint"]
+1 1
+16 0022222222222222220
+11 0020000000000000000 2
+55 2 2
+10 55 2
+0 55
+["Paint [edited] orange rect 1 small.paint"]
+14 0333330 0300030 0333330
+8 03330 03030 03330
+["Paint [edited] orange rect 2 small.paint"] 033333 033333 033033
+["Paint save as: my cat_ (return saves, esc cancels)"] 4
+saved /home/my cat.paint ["Paint [saved] yellow 1 my cat.paint"] 4
+brush true none ["Paint [saved] yellow 1 my cat.paint"] false
+["not saved: notes.txt is not a picture", "/home/my cat.paint"] keep me
+["saved", "/home/pics.paint"] ["not saved: old.d is a folder", "/home/pics.paint"] ["saved", "/home/pics/one.paint"] ["cannot write /home/none/two.paint", "/home/pics/one.paint"]
+["not saved: no name", "/home/pics/one.paint"] ["not saved: no name", "/home/pics/one.paint"] ["not saved: no name", "/home/pics/one.paint"]
+["saved", "/home/my cat.paint"] true
