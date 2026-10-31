@@ -1,12 +1,14 @@
-# shell/desktop.relic: a first MONOLITH 2 desktop, written in Relic (M11).
+# shell/desktop.relic: the MONOLITH 2 desktop, written in Relic (begun in Relic's M11).
 #   relic/build-sdl/relic shell/desktop.relic
 # Click Start (again to close the menu), pick an app, click inside it or type.
 # Drag a title bar to move, drag the bottom-right corner to resize. The x box
 # closes a window, the _ box minimizes it. A taskbar button brings its window
 # to the front, or minimizes it if it is already in front; click it again to
 # restore. With more windows than tabs fit, a +N button at the end of the bar
-# opens a list of the windows without a tab. Ctrl+S saves in the Editor.
-# Escape closes the Start menu or that list, or quits when neither is open.
+# opens a list of the windows without a tab. Ctrl+S (Cmd+S on macOS) saves in
+# the Editor and the IDE; Ctrl+R runs the IDE's program.
+# Escape closes the Start menu or that list, else stops an IDE run that waits
+# for input, or quits when none of those took it.
 # Input comes as graphics events and wm.handle turns them into app input, so
 # typed text keeps its case and symbols.
 use wm
