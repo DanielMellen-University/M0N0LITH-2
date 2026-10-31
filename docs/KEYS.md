@@ -96,9 +96,10 @@ While a run waits for input:
 | Input | What it does |
 |---|---|
 | Typing, Space, Backspace | edit the input line |
+| Ctrl+Backspace | removes the last word of the input line |
 | Ctrl+V | adds the first line of the clipboard |
 | Return | sends the line, and the run goes on |
-| Escape | stops the run |
+| Escape, Ctrl+C | stops the run |
 | Ctrl+S | saves the program; the run keeps waiting |
 | Other keys | ignored until the run ends |
 

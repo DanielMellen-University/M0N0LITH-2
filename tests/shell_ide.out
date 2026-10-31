@@ -81,3 +81,5 @@ false
 waiting for input [] [""]
 waiting for input ["a", "line a", "b", "line b"]
 error ["a", "line a", "b", "line b", "spin", "stopped: the program ran too long (200000 steps)"] none
+["one "] true
+stopped none stopped [""]

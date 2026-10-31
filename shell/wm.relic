@@ -1911,6 +1911,10 @@ fun _ide_input_key(s, k)
         s.input = s.input + " "
     else if k == "ctrl+v"
         s.input = s.input + _clip_line()
+    else if k == "ctrl+backspace"
+        s.input = _drop_word(s.input)
+    else if k == "ctrl+c"
+        _ide_escape(s)   # stops the run, as Esc does and as in a terminal
     else if len(k) == 1
         s.input = s.input + k
 

@@ -98,3 +98,12 @@ print(s.status, s.out)
 for k in ["s", "p", "i", "n", "return"]
     wm.key(d, k)
 print(s.status, s.out, s.run)
+# Ctrl+Backspace takes the last word off the input line, and Ctrl+C stops the
+# run as Esc does
+s.text = "use std/os\nprint(\"got \" + os.read_line())\n"
+wm.key(d, "ctrl+r")
+for k in ["o", "n", "e", "space", "t", "w", "o", "ctrl+backspace"]
+    wm.key(d, k)
+print([s.input], s.run != none)
+wm.key(d, "ctrl+c")
+print(s.status, s.run, s.out[len(s.out) - 1], [s.input])
