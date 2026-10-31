@@ -1,7 +1,9 @@
 # Files: Home and End go to the first and last row, and a letter or digit to
-# the next name that starts with it (any case, going round, never "..").
+# the next name that starts with it (any case, going round, never ".."), and
+# Page Up and Page Down a window of rows.
 use ../shell/wm
 use std/vfs
+use std/strings
 let d = wm.new_desktop(640, 480, wm.default_apps())
 let f = wm.launch(d, wm.files_app)
 for name in ["apple.txt", "Avocado.txt", "banana.txt", "cherry.txt", "2026.txt"]
@@ -34,3 +36,16 @@ f.state.sel = 0
 wm.key(d, "end")
 wm.key(d, "x")
 print(wm.visible_lines(f), sel())
+# Page Up and Page Down: a window of rows (the rows less the title, less one)
+vfs.make_dir(f.state.fs, "/tmp/many")
+for i in 0..40
+    vfs.write(f.state.fs, "/tmp/many/f" + strings.pad_left(str(i), 2, "0"), "x")
+f.state.path = "/tmp/many"
+f.state.sel = 0
+wm.visible_lines(f)
+let moves = [f.state.rows]
+for k in ["pagedown", "pagedown", "pagedown", "pagedown", "pageup", "pageup", "pageup", "pageup", "end", "pageup"]
+    wm.key(d, k)
+    append(moves, sel())
+print(moves)
+print(wm.key_of_event({type: "key_down", key: "pagedown", ctrl: false}), wm.key_of_event({type: "key_down", key: "pageup", ctrl: false}))

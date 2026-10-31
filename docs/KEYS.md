@@ -55,6 +55,7 @@ The commands are in [the Terminal doc](apps/TERMINAL.md).
 | Click a row | selects and opens it: a folder is entered, a file is set as the one the next Editor opens. The second click of a double-click is ignored |
 | Up, Down | move the selection |
 | Home, End | the first or last row |
+| Page Up, Page Down | a window of rows up or down, stopping at the ends |
 | A letter or digit | the next name that starts with it, any case, going round |
 | Return | opens the selected row |
 | Backspace | goes up a folder, with the folder you were in selected |
