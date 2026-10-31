@@ -73,7 +73,7 @@ The machine these docs were last checked on has no SDL2, so these run steps were
 - **Editor:** arrows, Home, End and Ctrl+arrow move; Shift selects, Ctrl+A selects all; Ctrl+Z undoes up to 500 edits; Ctrl+S saves and warns once if another app changed the file. See [Editor](docs/apps/EDITOR.md).
 - **IDE:** the Editor plus Ctrl+R to run the program in an output pane, Ctrl+E to jump to an error, and an input line when the program reads one (Return sends, Escape stops). Runs stop after 200,000 steps between inputs and cannot change files on the real disk. See [IDE](docs/apps/IDE.md).
 - **Paint:** drag on the canvas to draw; swatches or `1` to `8` pick a color, `e` the eraser, `+` and `-` the brush size, `f` fills, `c` clears, Ctrl+Z undoes, Ctrl+S saves a `.paint` file. See [Paint](docs/apps/PAINT.md).
-- **Snake:** arrows or W A S D start and turn, Space pauses, R plays again; it moves only while its window is focused. See [Snake](docs/apps/SNAKE.md).
+- **Snake:** arrows or W A S D start and turn, Space pauses, R plays again; it moves only while its window is focused, and the best score is saved in `/home/snake-best.txt`. See [Snake](docs/apps/SNAKE.md).
 - **Clicker and Notes:** a click counter and a one-line note. See [Clicker and Notes](docs/apps/SMALL_APPS.md).
 
 On macOS, Cmd with a letter works as Ctrl with it. Escape closes the Start menu or the +N list, stops an IDE run that waits for input, and otherwise quits, which loses the in-memory files. All the keys are in [Keyboard and mouse](docs/KEYS.md).

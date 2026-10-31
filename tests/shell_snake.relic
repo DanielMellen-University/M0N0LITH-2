@@ -110,3 +110,19 @@ wm.key(d, "up")
 run(150)
 show("itself")
 print(len(wm.paint_boxes(w)))
+# the best score is saved in the desktop's files and a new Snake reads it
+use std/vfs
+print([vfs.read(s.fs, "/home/snake-best.txt")])
+let w2 = wm.launch(d, wm.snake)
+print(w2.app.lines(w2.state)[0])
+# a higher saved best (another window's) shows at the next game; junk reads as 0
+vfs.write(s.fs, "/home/snake-best.txt", "9\n")
+w2.state.state = "over"
+wm.key(d, "r")
+print(w2.app.lines(w2.state)[0])
+vfs.write(s.fs, "/home/snake-best.txt", "lots")
+let w3 = wm.launch(d, wm.snake)
+print(w3.app.lines(w3.state)[0])
+vfs.write(s.fs, "/home/snake-best.txt", "2.5")
+let w4 = wm.launch(d, wm.snake)
+print(w4.app.lines(w4.state)[0])

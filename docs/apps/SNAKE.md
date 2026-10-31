@@ -9,7 +9,7 @@ The game. Its window is 210 by 170: a score line, a help line, and a board of 24
 - Eating the red food makes it one cell longer. New food goes on a free cell.
 - Running into a wall or into itself ends the game, with the snake left where it was. Filling the whole board wins.
 - Space pauses and goes on (it also starts a new game). R starts again after a game ends.
-- The best score lasts until the desktop quits.
+- The best score is saved in `/home/snake-best.txt` in the desktop's files (one whole number) whenever it is beaten, and read when a Snake window opens and when a new game starts, so two Snake windows share it. A file that holds no whole number counts as 0. Like all the desktop's files, it is lost when the desktop quits.
 
 The score line reads `Snake  score N  best M`. The help line says what to press next.
 
@@ -19,6 +19,6 @@ The score line reads `Snake  score N  best M`. The help line says what to press 
 - After a pause or a slow frame the beat starts again instead of catching up, so the snake never jumps several cells at once.
 - Food comes from a small seeded generator mixed with the clock when a game starts, so a test can replay a game exactly.
 - Walls end the game (no wrapping), which keeps the rules plain.
-- Not yet: a saved high score, levels or obstacles, and sound.
+- Not yet: levels or obstacles, and sound.
 
 Tests: `shell_snake`.

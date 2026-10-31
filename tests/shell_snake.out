@@ -16,3 +16,8 @@ keys ignored over
 again ready 0 [[3, 8], [4, 8], [5, 8]] [20, 7] ["Snake  score 0  best 4", "arrows or space to start"]
 itself over 0 [[5, 5], [6, 5], [7, 5], [8, 5], [8, 6], [7, 6]] [20, 7] ["Snake  score 0  best 4", "game over: r to play"]
 9
+["4\n"]
+Snake  score 0  best 4
+Snake  score 0  best 9
+Snake  score 0  best 0
+Snake  score 0  best 0

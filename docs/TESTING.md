@@ -164,7 +164,7 @@ Write `tests/shell_<topic>.relic`, run it, read its output, and save that as `te
 
 | Test | What it covers |
 |---|---|
-| `shell_snake` | Snake: no move before a key, the beat, no turning back, two turns in one step, pause without catching up, no move while another window is focused, eating and growing, speed, the wall, its own body, keys after the end, a new game |
+| `shell_snake` | Snake: no move before a key, the beat, no turning back, two turns in one step, pause without catching up, no move while another window is focused, eating and growing, speed, the wall, its own body, keys after the end, a new game, the best score saved in the files and read back (junk reads as 0) |
 
 ### Shared filesystem and fuzzing
 

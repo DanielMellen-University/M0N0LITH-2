@@ -2048,18 +2048,30 @@ fun _paint_paint(s)
 # clock from wm.tick, and only while its window is focused. Arrows or W A S D
 # turn it (not straight back), Space pauses and goes on, R starts again after
 # a game ends. Eating the red food makes it one longer and a little faster;
-# running into a wall or itself ends the game. The best score lasts as long
-# as the desktop.
+# running into a wall or itself ends the game. The best score is kept in
+# _snake_best_path in the desktop's files, read when a game starts and
+# written when it is beaten.
 let _snake_w = 24
 let _snake_h = 16
 let _snake_cell = 8
 let _snake_left = 6
 let _snake_top = 36
-let _snake_best = {score: 0}
+let _snake_best_path = "/home/snake-best.txt"
 let _snake_dirs = {up: [0, -1], down: [0, 1], left: [-1, 0], right: [1, 0], w: [0, -1], s: [0, 1], a: [-1, 0], d: [1, 0]}
 
+# The saved best score: 0 when there is no file or it holds no whole number.
+fun _snake_read_best(fs)
+    try
+        if vfs.exists(fs, _snake_best_path) and not vfs.is_dir(fs, _snake_best_path)
+            let n = num(strings.trim(vfs.read(fs, _snake_best_path)))
+            if n >= 0 and n % 1 == 0
+                return int(n)
+    catch e
+        return 0
+    return 0
+
 fun _snake_init()
-    let s = {now: 0, seed: 1}
+    let s = {now: 0, seed: 1, fs: _shell_fs, best: 0}
     _snake_reset(s)
     return s
 
@@ -2071,6 +2083,7 @@ fun _snake_reset(s)
     s.score = 0
     s.state = "ready"
     s.next_at = none
+    s.best = math.max(s.best, _snake_read_best(s.fs))
     s.seed = (s.seed * 7 + s.now) % 2147483647 + 1
     _snake_place_food(s)
 
@@ -2116,8 +2129,12 @@ fun _snake_step(s)
     append(s.body, n)
     if eats
         s.score = s.score + 1
-        if s.score > _snake_best.score
-            _snake_best.score = s.score
+        if s.score > s.best
+            s.best = s.score
+            try
+                vfs.write(s.fs, _snake_best_path, "{s.best}\n")
+            catch e
+                s.best = s.best   # a best that cannot be saved still shows
         _snake_place_food(s)
         if s.food == none
             s.state = "won"
@@ -2163,7 +2180,7 @@ fun _snake_click(s, x, y) = none
 
 fun _snake_lines(s)
     let help = {ready: "arrows or space to start", playing: "space to pause", paused: "paused: space to go on", over: "game over: r to play", won: "you won! r to play again"}
-    return ["Snake  score {s.score}  best {_snake_best.score}", help[s.state]]
+    return ["Snake  score {s.score}  best {s.best}", help[s.state]]
 
 fun _snake_paint(s)
     let c = _snake_cell
