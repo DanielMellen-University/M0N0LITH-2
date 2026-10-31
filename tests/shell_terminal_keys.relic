@@ -1,6 +1,7 @@
 # Terminal Ctrl keys: Ctrl+C gives up the line being typed (shown with ^C, not
 # run, not kept for Up, and it ends a recall); Ctrl+L empties the output like
-# clear and keeps the line being typed.
+# clear and keeps the line being typed. Ctrl+Backspace takes off the last
+# word, in Notes too.
 use ../shell/wm
 let t = wm.terminal.init()
 fun typed(line)
@@ -26,3 +27,12 @@ key("ctrl+l")
 print(t.buf, [t.input])
 key("ctrl+c")
 print(t.buf, [t.input])
+typed("cat /home/welcome.txt")
+print([key("ctrl+backspace"), key("ctrl+backspace"), key("ctrl+backspace"), key("ctrl+backspace"), key("ctrl+backspace")])
+let n = wm.notes.init()
+n.text = "two words  "
+wm.notes.on_key(n, "ctrl+backspace")
+print([n.text])
+wm.notes.on_key(n, "ctrl+backspace")
+wm.notes.on_key(n, "ctrl+backspace")
+print([n.text])

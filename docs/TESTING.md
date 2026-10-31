@@ -93,7 +93,7 @@ Write `tests/shell_<topic>.relic`, run it, read its output, and save that as `te
 | `shell_terminal` | Terminal commands: extra spaces, folders, redirects, errors |
 | `shell_terminal_history` | the Terminal keeps its last 200 lines |
 | `shell_terminal_recall` | Up and Down through earlier commands, the line being typed kept, blanks and repeats not kept, editing a recalled line, the last 50 |
-| `shell_terminal_keys` | Ctrl+C gives up the line (shown with ^C, not run or kept, ends a recall), Ctrl+L empties the output and keeps the line |
+| `shell_terminal_keys` | Ctrl+C gives up the line (shown with ^C, not run or kept, ends a recall), Ctrl+L empties the output and keeps the line, Ctrl+Backspace takes off the last word there and in Notes |
 | `shell_terminal_errors` | Terminal error messages (mv, mkdir, cat, paths through a file) |
 | `shell_terminal_touch` | touch preserves existing entries and creates empty files |
 | `shell_terminal_write` | write replaces content and handles empty text |

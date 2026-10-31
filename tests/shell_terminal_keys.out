@@ -2,3 +2,6 @@
 ["pwd", ""] ["pwd"]
 [] ["ec"]
 ["/home> ec^C"] [""]
+["cat /home/welcome.", "cat /home/", "cat /", "", ""]
+["two "]
+[""]

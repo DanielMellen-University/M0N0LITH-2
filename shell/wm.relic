@@ -697,9 +697,14 @@ fun _notes_init() = {text: ""}
 fun _notes_lines(s) = ["Type something:", s.text + "_"]
 fun _notes_click(s, x, y)
     return none
+# Ctrl+Backspace in a one-line input: back to where the Editor's Ctrl+Left would go.
+fun _drop_word(text) = slice(text, 0, _word_left(text, len(text)))
+
 fun _notes_key(s, k)
     if k == "ctrl+v"
         s.text = s.text + _clip_line()
+    else if k == "ctrl+backspace"
+        s.text = _drop_word(s.text)
     else if k == "ctrl+c" or k == "ctrl+x"
         # the whole line (Notes has no selection); an empty one leaves the clipboard
         if s.text != ""
@@ -1150,6 +1155,8 @@ fun _term_key(s, k)
         s.draft = ""
     else if k == "ctrl+l"
         s.buf = []   # what clear does, keeping the line being typed
+    else if k == "ctrl+backspace"
+        s.input = _drop_word(s.input)
     else
         s.input = _typed(s.input, k)
 
