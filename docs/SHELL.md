@@ -48,4 +48,8 @@ Files opens a row on a single click and ignores the second press of a double-cli
 
 ## Tests
 
-CMake discovers every `tests/*.relic` program. Each current test drives `wm.relic` and prints what happened; its standard output must match the `.out` file next to it (or be empty if that file is absent). `shell_fuzz` uses fixed seeds on two desktop sizes and checks model invariants after every step. `shell_apps_fuzz` does the same for the apps: random commands from two Terminals while Files and Editor work on the same filesystem. CTest also runs `relic check` on both shell files. To change an expected output on purpose, run the test, read the diff, and save the new output.
+CMake discovers every `tests/*.relic` program; each drives `wm.relic` and prints what happened, and its standard output must match the `.out` file next to it (or be empty if that file is absent). CTest also runs `relic check` on both shell files. How to run one, add one or change an expected output, and the list of all of them by area, are in [Tests](TESTING.md).
+
+## Words
+
+The code says tab (`tabs`, `tab_box`, `shown_tabs`) for what the user docs call a taskbar button, and the +N button's list is the hidden-windows list (`overflow_*`). The user-facing pages are [Windows](apps/WINDOWS.md), [Taskbar](apps/TASKBAR.md) and the other app pages in `docs/apps/`.
