@@ -1,6 +1,7 @@
 # The desktop's clipboard: Ctrl+C and Ctrl+X in the Editor and the IDE take
 # the selection, Ctrl+V pastes it over any selection (one undo step each), and
 # Notes, the Terminal and an IDE run waiting for input paste its first line.
+# Notes copies or cuts its whole line.
 use ../shell/wm
 use std/vfs
 let d = wm.new_desktop(640, 480, wm.default_apps())
@@ -53,3 +54,11 @@ keys(i, ["ctrl+a", "ctrl+x"])
 print([i.state.text])
 keys(e, ["ctrl+a", "ctrl+v"])
 print([s.text])
+# Notes: Ctrl+C copies its line, Ctrl+X cuts it; an empty line leaves the clipboard
+n.state.text = "note text"
+keys(n, ["ctrl+c"])
+keys(e, ["ctrl+a", "ctrl+v"])
+print([s.text, n.state.text])
+keys(n, ["ctrl+x", "ctrl+c", "ctrl+x"])
+keys(e, ["ctrl+v"])
+print([s.text, n.state.text])

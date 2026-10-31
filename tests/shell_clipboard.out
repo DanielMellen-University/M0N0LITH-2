@@ -10,3 +10,5 @@ true
 got hello world
 [""]
 ["use std/os\nprint(\"got \" + os.read_line())\n"]
+["note text", "note text"]
+["note textnote text", ""]

@@ -29,6 +29,7 @@ Every key and click the desktop and its apps act on, checked against `shell/wm.r
 |---|---|
 | Typing | adds to the one line of text |
 | Backspace | removes the last character |
+| Ctrl+C, Ctrl+X | copies, or cuts, the whole line to the clipboard |
 | Ctrl+V | adds the first line of the clipboard |
 
 ## Terminal
