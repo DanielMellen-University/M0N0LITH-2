@@ -750,7 +750,7 @@ fun _typed(text, k)
         return text + k
     return text
 
-fun _notes_init() = {text: ""}
+fun _notes_init() = {text: "", before: none}
 fun _notes_lines(s) = ["Type something:", s.text + "_"]
 fun _notes_click(s, x, y)
     return none
@@ -758,7 +758,16 @@ fun _notes_click(s, x, y)
 fun _drop_word(text) = slice(text, 0, _word_left(text, len(text)))
 
 fun _notes_key(s, k)
-    if k == "ctrl+v"
+    if k == "ctrl+u" or k == "ctrl+x" or k == "ctrl+backspace"
+        s.before = s.text   # what Ctrl+Z brings back
+    if k == "ctrl+z"
+        # one step: the line before the last Ctrl+U, Ctrl+X or Ctrl+Backspace,
+        # and pressed again, the line after it
+        if s.before != none
+            let now = s.text
+            s.text = s.before
+            s.before = now
+    else if k == "ctrl+v"
         s.text = s.text + _clip_line()
     else if k == "ctrl+backspace"
         s.text = _drop_word(s.text)

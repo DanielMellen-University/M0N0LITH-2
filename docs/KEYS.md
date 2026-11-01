@@ -41,6 +41,7 @@ Every key and click the desktop and its apps act on, checked against `shell/wm.r
 | Ctrl+C, Ctrl+X | copies, or cuts, the whole line to the clipboard |
 | Ctrl+Backspace | removes the last word |
 | Ctrl+U | empties the line |
+| Ctrl+Z | brings back the line from before the last Ctrl+U, Ctrl+X or Ctrl+Backspace; again puts it back |
 | Ctrl+V | adds the first line of the clipboard |
 
 ## Terminal
