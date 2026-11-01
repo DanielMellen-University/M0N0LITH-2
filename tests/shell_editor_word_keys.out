@@ -33,3 +33,8 @@ ctrl+shift+left ctrl+shift+end ctrl+s
 ["if x go()\nend"]
 ["a\n        bc\nd"] 3
 ["a\n    bc\nd"] 3
+["two\none\nthree"] 11
+["two\none\nthree"] 11
+["one\nthree\ntwo"] 1
+["one\nthree\ntwo"] 1
+["one\ntwo\nthree"]

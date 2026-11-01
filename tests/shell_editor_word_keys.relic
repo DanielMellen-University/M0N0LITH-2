@@ -139,3 +139,18 @@ e.app.on_key(s, "ctrl+]")
 print([s.text], s.back)
 e.app.on_key(s, "ctrl+[")
 print([s.text], s.back)
+# Ctrl+Up and Ctrl+Down move the cursor's line, the cursor with it
+s.text = "one\ntwo\nthree"
+s.back = 7
+s.mark = none
+e.app.on_key(s, "ctrl+up")
+print([s.text], s.back)
+e.app.on_key(s, "ctrl+up")
+print([s.text], s.back)
+e.app.on_key(s, "ctrl+down")
+e.app.on_key(s, "ctrl+down")
+print([s.text], s.back)
+e.app.on_key(s, "ctrl+down")
+print([s.text], s.back)
+e.app.on_key(s, "ctrl+z")
+print([s.text])

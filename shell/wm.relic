@@ -2060,6 +2060,23 @@ fun _editor_key(s, k)
             to = to + 1
         s.mark = len(s.text) - from
         _editor_set_pos(s, to)
+    else if k == "ctrl+up" or k == "ctrl+down"
+        # moves the cursor's line above the one before or below the one after
+        # (Alt+Up and Alt+Down in VS Code), the cursor going with it; one undo
+        s.overwrite = false
+        let pos = _editor_pos(s)
+        let a = _line_start(s.text, pos)
+        let b = _line_end(s.text, pos)
+        let line = slice(s.text, a, b)
+        if k == "ctrl+up" and a > 0
+            let pa = _line_start(s.text, a - 1)
+            _editor_change(s, pa, b - pa, line + "\n" + slice(s.text, pa, a - 1))
+            _editor_set_pos(s, pa + pos - a)
+        else if k == "ctrl+down" and b < len(s.text)
+            let nb = _line_end(s.text, b + 1)
+            let after = slice(s.text, b + 1, nb)
+            _editor_change(s, a, nb - a, after + "\n" + line)
+            _editor_set_pos(s, a + len(after) + 1 + pos - a)
     else if k == "ctrl+j"
         # joins the next line onto the cursor's: its newline and leading spaces
         # become one space (none after an empty line), the cursor at the join
