@@ -4,7 +4,7 @@ The window manager part of the desktop: how windows open, stack, move, resize, m
 
 ## The Start menu
 
-The Start button sits at the left end of the taskbar. Clicking it opens the menu, and clicking it again closes it. The menu sits just above the taskbar with one row per app, top to bottom: Clicker, Notes, Terminal, Files, Editor and IDE. Picking a row launches that app. With the menu open, Up and Down move a marked row (going round at the ends; the first is marked each time it opens) and Return launches it. Any other click closes the menu and then does what it normally does, and so does Escape.
+The Start button sits at the left end of the taskbar. Clicking it opens the menu, and clicking it again closes it. The menu sits just above the taskbar with one row per app, top to bottom: Clicker, Notes, Terminal, Files, Editor, IDE, Paint and Snake. Picking a row launches that app. With the menu open, Up and Down move a marked row (going round at the ends; the first is marked each time it opens) and Return launches it. Any other click closes the menu and then does what it normally does, and so does Escape.
 
 ## Opening
 
