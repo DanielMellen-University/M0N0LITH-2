@@ -33,6 +33,7 @@ Commands split on spaces. Quotes are ordinary characters and do not group words,
 | `find text` | every file and folder under the current folder whose own name has `text` in it, as paths from there (folders with a `/` after them), in the order `ls` gives, each folder followed by what is in it |
 | `grep text path` | the lines of a file that have `text` in them: plain text, not a pattern, and case counts |
 | `sort path` | the lines of a file in order, by character (capitals before small letters); the file is not changed |
+| `uniq path` | the lines of a file, leaving out a line the same as the one just before it (so a repeat further on stays, as in Unix) |
 | `mkdir path` | makes a folder, and any missing folders above it |
 | `touch path` | makes an empty file; an existing file or folder is left as it is |
 | `write path text` | replaces the file with the text and a newline |
@@ -43,7 +44,7 @@ Commands split on spaces. Quotes are ordinary characters and do not group words,
 
 ## Rules for paths
 
-- No command has options. `cd`, `ls`, `cat`, `head`, `tail`, `wc`, `grep`, `sort`, `mkdir`, `touch`, `rm`, `mv` and `cp` refuse any word starting with `-`, and so do the paths of `write` and `echo >`. To name such a file, write `./-x`.
+- No command has options. `cd`, `ls`, `cat`, `head`, `tail`, `wc`, `grep`, `sort`, `uniq`, `mkdir`, `touch`, `rm`, `mv` and `cp` refuse any word starting with `-`, and so do the paths of `write` and `echo >`. To name such a file, write `./-x`.
 - A path ending in `/` must be a folder: `cat notes.txt/` and `rm notes.txt/` are errors, and `touch new/` makes nothing.
 - Errors say which part is wrong: `not found: /home/x`, `not a folder: /home/notes.txt` when a part of the path is a file, `no folder: /home/missing` when the folder to write into is not there.
 - If another app removes or moves the folder a Terminal is in, it moves up to the nearest folder that still exists.
@@ -54,4 +55,4 @@ The Terminal keeps the last 200 lines of output; older ones fall off the top. Lo
 
 ## In the code
 
-`terminal` in `shell/wm.relic`, with `_term_run` dispatching the commands to `_term_*` helpers (one each for `ls`, `cat`, `head`, `tail`, `grep`, `sort`, `wc`, `cp` and the rest) and `_term_key` handling the keys, `!!` included. Tests: the `shell_terminal*` goldens, `shell_help`, `shell_date` and `shell_apps_fuzz` (see [the test list](../TESTING.md)).
+`terminal` in `shell/wm.relic`, with `_term_run` dispatching the commands to `_term_*` helpers (one each for `ls`, `cat`, `head`, `tail`, `grep`, `sort`, `uniq`, `wc`, `cp` and the rest) and `_term_key` handling the keys, `!!` included. Tests: the `shell_terminal*` goldens, `shell_help`, `shell_date` and `shell_apps_fuzz` (see [the test list](../TESTING.md)).
