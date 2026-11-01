@@ -26,6 +26,8 @@ The status is one of:
 | Page Up, Page Down | as many lines up or down as the window shows less one, so one stays in view; with Shift they select |
 | Ctrl+Backspace, Ctrl+Delete | removes the selection, or back to where Ctrl+Left goes, or on to where Ctrl+Right goes |
 | Shift with an arrow, Home, End, Page Up or Page Down | selects from the cursor |
+| Ctrl+Shift+Left, Ctrl+Shift+Right | selects to where Ctrl+Left or Ctrl+Right would go |
+| Ctrl+Shift+Home, Ctrl+Shift+End | selects to the start or the end of the file |
 | Return | a new line that starts with the same spaces as the one before (up to the cursor); in the IDE, 4 more after a line that opens a block (`if`, `else`, `for`, `while`, `fun` without `=`, `try`, `catch`) |
 | Tab | spaces to the next multiple of 4 columns (Relic's indent), over any selection; never a tab character |
 | Shift+Tab | takes the line's leading spaces back to the multiple of 4 before; the cursor stays on its character |

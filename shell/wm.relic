@@ -501,6 +501,7 @@ fun key(d, k)
 # punctuation and space come as text events, which carry shift, layout and Unicode.
 let _named_keys = ["return", "backspace", "tab", "up", "down", "left", "right", "delete", "home", "end", "pageup", "pagedown", "f5"]
 let _shift_keys = ["left", "right", "up", "down", "home", "end", "tab", "pageup", "pagedown"]   # shift+left and so on select in the Editor; shift+tab takes out an indent
+let _ctrl_shift_keys = ["left", "right", "home", "end"]
 let _modifier_keys = ["left ctrl", "right ctrl", "left shift", "right shift", "left alt", "right alt", "left gui", "right gui"]
 
 # The app key for a key_down event, or none when it needs no key. With ctrl held
@@ -513,6 +514,9 @@ fun key_of_event(e)
         return none
     let altgr = e.ctrl and "alt" in e and e.alt
     if e.ctrl and not altgr and not e.key in _modifier_keys
+        # Ctrl+Shift with a word or file move selects that far in the Editor
+        if "shift" in e and e.shift and e.key in _ctrl_shift_keys
+            return "ctrl+shift+" + e.key
         return "ctrl+" + e.key
     # Cmd on macOS (gui, since Relic 1.0.40) with a letter is the Ctrl shortcut
     # there: Cmd+S saves, Cmd+Z undoes, Cmd+A selects all.
@@ -1965,6 +1969,9 @@ fun _editor_key(s, k)
     else if k in ["shift+left", "shift+right", "shift+up", "shift+down", "shift+home", "shift+end", "shift+pageup", "shift+pagedown"]
         s.overwrite = false
         _editor_select(s, slice(k, 6, len(k)))
+    else if k in ["ctrl+shift+left", "ctrl+shift+right", "ctrl+shift+home", "ctrl+shift+end"]
+        s.overwrite = false
+        _editor_select(s, "ctrl+" + slice(k, 11, len(k)))
     else if k in ["left", "right", "up", "down", "home", "end", "ctrl+left", "ctrl+right", "ctrl+home", "ctrl+end", "pageup", "pagedown"]
         s.overwrite = false
         _editor_move(s, k)

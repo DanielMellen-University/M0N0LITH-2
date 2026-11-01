@@ -82,6 +82,7 @@ The commands are in [the Terminal doc](apps/TERMINAL.md).
 | Page Up, Page Down | a window of lines less one, up or down |
 | Ctrl+Backspace, Ctrl+Delete | removes the selection, or the word before or after the cursor |
 | Shift with an arrow, Home, End, Page Up or Page Down | selects from the cursor |
+| Ctrl+Shift+Left, Ctrl+Shift+Right, Ctrl+Shift+Home, Ctrl+Shift+End | selects to the word before or after, or to the start or end of the file |
 | Return | a new line with the same leading spaces (in the IDE 4 more after `if`, `else`, `for`, `while`, `fun`, `try`, `catch`) |
 | Tab | spaces to the next multiple of 4 columns, over any selection |
 | Shift+Tab | takes one indent (to the multiple of 4 before) off the line |

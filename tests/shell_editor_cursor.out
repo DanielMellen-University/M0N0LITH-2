@@ -21,6 +21,6 @@ after down []
 down ["first line", "second", "_the third liXYne"]
 ctrl+right stops [1, 7, 11, 13, 18, 24, 24, 24, 24]
 ctrl+left stops [22, 15, 12, 8, 4, 0, 0, 0, 0]
-home shift+end ctrl+left ctrl+right delete
+home shift+end ctrl+left ctrl+shift+right delete
 echo
 up onto a shorter line ["ab_", "longer"]

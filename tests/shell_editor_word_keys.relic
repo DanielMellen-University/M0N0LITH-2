@@ -4,6 +4,7 @@
 # stops after the leading spaces first.
 use ../shell/wm
 use std/strings
+use std/math
 let d = wm.new_desktop(640, 480, wm.default_apps())
 let e = wm.launch(d, wm.editor)
 let s = e.state
@@ -98,3 +99,21 @@ print([s.text], s.back)
 e.app.on_key(s, "ctrl+z")
 e.app.on_key(s, "ctrl+z")
 print([s.text])
+# Ctrl+Shift with Left, Right, Home or End selects as far as Ctrl alone moves
+print(wm.key_of_event({type: "key_down", key: "left", ctrl: true, shift: true}), wm.key_of_event({type: "key_down", key: "end", ctrl: true, shift: true}), wm.key_of_event({type: "key_down", key: "s", ctrl: true, shift: true}))
+fun chosen()
+    let a = len(s.text) - s.mark
+    let b = len(s.text) - s.back
+    return slice(s.text, math.min(a, b), math.max(a, b))
+s.text = "alpha beta gamma"
+s.back = 6
+s.mark = none
+e.app.on_key(s, "ctrl+shift+left")
+print([chosen()])
+e.app.on_key(s, "ctrl+shift+right")
+e.app.on_key(s, "ctrl+shift+right")
+print([chosen()])
+e.app.on_key(s, "ctrl+shift+home")
+print([chosen()])
+e.app.on_key(s, "ctrl+shift+end")
+print([chosen()])

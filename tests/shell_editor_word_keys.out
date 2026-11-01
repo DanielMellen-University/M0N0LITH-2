@@ -22,3 +22,8 @@ shift+pagedown
 [""] 0
 [""] 0
 ["one\nthree"]
+ctrl+shift+left ctrl+shift+end ctrl+s
+["beta"]
+[" gamma"]
+["alpha beta"]
+[" gamma"]
