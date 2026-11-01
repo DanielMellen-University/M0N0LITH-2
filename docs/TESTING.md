@@ -91,7 +91,7 @@ Write `tests/shell_<topic>.relic`, run it, read its output, and save that as `te
 
 | Test | What it covers |
 |---|---|
-| `shell_terminal` | Terminal commands: extra spaces, folders, redirects, errors, `wc`, `cp` (to a name or into a folder, not a folder, not over a file) and `head`; `cat` with several files |
+| `shell_terminal` | Terminal commands: extra spaces, folders, redirects, errors, `wc`, `cp` (to a name or into a folder, not a folder, not over a file) and `head`; `cat` with several files; `tail` and `grep` |
 | `shell_terminal_history` | the Terminal keeps its last 200 lines |
 | `shell_terminal_recall` | Up and Down through earlier commands, the line being typed kept, blanks and repeats not kept, editing a recalled line, the last 50, and `history` listing them numbered |
 | `shell_terminal_keys` | Ctrl+C gives up the line (shown with ^C, not run or kept, ends a recall), Ctrl+L empties the output and keeps the line, Ctrl+Backspace takes off the last word there and in Notes, Ctrl+U empties the line, `!!` runs the command before (or says there is none) |
@@ -140,7 +140,7 @@ Write `tests/shell_<topic>.relic`, run it, read its output, and save that as `te
 |---|---|
 | `shell_clipboard` | Ctrl+C, Ctrl+X and Ctrl+V in the Editor and the IDE (no selection, over a selection, one undo step each), and the first line pasted into Notes, the Terminal and an IDE run waiting for input; Notes copying and cutting its whole line |
 | `shell_editor_indent` | Return keeps leading spaces up to the cursor, the IDE adds a level after a block line but not after `fun f() = ...`, undo |
-| `shell_editor_word_keys` | Ctrl+Home and Ctrl+End go to the start and end of the file and drop the selection; Ctrl+Backspace and Ctrl+Delete remove a word, the selection, or nothing at the ends; Home stops after the leading spaces, then goes to the very start; Page Up and Page Down by the shown lines less one, Shift selecting; Ctrl+L selecting lines; Ctrl+D copying a line or the selected lines, and Ctrl+K removing them, each one undo; Ctrl+J joining lines; Ctrl+] and Ctrl+[ indenting and taking it off |
+| `shell_editor_word_keys` | Ctrl+Home and Ctrl+End go to the start and end of the file and drop the selection; Ctrl+Backspace and Ctrl+Delete remove a word, the selection, or nothing at the ends; Home stops after the leading spaces, then goes to the very start; Page Up and Page Down by the shown lines less one, Shift selecting; Ctrl+L selecting lines; Ctrl+D copying a line or the selected lines, and Ctrl+K removing them, each one undo; Ctrl+J joining lines; Ctrl+] and Ctrl+[ indenting and taking it off; Ctrl+Up and Ctrl+Down moving a line |
 | `shell_editor_tab` | Tab types spaces to the next multiple of 4, over a selection, one undo step, in the IDE too; Shift+Tab takes an indent off and keeps the cursor on its character; Backspace in leading spaces goes back one indent, elsewhere one character |
 | `shell_editor_title` | Editor title keeps the file name and the status in view |
 | `shell_editor_open_status` | Editor status on opening: open, new file, or why not |
