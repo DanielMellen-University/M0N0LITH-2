@@ -26,6 +26,7 @@ Every key and click the desktop and its apps act on, checked against `shell/wm.r
 |---|---|
 | Click inside, Space or Return | adds one to the count |
 | Backspace or - | takes one off, not below 0 |
+| Delete | sets the count back to 0 |
 | Ctrl+C | copies the count, as a number, to the clipboard |
 
 ## Notes

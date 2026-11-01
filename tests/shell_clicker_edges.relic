@@ -34,3 +34,8 @@ wm.key(d, "ctrl+c")
 let n = wm.launch(d, wm.notes)
 wm.key(d, "ctrl+v")
 print("copied", n.state.text)
+# Delete sets the count back to 0
+wm.close(d, n.id)
+wm.key(d, "space")
+wm.key(d, "delete")
+print("reset", fresh.state.count)

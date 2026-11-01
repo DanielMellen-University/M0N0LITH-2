@@ -6,3 +6,4 @@ return 2
 back 1
 floor 0 ["Clicks: 0", "Click here to count."]
 copied 2
+reset 0
