@@ -48,6 +48,13 @@ let m_top = wm.focused(d)
 wm.key(d, "ctrl+m")
 print("ctrl+m", m_top.minimized, wm.focused(d) != m_top)
 wm.restore(d, m_top.id)
+# Ctrl+1 to Ctrl+9 bring that taskbar window forward, restoring a minimized one
+let picks = []
+for k in ["ctrl+1", "ctrl+2", "ctrl+3", "ctrl+9", "ctrl+1"]
+    wm.key(d, k)
+    append(picks, wm.focused(d).app.name)
+print(picks, t.minimized, [n.state.text])
+wm.minimize(d, t.id)
 # Ctrl+W closes the window with focus, as the x box does; no app sees it
 let before = len(d.windows)
 let top = wm.focused(d)

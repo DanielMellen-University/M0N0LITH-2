@@ -497,6 +497,14 @@ fun key(d, k)
             remove(d.windows, i)
             insert(d.windows, 0, top)
         return
+    if len(k) == 6 and slice(k, 0, 5) == "ctrl+" and k[5] >= "1" and k[5] <= "9"
+        # Ctrl+1 to Ctrl+9: the window of that taskbar button (in the order
+        # opened), restored if minimized and brought to the front
+        let order = tabs(d)
+        let n = ord(k[5]) - 48
+        if n <= len(order)
+            restore(d, order[n - 1].id)
+        return
     let w = focused(d)
     if w != none and k == "ctrl+w"
         # closes the window with focus, as its x box does (no app sees the key)

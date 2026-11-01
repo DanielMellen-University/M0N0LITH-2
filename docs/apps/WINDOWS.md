@@ -23,7 +23,7 @@ The height is the area under the 16 pixel title bar.
 
 ## Focus and stacking
 
-The window on top that is not minimized has focus: its title bar is blue, and it gets the keys. Clicking anywhere in a window brings it to the front. Ctrl+Tab brings the lowest window that is not minimized to the front, so pressing it again goes round them all. Ctrl+Shift+Tab goes round the other way: the window with focus goes to the bottom, which undoes a Ctrl+Tab. Ctrl+W closes the window with focus, the same as its x box: an Editor's unsaved text goes with it. Ctrl+M minimizes it, the same as its _ box.
+The window on top that is not minimized has focus: its title bar is blue, and it gets the keys. Clicking anywhere in a window brings it to the front. Ctrl+Tab brings the lowest window that is not minimized to the front, so pressing it again goes round them all. Ctrl+Shift+Tab goes round the other way: the window with focus goes to the bottom, which undoes a Ctrl+Tab. Ctrl+W closes the window with focus, the same as its x box: an Editor's unsaved text goes with it. Ctrl+M minimizes it, the same as its _ box. Ctrl+1 to Ctrl+9 bring the first to the ninth window, in the order they were opened (the taskbar's order), to the front, restoring it if it was minimized.
 
 ## Moving and resizing
 
