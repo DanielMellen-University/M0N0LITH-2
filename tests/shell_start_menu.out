@@ -9,3 +9,9 @@ Notes row -> launch menu open: false windows: 1
 Start -> start menu open: true windows: 1
 Clicker row -> launch menu open: false windows: 2
 Clicker 2
+Start -> start menu open: true windows: 2
+[0, 1, 2, 1, 0, 7]
+false Notes 1
+Start -> start menu open: true windows: 3
+0
+false

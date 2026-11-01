@@ -8,6 +8,7 @@ Every key and click the desktop and its apps act on, checked against `shell/wm.r
 |---|---|
 | Click Start | opens the Start menu, or closes it |
 | Click a Start menu row | launches that app |
+| Up, Down, Return (menu open) | move the marked row of the Start menu, going round at the ends, and launch it; the first row is marked each time it opens |
 | Drag a title bar | moves the window |
 | Drag the bottom-right corner | resizes the window |
 | Click the _ box | minimizes the window |

@@ -65,7 +65,7 @@ fun _existing_dir(fs, p)
     return x
 
 fun new_desktop(width, height, apps)
-    return {width: width, height: height, apps: apps, windows: [], menu_open: false, overflow_open: false, next_id: 1, drag: none, clicks: 1}
+    return {width: width, height: height, apps: apps, windows: [], menu_open: false, menu_sel: 0, overflow_open: false, next_id: 1, drag: none, clicks: 1}
 
 fun bar_top(d) = d.height - bar_height
 
@@ -371,6 +371,7 @@ fun _click_overflow_list(d, x, y)
 fun _click_bar(d, x, y, menu_was_open, overflow_was_open)
     if x < start_width
         d.menu_open = not menu_was_open
+        d.menu_sel = 0   # the keys start from the first row each time it opens
         return "start"
     let ob = overflow_box(d)
     if ob != none and _inside(ob, x, y)
@@ -482,6 +483,18 @@ fun dismiss(d)
 # minimized to the front, so pressing it again goes round all of them. Every
 # other key goes to the window in front.
 fun key(d, k)
+    if d.menu_open and (k == "up" or k == "down" or k == "return")
+        # the open Start menu takes Up, Down and Return: move the marked row
+        # (round at the ends) and launch it
+        let n = len(d.apps)
+        if k == "up"
+            d.menu_sel = (d.menu_sel + n - 1) % n
+        else if k == "down"
+            d.menu_sel = (d.menu_sel + 1) % n
+        else
+            d.menu_open = false
+            launch(d, d.apps[d.menu_sel])
+        return
     if k == "ctrl+tab"
         for i in 0..len(d.windows)
             if not d.windows[i].minimized

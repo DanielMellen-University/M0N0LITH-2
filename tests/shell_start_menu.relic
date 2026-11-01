@@ -17,3 +17,21 @@ step(d, "Start", 10, 470)
 b = wm.menu_item_box(d, 0)
 step(d, "Clicker row", b[0] + 5, b[1] + 5)
 print(wm.focused(d).app.name, len(d.windows))
+# with the menu open, Up and Down move the marked row (round the ends) and
+# Return launches it; other keys still go to the window with focus
+step(d, "Start", 10, 470)
+let marks = [d.menu_sel]
+for k in ["down", "down", "up", "up", "up"]
+    wm.key(d, k)
+    append(marks, d.menu_sel)
+print(marks)
+wm.key(d, "down")
+wm.key(d, "down")
+let before = len(d.windows)
+wm.key(d, "return")
+print(d.menu_open, wm.focused(d).app.name, len(d.windows) - before)
+step(d, "Start", 10, 470)
+print(d.menu_sel)
+wm.key(d, "escape")
+wm.dismiss(d)
+print(d.menu_open)
