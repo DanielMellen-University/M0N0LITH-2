@@ -32,7 +32,7 @@ Write `tests/shell_<topic>.relic`, run it, read its output, and save that as `te
 | `shell_wm` | drives wm.relic with fake clicks and keys; output must match shell_wm.out |
 | `shell_lifecycle` | window ids, focus and tab order through lifecycle changes |
 | `shell_minimize` | minimize and restore from the taskbar and the _ box |
-| `shell_start_menu` | the Start button opens and closes the menu |
+| `shell_start_menu` | the Start button opens and closes the menu; Up, Down and Return on the open menu |
 | `shell_menu_focus` | keyboard focus while the Start menu or the +N list is open |
 | `shell_menu_edges` | Start menu row and taskbar hit boundaries |
 | `shell_drag_resize` | dragging and resizing keep windows reachable |
@@ -82,16 +82,16 @@ Write `tests/shell_<topic>.relic`, run it, read its output, and save that as `te
 | Test | What it covers |
 |---|---|
 | `shell_small_apps` | Editor, Notes and Clicker |
-| `shell_clicker_edges` | rapid input and Clicker state after reopening; Return counts, Backspace and `-` take one off down to 0, Ctrl+C copies the number; Delete setting the count back to 0 |
+| `shell_clicker_edges` | rapid input and Clicker state after reopening; Return counts, Backspace and `-` take one off down to 0, Ctrl+C copies the number; Delete setting the count back to 0; + and = adding one |
 | `shell_app_focus` | Notes and Clicker state across focus and window controls |
 | `shell_notes_resize` | Notes text clipping and edits across resizes |
-| `shell_notes_input_edges` | single-line input and reopening Notes |
+| `shell_notes_input_edges` | single-line input and reopening Notes; Ctrl+Z bringing a cleared line back, one step |
 
 ### Terminal
 
 | Test | What it covers |
 |---|---|
-| `shell_terminal` | Terminal commands: extra spaces, folders, redirects, errors, `wc`, `cp` (to a name or into a folder, not a folder, not over a file) and `head`; `cat` with several files; `tail` and `grep` |
+| `shell_terminal` | Terminal commands: extra spaces, folders, redirects, errors, `wc`, `cp` (to a name or into a folder, not a folder, not over a file) and `head`; `cat` with several files; `tail` and `grep`; `find` |
 | `shell_terminal_history` | the Terminal keeps its last 200 lines |
 | `shell_terminal_recall` | Up and Down through earlier commands, the line being typed kept, blanks and repeats not kept, editing a recalled line, the last 50, and `history` listing them numbered |
 | `shell_terminal_keys` | Ctrl+C gives up the line (shown with ^C, not run or kept, ends a recall), Ctrl+L empties the output and keeps the line, Ctrl+Backspace takes off the last word there and in Notes, Ctrl+U empties the line, `!!` runs the command before (or says there is none) |
@@ -163,7 +163,7 @@ Write `tests/shell_<topic>.relic`, run it, read its output, and save that as `te
 | Test | What it covers |
 |---|---|
 | `shell_ide` | IDE: run with Ctrl+R, output pane, error line and Ctrl+E, stopped loops, refused host calls, `use` of desktop files, input lines, Ctrl+Backspace there, Esc or Ctrl+C to stop, F5 like Ctrl+R; Ctrl+Return running like Ctrl+R |
-| `shell_ide_comment` | Ctrl+/ puts `# ` in after the leading spaces and takes it (or a bare `#`) out, the cursor staying on its character, one undo step each; the Editor ignores it |
+| `shell_ide_comment` | Ctrl+/ puts `# ` in after the leading spaces and takes it (or a bare `#`) out, the cursor staying on its character, one undo step each; the Editor ignores it; with a selection, every line it is on in one step |
 
 ### Paint
 
