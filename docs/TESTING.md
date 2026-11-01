@@ -15,7 +15,7 @@ One test: `ctest --test-dir build -C Release -R golden_shell_ide`. Or run it str
 
 ## How they are checked
 
-CMake finds every `tests/*.relic` and adds it as `golden_<name>`. `tools/run_golden.cmake` runs it from `tests/`, and it passes when it exits with 0 and its standard output matches `<name>.out` exactly (Windows line endings are ignored). A test with no `.out` file must print nothing. One more test, `check_shell`, runs `relic check` on `wm.relic` and `desktop.relic`, which catches syntax errors and undefined names in the drawing code no test runs. That is 100 tests in all, and CI runs them on Linux, macOS and Windows.
+CMake finds every `tests/*.relic` and adds it as `golden_<name>`. `tools/run_golden.cmake` runs it from `tests/`, and it passes when it exits with 0 and its standard output matches `<name>.out` exactly (Windows line endings are ignored). A test with no `.out` file must print nothing. One more test, `check_shell`, runs `relic check` on `wm.relic` and `desktop.relic`, which catches syntax errors and undefined names in the drawing code no test runs. That is 101 tests in all, and CI runs them on Linux, macOS and Windows.
 
 `shell_fuzz`, `shell_apps_fuzz` and `shell_events_fuzz` use fixed seeds, so their output is the same on every run. `shell_fuzz` checks the window model's invariants after every random step on two desktop sizes; `shell_apps_fuzz` sends random commands from two Terminals while Files and the Editor work on the same filesystem.
 
@@ -148,6 +148,7 @@ Write `tests/shell_<topic>.relic`, run it, read its output, and save that as `te
 | `shell_editor_edges` | Editor empty buffers, line edges and failed saves |
 | `shell_editor_disk_changed` | Ctrl+S warns once when another app changed the file |
 | `shell_editor_undo` | Ctrl+Z undoes edits one step at a time, up to 500, and Ctrl+Y redoes them until the next edit |
+| `shell_editor_escape` | Esc drops a selection in the Editor and the IDE and is taken, with none it is not; the IDE stops a waiting run first |
 | `shell_editor_select` | Shift+arrows and Ctrl+A select; typing and Backspace replace the selection |
 | `shell_editor_cursor` | arrows, Home, End and Ctrl+arrow word jumps move the cursor |
 | `shell_editor_delete` | Delete removes the next character or the selection; Ctrl+Z puts it back |

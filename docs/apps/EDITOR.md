@@ -30,6 +30,7 @@ The status is one of:
 | Tab | spaces to the next multiple of 4 columns (Relic's indent), over any selection; never a tab character |
 | Shift+Tab | takes the line's leading spaces back to the multiple of 4 before; the cursor stays on its character |
 | Ctrl+A | selects everything |
+| Esc | drops the selection; with none, Esc quits the desktop as usual |
 | Ctrl+C, Ctrl+X | copies, or cuts, the selection to the desktop's clipboard (nothing without a selection) |
 | Ctrl+V | pastes the clipboard at the cursor, over any selection; a cut and a paste are one undo step each |
 | Ctrl+Z | undoes the last edit |
