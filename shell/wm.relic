@@ -1490,6 +1490,10 @@ fun _files_key(s, k)
         # Right goes into the selected folder; on a file or .. it does nothing
         if len(names) > 0 and not s.stale and names[s.sel] != ".." and vfs.is_dir(s.fs, _files_full(s, names[s.sel]))
             _files_open(s, names[s.sel])
+    else if k == "ctrl+c"
+        # the selected row's full path, to paste into the Terminal or a note
+        if len(names) > 0 and names[s.sel] != ".."
+            _clip.text = _files_full(s, names[s.sel])
     else if k == "home" or k == "ctrl+home"
         s.sel = 0
     else if k == "end" or k == "ctrl+end"

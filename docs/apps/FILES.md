@@ -18,6 +18,7 @@ A long list scrolls just far enough to keep the selected row in view; the title 
 | A letter or digit | the next name that starts with it, in any case, going round to the top (never `..`) |
 | Return | opens the selected row |
 | Backspace or Left | goes up a folder, with the folder you were in selected, so going back down is one key (Right) |
+| Ctrl+C | copies the selected row's full path, such as `/home/docs/plan.txt`, to the desktop's clipboard, to paste into the Terminal or Notes; on `..` it copies nothing |
 | Right | goes into the selected folder, as in a folder tree; on a file or `..` it does nothing |
 | Click a row | selects and opens it |
 

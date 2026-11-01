@@ -68,6 +68,7 @@ The commands are in [the Terminal doc](apps/TERMINAL.md).
 | Return | opens the selected row |
 | Backspace or Left | goes up a folder, with the folder you were in selected |
 | Right | goes into the selected folder (a file or `..` stays put) |
+| Ctrl+C | copies the selected row's full path to the clipboard (not for `..`) |
 
 ## Editor
 

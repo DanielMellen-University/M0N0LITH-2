@@ -11,3 +11,5 @@ right on a file /tmp/many
 right on sub /tmp/many/sub
 right on .. /tmp/many/sub ..
 left /tmp/many sub
+copied /tmp/many/sub
+not for .. /tmp/many/sub
