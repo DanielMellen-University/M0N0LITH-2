@@ -66,7 +66,7 @@ The machine these docs were last checked on has no SDL2, so these run steps were
 
 ### Using it
 
-- **Windows:** click Start, pick an app. Drag a title bar to move a window and its bottom-right corner to resize it; the _ box minimizes and the x box closes. New windows cascade from the top left. See [Windows and the Start menu](docs/apps/WINDOWS.md).
+- **Windows:** click Start, pick an app. Drag a title bar to move a window and its bottom-right corner to resize it; the _ box minimizes and the x box closes (Ctrl+W closes the window with focus). Ctrl+Tab and Ctrl+Shift+Tab go round the windows. New windows cascade from the top left. See [Windows and the Start menu](docs/apps/WINDOWS.md).
 - **Taskbar:** a button brings its window to the front, or minimizes it if it is already there. Buttons shrink as windows open; from the 14th window on the 640 pixel bar, the extra ones go behind a +N button with a list. See [Taskbar](docs/apps/TASKBAR.md).
 - **Terminal:** `help`, `clear`, `history`, `echo`, `apps`, `date`, `pwd`, `cd`, `ls`, `cat`, `head`, `wc`, `mkdir`, `touch`, `write`, `rm`, `mv` and `cp` on the shared files, plus `echo text > path` and `>>`, and `!!` for the command before. See [Terminal](docs/apps/TERMINAL.md).
 - **Files:** click a row, or use Up, Down and Return; Backspace goes up a folder. Opening a file picks it for the next Editor or IDE window, or Paint for a `.paint` file. See [Files](docs/apps/FILES.md).
