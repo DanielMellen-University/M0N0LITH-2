@@ -26,6 +26,7 @@ Commands split on spaces. Quotes are ordinary characters and do not group words,
 | `cd [path]` | changes folder; without a path, goes to `/home` |
 | `ls [path]` | lists a folder (the current one without a path), folders with a `/` after them, packed into lines that fit the window; for a file, prints its name |
 | `cat path` | prints a file (only its last 200 lines are kept, like any output) |
+| `wc path` | the file's lines (its newlines, as Unix counts them), words and characters, then the path |
 | `mkdir path` | makes a folder, and any missing folders above it |
 | `touch path` | makes an empty file; an existing file or folder is left as it is |
 | `write path text` | replaces the file with the text and a newline |

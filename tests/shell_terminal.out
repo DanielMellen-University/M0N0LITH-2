@@ -45,3 +45,22 @@
   usage: mv <from> <to>
 > nope
   unknown: nope
+> echo one two > w.txt
+> echo  three >> w.txt
+> wc w.txt
+  2 3 14 w.txt
+> wc /home/w.txt
+  2 3 14 /home/w.txt
+> touch e.txt
+> wc e.txt
+  0 0 0 e.txt
+> wc nothing.txt
+  wc: not found: /home/nothing.txt
+> wc /home
+  wc: is a folder: /home
+> wc
+  usage: wc <path>
+> wc a b
+  usage: wc <path>
+> rm w.txt
+> rm e.txt

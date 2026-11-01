@@ -43,7 +43,7 @@ launch
 /home> help
 help clear echo apps date
 pwd cd ls cat mkdir touch
-write rm mv history
+write rm mv history wc
 echo text > file, >> adds
 /home> pwd
 /home

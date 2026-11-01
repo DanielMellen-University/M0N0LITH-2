@@ -14,3 +14,6 @@ fun run(line)
         print("  " + t.buf[i])
 for line in ["pwd", "ls", "cat  welcome.txt", "ls   /home", "cd  ..", "pwd", "cd  home", "pwd", "echo  a    b", "echo hi > a.txt", "echo  there  >>  a.txt", "cat a.txt", "mkdir  d", "mv  a.txt  d", "ls", "ls d", "cd d", "pwd", "rm  a.txt", "cd ..", "rm d", "ls", "cd welcome.txt", "cat d", "cat", "touch", "mv x", "nope"]
     run(line)
+# wc: lines (newlines), words and characters
+for line in ["echo one two > w.txt", "echo  three >> w.txt", "wc w.txt", "wc /home/w.txt", "touch e.txt", "wc e.txt", "wc nothing.txt", "wc /home", "wc", "wc a b", "rm w.txt", "rm e.txt"]
+    run(line)
