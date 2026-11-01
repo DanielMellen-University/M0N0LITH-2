@@ -25,3 +25,4 @@ playing [[0, -1]]
 [[0, -1], [-1, 0]]
 ready
 ["playing", "paused", "playing", "paused"]
+ready playing

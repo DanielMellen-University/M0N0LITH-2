@@ -137,6 +137,6 @@ With Shift or Caps Lock a letter works as its small one (`F` is the fill tool), 
 |---|---|
 | Arrows or W, A, S, D | start the game and turn the snake (not straight back) |
 | Space or P | pauses and goes on; also starts a game |
-| R | plays again after a game ends |
+| R or Return | plays again after a game ends |
 
 The letters work the same with Shift or Caps Lock.

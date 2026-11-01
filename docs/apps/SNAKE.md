@@ -8,7 +8,7 @@ The game. Its window is 210 by 170: a score line, a help line, and a board of 24
 - The snake moves one cell a step: every 150 ms at first, 5 ms quicker for each food eaten, down to 70 ms.
 - Eating the red food makes it one cell longer. New food goes on a free cell.
 - Running into a wall or into itself ends the game, with the snake left where it was. Filling the whole board wins.
-- Space or P pauses and goes on (either also starts a new game). R starts again after a game ends.
+- Space or P pauses and goes on (either also starts a new game). R or Return starts again after a game ends.
 - The best score is saved in `/home/snake-best.txt` in the desktop's files (one whole number) whenever it is beaten, and read when a Snake window opens and when a new game starts, so two Snake windows share it. A file that holds no whole number counts as 0. Like all the desktop's files, it is lost when the desktop quits.
 
 The score line reads `Snake  score N  best M`. The help line says what to press next.

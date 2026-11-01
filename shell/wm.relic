@@ -2677,7 +2677,7 @@ fun _snake_key(s, k)
             s.state = "paused"
         else if s.state == "paused" or s.state == "ready"
             s.state = "playing"
-    else if k == "r"
+    else if k == "r" or k == "return"
         if s.state == "over" or s.state == "won"
             _snake_reset(s)
 

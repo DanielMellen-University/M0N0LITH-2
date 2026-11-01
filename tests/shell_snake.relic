@@ -142,3 +142,10 @@ for k in ["p", "P", "space", "P"]
     wc.app.on_key(sc, k)
     append(states, sc.state)
 print(states)
+# Return plays again after the end like R, and does nothing during a game
+sc.state = "won"
+wc.app.on_key(sc, "return")
+let after = sc.state
+sc.state = "playing"
+wc.app.on_key(sc, "return")
+print(after, sc.state)
