@@ -173,3 +173,24 @@
 > grep apple
   usage: grep <text> <path>
 > rm g.txt
+> mkdir fd/notes
+> touch fd/notes/todo.txt
+> touch fd/note.md
+> touch fd/other.txt
+> cd fd
+> find note
+  note.md
+  notes/
+> find .txt
+  notes/todo.txt
+  other.txt
+> find zzz
+  find: nothing named like zzz
+> find
+  usage: find <text>
+> cd ..
+> rm fd/notes/todo.txt
+> rm fd/notes
+> rm fd/note.md
+> rm fd/other.txt
+> rm fd

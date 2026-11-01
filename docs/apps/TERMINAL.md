@@ -30,6 +30,7 @@ Commands split on spaces. Quotes are ordinary characters and do not group words,
 | `wc path` | the file's lines (its newlines, as Unix counts them), words and characters, then the path |
 | `head path` | the first 10 lines of a file |
 | `tail path` | the last 10 lines of a file |
+| `find text` | every file and folder under the current folder whose own name has `text` in it, as paths from there (folders with a `/` after them), in the order `ls` gives, each folder followed by what is in it |
 | `grep text path` | the lines of a file that have `text` in them: plain text, not a pattern, and case counts |
 | `mkdir path` | makes a folder, and any missing folders above it |
 | `touch path` | makes an empty file; an existing file or folder is left as it is |

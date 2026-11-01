@@ -1170,6 +1170,30 @@ fun _term_grep(s, word, path)
     for line in slice(found, math.max(0, len(found) - term_history), len(found))
         _term_reply(s, line)
 
+# find: every file and folder under the current folder whose name has the
+# text in it (the name, not the path), as paths from there, in the order ls
+# shows them, each folder followed by what is in it; as many as the output keeps.
+fun _term_find_in(s, dir, rel, word, out)
+    for e in vfs.entries(s.fs, dir)
+        let shown = e[0]
+        if rel != ""
+            shown = rel + "/" + e[0]
+        if strings.contains(e[0], word)
+            if e[1]
+                append(out, shown + "/")
+            else
+                append(out, shown)
+        if e[1]
+            _term_find_in(s, paths.join(dir, e[0]), shown, word, out)
+
+fun _term_find(s, word)
+    let out = []
+    _term_find_in(s, s.cwd, "", word, out)
+    if len(out) == 0
+        _term_reply(s, "find: nothing named like " + word)
+    for line in slice(out, math.max(0, len(out) - term_history), len(out))
+        _term_reply(s, line)
+
 # cp copies a file (not a folder) to a new name, or into a folder; like mv it
 # does not write over a file that is already there.
 fun _term_cp(s, a, b)
@@ -1226,7 +1250,7 @@ fun _term_run(s, line)
         _term_reply(s, "help clear history echo apps date")
         _term_reply(s, "pwd cd ls cat head tail")
         _term_reply(s, "mkdir touch write rm mv cp")
-        _term_reply(s, "wc grep")
+        _term_reply(s, "wc grep find")
         _term_reply(s, "echo text > file, >> adds")
     else if cmd == "clear"
         if _term_args(s, parts, 0, "clear")
@@ -1289,6 +1313,9 @@ fun _term_run(s, line)
     else if cmd == "grep"
         if _term_args(s, parts, 2, "grep <text> <path>")
             _term_grep(s, parts[1], parts[2])
+    else if cmd == "find"
+        if _term_args(s, parts, 1, "find <text>")
+            _term_find(s, parts[1])
     else if cmd == "cp"
         if _term_args(s, parts, 2, "cp <from> <to>")
             _term_cp(s, parts[1], parts[2])
@@ -1314,7 +1341,7 @@ let _term_recall_keep = 50
 # with "/" after it, anything else with a space); several are taken as far as
 # they agree, and when that adds nothing they are listed. No match, or an
 # empty line: nothing.
-let _term_commands = ["apps", "cat", "cd", "clear", "cp", "date", "echo", "grep", "head", "help", "history", "ls", "mkdir", "mv", "pwd", "rm", "tail", "touch", "wc", "write"]
+let _term_commands = ["apps", "cat", "cd", "clear", "cp", "date", "echo", "find", "grep", "head", "help", "history", "ls", "mkdir", "mv", "pwd", "rm", "tail", "touch", "wc", "write"]
 
 fun _common_start(names)
     let out = names[0]
