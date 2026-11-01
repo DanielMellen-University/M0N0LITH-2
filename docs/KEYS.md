@@ -115,7 +115,7 @@ While a run waits for input:
 | Click a swatch | picks that color, or the eraser (the last one) |
 | 1 to 8 | black, red, orange, yellow, green, blue, purple, brown |
 | e or 0 | the eraser |
-| + or =, - | brush size 1 to 4 cells |
+| + or = or ], - or [ | brush size 1 to 4 cells |
 | f, b | the fill tool (a click fills the area of one color), and back to the brush |
 | l, r, o | the line, rectangle and ellipse tools: press at one end or corner, drag to the other |
 | R, O | the filled rectangle and filled ellipse |

@@ -8,7 +8,7 @@ The status line reads `Paint [status] color tool file` (the tool is the brush si
 
 - Press on the canvas and drag to draw with the brush. A quick drag leaves no gaps: every cell on the way from one point to the next gets the brush.
 - Dragging off the canvas pauses the stroke, and it goes on from where the pointer comes back. A press outside the canvas never draws, even if the drag then enters it.
-- The brush is a square of 1 to 4 cells (`+` or `=` bigger, `-` smaller), centered on the cell under the pointer.
+- The brush is a square of 1 to 4 cells (`+`, `=` or `]` bigger, `-` or `[` smaller), centered on the cell under the pointer.
 - Swatches, left to right: black, red, orange, yellow, green, blue, purple, brown, and the eraser (white) last. Click one, or press `1` to `8` for the colors and `e` or `0` for the eraser. The chosen one has a blue frame.
 - `f` picks the fill tool: a click fills the area of one color under it with the chosen color (cells joined side by side, not corner to corner). `b` goes back to the brush. The status line shows `fill` in place of the brush size.
 - `l` picks the line tool and `r` the rectangle tool. Press at one end (or corner) and drag to the other: until the button is let go the shape follows the pointer, drawn over the picture as it was at the press. Past the canvas, the far end stays on the nearest edge. Lines and rectangle outlines use the brush size, and the status line shows `line 2` or `rect 2`.

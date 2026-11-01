@@ -96,3 +96,4 @@ brush true none ["Paint [saved] yellow 1 my cat.paint"] false
 [["fill", 1, none], ["line", 1, none], ["brush", 1, none], ["brush", 0, none], ["fill rect", 0, none], ["fill oval", 0, none], ["fill oval", 0, ""]]
 [2, 1, 0, 0, 1, 2, 2, 1]
 2 0
+[2, 3, 4, 4, 4, 3, 2, 1, 1, 1]

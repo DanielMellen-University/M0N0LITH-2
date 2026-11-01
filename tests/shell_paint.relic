@@ -341,3 +341,9 @@ let p2 = cell(20, 20)
 wo.app.on_click(so, p2[0], p2[1])
 wo.app.on_key(so, "ctrl+y")
 print(ocount(3), len(so.redo))
+# [ and ] change the brush size like - and +, within 1 to 4
+let sizes = []
+for k in ["]", "]", "]", "]", "]", "[", "[", "[", "[", "["]
+    wo.app.on_key(so, k)
+    append(sizes, so.size)
+print(sizes)
