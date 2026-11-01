@@ -8,3 +8,6 @@ floor 0 ["Clicks: 0", "Click here to count."]
 copied 2
 reset 0
 plus 3
+undone 3
+once 3
+counted on 0
