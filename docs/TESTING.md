@@ -91,7 +91,7 @@ Write `tests/shell_<topic>.relic`, run it, read its output, and save that as `te
 
 | Test | What it covers |
 |---|---|
-| `shell_terminal` | Terminal commands: extra spaces, folders, redirects, errors, `wc`, `cp` (to a name or into a folder, not a folder, not over a file) and `head` |
+| `shell_terminal` | Terminal commands: extra spaces, folders, redirects, errors, `wc`, `cp` (to a name or into a folder, not a folder, not over a file) and `head`; `cat` with several files |
 | `shell_terminal_history` | the Terminal keeps its last 200 lines |
 | `shell_terminal_recall` | Up and Down through earlier commands, the line being typed kept, blanks and repeats not kept, editing a recalled line, the last 50, and `history` listing them numbered |
 | `shell_terminal_keys` | Ctrl+C gives up the line (shown with ^C, not run or kept, ends a recall), Ctrl+L empties the output and keeps the line, Ctrl+Backspace takes off the last word there and in Notes, Ctrl+U empties the line, `!!` runs the command before (or says there is none) |
@@ -126,7 +126,7 @@ Write `tests/shell_<topic>.relic`, run it, read its output, and save that as `te
 | `shell_files_boundaries` | root, empty folders, unusual names and reopening Files |
 | `shell_files_long_names` | clipped names open the full path and deleted selections do not open replacements |
 | `shell_files_title` | Files keeps the end of a long folder path in its title |
-| `shell_files_keys` | Home, End, and a letter or digit going to the next name with it (any case, round, never `..`), the root, an empty folder, Page Up and Page Down by a window of rows less one, Ctrl+Home and Ctrl+End, Left going up a folder and Right going into the selected one only |
+| `shell_files_keys` | Home, End, and a letter or digit going to the next name with it (any case, round, never `..`), the root, an empty folder, Page Up and Page Down by a window of rows less one, Ctrl+Home and Ctrl+End, Left going up a folder and Right going into the selected one only; Ctrl+C copying the selected path |
 | `shell_files_hidden` | clicks below the visible Files rows do nothing |
 | `shell_files_stale` | Files when another app removed the selected file |
 | `shell_files_ancestor` | Files and Terminal recover after an ancestor folder moves |
@@ -140,7 +140,7 @@ Write `tests/shell_<topic>.relic`, run it, read its output, and save that as `te
 |---|---|
 | `shell_clipboard` | Ctrl+C, Ctrl+X and Ctrl+V in the Editor and the IDE (no selection, over a selection, one undo step each), and the first line pasted into Notes, the Terminal and an IDE run waiting for input; Notes copying and cutting its whole line |
 | `shell_editor_indent` | Return keeps leading spaces up to the cursor, the IDE adds a level after a block line but not after `fun f() = ...`, undo |
-| `shell_editor_word_keys` | Ctrl+Home and Ctrl+End go to the start and end of the file and drop the selection; Ctrl+Backspace and Ctrl+Delete remove a word, the selection, or nothing at the ends; Home stops after the leading spaces, then goes to the very start; Page Up and Page Down by the shown lines less one, Shift selecting; Ctrl+L selecting lines; Ctrl+D copying a line or the selected lines, and Ctrl+K removing them, each one undo |
+| `shell_editor_word_keys` | Ctrl+Home and Ctrl+End go to the start and end of the file and drop the selection; Ctrl+Backspace and Ctrl+Delete remove a word, the selection, or nothing at the ends; Home stops after the leading spaces, then goes to the very start; Page Up and Page Down by the shown lines less one, Shift selecting; Ctrl+L selecting lines; Ctrl+D copying a line or the selected lines, and Ctrl+K removing them, each one undo; Ctrl+J joining lines; Ctrl+] and Ctrl+[ indenting and taking it off |
 | `shell_editor_tab` | Tab types spaces to the next multiple of 4, over a selection, one undo step, in the IDE too; Shift+Tab takes an indent off and keeps the cursor on its character; Backspace in leading spaces goes back one indent, elsewhere one character |
 | `shell_editor_title` | Editor title keeps the file name and the status in view |
 | `shell_editor_open_status` | Editor status on opening: open, new file, or why not |
@@ -162,14 +162,14 @@ Write `tests/shell_<topic>.relic`, run it, read its output, and save that as `te
 
 | Test | What it covers |
 |---|---|
-| `shell_ide` | IDE: run with Ctrl+R, output pane, error line and Ctrl+E, stopped loops, refused host calls, `use` of desktop files, input lines, Ctrl+Backspace there, Esc or Ctrl+C to stop, F5 like Ctrl+R |
+| `shell_ide` | IDE: run with Ctrl+R, output pane, error line and Ctrl+E, stopped loops, refused host calls, `use` of desktop files, input lines, Ctrl+Backspace there, Esc or Ctrl+C to stop, F5 like Ctrl+R; Ctrl+Return running like Ctrl+R |
 | `shell_ide_comment` | Ctrl+/ puts `# ` in after the leading spaces and takes it (or a bare `#`) out, the cursor staying on its character, one undo step each; the Editor ignores it |
 
 ### Paint
 
 | Test | What it covers |
 |---|---|
-| `shell_paint` | Paint: a drag with no gaps, the fill tool (side by side only, no-op fills, undo), the line, rectangle and ellipse tools, outline and filled (the shape follows the drag, its end stays on the canvas, one undo step, brush size), save as (a typed name, `.paint` added, whole paths, Esc, no name, a folder, a file that is not a picture, a folder that is not there), swatches and keys, brush sizes (also with [ and ]), the eraser, undo, redo and clear, a stroke off the canvas and back, boxes cut to the window, save and open again from Files, a file that is not a picture, another size, a failed save |
+| `shell_paint` | Paint: a drag with no gaps, the fill tool (side by side only, no-op fills, undo), the line, rectangle and ellipse tools, outline and filled (the shape follows the drag, its end stays on the canvas, one undo step, brush size), save as (a typed name, `.paint` added, whole paths, Esc, no name, a folder, a file that is not a picture, a folder that is not there), swatches and keys, brush sizes (also with [ and ]), the eraser, undo, redo and clear, a stroke off the canvas and back, boxes cut to the window, save and open again from Files, a file that is not a picture, another size, a failed save; the i color picker (the tool before comes back, no undo step) |
 
 ### Snake
 
