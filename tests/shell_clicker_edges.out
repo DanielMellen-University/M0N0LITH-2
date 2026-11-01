@@ -1,5 +1,7 @@
-rapid 204 ["Clicks: 204", "Click here to count."]
-minimized 204
-restored ["Clicks: 205", "Click here to count."]
-reopened 205 ["Clicks: 0", "Click here to count."]
+rapid 203 ["Clicks: 203", "Click here to count."]
+minimized 203
+restored ["Clicks: 204", "Click here to count."]
+reopened 204 ["Clicks: 0", "Click here to count."]
 return 2
+back 1
+floor 0 ["Clicks: 0", "Click here to count."]

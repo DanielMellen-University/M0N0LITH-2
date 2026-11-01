@@ -679,6 +679,8 @@ fun _clicker_click(s, x, y)
 fun _clicker_key(s, k)
     if k == "space" or k == "return"
         s.count = s.count + 1
+    else if k == "backspace" or k == "-"
+        s.count = math.max(0, s.count - 1)   # a miscount taken back, never below 0
 
 # What typing key k does to text: backspace drops the last character, space and
 # any single character except a newline are added. Return is handled separately

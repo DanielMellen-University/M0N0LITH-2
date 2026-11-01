@@ -23,6 +23,7 @@ Every key and click the desktop and its apps act on, checked against `shell/wm.r
 | Input | What it does |
 |---|---|
 | Click inside, Space or Return | adds one to the count |
+| Backspace or - | takes one off, not below 0 |
 
 ## Notes
 

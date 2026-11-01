@@ -4,7 +4,7 @@ The two smallest apps. They do not use the filesystem, and their state goes when
 
 ## Clicker
 
-Shows `Clicks: N`. A click anywhere inside the window, or Space or Return while it has focus, adds one. Each Clicker window counts on its own.
+Shows `Clicks: N`. A click anywhere inside the window, or Space or Return while it has focus, adds one. Backspace or `-` takes one back off, stopping at 0. Each Clicker window counts on its own.
 
 ## Notes
 

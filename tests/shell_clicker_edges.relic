@@ -22,3 +22,8 @@ print("reopened", c.state.count, wm.visible_lines(fresh))
 wm.key(d, "return")
 wm.key(d, "return")
 print("return", fresh.state.count)
+# Backspace and - take one off, stopping at 0
+wm.key(d, "backspace")
+print("back", fresh.state.count)
+wm.handle(d, {type: "text", text: "---"})
+print("floor", fresh.state.count, wm.visible_lines(fresh))
