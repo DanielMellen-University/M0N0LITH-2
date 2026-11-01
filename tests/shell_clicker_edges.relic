@@ -39,3 +39,6 @@ wm.close(d, n.id)
 wm.key(d, "space")
 wm.key(d, "delete")
 print("reset", fresh.state.count)
+# + and = add one, as - takes one off
+wm.handle(d, {type: "text", text: "++="})
+print("plus", fresh.state.count)

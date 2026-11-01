@@ -7,3 +7,4 @@ back 1
 floor 0 ["Clicks: 0", "Click here to count."]
 copied 2
 reset 0
+plus 3
