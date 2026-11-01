@@ -64,7 +64,8 @@ The commands are in [the Terminal doc](apps/TERMINAL.md).
 | Page Up, Page Down | a window of rows up or down, stopping at the ends |
 | A letter or digit | the next name that starts with it, any case, going round |
 | Return | opens the selected row |
-| Backspace | goes up a folder, with the folder you were in selected |
+| Backspace or Left | goes up a folder, with the folder you were in selected |
+| Right | goes into the selected folder (a file or `..` stays put) |
 
 ## Editor
 

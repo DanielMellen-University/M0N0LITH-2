@@ -1385,9 +1385,14 @@ fun _files_key(s, k)
     else if k == "return" or k == "enter"
         if len(names) > 0 and not s.stale
             _files_open(s, names[s.sel])
-    else if k == "backspace"
+    else if k == "backspace" or k == "left"
+        # Left as in a folder tree: up to the folder this one is in
         if s.path != "/" and not s.recovered
             _files_up(s)
+    else if k == "right"
+        # Right goes into the selected folder; on a file or .. it does nothing
+        if len(names) > 0 and not s.stale and names[s.sel] != ".." and vfs.is_dir(s.fs, _files_full(s, names[s.sel]))
+            _files_open(s, names[s.sel])
     else if k == "home" or k == "ctrl+home"
         s.sel = 0
     else if k == "end" or k == "ctrl+end"

@@ -54,3 +54,22 @@ wm.key(d, "ctrl+end")
 let last = sel()
 wm.key(d, "ctrl+home")
 print(last, sel())
+# Left goes up a folder, Right goes into the selected folder only
+vfs.make_dir(f.state.fs, "/tmp/many/sub")
+wm.visible_lines(f)
+fun pick(name)
+    for i in 0..len(f.state.names)
+        if f.state.names[i] == name
+            f.state.sel = i
+pick("f00")
+wm.key(d, "right")
+print("right on a file", f.state.path)
+pick("sub")
+wm.key(d, "right")
+print("right on sub", f.state.path)
+wm.visible_lines(f)
+f.state.sel = 0
+wm.key(d, "right")
+print("right on ..", f.state.path, f.state.names[0])
+wm.key(d, "left")
+print("left", f.state.path, f.state.names[f.state.sel])

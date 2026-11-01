@@ -7,3 +7,7 @@
 [9, 7, 14, 21, 28, 21, 14, 7, 0, 40, 33]
 pagedown pageup
 40 0
+right on a file /tmp/many
+right on sub /tmp/many/sub
+right on .. /tmp/many/sub ..
+left /tmp/many sub
