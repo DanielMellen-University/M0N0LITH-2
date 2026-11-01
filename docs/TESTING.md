@@ -82,7 +82,7 @@ Write `tests/shell_<topic>.relic`, run it, read its output, and save that as `te
 | Test | What it covers |
 |---|---|
 | `shell_small_apps` | Editor, Notes and Clicker |
-| `shell_clicker_edges` | rapid input and Clicker state after reopening |
+| `shell_clicker_edges` | rapid input and Clicker state after reopening; Return counts, Backspace and `-` take one off down to 0, Ctrl+C copies the number |
 | `shell_app_focus` | Notes and Clicker state across focus and window controls |
 | `shell_notes_resize` | Notes text clipping and edits across resizes |
 | `shell_notes_input_edges` | single-line input and reopening Notes |
@@ -126,7 +126,7 @@ Write `tests/shell_<topic>.relic`, run it, read its output, and save that as `te
 | `shell_files_boundaries` | root, empty folders, unusual names and reopening Files |
 | `shell_files_long_names` | clipped names open the full path and deleted selections do not open replacements |
 | `shell_files_title` | Files keeps the end of a long folder path in its title |
-| `shell_files_keys` | Home, End, and a letter or digit going to the next name with it (any case, round, never `..`), the root, an empty folder, Page Up and Page Down by a window of rows less one, Ctrl+Home and Ctrl+End |
+| `shell_files_keys` | Home, End, and a letter or digit going to the next name with it (any case, round, never `..`), the root, an empty folder, Page Up and Page Down by a window of rows less one, Ctrl+Home and Ctrl+End, Left going up a folder and Right going into the selected one only |
 | `shell_files_hidden` | clicks below the visible Files rows do nothing |
 | `shell_files_stale` | Files when another app removed the selected file |
 | `shell_files_ancestor` | Files and Terminal recover after an ancestor folder moves |
@@ -140,7 +140,7 @@ Write `tests/shell_<topic>.relic`, run it, read its output, and save that as `te
 |---|---|
 | `shell_clipboard` | Ctrl+C, Ctrl+X and Ctrl+V in the Editor and the IDE (no selection, over a selection, one undo step each), and the first line pasted into Notes, the Terminal and an IDE run waiting for input; Notes copying and cutting its whole line |
 | `shell_editor_indent` | Return keeps leading spaces up to the cursor, the IDE adds a level after a block line but not after `fun f() = ...`, undo |
-| `shell_editor_word_keys` | Ctrl+Home and Ctrl+End go to the start and end of the file and drop the selection; Ctrl+Backspace and Ctrl+Delete remove a word, the selection, or nothing at the ends; Home stops after the leading spaces, then goes to the very start; Page Up and Page Down by the shown lines less one, Shift selecting; Ctrl+L selecting lines |
+| `shell_editor_word_keys` | Ctrl+Home and Ctrl+End go to the start and end of the file and drop the selection; Ctrl+Backspace and Ctrl+Delete remove a word, the selection, or nothing at the ends; Home stops after the leading spaces, then goes to the very start; Page Up and Page Down by the shown lines less one, Shift selecting; Ctrl+L selecting lines; Ctrl+D copying a line or the selected lines, and Ctrl+K removing them, each one undo |
 | `shell_editor_tab` | Tab types spaces to the next multiple of 4, over a selection, one undo step, in the IDE too; Shift+Tab takes an indent off and keeps the cursor on its character; Backspace in leading spaces goes back one indent, elsewhere one character |
 | `shell_editor_title` | Editor title keeps the file name and the status in view |
 | `shell_editor_open_status` | Editor status on opening: open, new file, or why not |
