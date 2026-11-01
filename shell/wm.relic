@@ -681,6 +681,8 @@ fun _clicker_key(s, k)
         s.count = s.count + 1
     else if k == "backspace" or k == "-"
         s.count = math.max(0, s.count - 1)   # a miscount taken back, never below 0
+    else if k == "ctrl+c"
+        _clip.text = str(s.count)   # the number alone, to paste into Notes or the Editor
 
 # What typing key k does to text: backspace drops the last character, space and
 # any single character except a newline are added. Return is handled separately
