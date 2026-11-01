@@ -45,7 +45,7 @@ Every key and click the desktop and its apps act on, checked against `shell/wm.r
 |---|---|
 | Typing | adds to the command line |
 | Backspace | removes the last character |
-| Return | runs the command |
+| Return | runs the command; `!!` runs the one before again |
 | Ctrl+V | adds the first line of the clipboard |
 | Up, Down | the command before, or after, from the last 50 run; Down past the newest gives back the line being typed |
 | Ctrl+C | gives up the line: shown with ^C, not run |

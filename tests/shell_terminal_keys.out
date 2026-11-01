@@ -7,3 +7,5 @@
 [""]
 [""] true
 [""]
+["/home> !!", "!!: no command before"] []
+["/home> pwd", "/home", "/home> pwd", "/home"] ["pwd"]

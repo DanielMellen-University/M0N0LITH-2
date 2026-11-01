@@ -1228,6 +1228,14 @@ fun _term_complete(s)
 fun _term_key(s, k)
     if k == "return" or k == "enter"
         let line = s.input
+        if strings.trim(line) == "!!"
+            # the command before, again, as in a Unix shell; shown as it runs
+            if len(s.past) == 0
+                _term_reply(s, s.cwd + "> " + line)
+                _term_reply(s, "!!: no command before")
+                s.input = ""
+                return
+            line = s.past[len(s.past) - 1]
         if strings.trim(line) != "" and (len(s.past) == 0 or s.past[len(s.past) - 1] != line)
             append(s.past, line)
             if len(s.past) > _term_recall_keep
