@@ -28,8 +28,8 @@ Commands split on spaces. Quotes are ordinary characters and do not group words,
 | `cat path...` | prints a file, or several one after another (only the last 200 lines are kept, like any output); a missing one is an error and the rest still print |
 | `cp from to` | copies a file to a new name, or into `to` when it is a folder; a folder is not copied, and a file already there is not written over |
 | `wc path` | the file's lines (its newlines, as Unix counts them), words and characters, then the path |
-| `head path` | the first 10 lines of a file |
-| `tail path` | the last 10 lines of a file |
+| `head path [lines]` | the first 10 lines of a file, or as many as `lines` says (a whole number in digits; 0 prints nothing) |
+| `tail path [lines]` | the last 10 lines of a file, or as many as `lines` says |
 | `find text` | every file and folder under the current folder whose own name has `text` in it, as paths from there (folders with a `/` after them), in the order `ls` gives, each folder followed by what is in it |
 | `grep text path` | the lines of a file that have `text` in them: plain text, not a pattern, and case counts |
 | `sort path` | the lines of a file in order, by character (capitals before small letters); the file is not changed |
@@ -41,7 +41,7 @@ Commands split on spaces. Quotes are ordinary characters and do not group words,
 | `rm path` | removes a file or an empty folder |
 | `mv from to` | renames, or moves into `to` when it is a folder |
 
-`clear`, `history`, `apps`, `date` and `pwd` take no words, and a word too many is an error for every command but `cat`, which takes several (`rm a b` removes nothing).
+`clear`, `history`, `apps`, `date` and `pwd` take no words, and a word too many is an error for every command but `cat`, which takes several (`rm a b` removes nothing); `head` and `tail` take a count after the path.
 
 ## Rules for paths
 

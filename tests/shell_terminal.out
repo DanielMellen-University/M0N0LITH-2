@@ -114,7 +114,7 @@
 > head /home
   head: is a folder: /home
 > head
-  usage: head <path>
+  usage: head <path> [lines]
 > rm h.txt
 > rm e.txt
 > echo one > c1.txt
@@ -153,7 +153,7 @@
 > tail /home
   tail: is a folder: /home
 > tail
-  usage: tail <path>
+  usage: tail <path> [lines]
 > rm t.txt
 > rm e.txt
 > echo Apple pie > g.txt

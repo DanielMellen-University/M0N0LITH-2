@@ -1133,9 +1133,28 @@ fun _term_mv(s, a, b)
         catch err
             _term_reply(s, "mv: " + err.message)
 
-# head: the first 10 lines of a file, read only as far as they go.
+# head: the first 10 lines of a file (or as many as asked), read only as far
+# as they go.
 let _head_lines = 10
-fun _term_head(s, path)
+
+# The count of head and tail: 10 without one, else a whole number written in
+# digits (0 prints nothing); none after saying what is wrong with it.
+fun _term_count(s, cmd, parts)
+    if len(parts) < 3
+        return _head_lines
+    let word = parts[2]
+    let digits = len(word) > 0 and len(word) <= 6
+    for c in word
+        if c < "0" or c > "9"
+            digits = false
+    if not digits
+        _term_reply(s, cmd + ": not a count of lines: " + word)
+        return none
+    return int(word)
+
+fun _term_head(s, path, count)
+    if count == 0
+        return   # first_lines and last_lines read 0 as every line
     if _term_not_folder(s, "head", path, false)
         return
     let p = _term_path(s, path)
@@ -1148,11 +1167,14 @@ fun _term_head(s, path)
     let text = vfs.read(s.fs, p)
     if text == ""
         return
-    for line in first_lines(text, _head_lines)
+    for line in first_lines(text, count)
         _term_reply(s, line)
 
-# tail: the last 10 lines of a file, the way cat finds them from the end.
-fun _term_tail(s, path)
+# tail: the last 10 lines of a file (or as many as asked), the way cat finds
+# them from the end.
+fun _term_tail(s, path, count)
+    if count == 0
+        return   # first_lines and last_lines read 0 as every line
     if _term_not_folder(s, "tail", path, false)
         return
     let p = _term_path(s, path)
@@ -1167,7 +1189,7 @@ fun _term_tail(s, path)
         text = slice(text, 0, len(text) - 1)
     if text == "" and vfs.size(s.fs, p) == 0
         return
-    for line in last_lines(text, _head_lines)
+    for line in last_lines(text, count)
         _term_reply(s, line)
 
 # grep: the lines of a file that have the text in them (plain text, case
@@ -1369,12 +1391,15 @@ fun _term_run(s, line)
             _term_write(s, "write", parts[1], strings.join(slice(parts, 2, len(parts)), " "), false)
         else
             _term_reply(s, "usage: write <path> <text>")
-    else if cmd == "head"
-        if _term_args(s, parts, 1, "head <path>")
-            _term_head(s, parts[1])
-    else if cmd == "tail"
-        if _term_args(s, parts, 1, "tail <path>")
-            _term_tail(s, parts[1])
+    else if cmd == "head" or cmd == "tail"
+        if len(parts) < 2 or len(parts) > 3
+            _term_reply(s, "usage: " + cmd + " <path> [lines]")
+        else
+            let count = _term_count(s, cmd, parts)
+            if count != none and cmd == "head"
+                _term_head(s, parts[1], count)
+            else if count != none
+                _term_tail(s, parts[1], count)
     else if cmd == "grep"
         if _term_args(s, parts, 2, "grep <text> <path>")
             _term_grep(s, parts[1], parts[2])
