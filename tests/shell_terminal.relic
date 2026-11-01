@@ -26,3 +26,6 @@ for i in 2..13
     run("echo {i} >> h.txt")
 for line in ["head h.txt", "touch e.txt", "head e.txt", "head /home", "head", "rm h.txt", "rm e.txt"]
     run(line)
+# cat with several files prints each in turn; a missing one does not stop the rest
+for line in ["echo one > c1.txt", "echo two > c2.txt", "cat c1.txt nope.txt c2.txt", "rm c1.txt", "rm c2.txt"]
+    run(line)

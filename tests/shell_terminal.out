@@ -38,7 +38,7 @@
 > cat d
   cat: not found: /home/d
 > cat
-  usage: cat <path>
+  usage: cat <path>...
 > touch
   usage: touch <path>
 > mv x
@@ -117,3 +117,11 @@
   usage: head <path>
 > rm h.txt
 > rm e.txt
+> echo one > c1.txt
+> echo two > c2.txt
+> cat c1.txt nope.txt c2.txt
+  one
+  cat: not found: /home/nope.txt
+  two
+> rm c1.txt
+> rm c2.txt

@@ -1199,8 +1199,11 @@ fun _term_run(s, line)
         else
             _term_ls(s, parts)
     else if cmd == "cat"
-        if _term_args(s, parts, 1, "cat <path>")
-            _term_cat(s, parts[1])
+        # one file after another, as Unix cat; an error for one does not stop the rest
+        if len(parts) < 2
+            _term_reply(s, "usage: cat <path>...")
+        for path in slice(parts, 1, len(parts))
+            _term_cat(s, path)
     else if cmd == "mkdir"
         if _term_args(s, parts, 1, "mkdir <path>")
             _term_mkdir(s, parts[1])

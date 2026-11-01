@@ -93,7 +93,7 @@ mv: cannot move /home/notes into itself
 /home> mv welcome.txt notes/todo.txt
 mv: already there: /home/notes/todo.txt
 /home> cat
-usage: cat <path>
+usage: cat <path>...
 /home> mv a
 usage: mv <from> <to>
 /home> frob

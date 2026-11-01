@@ -25,7 +25,7 @@ Commands split on spaces. Quotes are ordinary characters and do not group words,
 | `pwd` | the current folder |
 | `cd [path]` | changes folder; without a path, goes to `/home` |
 | `ls [path]` | lists a folder (the current one without a path), folders with a `/` after them, packed into lines that fit the window; for a file, prints its name |
-| `cat path` | prints a file (only its last 200 lines are kept, like any output) |
+| `cat path...` | prints a file, or several one after another (only the last 200 lines are kept, like any output); a missing one is an error and the rest still print |
 | `cp from to` | copies a file to a new name, or into `to` when it is a folder; a folder is not copied, and a file already there is not written over |
 | `wc path` | the file's lines (its newlines, as Unix counts them), words and characters, then the path |
 | `head path` | the first 10 lines of a file |
@@ -35,7 +35,7 @@ Commands split on spaces. Quotes are ordinary characters and do not group words,
 | `rm path` | removes a file or an empty folder |
 | `mv from to` | renames, or moves into `to` when it is a folder |
 
-`clear`, `history`, `apps`, `date` and `pwd` take no words, and a word too many is an error for every command (`rm a b` removes nothing).
+`clear`, `history`, `apps`, `date` and `pwd` take no words, and a word too many is an error for every command but `cat`, which takes several (`rm a b` removes nothing).
 
 ## Rules for paths
 

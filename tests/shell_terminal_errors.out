@@ -43,7 +43,6 @@ write: not a folder: /home/welcome.txt
 /home> rm a.txt b.txt
 usage: rm <path>
 /home> cat a.txt b.txt
-usage: cat <path>
 /home> mkdir x y
 usage: mkdir <path>
 /home> touch p q

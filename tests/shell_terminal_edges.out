@@ -7,7 +7,7 @@
 ["/tmp> touch ./odd!@#"]
 ["/tmp> ls /tmp/./", "odd!@#"]
 ["/tmp> echo 'two words'", "'two words'"]
-["/tmp> cat 'two words'", "usage: cat <path>"]
+["/tmp> cat 'two words'", "cat: not found: /tmp/'two", "cat: not found: /tmp/words'"]
 ["/tmp> write /tmp/long xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"]
 long file length 301
 ["/tmp> rm /tmp/long"]
