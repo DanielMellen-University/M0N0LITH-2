@@ -23,7 +23,7 @@ relic/                the pinned Relic: the relic program, std/ and selfhost/
 
 ## Apps
 
-An app is a map of functions (`init`, `lines`, `on_click`, `on_key` and some optional ones), and a window holds the app and its own `state` map. The model calls the app; the app never calls the model. So an app has no idea where it is drawn, and the same app can have any number of windows.
+An app is a map of functions (`init`, `lines`, `on_click`, `on_key` and some optional ones), and a window holds the app and its own `state` map. The model calls the app; the app never calls the model. Keys go the same way: `wm.key` keeps the window keys for itself (Ctrl+Tab, Ctrl+Shift+Tab, Ctrl+W, Ctrl+M, Ctrl+1 to Ctrl+9) and hands every other key to the app of the window with focus. So an app has no idea where it is drawn, and the same app can have any number of windows.
 
 ## Shared state
 
