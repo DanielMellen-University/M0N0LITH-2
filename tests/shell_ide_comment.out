@@ -1,0 +1,4 @@
+["fun f()\n    # return 1\n", 20] ["fun f()\n    return 1\n", 18] ["fun f()\n    # return 1\n", 20] ["fun f()\n    return 1\n", 12] ["fun f()\n    # return 1\n", 14]
+["x", 1] ["# x", 3]
+["# ", 2] ["", 0]
+["a"]

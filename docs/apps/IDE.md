@@ -11,6 +11,7 @@ Ctrl+R (or F5) runs the text in the buffer, saved or not. The program runs in Re
 - `print` and `eprint` lines go to the output pane. The pane shows the last 6 lines and keeps the last 200.
 - The status becomes `ran`, `error`, `waiting for input` or `stopped`.
 - An error in the program shows as `line L: message`, and the pane's header says `ctrl+e: to line L`. Ctrl+E puts the cursor at the start of that line. An error inside a module the program used shows that module's path and line instead, and Ctrl+E does nothing then.
+- Ctrl+/ comments out the line the cursor is on, putting `# ` after its leading spaces, or takes a `#` (and the space after it) back off. It is one undo step, and the cursor stays on the same character.
 
 ## Modules
 

@@ -1,0 +1,24 @@
+# IDE Ctrl+/: "# " goes in after the line's leading spaces, and comes back out
+# the same way (a "#" with no space after it too); the cursor stays on its
+# character, and each is one undo step. The Editor leaves the key alone.
+use ../shell/wm
+let d = wm.new_desktop(640, 480, wm.default_apps())
+let i = wm.launch(d, wm.ide)
+let s = i.state
+s.text = "fun f()\n    return 1\n"
+s.back = 3
+s.mark = none
+fun k(key)
+    i.app.on_key(s, key)
+    return [s.text, len(s.text) - s.back]
+print(k("ctrl+/"), k("ctrl+/"), k("ctrl+/"), k("ctrl+z"), k("ctrl+z"))
+s.text = "#x"
+s.back = 0
+print(k("ctrl+/"), k("ctrl+/"))
+s.text = ""
+s.back = 0
+print(k("ctrl+/"), k("ctrl+/"))
+let e = wm.launch(d, wm.editor)
+e.state.text = "a"
+e.app.on_key(e.state, "ctrl+/")
+print([e.state.text])

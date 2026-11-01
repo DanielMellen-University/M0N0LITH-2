@@ -2058,6 +2058,27 @@ fun _ide_escape(s)
     append(s.out, "stopped")
     return true
 
+# Ctrl+/: comments the cursor's line out with "# " after its leading spaces,
+# or takes a "#" (and one space after it) back off; one undo step.
+fun _ide_toggle_comment(s)
+    let pos = _editor_pos(s)
+    let start = _line_start(s.text, pos)
+    let at = start
+    while at < len(s.text) and s.text[at] == " "
+        at = at + 1
+    if at < len(s.text) and s.text[at] == "#"
+        let n = 1
+        if at + 1 < len(s.text) and s.text[at + 1] == " "
+            n = 2
+        _editor_change(s, at, n, "")
+        _editor_set_pos(s, math.max(at, pos - n))
+    else
+        _editor_change(s, at, 0, "# ")
+        if pos >= at
+            _editor_set_pos(s, pos + 2)
+        else
+            _editor_set_pos(s, pos)
+
 # Ctrl+E: the cursor to the start of the error's line.
 fun _ide_to_error(s)
     if s.err_line == none
@@ -2117,6 +2138,8 @@ fun _ide_key(s, k)
         _ide_run(s)
     else if k == "ctrl+e"
         _ide_to_error(s)
+    else if k == "ctrl+/"
+        _ide_toggle_comment(s)
     else
         _editor_key(s, k)
 
