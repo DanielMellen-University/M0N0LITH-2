@@ -74,6 +74,7 @@ The commands are in [the Terminal doc](apps/TERMINAL.md).
 | Backspace or Left | goes up a folder, with the folder you were in selected |
 | Right | goes into the selected folder (a file or `..` stays put) |
 | Ctrl+C | copies the selected row's full path to the clipboard (not for `..`) |
+| Delete, Delete | removes the selected file or empty folder: the first asks in the title, the second removes, any other key gives up |
 
 ## Editor
 

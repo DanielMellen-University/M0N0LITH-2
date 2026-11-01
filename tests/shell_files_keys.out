@@ -13,3 +13,7 @@ right on .. /tmp/many/sub ..
 left /tmp/many sub
 copied /tmp/many/sub
 not for .. /tmp/many/sub
+Delete gone.txt? Delete again true
+Files: /tmp/many false
+not empty: sub true
+Files: /tmp/many
