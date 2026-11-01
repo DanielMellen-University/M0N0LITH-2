@@ -31,4 +31,4 @@ A picture is a text file in the desktop's shared files: a line `paint 60 36`, th
 - The app draws through two hooks any app can use: `paint(state)` gives colored boxes, and `on_drag(state, x, y)` gets the pointer while the button is held after a press inside the window (see [SHELL.md](../SHELL.md#an-app)).
 - Not yet: more colors, and a bigger or resizable canvas.
 
-Tests: `shell_paint`.
+Tests: `shell_paint`, and `shell_events_fuzz` for random input.

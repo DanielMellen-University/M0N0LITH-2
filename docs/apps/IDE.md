@@ -40,4 +40,4 @@ Ctrl+S saves the program and the run keeps waiting; the status reads `saved, wai
 
 ## In the code
 
-`ide` in `shell/wm.relic`, `_ide_*`, using the hooks Relic 1.0.44 and 1.0.45 added to `selfhost/interp` (`rt.out`, `rt.steps`, `rt.denied`, `rt.load`, `rt.input` and `interp.resume`). Design calls are in [the roadmap](../ROADMAP.md). Test: `shell_ide`.
+`ide` in `shell/wm.relic`, `_ide_*`, using the hooks Relic 1.0.44 and 1.0.45 added to `selfhost/interp` (`rt.out`, `rt.steps`, `rt.denied`, `rt.load`, `rt.input` and `interp.resume`). Design calls are in [the roadmap](../ROADMAP.md). Tests: `shell_ide`, `shell_ide_comment`, and the Editor's tests, since the IDE shares its keys.
