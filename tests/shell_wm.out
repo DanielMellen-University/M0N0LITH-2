@@ -43,7 +43,8 @@ launch
 /home> help
 help clear history echo apps date
 pwd cd ls cat head tail
-mkdir touch write rm mv cp wc
+mkdir touch write rm mv cp
+wc grep
 echo text > file, >> adds
 /home> pwd
 /home

@@ -35,3 +35,6 @@ for i in 2..13
     run("echo {i} >> t.txt")
 for line in ["tail t.txt", "touch e.txt", "tail e.txt", "tail /home", "tail", "rm t.txt", "rm e.txt"]
     run(line)
+# grep: lines with the text in them, case counting
+for line in ["echo Apple pie > g.txt", "echo apple tart >> g.txt", "echo plum >> g.txt", "grep apple g.txt", "grep pl g.txt", "grep kiwi g.txt", "grep x /home", "grep x nope.txt", "grep apple", "rm g.txt"]
+    run(line)
