@@ -2427,10 +2427,16 @@ fun _paint_init()
     let path = "/home/picture.paint"
     if strings.ends_with(_shell_open.path, ".paint")
         path = _shell_open.path
-    let s = {fs: _shell_fs, path: path, cells: _paint_blank(), color: 1, size: 1, last: none, stroke: false, undo: [], redo: [], status: "new file", foreign: false, tool: "brush", anchor: none, base: none, naming: none}
+    let s = {fs: _shell_fs, path: path, cells: _paint_blank(), color: 1, size: 1, last: none, stroke: false, undo: [], redo: [], status: "new file", foreign: false, tool: "brush", anchor: none, base: none, naming: none, other: 0}
     if vfs.exists(_shell_fs, path) and not vfs.is_dir(_shell_fs, path)
         _paint_load(s, vfs.read(_shell_fs, path))
     return s
+
+# Choosing a color keeps the one before in s.other, for x to swap back to.
+fun _paint_choose(s, c)
+    if c != s.color
+        s.other = s.color
+        s.color = c
 
 # Reads a saved picture into s; a picture of another size keeps the part that fits.
 fun _paint_load(s, text)
@@ -2612,14 +2618,14 @@ fun _paint_click(s, x, y)
     s.anchor = none
     let sw = _paint_swatch_at(x, y)
     if sw != none
-        s.color = sw
+        _paint_choose(s, sw)
         return
     let c = _paint_cell_at(x, y)
     if c == none
         return
     if s.tool == "pick"
         # the color under the click, then back to the tool before; not an edit
-        s.color = s.cells[c[1] * _paint_w + c[0]]
+        _paint_choose(s, s.cells[c[1] * _paint_w + c[0]])
         s.tool = s.tool_before
         return
     if s.tool == "fill" and s.cells[c[1] * _paint_w + c[0]] == s.color
@@ -2713,9 +2719,14 @@ fun _paint_key(s, k)
     if len(k) == 1 and k != "R" and k != "O" and strings.upper(k) == k
         k = strings.lower(k)
     if len(k) == 1 and ord(k) >= 49 and ord(k) <= 56
-        s.color = ord(k) - 48
+        _paint_choose(s, ord(k) - 48)
     else if k == "e" or k == "0"
-        s.color = 0
+        _paint_choose(s, 0)
+    else if k == "x"
+        # back to the color before, and again to this one (the eraser at first)
+        let c = s.other
+        s.other = s.color
+        s.color = c
     else if k == "+" or k == "=" or k == "]"
         s.size = math.min(4, s.size + 1)
     else if k == "-" or k == "["

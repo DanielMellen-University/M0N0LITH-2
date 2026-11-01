@@ -364,3 +364,11 @@ wi.app.on_key(si, "I")
 wi.app.on_key(si, "i")
 wi.app.on_click(si, 6 + 1 * 4 + 2, 40 + 1 * 4 + 2)
 print(si.color, si.tool)
+# x swaps to the color chosen before and back; at first that is the eraser
+let wx = wm.launch(d, wm.paint_app)
+let sx = wx.state
+let seen_colors = [sx.color]
+for k in ["x", "x", "3", "x", "X", "5", "5", "x"]
+    wx.app.on_key(sx, k)
+    append(seen_colors, sx.color)
+print(seen_colors)

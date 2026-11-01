@@ -133,6 +133,7 @@ While a run waits for input:
 | Click a swatch | picks that color, or the eraser (the last one) |
 | 1 to 8 | black, red, orange, yellow, green, blue, purple, brown |
 | e or 0 | the eraser |
+| x | swaps to the color picked before, and back (the eraser at first) |
 | + or = or ], - or [ | brush size 1 to 4 cells |
 | f, b | the fill tool (a click fills the area of one color), and back to the brush |
 | i | the color picker: the next click on the canvas takes its color, then the tool before comes back |
