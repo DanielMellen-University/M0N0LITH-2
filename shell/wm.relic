@@ -2933,6 +2933,8 @@ fun _snake_key(s, k)
     else if k == "r" or k == "return"
         if s.state == "over" or s.state == "won"
             _snake_reset(s)
+    else if k == "n"
+        _snake_reset(s)   # a new game at any time, giving up the one going on
 
 fun _snake_click(s, x, y) = none
 

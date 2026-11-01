@@ -149,3 +149,11 @@ let after = sc.state
 sc.state = "playing"
 wc.app.on_key(sc, "return")
 print(after, sc.state)
+# N starts a new game at any time, mid-game or paused, with Shift too
+sc.state = "playing"
+sc.score = 3
+wc.app.on_key(sc, "n")
+print(sc.state, sc.score, len(sc.body))
+sc.state = "paused"
+wc.app.on_key(sc, "N")
+print(sc.state)
