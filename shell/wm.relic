@@ -677,7 +677,7 @@ fun _clicker_lines(s) = ["Clicks: {s.count}", "Click here to count."]
 fun _clicker_click(s, x, y)
     s.count = s.count + 1
 fun _clicker_key(s, k)
-    if k == "space"
+    if k == "space" or k == "return"
         s.count = s.count + 1
 
 # What typing key k does to text: backspace drops the last character, space and

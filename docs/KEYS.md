@@ -22,7 +22,7 @@ Every key and click the desktop and its apps act on, checked against `shell/wm.r
 
 | Input | What it does |
 |---|---|
-| Click inside, or Space | adds one to the count |
+| Click inside, Space or Return | adds one to the count |
 
 ## Notes
 

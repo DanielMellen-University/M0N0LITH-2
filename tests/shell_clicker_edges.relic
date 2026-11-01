@@ -18,3 +18,7 @@ print("restored", wm.visible_lines(c))
 wm.close(d, c.id)
 let fresh = wm.launch(d, wm.clicker)
 print("reopened", c.state.count, wm.visible_lines(fresh))
+# Return counts like Space
+wm.key(d, "return")
+wm.key(d, "return")
+print("return", fresh.state.count)
