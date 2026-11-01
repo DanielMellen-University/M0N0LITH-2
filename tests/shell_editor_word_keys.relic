@@ -69,3 +69,17 @@ e.app.on_key(s, "ctrl+l")
 print([picked()])
 e.app.on_key(s, "ctrl+x")
 print([s.text])
+# Ctrl+D copies the line under it, the cursor going with it; one undo
+s.text = "one\ntwo\nthree"
+s.back = 6
+s.mark = none
+e.app.on_key(s, "ctrl+d")
+print([s.text], s.back, [slice(s.text, len(s.text) - s.back, len(s.text) - s.back + 2)])
+e.app.on_key(s, "ctrl+z")
+print([s.text])
+# with a selection over two lines, both are copied
+s.text = "a\nbc\nd"
+s.back = 4
+s.mark = 6
+e.app.on_key(s, "ctrl+d")
+print([s.text])

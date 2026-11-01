@@ -86,6 +86,7 @@ The commands are in [the Terminal doc](apps/TERMINAL.md).
 | Shift+Tab | takes one indent (to the multiple of 4 before) off the line |
 | Ctrl+A | selects everything |
 | Ctrl+L | selects the line with its newline; again adds the next line |
+| Ctrl+D | puts a copy of the line, or of the selected lines, under it |
 | Ctrl+C, Ctrl+X | copies, or cuts, the selection to the desktop's clipboard (shared by all windows, not the system's) |
 | Ctrl+V | pastes it, over any selection |
 | Ctrl+Z | undoes the last edit (a cut or a paste is one), up to 500 |

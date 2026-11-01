@@ -14,3 +14,6 @@ shift+pagedown
 ["two\nthree"]
 ["two\nthree"]
 ["one\n"]
+["one\ntwo\ntwo\nthree"] 6 ["\nt"]
+["one\ntwo\nthree"]
+["a\nbc\na\nbc\nd"]

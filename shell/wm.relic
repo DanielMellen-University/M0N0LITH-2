@@ -1911,6 +1911,20 @@ fun _editor_key(s, k)
             to = to + 1
         s.mark = len(s.text) - from
         _editor_set_pos(s, to)
+    else if k == "ctrl+d"
+        # a copy of the cursor's line (or of the lines the selection is on)
+        # under it, the cursor on the copy at the same column
+        s.overwrite = false
+        let pos = _editor_pos(s)
+        let sel = _editor_selection(s)
+        let from = _line_start(s.text, pos)
+        let to = _line_end(s.text, pos)
+        if sel != none
+            from = _line_start(s.text, sel[0])
+            to = _line_end(s.text, sel[1])
+        let block = slice(s.text, from, to)
+        _editor_change(s, to, 0, "\n" + block)
+        _editor_set_pos(s, pos + len(block) + 1)
     else if k == "ctrl+c" or k == "ctrl+x"
         s.overwrite = false
         let sel = _editor_selection(s)
