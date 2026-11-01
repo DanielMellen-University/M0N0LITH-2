@@ -34,3 +34,24 @@ key("down")
 for i in 0..60
     run("echo {i}")
 print(len(t.past), t.past[0], t.past[49])
+# history lists the kept commands, numbered from the oldest, itself last
+let h = wm.terminal.init()
+for line in ["pwd", "echo hi", "pwd"]
+    for ch in line
+        if ch == " "
+            wm.terminal.on_key(h, "space")
+        else
+            wm.terminal.on_key(h, ch)
+    wm.terminal.on_key(h, "return")
+let before = len(h.buf)
+for ch in "history"
+    wm.terminal.on_key(h, ch)
+wm.terminal.on_key(h, "return")
+print(slice(h.buf, before, len(h.buf)))
+before = len(h.buf)
+for ch in "history"
+    wm.terminal.on_key(h, ch)
+wm.terminal.on_key(h, "space")
+wm.terminal.on_key(h, "5")
+wm.terminal.on_key(h, "return")
+print(slice(h.buf, before, len(h.buf)))

@@ -1075,11 +1075,19 @@ fun _term_run(s, line)
     if cmd == "help"
         _term_reply(s, "help clear echo apps date")
         _term_reply(s, "pwd cd ls cat mkdir touch")
-        _term_reply(s, "write rm mv")
+        _term_reply(s, "write rm mv history")
         _term_reply(s, "echo text > file, >> adds")
     else if cmd == "clear"
         if _term_args(s, parts, 0, "clear")
             s.buf = []
+    else if cmd == "history"
+        # the commands Up brings back, numbered from the oldest; this one is
+        # kept already, so it is the last
+        if _term_args(s, parts, 0, "history")
+            let i = 1
+            for line in s.past
+                _term_reply(s, strings.pad_left(str(i), 3, " ") + "  " + line)
+                i = i + 1
     else if cmd == "echo"
         _term_echo(s, parts)
     else if cmd == "apps"
@@ -1137,7 +1145,7 @@ let _term_recall_keep = 50
 # with "/" after it, anything else with a space); several are taken as far as
 # they agree, and when that adds nothing they are listed. No match, or an
 # empty line: nothing.
-let _term_commands = ["apps", "cat", "cd", "clear", "date", "echo", "help", "ls", "mkdir", "mv", "pwd", "rm", "touch", "write"]
+let _term_commands = ["apps", "cat", "cd", "clear", "date", "echo", "help", "history", "ls", "mkdir", "mv", "pwd", "rm", "touch", "write"]
 
 fun _common_start(names)
     let out = names[0]

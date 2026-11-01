@@ -3,3 +3,5 @@
 ["echo two", "pwd", "echo one", "echo one", "pwd", "echo two", "ls", "ls"]
 twx ["echo one", "pwd", "echo two", "echo twx"] echo twx
 50 echo 10 echo 59
+["/home> history", "  1  pwd", "  2  echo hi", "  3  pwd", "  4  history"]
+["/home> history 5", "usage: history"]

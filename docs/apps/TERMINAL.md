@@ -16,6 +16,7 @@ Commands split on spaces. Quotes are ordinary characters and do not group words,
 |---|---|
 | `help` | lists the commands |
 | `clear` | empties the output |
+| `history` | the commands Up and Down go through (the last 50), numbered from the oldest; `history` itself is the last |
 | `echo text` | prints the text |
 | `echo text > path` | replaces the file with the text and a newline |
 | `echo text >> path` | adds the text and a newline to the end of the file |
@@ -31,7 +32,7 @@ Commands split on spaces. Quotes are ordinary characters and do not group words,
 | `rm path` | removes a file or an empty folder |
 | `mv from to` | renames, or moves into `to` when it is a folder |
 
-`clear`, `apps`, `date` and `pwd` take no words, and a word too many is an error for every command (`rm a b` removes nothing).
+`clear`, `history`, `apps`, `date` and `pwd` take no words, and a word too many is an error for every command (`rm a b` removes nothing).
 
 ## Rules for paths
 
