@@ -36,3 +36,7 @@ print([n.text])
 wm.notes.on_key(n, "ctrl+backspace")
 wm.notes.on_key(n, "ctrl+backspace")
 print([n.text])
+# Ctrl+U empties the line and shows nothing
+typed("rm all")
+let shown = len(t.buf)
+print([key("ctrl+u")], len(t.buf) == shown)

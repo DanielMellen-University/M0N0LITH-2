@@ -1241,6 +1241,8 @@ fun _term_key(s, k)
         s.input = _drop_word(s.input)
     else if k == "tab"
         _term_complete(s)
+    else if k == "ctrl+u"
+        s.input = ""   # empties the line, as in most shells; nothing is shown
     else
         s.input = _typed(s.input, k)
 
