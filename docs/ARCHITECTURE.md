@@ -9,7 +9,7 @@ SDL2 window
 shell/desktop.relic   opens the window, runs the event loop, draws
    |  wm.handle(d, e), wm.dismiss(d)  ->  boxes and visible_lines back
    v
-shell/wm.relic        the model and the six apps
+shell/wm.relic        the model and the eight apps
    |  use std/vfs, std/strings, std/paths ...  (the shared files and helpers)
    |  use ../relic/selfhost/lexer, parser, interp  (the IDE's runs)
    v
@@ -18,7 +18,7 @@ relic/                the pinned Relic: the relic program, std/ and selfhost/
 
 ## The two files
 
-- `shell/wm.relic` is the whole desktop as data: the windows, the taskbar, the Start menu, and the six apps. It never draws. Input goes in as `click`, `motion`, `release`, `key` and `dismiss`, or as raw graphics events through `handle`. Output comes out as boxes (`tab_box`, `close_box`, `menu_item_box` and so on) and the text rows each window shows (`visible_lines`). This is what the tests drive, with no SDL and no window.
+- `shell/wm.relic` is the whole desktop as data: the windows, the taskbar, the Start menu, and the eight apps. It never draws: Paint and Snake give their canvas and board as colored boxes through their app's `paint` call, which `paint_boxes` turns into desktop coordinates for desktop.relic to fill. Input goes in as `click`, `motion`, `release`, `key` and `dismiss`, or as raw graphics events through `handle`. Output comes out as boxes (`tab_box`, `close_box`, `menu_item_box` and so on) and the text rows each window shows (`visible_lines`). This is what the tests drive, with no SDL and no window.
 - `shell/desktop.relic` is about a hundred lines. It opens a 640 by 480 window with `std/graphics`, reads events, hands them to `wm.handle` (Escape goes to `wm.dismiss`, and quits when nothing took it), and draws the model about 60 times a second. It is the only file that needs SDL, and no test runs it; `relic check` covers it.
 
 ## Apps
