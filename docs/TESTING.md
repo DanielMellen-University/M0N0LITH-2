@@ -67,7 +67,7 @@ Write `tests/shell_<topic>.relic`, run it, read its output, and save that as `te
 | `shell_altgr` | AltGr (Ctrl+Alt) typing is text, not Ctrl+S |
 | `shell_cmd_keys` | Cmd with a letter acts like Ctrl (Cmd+S, Cmd+Z, Cmd+A on macOS) |
 | `shell_held_keys` | repeated key_down events from held keys, and key_up |
-| `shell_window_cycle` | Ctrl+Tab brings the lowest visible window to the front and goes round, skips minimized ones, does nothing with no windows, and no app sees the key; Ctrl+Shift+Tab going the other way and undoing a Ctrl+Tab; Ctrl+W closing the window with focus and leaving a minimized one |
+| `shell_window_cycle` | Ctrl+Tab brings the lowest visible window to the front and goes round, skips minimized ones, does nothing with no windows, and no app sees the key; Ctrl+Shift+Tab going the other way and undoing a Ctrl+Tab; Ctrl+W closing the window with focus and leaving a minimized one; Ctrl+M minimizing it; Ctrl+1 to Ctrl+9 picking a window by its taskbar place |
 | `shell_mouse_buttons` | left and right mouse buttons during a drag |
 
 ### Drawing and clipping
@@ -82,7 +82,7 @@ Write `tests/shell_<topic>.relic`, run it, read its output, and save that as `te
 | Test | What it covers |
 |---|---|
 | `shell_small_apps` | Editor, Notes and Clicker |
-| `shell_clicker_edges` | rapid input and Clicker state after reopening; Return counts, Backspace and `-` take one off down to 0, Ctrl+C copies the number |
+| `shell_clicker_edges` | rapid input and Clicker state after reopening; Return counts, Backspace and `-` take one off down to 0, Ctrl+C copies the number; Delete setting the count back to 0 |
 | `shell_app_focus` | Notes and Clicker state across focus and window controls |
 | `shell_notes_resize` | Notes text clipping and edits across resizes |
 | `shell_notes_input_edges` | single-line input and reopening Notes |
@@ -169,13 +169,13 @@ Write `tests/shell_<topic>.relic`, run it, read its output, and save that as `te
 
 | Test | What it covers |
 |---|---|
-| `shell_paint` | Paint: a drag with no gaps, the fill tool (side by side only, no-op fills, undo), the line, rectangle and ellipse tools, outline and filled (the shape follows the drag, its end stays on the canvas, one undo step, brush size), save as (a typed name, `.paint` added, whole paths, Esc, no name, a folder, a file that is not a picture, a folder that is not there), swatches and keys, brush sizes (also with [ and ]), the eraser, undo, redo and clear, a stroke off the canvas and back, boxes cut to the window, save and open again from Files, a file that is not a picture, another size, a failed save; the i color picker (the tool before comes back, no undo step) |
+| `shell_paint` | Paint: a drag with no gaps, the fill tool (side by side only, no-op fills, undo), the line, rectangle and ellipse tools, outline and filled (the shape follows the drag, its end stays on the canvas, one undo step, brush size), save as (a typed name, `.paint` added, whole paths, Esc, no name, a folder, a file that is not a picture, a folder that is not there), swatches and keys, brush sizes (also with [ and ]), the eraser, undo, redo and clear, a stroke off the canvas and back, boxes cut to the window, save and open again from Files, a file that is not a picture, another size, a failed save; the i color picker (the tool before comes back, no undo step); x swapping back to the color before |
 
 ### Snake
 
 | Test | What it covers |
 |---|---|
-| `shell_snake` | Snake: no move before a key, the beat, no turning back, two turns in one step, pause without catching up (Space or P), no move while another window is focused, eating and growing, speed, the wall, its own body, keys after the end, a new game (R or Return), the best score saved in the files and read back (junk reads as 0) |
+| `shell_snake` | Snake: no move before a key, the beat, no turning back, two turns in one step, pause without catching up (Space or P), no move while another window is focused, eating and growing, speed, the wall, its own body, keys after the end, a new game (R or Return), the best score saved in the files and read back (junk reads as 0); N starting a new game mid-game or paused |
 
 ### Shared filesystem and fuzzing
 
