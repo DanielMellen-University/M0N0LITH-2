@@ -6,7 +6,7 @@ The title reads `IDE [status] path  (ctrl+s save, ctrl+r run)`. Every Editor key
 
 ## Running
 
-Ctrl+R runs the text in the buffer, saved or not. The program runs in Relic's self-hosted interpreter (`selfhost/interp` from the pinned Relic), inside the desktop: there is no separate process.
+Ctrl+R (or F5) runs the text in the buffer, saved or not. The program runs in Relic's self-hosted interpreter (`selfhost/interp` from the pinned Relic), inside the desktop: there is no separate process.
 
 - `print` and `eprint` lines go to the output pane. The pane shows the last 6 lines and keeps the last 200.
 - The status becomes `ran`, `error`, `waiting for input` or `stopped`.
@@ -27,7 +27,7 @@ Ctrl+R runs the text in the buffer, saved or not. The program runs in Relic's se
 | Ctrl+V | adds the first line of the desktop's clipboard to it |
 | Return | sends the line, and the run goes on |
 | Escape, Ctrl+C | stops the run; the pane shows `stopped` |
-| Ctrl+R | starts the run again from the top |
+| Ctrl+R, F5 | starts the run again from the top |
 
 Ctrl+S saves the program and the run keeps waiting; the status reads `saved, waiting for input` (decided Oct 31 2026). Other keys are ignored while the run waits. Escape goes to the IDE while a run waits, and when text is selected (it drops the selection); at any other time it closes menus or quits the desktop as usual.
 

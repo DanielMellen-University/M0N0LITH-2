@@ -496,7 +496,7 @@ fun key(d, k)
 
 # Keys that are not typed text; the apps handle these by name. Letters, digits,
 # punctuation and space come as text events, which carry shift, layout and Unicode.
-let _named_keys = ["return", "backspace", "tab", "up", "down", "left", "right", "delete", "home", "end", "pageup", "pagedown"]
+let _named_keys = ["return", "backspace", "tab", "up", "down", "left", "right", "delete", "home", "end", "pageup", "pagedown", "f5"]
 let _shift_keys = ["left", "right", "up", "down", "home", "end", "tab", "pageup", "pagedown"]   # shift+left and so on select in the Editor; shift+tab takes out an indent
 let _modifier_keys = ["left ctrl", "right ctrl", "left shift", "right shift", "left alt", "right alt", "left gui", "right gui"]
 
@@ -2094,6 +2094,8 @@ fun _ide_lines(s)
     return out
 
 fun _ide_key(s, k)
+    if k == "f5"
+        k = "ctrl+r"   # F5 runs, as in most IDEs
     if s.run != none and k == "ctrl+s"
         # saving does not stop a run that waits for input (decided Oct 31)
         _editor_key(s, k)

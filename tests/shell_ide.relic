@@ -107,3 +107,13 @@ for k in ["o", "n", "e", "space", "t", "w", "o", "ctrl+backspace"]
 print([s.input], s.run != none)
 wm.key(d, "ctrl+c")
 print(s.status, s.run, s.out[len(s.out) - 1], [s.input])
+# F5 runs like Ctrl+R, and starts a waiting run again
+s.text = "print(\"f5 ran\")\n"
+wm.key(d, "f5")
+print(s.out[len(s.out) - 1], wm.key_of_event({type: "key_down", key: "f5", ctrl: false}))
+s.text = "use std/os\nprint(os.read_line())\n"
+wm.key(d, "f5")
+wm.key(d, "x")
+wm.key(d, "f5")
+print(s.run != none, [s.input])
+wm.dismiss(d)
