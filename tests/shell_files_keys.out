@@ -17,3 +17,5 @@ Delete gone.txt? Delete again true
 Files: /tmp/many false
 not empty: sub true
 Files: /tmp/many
+zz2.txt
+sub false true

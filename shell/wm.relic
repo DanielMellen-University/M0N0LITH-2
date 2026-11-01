@@ -1692,6 +1692,13 @@ fun _files_key(s, k)
             s.note = "not empty: " + paths.base(full)
         else
             vfs.remove(s.fs, full)
+            # the row goes from the list here too, so the next draw does not
+            # take it for a file another app removed (that would select ..):
+            # the selection stays on its line, now the next name
+            let i = s.sel
+            s.names = slice(s.names, 0, i) + slice(s.names, i + 1, len(s.names))
+            s.dirs = slice(s.dirs, 0, i) + slice(s.dirs, i + 1, len(s.dirs))
+            s.sel = math.min(i, len(s.names) - 1)
         return
     if k == "up"
         if s.sel > 0
