@@ -3,7 +3,7 @@ M0N0LITH written in [Relic](https://github.com/DanielMellen-University/Relic).
 
 This repo is the MONOLITH 2 desktop environment: the window manager, taskbar, Start menu and the apps, all written in [Relic](https://github.com/DanielMellen-University/Relic). The language itself (host, std, self-host) lives in the Relic repo. Language changes go there, desktop and app changes go here.
 
-> Status: early. The shell started inside the Relic repo during its M11 milestone and moved here with its history in Relic 1.0.1. It has a window model with drag, resize and minimize, a taskbar with a +N button for windows that do not fit, a Start menu, and six apps: Clicker, Notes, Terminal, Files, Editor and IDE. Terminal, Files, the Editor and the IDE share one in-memory filesystem (`std/vfs` from Relic). The IDE is the Editor plus Ctrl+R to run a Relic program in an output pane, with input, `use` of your own files and Ctrl+E to jump to an error. Next up is in the [roadmap](docs/ROADMAP.md).
+> Status: early. The shell started inside the Relic repo during its M11 milestone and moved here with its history in Relic 1.0.1. It has a window model with drag, resize and minimize, a taskbar with a +N button for windows that do not fit, a Start menu, and eight apps: Clicker, Notes, Terminal, Files, Editor, IDE, Paint and Snake. Terminal, Files, the Editor, the IDE and Paint share one in-memory filesystem (`std/vfs` from Relic), and Snake keeps its best score there. The IDE is the Editor plus Ctrl+R to run a Relic program in an output pane, with input, `use` of your own files and Ctrl+E to jump to an error. Next up is in the [roadmap](docs/ROADMAP.md).
 
 ## Layout
 
