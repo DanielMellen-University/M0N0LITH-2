@@ -10,3 +10,7 @@ ctrl+home ctrl+end
 [5, 3, 6, 3, 6, 9, 12, 15, 18, 15]
 3 true
 shift+pagedown
+["two\n"]
+["two\nthree"]
+["two\nthree"]
+["one\n"]

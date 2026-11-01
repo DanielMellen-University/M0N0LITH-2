@@ -56,3 +56,16 @@ e.app.on_key(s, "ctrl+home")
 e.app.on_key(s, "shift+pagedown")
 print(line_no(), s.mark == len(s.text))
 print(wm.key_of_event({type: "key_down", key: "pagedown", ctrl: false, shift: true}))
+# Ctrl+L selects the cursor's line with its newline; again adds the next one
+s.text = "one\ntwo\nthree"
+s.back = 6
+s.mark = none
+e.app.on_key(s, "ctrl+l")
+fun picked() = slice(s.text, len(s.text) - s.mark, len(s.text) - s.back)
+print([picked()])
+e.app.on_key(s, "ctrl+l")
+print([picked()])
+e.app.on_key(s, "ctrl+l")
+print([picked()])
+e.app.on_key(s, "ctrl+x")
+print([s.text])

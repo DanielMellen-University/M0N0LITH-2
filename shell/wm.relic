@@ -1889,6 +1889,19 @@ fun _editor_key(s, k)
         s.overwrite = false
         s.mark = len(s.text)
         s.back = 0
+    else if k == "ctrl+l"
+        # the cursor's line with its newline, as in most code editors; again
+        # takes in the next line too
+        s.overwrite = false
+        let sel = _editor_selection(s)
+        let from = _line_start(s.text, _editor_pos(s))
+        if sel != none
+            from = _line_start(s.text, sel[0])
+        let to = _line_end(s.text, _editor_pos(s))
+        if to < len(s.text)
+            to = to + 1
+        s.mark = len(s.text) - from
+        _editor_set_pos(s, to)
     else if k == "ctrl+c" or k == "ctrl+x"
         s.overwrite = false
         let sel = _editor_selection(s)
