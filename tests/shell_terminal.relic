@@ -20,3 +20,9 @@ for line in ["echo one two > w.txt", "echo  three >> w.txt", "wc w.txt", "wc /ho
 # cp: a file to a new name or into a folder; not a folder, not over a file
 for line in ["echo hi > c.txt", "mkdir cd", "cp c.txt c2.txt", "cat c2.txt", "cp c.txt cd", "ls cd", "cp c.txt c2.txt", "cp cd x", "cp nope.txt y", "cp c.txt", "cp c.txt nope/y.txt", "rm cd/c.txt", "rm cd", "rm c.txt", "rm c2.txt"]
     run(line)
+# head: the first 10 lines
+run("echo 1 > h.txt")
+for i in 2..13
+    run("echo {i} >> h.txt")
+for line in ["head h.txt", "touch e.txt", "head e.txt", "head /home", "head", "rm h.txt", "rm e.txt"]
+    run(line)

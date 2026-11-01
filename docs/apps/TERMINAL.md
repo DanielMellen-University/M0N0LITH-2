@@ -28,6 +28,7 @@ Commands split on spaces. Quotes are ordinary characters and do not group words,
 | `cat path` | prints a file (only its last 200 lines are kept, like any output) |
 | `cp from to` | copies a file to a new name, or into `to` when it is a folder; a folder is not copied, and a file already there is not written over |
 | `wc path` | the file's lines (its newlines, as Unix counts them), words and characters, then the path |
+| `head path` | the first 10 lines of a file |
 | `mkdir path` | makes a folder, and any missing folders above it |
 | `touch path` | makes an empty file; an existing file or folder is left as it is |
 | `write path text` | replaces the file with the text and a newline |

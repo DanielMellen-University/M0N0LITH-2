@@ -86,3 +86,34 @@
 > rm cd
 > rm c.txt
 > rm c2.txt
+> echo 1 > h.txt
+> echo 2 >> h.txt
+> echo 3 >> h.txt
+> echo 4 >> h.txt
+> echo 5 >> h.txt
+> echo 6 >> h.txt
+> echo 7 >> h.txt
+> echo 8 >> h.txt
+> echo 9 >> h.txt
+> echo 10 >> h.txt
+> echo 11 >> h.txt
+> echo 12 >> h.txt
+> head h.txt
+  1
+  2
+  3
+  4
+  5
+  6
+  7
+  8
+  9
+  10
+> touch e.txt
+> head e.txt
+> head /home
+  head: is a folder: /home
+> head
+  usage: head <path>
+> rm h.txt
+> rm e.txt
