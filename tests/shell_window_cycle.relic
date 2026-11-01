@@ -26,6 +26,23 @@ for i in 0..3
     append(seen, wm.focused(d).app.name)
 print(seen, [n.state.text, t.state.input], c.state.count)
 print(wm.key_of_event({type: "key_down", key: "tab", ctrl: true, shift: false}))
+# Ctrl+Shift+Tab goes the other way, and undoes a Ctrl+Tab
+print(wm.key_of_event({type: "key_down", key: "tab", ctrl: true, shift: true}))
+fun order()
+    let out = []
+    for w in d.windows
+        if not w.minimized
+            append(out, w.app.name)
+    return out
+let was = order()
+wm.key(d, "ctrl+tab")
+wm.key(d, "ctrl+shift+tab")
+print("undone", order() == was)
+seen = []
+for i in 0..3
+    wm.key(d, "ctrl+shift+tab")
+    append(seen, wm.focused(d).app.name)
+print("back", seen)
 # Ctrl+W closes the window with focus, as the x box does; no app sees it
 let before = len(d.windows)
 let top = wm.focused(d)

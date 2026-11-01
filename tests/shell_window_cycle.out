@@ -3,5 +3,8 @@
 ["Notes", "Terminal", "Clicker", "Notes"]
 ["Clicker", "Notes", "Clicker"] ["", ""] 0
 ctrl+tab
+ctrl+shift+tab
+undone true
+back ["Notes", "Clicker", "Notes"]
 ctrl+w 1 true ["", ""]
 the minimized one is left 1 true none
