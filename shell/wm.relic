@@ -1911,6 +1911,23 @@ fun _editor_key(s, k)
             to = to + 1
         s.mark = len(s.text) - from
         _editor_set_pos(s, to)
+    else if k == "ctrl+k"
+        # removes the cursor's line (or the lines the selection is on) with
+        # its newline; the last line takes the newline before it instead
+        s.overwrite = false
+        let pos = _editor_pos(s)
+        let sel = _editor_selection(s)
+        let from = _line_start(s.text, pos)
+        let to = _line_end(s.text, pos)
+        if sel != none
+            from = _line_start(s.text, sel[0])
+            to = _line_end(s.text, sel[1])
+        if to < len(s.text)
+            to = to + 1
+        else if from > 0
+            from = from - 1
+        if to > from
+            _editor_change(s, from, to - from, "")
     else if k == "ctrl+d"
         # a copy of the cursor's line (or of the lines the selection is on)
         # under it, the cursor on the copy at the same column

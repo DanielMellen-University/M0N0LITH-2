@@ -32,6 +32,7 @@ The status is one of:
 | Ctrl+A | selects everything |
 | Ctrl+L | selects the cursor's line with its newline; pressed again it takes in the next line too |
 | Ctrl+D | puts a copy of the cursor's line, or of every line the selection is on, under it; the cursor goes to the same column in the copy. One Ctrl+Z takes it back |
+| Ctrl+K | removes the cursor's line, or every line the selection is on, with its newline (the last line takes the newline before it); the cursor goes to the start of what came after. One Ctrl+Z puts it back |
 | Esc | drops the selection; with none, Esc quits the desktop as usual |
 | Ctrl+C, Ctrl+X | copies, or cuts, the selection to the desktop's clipboard (nothing without a selection) |
 | Ctrl+V | pastes the clipboard at the cursor, over any selection; a cut and a paste are one undo step each |

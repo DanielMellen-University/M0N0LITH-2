@@ -83,3 +83,18 @@ s.back = 4
 s.mark = 6
 e.app.on_key(s, "ctrl+d")
 print([s.text])
+# Ctrl+K removes the line with its newline, the last line the one before
+s.text = "one\ntwo\nthree"
+s.back = 7
+s.mark = none
+e.app.on_key(s, "ctrl+k")
+print([s.text], s.back)
+e.app.on_key(s, "ctrl+k")
+print([s.text], s.back)
+e.app.on_key(s, "ctrl+k")
+print([s.text], s.back)
+e.app.on_key(s, "ctrl+k")
+print([s.text], s.back)
+e.app.on_key(s, "ctrl+z")
+e.app.on_key(s, "ctrl+z")
+print([s.text])
