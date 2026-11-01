@@ -31,3 +31,5 @@ ctrl+shift+left ctrl+shift+end ctrl+s
 ["if x go()\nend"]
 ["if x go() end"]
 ["if x go()\nend"]
+["a\n        bc\nd"] 3
+["a\n    bc\nd"] 3

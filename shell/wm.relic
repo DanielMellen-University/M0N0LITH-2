@@ -2064,9 +2064,16 @@ fun _editor_key(s, k)
         s.overwrite = false
         if _clip.text != ""
             _editor_type(s, _clip.text)
-    else if k == "shift+tab"
+    else if k == "shift+tab" or k == "ctrl+["
         s.overwrite = false
         _editor_dedent(s)
+    else if k == "ctrl+]"
+        # one indent more at the line's start, wherever the cursor is in it
+        s.overwrite = false
+        let pos = _editor_pos(s)
+        let start = _line_start(s.text, pos)
+        _editor_change(s, start, 0, "    ")
+        _editor_set_pos(s, pos + 4)
     else if k == "ctrl+backspace" or k == "ctrl+delete"
         s.overwrite = false
         _editor_delete_word(s, k)

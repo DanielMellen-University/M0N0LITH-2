@@ -130,3 +130,12 @@ e.app.on_key(s, "ctrl+j")
 print([s.text])
 e.app.on_key(s, "ctrl+z")
 print([s.text])
+# Ctrl+] indents the line from anywhere in it, Ctrl+[ takes it back off
+s.text = "a\nbc\nd"
+s.back = 3
+s.mark = none
+e.app.on_key(s, "ctrl+]")
+e.app.on_key(s, "ctrl+]")
+print([s.text], s.back)
+e.app.on_key(s, "ctrl+[")
+print([s.text], s.back)
