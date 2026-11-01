@@ -117,3 +117,16 @@ e.app.on_key(s, "ctrl+shift+home")
 print([chosen()])
 e.app.on_key(s, "ctrl+shift+end")
 print([chosen()])
+# Ctrl+J joins the next line on with one space, its indent dropped
+s.text = "if x\n    go()\n\nend"
+s.back = len(s.text)
+s.mark = none
+e.app.on_key(s, "ctrl+j")
+print([s.text], s.back)
+e.app.on_key(s, "ctrl+j")
+print([s.text])
+e.app.on_key(s, "ctrl+j")
+e.app.on_key(s, "ctrl+j")
+print([s.text])
+e.app.on_key(s, "ctrl+z")
+print([s.text])

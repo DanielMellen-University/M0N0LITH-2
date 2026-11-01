@@ -27,3 +27,7 @@ ctrl+shift+left ctrl+shift+end ctrl+s
 [" gamma"]
 ["alpha beta"]
 [" gamma"]
+["if x go()\n\nend"] 10
+["if x go()\nend"]
+["if x go() end"]
+["if x go()\nend"]

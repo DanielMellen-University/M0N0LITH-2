@@ -2008,6 +2008,20 @@ fun _editor_key(s, k)
             to = to + 1
         s.mark = len(s.text) - from
         _editor_set_pos(s, to)
+    else if k == "ctrl+j"
+        # joins the next line onto the cursor's: its newline and leading spaces
+        # become one space (none after an empty line), the cursor at the join
+        s.overwrite = false
+        let at = _line_end(s.text, _editor_pos(s))
+        if at < len(s.text)
+            let n = 1
+            while at + n < len(s.text) and s.text[at + n] == " "
+                n = n + 1
+            let glue = " "
+            if at == _line_start(s.text, at) or at + n == len(s.text) or s.text[at + n] == "\n"
+                glue = ""
+            _editor_change(s, at, n, glue)
+            _editor_set_pos(s, at)
     else if k == "ctrl+k"
         # removes the cursor's line (or the lines the selection is on) with
         # its newline; the last line takes the newline before it instead
