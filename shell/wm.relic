@@ -1440,7 +1440,7 @@ let _term_recall_keep = 50
 # with "/" after it, anything else with a space); several are taken as far as
 # they agree, and when that adds nothing they are listed. No match, or an
 # empty line: nothing.
-let _term_commands = ["apps", "cat", "cd", "clear", "cp", "date", "echo", "find", "grep", "head", "help", "history", "ls", "mkdir", "mv", "pwd", "rm", "tail", "touch", "wc", "write"]
+let _term_commands = ["apps", "cat", "cd", "clear", "cp", "date", "echo", "find", "grep", "head", "help", "history", "ls", "mkdir", "mv", "nl", "pwd", "rm", "sort", "tail", "touch", "uniq", "wc", "write"]
 
 fun _common_start(names)
     let out = names[0]

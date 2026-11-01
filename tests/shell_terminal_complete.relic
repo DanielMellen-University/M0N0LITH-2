@@ -28,3 +28,5 @@ wm.terminal.on_key(t, "tab")
 print([t.input], slice(t.buf, before, len(t.buf)))
 t.cwd = "/home/docs"
 print([tab("rm ../dr"), tab("rm p"), tab("rm ./plans")])
+# the commands added later complete too: sort, uniq and nl
+print([tab("so"), tab("un"), tab("n")])
