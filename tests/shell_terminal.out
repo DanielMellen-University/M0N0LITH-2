@@ -125,3 +125,34 @@
   two
 > rm c1.txt
 > rm c2.txt
+> echo 1 > t.txt
+> echo 2 >> t.txt
+> echo 3 >> t.txt
+> echo 4 >> t.txt
+> echo 5 >> t.txt
+> echo 6 >> t.txt
+> echo 7 >> t.txt
+> echo 8 >> t.txt
+> echo 9 >> t.txt
+> echo 10 >> t.txt
+> echo 11 >> t.txt
+> echo 12 >> t.txt
+> tail t.txt
+  3
+  4
+  5
+  6
+  7
+  8
+  9
+  10
+  11
+  12
+> touch e.txt
+> tail e.txt
+> tail /home
+  tail: is a folder: /home
+> tail
+  usage: tail <path>
+> rm t.txt
+> rm e.txt
