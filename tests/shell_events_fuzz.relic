@@ -9,7 +9,7 @@ let seed = 0
 fun rnd(n)
     seed = (seed * 1103515245 + 12345) % 2147483648
     return int(seed / 65536) % n
-let app_keys = ["a", "b", "c", "e", "f", "l", "r", "R", "o", "O", "n", "s", "w", "d", "1", "2", "5", "0", "+", "-", "=", "/", ".", "\"", "{{", "(", "[", "]", "space", "return", "backspace", "tab", "up", "down", "left", "right", "delete", "home", "end", "shift+left", "shift+right", "shift+up", "ctrl+s", "ctrl+z", "ctrl+r", "ctrl+e", "ctrl+a", "ctrl+c", "ctrl+v", "ctrl+x", "ctrl+y", "ctrl+l", "ctrl+home", "ctrl+end", "ctrl+left", "ctrl+right", "ctrl+backspace", "ctrl+delete", "shift+tab", "shift+home", "p", "P"]
+let app_keys = ["a", "b", "c", "e", "f", "l", "r", "R", "o", "O", "n", "s", "w", "d", "1", "2", "5", "0", "+", "-", "=", "/", ".", "\"", "{{", "(", "[", "]", "space", "return", "backspace", "tab", "up", "down", "left", "right", "delete", "home", "end", "shift+left", "shift+right", "shift+up", "ctrl+s", "ctrl+z", "ctrl+r", "ctrl+e", "ctrl+a", "ctrl+c", "ctrl+v", "ctrl+x", "ctrl+y", "ctrl+l", "ctrl+home", "ctrl+end", "ctrl+left", "ctrl+right", "ctrl+backspace", "ctrl+delete", "shift+tab", "shift+home", "p", "P", "ctrl+/", "ctrl+u", "f5", "pageup", "pagedown", "shift+pagedown", "ctrl+tab"]
 let d = none
 let bad = 0
 fun check(step, what)
