@@ -347,3 +347,20 @@ for k in ["]", "]", "]", "]", "]", "[", "[", "[", "[", "["]
     wo.app.on_key(so, k)
     append(sizes, so.size)
 print(sizes)
+# i picks the color of the next cell clicked, then the tool before is back;
+# it is not an undo step
+wm.dismiss(d)
+let wi = wm.launch(d, wm.paint_app)
+let si = wi.state
+si.cells[3 * 60 + 5] = 6
+si.tool = "rect"
+si.color = 2
+wi.app.on_key(si, "i")
+let undo_before = len(si.undo)
+print(wm.visible_lines(wi)[0], si.tool)
+wi.app.on_click(si, 6 + 5 * 4 + 2, 40 + 3 * 4 + 2)
+print(si.color, si.tool, len(si.undo) == undo_before, wm.visible_lines(wi)[0])
+wi.app.on_key(si, "I")
+wi.app.on_key(si, "i")
+wi.app.on_click(si, 6 + 1 * 4 + 2, 40 + 1 * 4 + 2)
+print(si.color, si.tool)

@@ -97,3 +97,6 @@ brush true none ["Paint [saved] yellow 1 my cat.paint"] false
 [2, 1, 0, 0, 1, 2, 2, 1]
 2 0
 [2, 3, 4, 4, 4, 3, 2, 1, 1, 1]
+Paint [open] red pick small.pai pick
+6 rect true Paint [open] blue rect 1 small.
+5 rect

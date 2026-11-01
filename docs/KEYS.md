@@ -133,6 +133,7 @@ While a run waits for input:
 | e or 0 | the eraser |
 | + or = or ], - or [ | brush size 1 to 4 cells |
 | f, b | the fill tool (a click fills the area of one color), and back to the brush |
+| i | the color picker: the next click on the canvas takes its color, then the tool before comes back |
 | l, r, o | the line, rectangle and ellipse tools: press at one end or corner, drag to the other |
 | R, O | the filled rectangle and filled ellipse |
 | c | clears the canvas |

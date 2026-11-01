@@ -2336,7 +2336,8 @@ fun _ide_key(s, k)
 # fills the area of one color under it), l the line tool, r the rectangle and
 # o the ellipse (press at one end or corner and drag to the other; until the
 # button is let go the shape follows the pointer), R and O the filled
-# rectangle and ellipse, and b the brush again, c clears,
+# rectangle and ellipse, i picks the color of the next cell clicked, and b
+# the brush again, c clears,
 # Ctrl+Z undoes a stroke, a fill, a shape or a clear, Ctrl+S saves, n saves as
 # a name typed on the status line (Return saves, Esc gives up). A picture is a text file in the desktop's
 # files: "paint W H" and then H lines of W digits (0 is white). Paint opens the
@@ -2552,6 +2553,11 @@ fun _paint_click(s, x, y)
     let c = _paint_cell_at(x, y)
     if c == none
         return
+    if s.tool == "pick"
+        # the color under the click, then back to the tool before; not an edit
+        s.color = s.cells[c[1] * _paint_w + c[0]]
+        s.tool = s.tool_before
+        return
     if s.tool == "fill" and s.cells[c[1] * _paint_w + c[0]] == s.color
         return   # a fill that would change nothing is not an undo step
     _paint_snapshot(s)
@@ -2650,6 +2656,10 @@ fun _paint_key(s, k)
         s.size = math.min(4, s.size + 1)
     else if k == "-" or k == "["
         s.size = math.max(1, s.size - 1)   # [ and ] as in most paint programs
+    else if k == "i"
+        if s.tool != "pick"
+            s.tool_before = s.tool
+        s.tool = "pick"
     else if k == "f"
         s.tool = "fill"
     else if k == "b"
@@ -2688,8 +2698,8 @@ fun _paint_lines(s)
     if s.naming != none
         return ["Paint save as: {s.naming}_ (return saves, esc cancels)"]
     let tool = str(s.size)
-    if s.tool == "fill"
-        tool = "fill"
+    if s.tool == "fill" or s.tool == "pick"
+        tool = s.tool
     else if s.tool == "fill rect" or s.tool == "fill oval"
         tool = "filled " + slice(s.tool, 5, len(s.tool))
     else if s.tool != "brush"
