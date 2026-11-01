@@ -39,7 +39,7 @@ Commands split on spaces. Quotes are ordinary characters and do not group words,
 
 ## Rules for paths
 
-- No command has options. `cd`, `ls`, `cat`, `mkdir`, `touch`, `rm` and `mv` refuse any word starting with `-`, and so do the paths of `write` and `echo >`. To name such a file, write `./-x`.
+- No command has options. `cd`, `ls`, `cat`, `head`, `wc`, `mkdir`, `touch`, `rm`, `mv` and `cp` refuse any word starting with `-`, and so do the paths of `write` and `echo >`. To name such a file, write `./-x`.
 - A path ending in `/` must be a folder: `cat notes.txt/` and `rm notes.txt/` are errors, and `touch new/` makes nothing.
 - Errors say which part is wrong: `not found: /home/x`, `not a folder: /home/notes.txt` when a part of the path is a file, `no folder: /home/missing` when the folder to write into is not there.
 - If another app removes or moves the folder a Terminal is in, it moves up to the nearest folder that still exists.
