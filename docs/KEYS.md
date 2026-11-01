@@ -1,6 +1,6 @@
 # Keyboard and mouse reference
 
-Every key and click the desktop and its apps act on, checked against `shell/wm.relic` and `shell/desktop.relic`. Keys go to the window on top. On macOS, Cmd with a letter works as Ctrl with it (Cmd+S, Cmd+Z, Cmd+Y, Cmd+A, Cmd+C, Cmd+X, Cmd+V, Cmd+R, Cmd+E, and Cmd+L in the Terminal). With any other key (Home, Backspace, Tab, the arrows) it is Ctrl on every system: only Cmd with a letter is read as Ctrl. AltGr (Ctrl+Alt) characters are typed as text, not read as shortcuts.
+Every key and click the desktop and its apps act on, checked against `shell/wm.relic` and `shell/desktop.relic`. Keys go to the window on top. On macOS, Cmd with a letter works as Ctrl with it (Cmd+S, Cmd+Z, Cmd+Y, Cmd+A, Cmd+C, Cmd+X, Cmd+V, Cmd+R, Cmd+E, Cmd+L, which selects a line in the Editor and clears the Terminal, and Cmd+U). With any other key (Home, Backspace, Tab, the arrows) it is Ctrl on every system: only Cmd with a letter is read as Ctrl. AltGr (Ctrl+Alt) characters are typed as text, not read as shortcuts.
 
 ## Desktop
 
