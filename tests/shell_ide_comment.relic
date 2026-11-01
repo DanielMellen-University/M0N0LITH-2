@@ -22,3 +22,13 @@ let e = wm.launch(d, wm.editor)
 e.state.text = "a"
 e.app.on_key(e.state, "ctrl+/")
 print([e.state.text])
+# with a selection, every line it is on, one undo step, the lines still selected
+s.text = "a\n    b\n\nc\nd"
+s.back = 3
+s.mark = len(s.text)
+print(k("ctrl+/"), [slice(s.text, len(s.text) - s.mark, len(s.text) - s.back)])
+print(k("ctrl+/"))
+s.text = "# a\nb"
+s.back = 0
+s.mark = len(s.text)
+print(k("ctrl+/"), k("ctrl+z"))

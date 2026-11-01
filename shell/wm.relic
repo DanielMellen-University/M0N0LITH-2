@@ -2320,7 +2320,42 @@ fun _ide_escape(s)
 
 # Ctrl+/: comments the cursor's line out with "# " after its leading spaces,
 # or takes a "#" (and one space after it) back off; one undo step.
+# With a selection, every line it is on: all commented (blank lines aside)
+# take the # off, else each gets one, in one undo step, and the lines stay
+# selected.
+fun _ide_comment_lines(s, sel)
+    let from = _line_start(s.text, sel[0])
+    let to = _line_end(s.text, sel[1])
+    let lines = strings.split(slice(s.text, from, to), "\n")
+    let all = true
+    for line in lines
+        let t = strings.trim(line)
+        if t != "" and not strings.starts_with(t, "#")
+            all = false
+    let out = []
+    for line in lines
+        let lead = len(line) - len(strings.trim_start(line))
+        let body = slice(line, lead, len(line))
+        if strings.trim(line) == ""
+            append(out, line)
+        else if all
+            if strings.starts_with(body, "# ")
+                body = slice(body, 2, len(body))
+            else
+                body = slice(body, 1, len(body))
+            append(out, slice(line, 0, lead) + body)
+        else
+            append(out, slice(line, 0, lead) + "# " + body)
+    let block = strings.join(out, "\n")
+    _editor_change(s, from, to - from, block)
+    s.mark = len(s.text) - from
+    _editor_set_pos(s, from + len(block))
+
 fun _ide_toggle_comment(s)
+    let sel = _editor_selection(s)
+    if sel != none
+        _ide_comment_lines(s, sel)
+        return
     let pos = _editor_pos(s)
     let start = _line_start(s.text, pos)
     let at = start
