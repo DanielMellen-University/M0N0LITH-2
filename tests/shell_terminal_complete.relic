@@ -4,6 +4,7 @@
 # the line, as a shell does.
 use ../shell/wm
 use std/vfs
+use std/strings
 let t = wm.terminal.init()
 fun typed(line)
     for ch in line
@@ -30,3 +31,18 @@ t.cwd = "/home/docs"
 print([tab("rm ../dr"), tab("rm p"), tab("rm ./plans")])
 # the commands added later complete too: sort, uniq and nl
 print([tab("so"), tab("un"), tab("n")])
+# every command help lists completes to itself, so a new command cannot be
+# left out of the Tab list again (the last help line is about >, not commands)
+t.cwd = "/home"
+t.input = ""
+let shown = len(t.buf)
+typed("help")
+wm.terminal.on_key(t, "return")
+let listed = slice(t.buf, shown + 1, len(t.buf) - 1)
+print(len(listed), "help lines of commands")
+let missing = []
+for line in listed
+    for word in strings.split(line, " ")
+        if tab(word) != word + " "
+            append(missing, word)
+print("help commands Tab misses:", missing)

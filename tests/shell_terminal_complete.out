@@ -3,3 +3,5 @@
 ["cat docs/plan"] ["/home> cat docs/plan", "plan.txt  plans.txt", "/home> cat docs/plan", "plan.txt  plans.txt"]
 ["rm ../draft.txt ", "rm plan", "rm ./plans.txt "]
 ["sort ", "uniq ", "nl "]
+4 help lines of commands
+help commands Tab misses: []
