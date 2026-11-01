@@ -39,3 +39,8 @@ removed true
 ["/tmp> head /tmp/rep two", "head: not a count of lines: two"]
 ["/tmp> tail /tmp/rep 1 2", "usage: tail <path> [lines]"]
 ["/tmp> head", "usage: head <path> [lines]"]
+["/tmp> sort /tmp/empty"]
+["/tmp> uniq /tmp/empty"]
+["/tmp> sort /tmp/bare", "a", "a", "b"]
+["/tmp> uniq /tmp/bare", "b", "a"]
+["/tmp> nl /tmp/bare", "  1  b", "  2  a", "  3  a"]

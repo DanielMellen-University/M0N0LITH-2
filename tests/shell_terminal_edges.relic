@@ -59,3 +59,11 @@ run("tail /tmp/rep 99")
 run("head /tmp/rep two")
 run("tail /tmp/rep 1 2")
 run("head")
+# sort, uniq and nl on an empty file print nothing, and a last line with no
+# newline after it still counts
+run("sort /tmp/empty")
+run("uniq /tmp/empty")
+vfs.write(t.fs, "/tmp/bare", "b\na\na")
+run("sort /tmp/bare")
+run("uniq /tmp/bare")
+run("nl /tmp/bare")
