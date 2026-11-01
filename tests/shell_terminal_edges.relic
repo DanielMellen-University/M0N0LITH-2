@@ -46,3 +46,8 @@ run("echo a >> /tmp/rep")
 run("uniq /tmp/rep")
 run("uniq /tmp/nothere")
 run("uniq /tmp/rep /tmp/rep")
+# nl: each line after its number
+run("nl /tmp/rep")
+run("touch /tmp/empty")
+run("nl /tmp/empty")
+run("nl /tmp")

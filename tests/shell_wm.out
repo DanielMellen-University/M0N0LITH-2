@@ -44,7 +44,7 @@ launch
 help clear history echo apps date
 pwd cd ls cat head tail
 mkdir touch write rm mv cp
-wc grep find sort uniq
+wc grep find sort uniq nl
 echo text > file, >> adds
 /home> pwd
 /home

@@ -28,3 +28,7 @@ removed true
 ["/tmp> uniq /tmp/rep", "a", "b", "a"]
 ["/tmp> uniq /tmp/nothere", "uniq: not found: /tmp/nothere"]
 ["/tmp> uniq /tmp/rep /tmp/rep", "usage: uniq <path>"]
+["/tmp> nl /tmp/rep", "  1  a", "  2  a", "  3  b", "  4  a"]
+["/tmp> touch /tmp/empty"]
+["/tmp> nl /tmp/empty"]
+["/tmp> nl /tmp", "nl: is a folder: /tmp"]
