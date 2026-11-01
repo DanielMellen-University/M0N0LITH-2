@@ -716,6 +716,8 @@ fun _notes_key(s, k)
         s.text = s.text + _clip_line()
     else if k == "ctrl+backspace"
         s.text = _drop_word(s.text)
+    else if k == "ctrl+u"
+        s.text = ""   # like the Terminal's Ctrl+U
     else if k == "ctrl+c" or k == "ctrl+x"
         # the whole line (Notes has no selection); an empty one leaves the clipboard
         if s.text != ""
@@ -2034,6 +2036,8 @@ fun _ide_input_key(s, k)
         s.input = s.input + _clip_line()
     else if k == "ctrl+backspace"
         s.input = _drop_word(s.input)
+    else if k == "ctrl+u"
+        s.input = ""
     else if k == "ctrl+c"
         _ide_escape(s)   # stops the run, as Esc does and as in a terminal
     else if len(k) == 1

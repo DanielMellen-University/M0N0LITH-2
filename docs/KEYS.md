@@ -32,6 +32,7 @@ Every key and click the desktop and its apps act on, checked against `shell/wm.r
 | Backspace | removes the last character |
 | Ctrl+C, Ctrl+X | copies, or cuts, the whole line to the clipboard |
 | Ctrl+Backspace | removes the last word |
+| Ctrl+U | empties the line |
 | Ctrl+V | adds the first line of the clipboard |
 
 ## Terminal
@@ -103,6 +104,7 @@ While a run waits for input:
 |---|---|
 | Typing, Space, Backspace | edit the input line |
 | Ctrl+Backspace | removes the last word of the input line |
+| Ctrl+U | empties the input line |
 | Ctrl+V | adds the first line of the clipboard |
 | Return | sends the line, and the run goes on |
 | Escape, Ctrl+C | stops the run |

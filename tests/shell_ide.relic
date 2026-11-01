@@ -117,3 +117,10 @@ wm.key(d, "x")
 wm.key(d, "f5")
 print(s.run != none, [s.input])
 wm.dismiss(d)
+# Ctrl+U empties the input line of a waiting run
+s.text = "use std/os\nprint(os.read_line())\n"
+wm.key(d, "ctrl+r")
+for k in ["a", "b", "ctrl+u"]
+    wm.key(d, k)
+print([s.input], s.run != none)
+wm.dismiss(d)

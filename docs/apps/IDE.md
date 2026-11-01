@@ -25,6 +25,7 @@ Ctrl+R (or F5) runs the text in the buffer, saved or not. The program runs in Re
 |---|---|
 | Typing, Space, Backspace | edit the input line |
 | Ctrl+Backspace | removes the last word of the input line |
+| Ctrl+U | empties the input line |
 | Ctrl+V | adds the first line of the desktop's clipboard to it |
 | Return | sends the line, and the run goes on |
 | Escape, Ctrl+C | stops the run; the pane shows `stopped` |

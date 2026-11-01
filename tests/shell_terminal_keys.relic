@@ -40,3 +40,7 @@ print([n.text])
 typed("rm all")
 let shown = len(t.buf)
 print([key("ctrl+u")], len(t.buf) == shown)
+# Ctrl+U in Notes too
+n.text = "some note"
+wm.notes.on_key(n, "ctrl+u")
+print([n.text])

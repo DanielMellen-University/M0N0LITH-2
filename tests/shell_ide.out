@@ -85,3 +85,4 @@ error ["a", "line a", "b", "line b", "spin", "stopped: the program ran too long 
 stopped none stopped [""]
 f5 ran f5
 true [""]
+[""] true
