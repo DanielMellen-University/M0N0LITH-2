@@ -12,3 +12,12 @@
 long file length 301
 ["/tmp> rm /tmp/long"]
 removed true
+["/tmp> write /tmp/fruit pear"]
+["/tmp> echo apple >> /tmp/fruit"]
+["/tmp> echo Fig >> /tmp/fruit"]
+["/tmp> sort /tmp/fruit", "Fig", "apple", "pear"]
+["/tmp> cat /tmp/fruit", "pear", "apple", "Fig"]
+["/tmp> sort /tmp/nothere", "sort: not found: /tmp/nothere"]
+["/tmp> sort /tmp", "sort: is a folder: /tmp"]
+["/tmp> sort -r /tmp/fruit", "sort: no options, not even -r"]
+["/tmp> sort", "usage: sort <path>"]

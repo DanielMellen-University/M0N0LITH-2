@@ -30,6 +30,7 @@ use std/time
 use std/vfs
 use std/paths
 use std/math
+use std/lists
 use ../relic/selfhost/lexer
 use ../relic/selfhost/parser
 use ../relic/selfhost/interp
@@ -1179,6 +1180,30 @@ fun _term_grep(s, word, path)
     for line in slice(found, math.max(0, len(found) - term_history), len(found))
         _term_reply(s, line)
 
+# The lines of a file for sort, or none after saying what is wrong, the way
+# grep and head check: a path ending in /, a missing file, or a folder.
+fun _term_file_lines(s, cmd, path)
+    if _term_not_folder(s, cmd, path, false)
+        return none
+    let p = _term_path(s, path)
+    if not vfs.exists(s.fs, p)
+        _term_reply(s, cmd + ": " + _term_missing(s, p))
+        return none
+    if vfs.is_dir(s.fs, p)
+        _term_reply(s, cmd + ": is a folder: " + p)
+        return none
+    return strings.lines(vfs.read(s.fs, p))
+
+# sort: the lines of a file in order (by character, so capitals come first),
+# the file left as it is; as many as the output keeps, from the end.
+fun _term_sort(s, path)
+    let lines = _term_file_lines(s, "sort", path)
+    if lines == none
+        return
+    let sorted = lists.sort(lines)
+    for line in slice(sorted, math.max(0, len(sorted) - term_history), len(sorted))
+        _term_reply(s, line)
+
 # find: every file and folder under the current folder whose name has the
 # text in it (the name, not the path), as paths from there, in the order ls
 # shows them, each folder followed by what is in it; as many as the output keeps.
@@ -1235,7 +1260,7 @@ fun _words(line)
     return out
 
 # Commands whose words are all paths, so a word like -l or -r is a mistake, not a name.
-let _path_commands = ["cd", "ls", "cat", "mkdir", "touch", "rm", "mv", "cp", "wc", "head", "tail", "grep"]
+let _path_commands = ["cd", "ls", "cat", "mkdir", "touch", "rm", "mv", "cp", "wc", "head", "tail", "grep", "sort"]
 
 fun _term_run(s, line)
     s.cwd = _existing_dir(s.fs, s.cwd)
@@ -1259,7 +1284,7 @@ fun _term_run(s, line)
         _term_reply(s, "help clear history echo apps date")
         _term_reply(s, "pwd cd ls cat head tail")
         _term_reply(s, "mkdir touch write rm mv cp")
-        _term_reply(s, "wc grep find")
+        _term_reply(s, "wc grep find sort")
         _term_reply(s, "echo text > file, >> adds")
     else if cmd == "clear"
         if _term_args(s, parts, 0, "clear")
@@ -1328,6 +1353,9 @@ fun _term_run(s, line)
     else if cmd == "cp"
         if _term_args(s, parts, 2, "cp <from> <to>")
             _term_cp(s, parts[1], parts[2])
+    else if cmd == "sort"
+        if _term_args(s, parts, 1, "sort <path>")
+            _term_sort(s, parts[1])
     else if cmd == "wc"
         if _term_args(s, parts, 1, "wc <path>")
             _term_wc(s, parts[1])
