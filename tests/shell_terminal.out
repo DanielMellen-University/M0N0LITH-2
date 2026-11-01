@@ -64,3 +64,25 @@
   usage: wc <path>
 > rm w.txt
 > rm e.txt
+> echo hi > c.txt
+> mkdir cd
+> cp c.txt c2.txt
+> cat c2.txt
+  hi
+> cp c.txt cd
+> ls cd
+  c.txt
+> cp c.txt c2.txt
+  cp: already there: /home/c2.txt
+> cp cd x
+  cp: is a folder: /home/cd
+> cp nope.txt y
+  cp: not found: /home/nope.txt
+> cp c.txt
+  usage: cp <from> <to>
+> cp c.txt nope/y.txt
+  cp: no folder: /home/nope
+> rm cd/c.txt
+> rm cd
+> rm c.txt
+> rm c2.txt

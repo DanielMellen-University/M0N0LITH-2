@@ -17,3 +17,6 @@ for line in ["pwd", "ls", "cat  welcome.txt", "ls   /home", "cd  ..", "pwd", "cd
 # wc: lines (newlines), words and characters
 for line in ["echo one two > w.txt", "echo  three >> w.txt", "wc w.txt", "wc /home/w.txt", "touch e.txt", "wc e.txt", "wc nothing.txt", "wc /home", "wc", "wc a b", "rm w.txt", "rm e.txt"]
     run(line)
+# cp: a file to a new name or into a folder; not a folder, not over a file
+for line in ["echo hi > c.txt", "mkdir cd", "cp c.txt c2.txt", "cat c2.txt", "cp c.txt cd", "ls cd", "cp c.txt c2.txt", "cp cd x", "cp nope.txt y", "cp c.txt", "cp c.txt nope/y.txt", "rm cd/c.txt", "rm cd", "rm c.txt", "rm c2.txt"]
+    run(line)

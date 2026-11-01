@@ -1088,6 +1088,29 @@ fun _term_mv(s, a, b)
         catch err
             _term_reply(s, "mv: " + err.message)
 
+# cp copies a file (not a folder) to a new name, or into a folder; like mv it
+# does not write over a file that is already there.
+fun _term_cp(s, a, b)
+    if _term_not_folder(s, "cp", a, false) or _term_not_folder(s, "cp", b, true)
+        return
+    let src = _term_path(s, a)
+    let dst = _term_path(s, b)
+    if vfs.is_dir(s.fs, dst)
+        dst = paths.join(dst, paths.base(src))
+    if not vfs.exists(s.fs, src)
+        _term_reply(s, "cp: " + _term_missing(s, src))
+    else if vfs.is_dir(s.fs, src)
+        _term_reply(s, "cp: is a folder: " + src)
+    else if vfs.exists(s.fs, dst)
+        _term_reply(s, "cp: already there: " + dst)
+    else if _why_not_new(s.fs, dst) != none
+        _term_reply(s, "cp: " + _why_not_new(s.fs, dst))
+    else
+        try
+            vfs.write(s.fs, dst, vfs.read(s.fs, src))
+        catch err
+            _term_reply(s, "cp: " + err.message)
+
 # The words of a line; a run of spaces counts as one.
 fun _words(line)
     let out = []
@@ -1097,7 +1120,7 @@ fun _words(line)
     return out
 
 # Commands whose words are all paths, so a word like -l or -r is a mistake, not a name.
-let _path_commands = ["cd", "ls", "cat", "mkdir", "touch", "rm", "mv", "wc"]
+let _path_commands = ["cd", "ls", "cat", "mkdir", "touch", "rm", "mv", "cp", "wc"]
 
 fun _term_run(s, line)
     s.cwd = _existing_dir(s.fs, s.cwd)
@@ -1120,7 +1143,7 @@ fun _term_run(s, line)
     if cmd == "help"
         _term_reply(s, "help clear echo apps date")
         _term_reply(s, "pwd cd ls cat mkdir touch")
-        _term_reply(s, "write rm mv history wc")
+        _term_reply(s, "write rm mv cp history wc")
         _term_reply(s, "echo text > file, >> adds")
     else if cmd == "clear"
         if _term_args(s, parts, 0, "clear")
@@ -1171,6 +1194,9 @@ fun _term_run(s, line)
             _term_write(s, "write", parts[1], strings.join(slice(parts, 2, len(parts)), " "), false)
         else
             _term_reply(s, "usage: write <path> <text>")
+    else if cmd == "cp"
+        if _term_args(s, parts, 2, "cp <from> <to>")
+            _term_cp(s, parts[1], parts[2])
     else if cmd == "wc"
         if _term_args(s, parts, 1, "wc <path>")
             _term_wc(s, parts[1])
@@ -1193,7 +1219,7 @@ let _term_recall_keep = 50
 # with "/" after it, anything else with a space); several are taken as far as
 # they agree, and when that adds nothing they are listed. No match, or an
 # empty line: nothing.
-let _term_commands = ["apps", "cat", "cd", "clear", "date", "echo", "help", "history", "ls", "mkdir", "mv", "pwd", "rm", "touch", "wc", "write"]
+let _term_commands = ["apps", "cat", "cd", "clear", "cp", "date", "echo", "help", "history", "ls", "mkdir", "mv", "pwd", "rm", "touch", "wc", "write"]
 
 fun _common_start(names)
     let out = names[0]
