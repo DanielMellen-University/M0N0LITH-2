@@ -49,3 +49,8 @@ for k in ["pagedown", "pagedown", "pagedown", "pagedown", "pageup", "pageup", "p
     append(moves, sel())
 print(moves)
 print(wm.key_of_event({type: "key_down", key: "pagedown", ctrl: false}), wm.key_of_event({type: "key_down", key: "pageup", ctrl: false}))
+# Ctrl+Home and Ctrl+End work as Home and End
+wm.key(d, "ctrl+end")
+let last = sel()
+wm.key(d, "ctrl+home")
+print(last, sel())

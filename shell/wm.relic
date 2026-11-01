@@ -1382,10 +1382,10 @@ fun _files_key(s, k)
     else if k == "backspace"
         if s.path != "/" and not s.recovered
             _files_up(s)
-    else if k == "home"
+    else if k == "home" or k == "ctrl+home"
         s.sel = 0
-    else if k == "end"
-        s.sel = math.max(0, len(names) - 1)
+    else if k == "end" or k == "ctrl+end"
+        s.sel = math.max(0, len(names) - 1)   # Ctrl too, as in the Editor
     else if k == "pageup" or k == "pagedown"
         # a window of rows at a time (the title is one row), at least one
         let page = math.max(1, s.rows - 2)
