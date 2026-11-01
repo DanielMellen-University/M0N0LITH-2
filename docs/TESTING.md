@@ -95,7 +95,7 @@ Write `tests/shell_<topic>.relic`, run it, read its output, and save that as `te
 | `shell_terminal_history` | the Terminal keeps its last 200 lines |
 | `shell_terminal_recall` | Up and Down through earlier commands, the line being typed kept, blanks and repeats not kept, editing a recalled line, the last 50, and `history` listing them numbered |
 | `shell_terminal_keys` | Ctrl+C gives up the line (shown with ^C, not run or kept, ends a recall), Ctrl+L empties the output and keeps the line, Ctrl+Backspace takes off the last word there and in Notes, Ctrl+U empties the line, `!!` runs the command before (or says there is none) |
-| `shell_terminal_complete` | Tab: command names, names in the current folder and in a typed one (absolute, `..`, `.`), a folder gets `/`, several go as far as they agree or are listed, nothing for no match or a missing folder |
+| `shell_terminal_complete` | Tab: command names, names in the current folder and in a typed one (absolute, `..`, `.`), a folder gets `/`, several go as far as they agree or are listed, nothing for no match or a missing folder; every command `help` lists completes to itself |
 | `shell_terminal_errors` | Terminal error messages (mv, mkdir, cat, paths through a file) |
 | `shell_terminal_touch` | touch preserves existing entries and creates empty files |
 | `shell_terminal_write` | write replaces content and handles empty text |
@@ -107,7 +107,7 @@ Write `tests/shell_<topic>.relic`, run it, read its output, and save that as `te
 | `shell_terminal_slash` | a path ending in / must be a folder |
 | `shell_terminal_redirect` | echo redirects and missing destinations |
 | `shell_terminal_redirect_errors` | failed redirects and output after clear |
-| `shell_terminal_edges` | Terminal path and input boundaries |
+| `shell_terminal_edges` | Terminal path and input boundaries; `sort`, `uniq` and `nl` (an empty file, a last line with no newline), and the line count of `head` and `tail` |
 | `shell_terminal_root` | root and normalized path operations |
 | `shell_terminal_stale` | Terminal recovers when its current folder is removed |
 | `shell_terminal_ls` | Terminal packs directory listings to the window width |
@@ -126,7 +126,7 @@ Write `tests/shell_<topic>.relic`, run it, read its output, and save that as `te
 | `shell_files_boundaries` | root, empty folders, unusual names and reopening Files |
 | `shell_files_long_names` | clipped names open the full path and deleted selections do not open replacements |
 | `shell_files_title` | Files keeps the end of a long folder path in its title |
-| `shell_files_keys` | Home, End, and a letter or digit going to the next name with it (any case, round, never `..`), the root, an empty folder, Page Up and Page Down by a window of rows less one, Ctrl+Home and Ctrl+End, Left going up a folder and Right going into the selected one only; Ctrl+C copying the selected path |
+| `shell_files_keys` | Home, End, and a letter or digit going to the next name with it (any case, round, never `..`), the root, an empty folder, Page Up and Page Down by a window of rows less one, Ctrl+Home and Ctrl+End, Left going up a folder and Right going into the selected one only; Ctrl+C copying the selected path; Delete asking, removing a file or an empty folder (not one with files in it, not `..`) and keeping the selection on its line |
 | `shell_files_hidden` | clicks below the visible Files rows do nothing |
 | `shell_files_stale` | Files when another app removed the selected file |
 | `shell_files_ancestor` | Files and Terminal recover after an ancestor folder moves |
