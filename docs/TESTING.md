@@ -67,7 +67,7 @@ Write `tests/shell_<topic>.relic`, run it, read its output, and save that as `te
 | `shell_altgr` | AltGr (Ctrl+Alt) typing is text, not Ctrl+S |
 | `shell_cmd_keys` | Cmd with a letter acts like Ctrl (Cmd+S, Cmd+Z, Cmd+A on macOS) |
 | `shell_held_keys` | repeated key_down events from held keys, and key_up |
-| `shell_window_cycle` | Ctrl+Tab brings the lowest visible window to the front and goes round, skips minimized ones, does nothing with no windows, and no app sees the key |
+| `shell_window_cycle` | Ctrl+Tab brings the lowest visible window to the front and goes round, skips minimized ones, does nothing with no windows, and no app sees the key; Ctrl+Shift+Tab going the other way and undoing a Ctrl+Tab; Ctrl+W closing the window with focus and leaving a minimized one |
 | `shell_mouse_buttons` | left and right mouse buttons during a drag |
 
 ### Drawing and clipping
@@ -91,10 +91,10 @@ Write `tests/shell_<topic>.relic`, run it, read its output, and save that as `te
 
 | Test | What it covers |
 |---|---|
-| `shell_terminal` | Terminal commands: extra spaces, folders, redirects, errors |
+| `shell_terminal` | Terminal commands: extra spaces, folders, redirects, errors, and `wc` |
 | `shell_terminal_history` | the Terminal keeps its last 200 lines |
 | `shell_terminal_recall` | Up and Down through earlier commands, the line being typed kept, blanks and repeats not kept, editing a recalled line, the last 50, and `history` listing them numbered |
-| `shell_terminal_keys` | Ctrl+C gives up the line (shown with ^C, not run or kept, ends a recall), Ctrl+L empties the output and keeps the line, Ctrl+Backspace takes off the last word there and in Notes, Ctrl+U empties the line |
+| `shell_terminal_keys` | Ctrl+C gives up the line (shown with ^C, not run or kept, ends a recall), Ctrl+L empties the output and keeps the line, Ctrl+Backspace takes off the last word there and in Notes, Ctrl+U empties the line, `!!` runs the command before (or says there is none) |
 | `shell_terminal_complete` | Tab: command names, names in the current folder and in a typed one (absolute, `..`, `.`), a folder gets `/`, several go as far as they agree or are listed, nothing for no match or a missing folder |
 | `shell_terminal_errors` | Terminal error messages (mv, mkdir, cat, paths through a file) |
 | `shell_terminal_touch` | touch preserves existing entries and creates empty files |
@@ -150,7 +150,7 @@ Write `tests/shell_<topic>.relic`, run it, read its output, and save that as `te
 | `shell_editor_undo` | Ctrl+Z undoes edits one step at a time, up to 500, and Ctrl+Y redoes them until the next edit |
 | `shell_editor_escape` | Esc drops a selection in the Editor and the IDE and is taken, with none it is not; the IDE stops a waiting run first |
 | `shell_editor_select` | Shift+arrows and Ctrl+A select; typing and Backspace replace the selection |
-| `shell_editor_cursor` | arrows, Home, End and Ctrl+arrow word jumps move the cursor |
+| `shell_editor_cursor` | arrows, Home, End and Ctrl+arrow word jumps move the cursor, and which keys Ctrl and Shift together give |
 | `shell_editor_delete` | Delete removes the next character or the selection; Ctrl+Z puts it back |
 | `shell_editor_long_line` | long-line clipping, ignored movement and saving the full buffer |
 | `shell_editor_replaced` | saving after a file is removed or replaced by a folder |
