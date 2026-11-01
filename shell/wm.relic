@@ -501,6 +501,9 @@ fun key(d, k)
     if w != none and k == "ctrl+w"
         # closes the window with focus, as its x box does (no app sees the key)
         close(d, w.id)
+    else if w != none and k == "ctrl+m"
+        # minimizes it, as its _ box does; the next window down gets focus
+        minimize(d, w.id)
     else if w != none
         w.app.on_key(w.state, k)
 

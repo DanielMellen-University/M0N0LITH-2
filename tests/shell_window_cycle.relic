@@ -43,6 +43,11 @@ for i in 0..3
     wm.key(d, "ctrl+shift+tab")
     append(seen, wm.focused(d).app.name)
 print("back", seen)
+# Ctrl+M minimizes the window with focus, as the _ box does
+let m_top = wm.focused(d)
+wm.key(d, "ctrl+m")
+print("ctrl+m", m_top.minimized, wm.focused(d) != m_top)
+wm.restore(d, m_top.id)
 # Ctrl+W closes the window with focus, as the x box does; no app sees it
 let before = len(d.windows)
 let top = wm.focused(d)

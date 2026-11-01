@@ -6,5 +6,6 @@ ctrl+tab
 ctrl+shift+tab
 undone true
 back ["Notes", "Clicker", "Notes"]
+ctrl+m true true
 ctrl+w 1 true ["", ""]
 the minimized one is left 1 true none

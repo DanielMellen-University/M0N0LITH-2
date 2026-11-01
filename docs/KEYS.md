@@ -18,6 +18,7 @@ Every key and click the desktop and its apps act on, checked against `shell/wm.r
 | Ctrl+Tab | brings the lowest window that is not minimized to the front; again and again goes round them |
 | Ctrl+Shift+Tab | the other way: the window with focus goes to the bottom, so it undoes a Ctrl+Tab |
 | Ctrl+W | closes the window with focus, as its x box does |
+| Ctrl+M | minimizes the window with focus, as its _ box does |
 | Escape | closes the Start menu or the +N list; else stops an IDE run that waits for input, or drops a selection in the Editor or the IDE; else quits the desktop (the in-memory files are lost). A held, repeating Escape does not quit |
 
 ## Clicker
