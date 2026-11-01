@@ -489,7 +489,10 @@ fun key(d, k)
                 return
         return
     let w = focused(d)
-    if w != none
+    if w != none and k == "ctrl+w"
+        # closes the window with focus, as its x box does (no app sees the key)
+        close(d, w.id)
+    else if w != none
         w.app.on_key(w.state, k)
 
 # ---- input events ----

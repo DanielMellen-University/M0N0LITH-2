@@ -26,3 +26,12 @@ for i in 0..3
     append(seen, wm.focused(d).app.name)
 print(seen, [n.state.text, t.state.input], c.state.count)
 print(wm.key_of_event({type: "key_down", key: "tab", ctrl: true, shift: false}))
+# Ctrl+W closes the window with focus, as the x box does; no app sees it
+let before = len(d.windows)
+let top = wm.focused(d)
+wm.key(d, "ctrl+w")
+print("ctrl+w", before - len(d.windows), wm.focused(d) != top, [n.state.text, t.state.input])
+while wm.focused(d) != none
+    wm.key(d, "ctrl+w")
+wm.key(d, "ctrl+w")
+print("the minimized one is left", len(d.windows), d.windows[0].minimized, wm.focused(d))
