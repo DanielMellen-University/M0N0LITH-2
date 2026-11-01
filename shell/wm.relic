@@ -2282,8 +2282,8 @@ fun _ide_lines(s)
     return out
 
 fun _ide_key(s, k)
-    if k == "f5"
-        k = "ctrl+r"   # F5 runs, as in most IDEs
+    if k == "f5" or k == "ctrl+return" or k == "ctrl+keypad enter"
+        k = "ctrl+r"   # F5 and Ctrl+Return run too, as in most IDEs and notebooks
     if s.run != none and k == "ctrl+s"
         # saving does not stop a run that waits for input (decided Oct 31)
         _editor_key(s, k)

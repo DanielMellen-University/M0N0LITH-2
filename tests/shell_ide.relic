@@ -124,3 +124,10 @@ for k in ["a", "b", "ctrl+u"]
     wm.key(d, k)
 print([s.input], s.run != none)
 wm.dismiss(d)
+# Ctrl+Return runs like Ctrl+R (from the main keys or the keypad)
+s.text = "print(\"ctrl+return ran\")\n"
+wm.key(d, wm.key_of_event({type: "key_down", key: "return", ctrl: true}))
+print(s.out[len(s.out) - 1], s.run)
+s.text = "print(\"keypad\")\n"
+wm.key(d, wm.key_of_event({type: "key_down", key: "keypad enter", ctrl: true}))
+print(s.out[len(s.out) - 1])
