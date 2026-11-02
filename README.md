@@ -76,7 +76,7 @@ The machine these docs were last checked on has no SDL2, so these run steps were
 - **Snake:** arrows or W A S D start and turn, Space pauses, R plays again; it moves only while its window is focused, and the best score is saved in `/home/snake-best.txt`. See [Snake](docs/apps/SNAKE.md).
 - **Clicker and Notes:** a click counter (Space or Return counts, Backspace takes one off, Delete starts again and Ctrl+Z right after brings the count back) and a one-line note with a cursor (Ctrl+C, Ctrl+X and Ctrl+V with the desktop clipboard, Ctrl+Z for the last clear). See [Clicker and Notes](docs/apps/SMALL_APPS.md).
 
-On macOS, Cmd with a letter works as Ctrl with it. Escape closes the Start menu or the +N list, stops an IDE run that waits for input, and otherwise quits, which loses the in-memory files. All the keys are in [Keyboard and mouse](docs/KEYS.md).
+On macOS, Cmd with a letter works as Ctrl with it. Escape closes the Start menu or the +N list, gives up a find or a name being typed, stops an IDE run that waits for input, drops a selection, and otherwise quits, which loses the in-memory files. All the keys are in [Keyboard and mouse](docs/KEYS.md).
 
 ## Docs
 
