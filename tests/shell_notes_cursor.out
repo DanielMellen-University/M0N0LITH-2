@@ -1,0 +1,12 @@
+left 5 hello _world
+typed hello big _world
+home _hello big world
+left at the start _hello big world
+ctrl+right hello_ big world
+delete hello_big world
+delete at the end hellobig world_
+backspace hellobig_world
+ctrl+backspace _world
+ctrl+z: the whole line back, cursor at the end hellobigworld_
+ctrl+u before the cursor _llobigworld
+ctrl+z hellobigworld_

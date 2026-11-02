@@ -760,14 +760,56 @@ fun _typed(text, k)
         return text + k
     return text
 
-fun _notes_init() = {text: "", before: none}
-fun _notes_lines(s) = ["Type something:", s.text + "_"]
+fun _notes_init() = {text: "", before: none, left: 0}
+# The cursor is s.left characters before the end of the line (0: at the end).
+fun _notes_left(s)
+    if not "left" in s
+        return 0
+    return math.max(0, math.min(s.left, len(s.text)))
+fun _notes_lines(s)
+    let at = len(s.text) - _notes_left(s)
+    return ["Type something:", slice(s.text, 0, at) + "_" + slice(s.text, at, len(s.text))]
 fun _notes_click(s, x, y)
     return none
 # Ctrl+Backspace in a one-line input: back to where the Editor's Ctrl+Left would go.
 fun _drop_word(text) = slice(text, 0, _word_left(text, len(text)))
 
+# Left, Right, Home, End and Ctrl+Left and Ctrl+Right move the cursor, and
+# Delete takes the character after it; typing, Backspace, Ctrl+Backspace,
+# Ctrl+U and Ctrl+V work on the part before it. Ctrl+C, Ctrl+X and Ctrl+Z
+# take the whole line and put the cursor at the end.
 fun _notes_key(s, k)
+    let n = len(s.text)
+    let left = _notes_left(s)
+    if k == "left"
+        s.left = math.min(n, left + 1)
+    else if k == "right"
+        s.left = math.max(0, left - 1)
+    else if k == "home"
+        s.left = n
+    else if k == "end"
+        s.left = 0
+    else if k == "ctrl+left"
+        s.left = n - _word_left(s.text, n - left)
+    else if k == "ctrl+right"
+        s.left = n - _word_right(s.text, n - left)
+    else if k == "delete"
+        if left > 0
+            s.text = slice(s.text, 0, n - left) + slice(s.text, n - left + 1, n)
+            s.left = left - 1
+    else if k in ["ctrl+c", "ctrl+x", "ctrl+z"] or left == 0
+        s.left = 0
+        _notes_edit(s, k)
+    else
+        let after = slice(s.text, n - left, n)
+        s.text = slice(s.text, 0, n - left)
+        _notes_edit(s, k)
+        if s.before != none and (k == "ctrl+u" or k == "ctrl+backspace" or k == "ctrl+v")
+            s.before = s.before + after   # Ctrl+Z brings back the whole line
+        s.text = s.text + after
+        s.left = len(after)
+
+fun _notes_edit(s, k)
     if k == "ctrl+u" or k == "ctrl+x" or k == "ctrl+backspace" or (k == "ctrl+v" and _clip_line() != "")
         s.before = s.text   # what Ctrl+Z brings back
     if k == "ctrl+z"

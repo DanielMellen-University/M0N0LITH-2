@@ -1,0 +1,42 @@
+# Notes cursor: Left, Right, Home, End and Ctrl+Left and Ctrl+Right move it,
+# Delete takes the character after it, typing and the editing keys work at
+# it, and Ctrl+Z brings back the whole line.
+use ../shell/wm
+let n = wm.notes.init()
+fun keys(list)
+    for k in list
+        wm.notes.on_key(n, k)
+fun typed(t)
+    for ch in t
+        if ch == " "
+            wm.notes.on_key(n, "space")
+        else
+            wm.notes.on_key(n, ch)
+fun show(label)
+    print(label, wm.notes.lines(n)[1])
+typed("hello world")
+keys(["left", "left", "left", "left", "left"])
+show("left 5")
+typed("big ")
+show("typed")
+keys(["home"])
+show("home")
+keys(["left"])
+show("left at the start")
+keys(["ctrl+right"])
+show("ctrl+right")
+keys(["delete"])
+show("delete")
+keys(["end", "delete"])
+show("delete at the end")
+keys(["ctrl+left", "backspace"])
+show("backspace")
+keys(["ctrl+backspace"])
+show("ctrl+backspace")
+keys(["ctrl+z"])
+show("ctrl+z: the whole line back, cursor at the end")
+keys(["home", "right", "right"])
+keys(["ctrl+u"])
+show("ctrl+u before the cursor")
+keys(["ctrl+z"])
+show("ctrl+z")

@@ -37,8 +37,10 @@ Every key and click the desktop and its apps act on, checked against `shell/wm.r
 
 | Input | What it does |
 |---|---|
-| Typing | adds to the one line of text |
-| Backspace | removes the last character |
+| Typing | adds to the one line of text at the cursor |
+| Left, Right, Home, End, Ctrl+Left, Ctrl+Right | move the cursor |
+| Delete | removes the character after the cursor |
+| Backspace | removes the character before the cursor |
 | Ctrl+C, Ctrl+X | copies, or cuts, the whole line to the clipboard |
 | Ctrl+Backspace | removes the last word |
 | Ctrl+U | empties the line |

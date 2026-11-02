@@ -15,7 +15,7 @@ One test: `ctest --test-dir build -C Release -R golden_shell_ide`. Or run it str
 
 ## How they are checked
 
-CMake finds every `tests/*.relic` and adds it as `golden_<name>`. `tools/run_golden.cmake` runs it from `tests/`, and it passes when it exits with 0 and its standard output matches `<name>.out` exactly (Windows line endings are ignored). A test with no `.out` file must print nothing. One more test, `check_shell`, runs `relic check` on `wm.relic` and `desktop.relic`, which catches syntax errors and undefined names in the drawing code no test runs. That is 106 tests in all, and CI runs them on Linux, macOS and Windows.
+CMake finds every `tests/*.relic` and adds it as `golden_<name>`. `tools/run_golden.cmake` runs it from `tests/`, and it passes when it exits with 0 and its standard output matches `<name>.out` exactly (Windows line endings are ignored). A test with no `.out` file must print nothing. One more test, `check_shell`, runs `relic check` on `wm.relic` and `desktop.relic`, which catches syntax errors and undefined names in the drawing code no test runs. That is 107 tests in all, and CI runs them on Linux, macOS and Windows.
 
 `shell_fuzz`, `shell_apps_fuzz` and `shell_events_fuzz` use fixed seeds, so their output is the same on every run. `shell_fuzz` checks the window model's invariants after every random step on two desktop sizes; `shell_apps_fuzz` sends random commands from two Terminals while Files and the Editor work on the same filesystem.
 
@@ -85,6 +85,7 @@ Write `tests/shell_<topic>.relic`, run it, read its output, and save that as `te
 | `shell_clicker_edges` | rapid input and Clicker state after reopening; Return counts, Backspace and `-` take one off down to 0, Ctrl+C copies the number; Delete setting the count back to 0; + and = adding one |
 | `shell_app_focus` | Notes and Clicker state across focus and window controls |
 | `shell_notes_resize` | Notes text clipping and edits across resizes |
+| `shell_notes_cursor` | Notes: Left, Right, Home, End and word jumps move the cursor, Delete, typing, Backspace, Ctrl+Backspace and Ctrl+U at it, and Ctrl+Z bringing back the whole line |
 | `shell_notes_input_edges` | single-line input and reopening Notes; Ctrl+Z bringing a cleared line back, or taking a paste back, one step |
 
 ### Terminal
