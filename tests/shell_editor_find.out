@@ -13,3 +13,12 @@ Two one
 threeX
 ide 15 17
 IDE [open] /home/welcome.txt
+f3 before any find none open
+found [0, 2]
+f3 [3, 5]
+f3 [6, 8]
+f3 round [0, 2]
+shift+f3 round back [8, 6]
+shift+f3 [5, 3]
+not found: ab
+shift+f3 f3

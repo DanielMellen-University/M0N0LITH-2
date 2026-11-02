@@ -61,3 +61,31 @@ keys(["ctrl+f", "2", "2", "return"])
 print("ide", len(i.state.text) - i.state.mark, len(i.state.text) - i.state.back)
 wm.dismiss(d)
 print(wm.visible_lines(i)[0])
+# F3 finds the last text again, Shift+F3 the place before; nothing found says so
+let e2 = wm.launch(d, wm.editor)
+e2.state.text = "ab ab ab"
+e2.state.back = len(e2.state.text)
+keys(["f3"])
+print("f3 before any find", e2.state.mark, e2.state.status)
+keys(["ctrl+f", "a", "b", "return"])
+wm.dismiss(d)
+fun sel2()
+    let s = e2.state
+    return [len(s.text) - s.mark, len(s.text) - s.back]
+print("found", sel2())
+keys(["f3"])
+print("f3", sel2())
+keys(["f3"])
+print("f3", sel2())
+keys(["f3"])
+print("f3 round", sel2())
+keys(["shift+f3"])
+print("shift+f3 round back", sel2())
+keys(["shift+f3"])
+print("shift+f3", sel2())
+e2.state.text = "zz"
+e2.state.back = 0
+e2.state.mark = none
+keys(["f3"])
+print(e2.state.status)
+print(wm.key_of_event({type: "key_down", key: "f3", shift: true, ctrl: false}), wm.key_of_event({type: "key_down", key: "f3", shift: false, ctrl: false}))

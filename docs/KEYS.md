@@ -119,6 +119,7 @@ The commands are in [the Terminal doc](apps/TERMINAL.md).
 | Ctrl+Y | redoes what Ctrl+Z undid, newest first; a new edit ends it |
 | Ctrl+S | saves. If another app changed the file since it was opened or saved, the first Ctrl+S warns and writes nothing, and a second one right after overwrites |
 | Ctrl+F | find: type the text, Return selects the next match after the cursor (going round to the start); Esc or another key stops |
+| F3, Shift+F3 | finds the last text again, the next or the one before |
 
 ## IDE
 

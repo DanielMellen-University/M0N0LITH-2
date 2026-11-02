@@ -45,6 +45,7 @@ The status is one of:
 | Ctrl+Y | does again what Ctrl+Z undid, until the next edit |
 | Ctrl+S | saves |
 | Ctrl+F | finds: type the text (the title shows `find: text_`), and Return selects the next place it is after the cursor, going round to the start; `(not found)` when it is nowhere. Case counts. Backspace, Ctrl+Backspace, Ctrl+U and Ctrl+V edit the text; Esc, or any other key, stops finding, and that key then does what it always does |
+| F3, Shift+F3 | the last text found again: the next place, or with Shift the one before (both go round); `not found: text` when it is gone |
 
 On macOS, Cmd with a letter works as Ctrl with it.
 
