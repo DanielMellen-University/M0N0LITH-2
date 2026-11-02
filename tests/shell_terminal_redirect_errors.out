@@ -5,7 +5,7 @@
 ["/home> echo text >", "echo: missing redirect path"]
 unchanged original true
 ["/home> echo 'hello world' > /tmp/quoted"]
-literal quotes 'hello world'
+quotes dropped hello world
 
 clear view ["/home> _"]
 after view ["/home> echo after", "after", "/home> _"]

@@ -8,7 +8,7 @@ The filesystem starts with `/home`, `/tmp` and `/home/welcome.txt` (`vfs.new()` 
 
 Type a command and press Return. The prompt is the current folder and `> `; a new Terminal starts in `/home`. Backspace removes the last character, and Ctrl+Backspace the last word. Up and Down go back and forth through the commands run before (the last 50; a blank line, or the same command twice in a row, is kept once at most), and Down past the newest gives back what you were typing. `!!` runs the command before again, and shows it as it runs, as in a Unix shell. Ctrl+V adds the first line of the desktop's clipboard (what the Editor or the IDE copied). Ctrl+C gives up the line being typed: it shows with `^C` after it, and is not run or kept for Up. Ctrl+L empties the output, as `clear` does, and keeps the line being typed; Ctrl+U empties the line instead. Tab completes the word being typed: the first word from the command names, a later one from the names in its folder (`cat docs/pl` looks in `docs`). One match goes in whole, a folder with `/` after it and anything else with a space; several go in as far as they agree, and a Tab that adds nothing lists them. Paths may be absolute or relative to the current folder, and `.` and `..` work.
 
-Commands split on spaces. Quotes are ordinary characters and do not group words, so a path with a space in it cannot be given as one argument.
+Commands split on spaces. A part in double or single quotes is one word with its spaces kept and the quotes dropped, so `cat "my notes.txt"` reads one file; the other kind of quote inside is plain text (`echo "it's"`). A quote left open runs nothing and says `no closing "`. A quoted `>` or `>>` is text for `echo`, not a redirect.
 
 ## Commands
 

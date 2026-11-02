@@ -1,0 +1,52 @@
+# Terminal quotes: a part in double or single quotes is one word with its
+# spaces, the quotes dropped; a quote left open is an error; a quoted > is
+# text for echo, not a redirect.
+use ../shell/wm
+use std/vfs
+let t = wm.terminal.init()
+fun run(line)
+    t.buf = []
+    for c in line
+        if c == " "
+            wm.terminal.on_key(t, "space")
+        else
+            wm.terminal.on_key(t, c)
+    wm.terminal.on_key(t, "return")
+    print(t.buf)
+run("touch \"my notes.txt\"")
+print("made", vfs.exists(t.fs, "/home/my notes.txt"))
+run("echo first line > 'my notes.txt'")
+run("cat \"my notes.txt\"")
+run("echo more >> my' 'notes.txt")
+run("cat 'my notes.txt'")
+run("wc \"my notes.txt\"")
+run("mkdir \"a folder\"")
+run("mv 'my notes.txt' \"a folder\"")
+run("ls \"a folder\"")
+run("cd 'a folder'")
+run("pwd")
+run("cat \"my notes.txt\" missing")
+run("cp \"my notes.txt\" 'copy of it'")
+run("ls")
+run("rm 'copy of it'")
+run("cd ..")
+# the other quote inside is plain text
+run("echo \"it's here\" 'say \"hi\"'")
+# spaces inside quotes are kept as they are
+run("echo \"a   b\"")
+# an empty quoted word is a word
+run("echo '' x")
+run("mkdir \"\"")
+# a quote left open runs nothing
+run("touch \"half open")
+print("not made", not vfs.exists(t.fs, "/home/\"half open"), not vfs.exists(t.fs, "/home/half open"))
+run("echo 'x")
+# a quoted > is text
+run("echo a \">\" b")
+run("echo a '>'")
+run("echo a \">>\" '/tmp/x'")
+print("no /tmp/x", not vfs.exists(t.fs, "/tmp/x"))
+run("echo a > \"/tmp/with space\"")
+run("cat '/tmp/with space'")
+# quoted words still count as words for usage
+run("rm \"a\" \"b\"")

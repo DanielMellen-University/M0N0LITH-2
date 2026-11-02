@@ -15,7 +15,7 @@ One test: `ctest --test-dir build -C Release -R golden_shell_ide`. Or run it str
 
 ## How they are checked
 
-CMake finds every `tests/*.relic` and adds it as `golden_<name>`. `tools/run_golden.cmake` runs it from `tests/`, and it passes when it exits with 0 and its standard output matches `<name>.out` exactly (Windows line endings are ignored). A test with no `.out` file must print nothing. One more test, `check_shell`, runs `relic check` on `wm.relic` and `desktop.relic`, which catches syntax errors and undefined names in the drawing code no test runs. That is 103 tests in all, and CI runs them on Linux, macOS and Windows.
+CMake finds every `tests/*.relic` and adds it as `golden_<name>`. `tools/run_golden.cmake` runs it from `tests/`, and it passes when it exits with 0 and its standard output matches `<name>.out` exactly (Windows line endings are ignored). A test with no `.out` file must print nothing. One more test, `check_shell`, runs `relic check` on `wm.relic` and `desktop.relic`, which catches syntax errors and undefined names in the drawing code no test runs. That is 104 tests in all, and CI runs them on Linux, macOS and Windows.
 
 `shell_fuzz`, `shell_apps_fuzz` and `shell_events_fuzz` use fixed seeds, so their output is the same on every run. `shell_fuzz` checks the window model's invariants after every random step on two desktop sizes; `shell_apps_fuzz` sends random commands from two Terminals while Files and the Editor work on the same filesystem.
 
@@ -106,6 +106,7 @@ Write `tests/shell_<topic>.relic`, run it, read its output, and save that as `te
 | `shell_terminal_why` | errors name the missing folder or the part that is a file |
 | `shell_terminal_slash` | a path ending in / must be a folder |
 | `shell_terminal_redirect` | echo redirects and missing destinations |
+| `shell_terminal_quotes` | quoted words keep their spaces for touch, cat, wc, mkdir, mv, cd, cp, rm and echo >; the other quote inside, an empty quoted word, a quote left open, and a quoted > that is not a redirect |
 | `shell_terminal_redirect_errors` | failed redirects and output after clear |
 | `shell_terminal_edges` | Terminal path and input boundaries; `sort`, `uniq` and `nl` (an empty file, a last line with no newline), and the line count of `head` and `tail` |
 | `shell_terminal_root` | root and normalized path operations |
