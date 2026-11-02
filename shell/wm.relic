@@ -3172,6 +3172,9 @@ fun _ide_input_key(s, k)
         s.in_left = n
     else if k == "end"
         s.in_left = 0
+    else if k == "ctrl+k"
+        s.input = slice(s.input, 0, n - left)   # the rest of the line, as in the Terminal
+        s.in_left = 0
     else if k == "ctrl+left"
         s.in_left = n - _word_left(s.input, n - left)   # word jumps as in the Terminal
     else if k == "ctrl+right"

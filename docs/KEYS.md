@@ -144,6 +144,7 @@ While a run waits for input:
 | Ctrl+Left, Ctrl+Right | move it by words |
 | Delete, Ctrl+Delete | remove the character, or the word, after the cursor |
 | Ctrl+Backspace | removes the word before the cursor |
+| Ctrl+K | removes the rest of the line after the cursor |
 | Ctrl+U | empties the input line |
 | Ctrl+V | adds the first line of the clipboard |
 | Return | sends the line, and the run goes on |

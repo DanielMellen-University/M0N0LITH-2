@@ -28,6 +28,7 @@ Ctrl+R (or F5, or Ctrl+Return) runs the text in the buffer, saved or not. The pr
 | Ctrl+Left, Ctrl+Right | move it by words |
 | Delete, Ctrl+Delete | remove the character, or the word, after the cursor |
 | Ctrl+Backspace | removes the word before the cursor |
+| Ctrl+K | removes the rest of the line after the cursor |
 | Ctrl+U | empties the input line |
 | Ctrl+V | adds the first line of the desktop's clipboard to it |
 | Return | sends the line, and the run goes on |

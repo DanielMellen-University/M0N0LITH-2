@@ -148,6 +148,11 @@ for k in ["o", "n", "e", "space", "t", "w", "o", "space", "s", "i", "x", "ctrl+l
     wm.key(d, k)
 pane = wm.ide.lines(s)
 print(pane[len(pane) - 1])
+# Ctrl+K takes the rest of the line after the cursor
+for k in ["ctrl+left", "ctrl+k"]
+    wm.key(d, k)
+pane = wm.ide.lines(s)
+print(pane[len(pane) - 1])
 wm.key(d, "escape")
 # an input line wider than the window keeps the cursor in view
 s.text = "use std/os\nprint(os.prompt(\"name? \"))\n"
