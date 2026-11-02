@@ -106,7 +106,7 @@ The commands are in [the Terminal doc](apps/TERMINAL.md).
 | Shift with an arrow, Home, End, Page Up or Page Down | selects from the cursor |
 | Ctrl+Shift+Left, Ctrl+Shift+Right, Ctrl+Shift+Home, Ctrl+Shift+End | selects to the word before or after, or to the start or end of the file |
 | Return | a new line with the same leading spaces (in the IDE 4 more after `if`, `else`, `for`, `while`, `fun`, `try`, `catch`) |
-| Tab | spaces to the next multiple of 4 columns, over any selection |
+| Tab | spaces to the next multiple of 4 columns, in place of any selection (Ctrl+] indents the selected lines instead) |
 | Shift+Tab, Ctrl+[ | takes one indent (to the multiple of 4 before) off the line, or off every selected line |
 | Ctrl+] | puts one indent (4 spaces) at the start of the line, wherever the cursor is, or of every selected line but empty ones |
 | Ctrl+A | selects everything |

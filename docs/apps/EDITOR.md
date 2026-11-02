@@ -29,7 +29,7 @@ The status is one of:
 | Ctrl+Shift+Left, Ctrl+Shift+Right | selects to where Ctrl+Left or Ctrl+Right would go |
 | Ctrl+Shift+Home, Ctrl+Shift+End | selects to the start or the end of the file |
 | Return | a new line that starts with the same spaces as the one before (up to the cursor); in the IDE, 4 more after a line that opens a block (`if`, `else`, `for`, `while`, `fun` without `=`, `try`, `catch`) |
-| Tab | spaces to the next multiple of 4 columns (Relic's indent), over any selection; never a tab character |
+| Tab | spaces to the next multiple of 4 columns (Relic's indent), in place of any selection (to indent the selected lines, Ctrl+]); never a tab character |
 | Shift+Tab, Ctrl+[ | takes the line's leading spaces back to the multiple of 4 before; the cursor stays on its character. With a selection, every line it is on, in one undo step, the lines staying selected |
 | Ctrl+] | puts 4 spaces at the start of the line, wherever the cursor is in it; the cursor stays on its character. With a selection, every line it is on but empty ones, in one undo step, the lines staying selected |
 | Ctrl+A | selects everything |
