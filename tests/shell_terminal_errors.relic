@@ -33,3 +33,5 @@ run(["touch a.txt", "touch b.txt", "rm a.txt b.txt", "cat a.txt b.txt", "mkdir x
 
 # options are not supported; say so instead of looking for a file named -l
 run(["ls -l", "rm -r sub", "cat -n a.txt", "mkdir -p x/y", "cd -", "echo -n hi", "touch ./-odd", "ls", "rm ./-odd", "mv a.txt -b", "write -x text"])
+# moving the folder the Terminal is in (or one above it) takes it along
+run(["mkdir /tmp/mv/in", "cd /tmp/mv/in", "mv /tmp/mv /tmp/moved", "pwd", "mv /tmp/moved/in /tmp/in2", "pwd", "cd /"])

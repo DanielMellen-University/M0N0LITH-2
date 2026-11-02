@@ -1246,6 +1246,10 @@ fun _term_mv(s, a, b)
         try
             vfs.rename(s.fs, src, dst)
             _follow_rename(src, dst)
+            # moving the folder it is in takes the Terminal along, as a shell's
+            # working folder goes with it
+            if s.cwd == src or strings.starts_with(s.cwd, src + "/")
+                s.cwd = dst + slice(s.cwd, len(src), len(s.cwd))
         catch err
             _term_reply(s, "mv: " + err.message)
 

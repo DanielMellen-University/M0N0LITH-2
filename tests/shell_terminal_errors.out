@@ -77,3 +77,12 @@ welcome.txt
 mv: no options, not even -b
 /home> write -x text
 write: no options, not even -x
+/home> mkdir /tmp/mv/in
+/home> cd /tmp/mv/in
+/tmp/mv/in> mv /tmp/mv /tmp/moved
+/tmp/moved/in> pwd
+/tmp/moved/in
+/tmp/moved/in> mv /tmp/moved/in /tmp/in2
+/tmp/in2> pwd
+/tmp/in2
+/tmp/in2> cd /
