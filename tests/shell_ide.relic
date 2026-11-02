@@ -142,3 +142,10 @@ print(pane[len(pane) - 1])
 wm.key(d, "home")
 wm.key(d, "return")
 print(s.out[len(s.out) - 1], s.run)
+# Ctrl+Left and Ctrl+Right jump by words, Ctrl+Delete takes the word after
+wm.key(d, "ctrl+r")
+for k in ["o", "n", "e", "space", "t", "w", "o", "space", "s", "i", "x", "ctrl+left", "ctrl+left", "ctrl+delete", "ctrl+right", "x"]
+    wm.key(d, k)
+pane = wm.ide.lines(s)
+print(pane[len(pane) - 1])
+wm.key(d, "escape")

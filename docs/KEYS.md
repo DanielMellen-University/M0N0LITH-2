@@ -140,8 +140,9 @@ While a run waits for input:
 |---|---|
 | Typing, Space, Backspace | edit the input line at its cursor |
 | Left, Right, Home, End | move the cursor in the input line |
-| Delete | removes the character after the cursor |
-| Ctrl+Backspace | removes the last word of the input line |
+| Ctrl+Left, Ctrl+Right | move it by words |
+| Delete, Ctrl+Delete | remove the character, or the word, after the cursor |
+| Ctrl+Backspace | removes the word before the cursor |
 | Ctrl+U | empties the input line |
 | Ctrl+V | adds the first line of the clipboard |
 | Return | sends the line, and the run goes on |
