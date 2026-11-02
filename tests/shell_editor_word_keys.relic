@@ -181,3 +181,16 @@ e.app.on_key(s, "ctrl+down")
 print([s.text], [chosen()])
 e.app.on_key(s, "ctrl+up")
 print([s.text], [chosen()])
+# Ctrl+] and Ctrl+[ with a selection indent every line it is on (not empty
+# ones), one undo step, the lines staying selected
+s.text = "a\n\n  b\nc"
+s.back = len(s.text)
+s.mark = none
+e.app.on_key(s, "ctrl+a")
+e.app.on_key(s, "ctrl+]")
+print([s.text], [chosen()])
+e.app.on_key(s, "ctrl+[")
+e.app.on_key(s, "shift+tab")
+print([s.text], [chosen()])
+e.app.on_key(s, "ctrl+z")
+print([s.text])

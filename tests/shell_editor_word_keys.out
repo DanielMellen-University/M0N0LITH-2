@@ -43,3 +43,6 @@ ctrl+shift+left ctrl+shift+end ctrl+s
 ["c\na\nb\nd"] ["a\nb"]
 ["c\nd\na\nb"] ["a\nb"]
 ["c\na\nb\nd"] ["a\nb"]
+["    a\n\n      b\n    c"] ["    a\n\n      b\n    c"]
+["a\n\nb\nc"] ["a\n\nb\nc"]
+["a\n\n    b\nc"]

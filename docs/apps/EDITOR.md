@@ -30,8 +30,8 @@ The status is one of:
 | Ctrl+Shift+Home, Ctrl+Shift+End | selects to the start or the end of the file |
 | Return | a new line that starts with the same spaces as the one before (up to the cursor); in the IDE, 4 more after a line that opens a block (`if`, `else`, `for`, `while`, `fun` without `=`, `try`, `catch`) |
 | Tab | spaces to the next multiple of 4 columns (Relic's indent), over any selection; never a tab character |
-| Shift+Tab, Ctrl+[ | takes the line's leading spaces back to the multiple of 4 before; the cursor stays on its character |
-| Ctrl+] | puts 4 spaces at the start of the line, wherever the cursor is in it; the cursor stays on its character |
+| Shift+Tab, Ctrl+[ | takes the line's leading spaces back to the multiple of 4 before; the cursor stays on its character. With a selection, every line it is on, in one undo step, the lines staying selected |
+| Ctrl+] | puts 4 spaces at the start of the line, wherever the cursor is in it; the cursor stays on its character. With a selection, every line it is on but empty ones, in one undo step, the lines staying selected |
 | Ctrl+A | selects everything |
 | Ctrl+L | selects the cursor's line with its newline; pressed again it takes in the next line too |
 | Ctrl+D | puts a copy of the cursor's line, or of every line the selection is on (not a line it only ends at the start of, as after Ctrl+L), under it; the cursor goes to the same column in the copy. One Ctrl+Z takes it back |

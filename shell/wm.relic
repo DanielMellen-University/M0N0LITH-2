@@ -2193,7 +2193,36 @@ fun _editor_indent(s)
 
 # Shift+Tab takes the line's leading spaces back to the multiple of 4 before
 # (one undo step); the cursor stays on the same character.
+# Ctrl+] and Ctrl+[ (or Shift+Tab) with a selection: one indent more, or one
+# less, on every line it is on (not empty ones), in one undo step, the lines
+# staying selected, as the IDE's Ctrl+/ does.
+fun _editor_shift_lines(s, sel, more)
+    let from = _line_start(s.text, sel[0])
+    let to = _line_end(s.text, _sel_last(s.text, sel))
+    let out = []
+    for line in strings.split(slice(s.text, from, to), "\n")
+        let n = len(line) - len(strings.trim_start(line))
+        if line == ""
+            append(out, line)
+        else if more
+            append(out, "    " + line)
+        else
+            let r = n % 4
+            if r == 0
+                r = math.min(4, n)
+            append(out, slice(line, r, len(line)))
+    let block = strings.join(out, "\n")
+    if block == slice(s.text, from, to)
+        return
+    _editor_change(s, from, to - from, block)
+    s.mark = len(s.text) - from
+    _editor_set_pos(s, from + len(block))
+
 fun _editor_dedent(s)
+    let sel = _editor_selection(s)
+    if sel != none
+        _editor_shift_lines(s, sel, false)
+        return
     let pos = _editor_pos(s)
     let start = _line_start(s.text, pos)
     let n = 0
@@ -2970,6 +2999,10 @@ fun _editor_key(s, k)
     else if k == "ctrl+]"
         # one indent more at the line's start, wherever the cursor is in it
         s.overwrite = false
+        let sel = _editor_selection(s)
+        if sel != none
+            _editor_shift_lines(s, sel, true)
+            return
         let pos = _editor_pos(s)
         let start = _line_start(s.text, pos)
         _editor_change(s, start, 0, "    ")
