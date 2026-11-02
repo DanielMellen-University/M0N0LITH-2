@@ -48,7 +48,7 @@ An app is a map: `name`, `width`, `height`, `init()`, `lines(state)`, `on_click(
 
 Terminal, Files and Editor work on one in-memory filesystem (`std/vfs`), so a change in one shows in the others. An app has to cope with that: a folder or file can be gone between two frames. Editor keeps the text it last read or saved (`disk`) and warns before a Ctrl+S would overwrite a change another app made (a second Ctrl+S in a row writes).
 
-Files opens a row on a single click and ignores the second press of a double-click (`_click_in` puts `d.clicks` in its state), so double-clicking a folder enters it once. Files remembers the last row content and available row count when drawn. Once it has been drawn, a row click after a directory change or resize is ignored until the next draw supplies the current layout; keyboard navigation refreshes the directory independently. Opening a file in Files sets the path used by the next Editor window. The filesystem and that path are module-level state, shared even across desktop maps created in the same process.
+Files opens a row on a single click and ignores the second press of a double-click (`_click_in` puts `d.clicks` in every app's state before `on_click`; the Editor and the IDE select a word on 2 and a line on 3), so double-clicking a folder enters it once. Files remembers the last row content and available row count when drawn. Once it has been drawn, a row click after a directory change or resize is ignored until the next draw supplies the current layout; keyboard navigation refreshes the directory independently. Opening a file in Files sets the path used by the next Editor window. The filesystem and that path are module-level state, shared even across desktop maps created in the same process.
 
 ## Tests
 

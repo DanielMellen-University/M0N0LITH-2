@@ -80,7 +80,9 @@ fun sel(w)
     wm.visible_lines(w)
     let s = w.state
     let a = len(s.text) - s.back
-    let b = len(s.text) - s.mark
+    let b = a
+    if s.mark != none
+        b = len(s.text) - s.mark
     return [math.min(a, b), math.max(a, b)]
 wm.visible_lines(e2)
 let p1 = at(e2, 1, 6)
@@ -106,3 +108,21 @@ wm.release(d)
 wm.motion(d, p2[0], p2[1])
 wm.visible_lines(e2)
 print("click, release, move", e2.state.mark, e2.state.marks)
+# a double-click selects the word under it, a triple-click the line with its
+# newline (mouse_down events carry the count)
+e2.state.text = "let foo_bar = é1 + x\nnext line"
+e2.state.back = 0
+e2.state.mark = none
+wm.visible_lines(e2)
+fun press(w, r, col, n)
+    let p = at(w, r, col)
+    wm.handle(d, {type: "mouse_down", button: 1, x: p[0], y: p[1], clicks: n})
+    wm.handle(d, {type: "mouse_up", button: 1, x: p[0], y: p[1]})
+    let s = sel(w)
+    print("clicks {n} at col {col}:", s, [slice(w.state.text, s[0], s[1])])
+press(e2, 1, 6, 1)
+press(e2, 1, 6, 2)
+press(e2, 1, 15, 2)
+press(e2, 1, 12, 2)
+press(e2, 1, 3, 3)
+press(e2, 2, 1, 3)

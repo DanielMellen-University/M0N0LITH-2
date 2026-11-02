@@ -421,7 +421,7 @@ fun _click_in(d, w, x, y)
             return "app"
         w.state.first = _first_row(w, lines)
         w.state.rows = rows_fit(w)
-        w.state.clicks = d.clicks
+    w.state.clicks = d.clicks   # Files ignores a double-click's second press; the Editor selects a word
     w.app.on_click(w.state, x - w.x, y - w.y - title_height)
     if "on_drag" in w.app
         d.drag = {id: w.id, mode: "app", ox: 0, oy: 0}
@@ -2303,6 +2303,17 @@ fun _editor_point(s, x, y, clamp)
         col = col - 1   # the "_" takes a column
     return math.min(start + col, _line_end(s.text, start))
 
+# The lines built again for the window's last rows and cols, so a press or a
+# drag right after the cursor moved (a double-click's second press, a drag
+# step) reads where the "_" is now, not where the last frame drew it.
+fun _editor_relayout(s)
+    if not "starts" in s
+        return
+    if "run" in s
+        _ide_lines(s)
+    else
+        _editor_lines(s)
+
 # A click on a text line puts the cursor at that character (past the line's
 # end: at its end) and drops the selection; dragging from there selects. The
 # title line and the IDE's pane do nothing, and nor does a click while an IDE
@@ -2311,12 +2322,38 @@ fun _editor_click(s, x, y)
     s.press = none
     if "run" in s and s.run != none
         return none
+    _editor_relayout(s)
     let pos = _editor_point(s, x, y, false)
     if pos == none
         return none
     s.mark = none
     _editor_set_pos(s, pos)
     s.press = s.back
+    let clicks = 1
+    if "clicks" in s
+        clicks = s.clicks
+    if clicks == 2
+        # a double-click selects the word under the pointer (letters, digits,
+        # _ and past ASCII, as Ctrl+Left and Ctrl+Right), or nothing off a word
+        let a = pos
+        while a > 0 and _word_char(s.text[a - 1])
+            a = a - 1
+        let b = pos
+        while b < len(s.text) and _word_char(s.text[b])
+            b = b + 1
+        if b > a
+            s.mark = len(s.text) - a
+            _editor_set_pos(s, b)
+        s.press = none
+    else if clicks >= 3
+        # a triple-click selects the whole line, with its newline as Ctrl+L
+        let a = _line_start(s.text, pos)
+        let b = _line_end(s.text, pos)
+        if b < len(s.text)
+            b = b + 1
+        s.mark = len(s.text) - a
+        _editor_set_pos(s, b)
+        s.press = none
     return none
 
 # A move with the button held after a click on the text: the selection runs
@@ -2326,10 +2363,7 @@ fun _editor_click(s, x, y)
 fun _editor_drag(s, x, y)
     if not "press" in s or s.press == none or ("run" in s and s.run != none)
         return
-    if "run" in s
-        _ide_lines(s)
-    else
-        _editor_lines(s)
+    _editor_relayout(s)
     let pos = _editor_point(s, x, y, true)
     if pos == none
         return

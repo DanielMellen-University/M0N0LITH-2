@@ -151,7 +151,7 @@ Write `tests/shell_<topic>.relic`, run it, read its output, and save that as `te
 | `shell_editor_undo` | Ctrl+Z undoes edits one step at a time, up to 500, and Ctrl+Y redoes them until the next edit |
 | `shell_editor_escape` | Esc drops a selection in the Editor and the IDE and is taken, with none it is not; the IDE stops a waiting run first |
 | `shell_editor_select` | Shift+arrows and Ctrl+A select; typing and Backspace replace the selection |
-| `shell_editor_click` | a click puts the cursor on the character clicked (the `_` not counted), at the end past a line's end, from what shows of a line cut on the left; the title, a click below the text, the IDE's pane and a waiting run do nothing; press and drag selects, above and below the text too |
+| `shell_editor_click` | a click puts the cursor on the character clicked (the `_` not counted), at the end past a line's end, from what shows of a line cut on the left; the title, a click below the text, the IDE's pane and a waiting run do nothing; press and drag selects, above and below the text too; a double-click selects a word, a triple-click the line |
 | `shell_editor_cursor` | arrows, Home, End and Ctrl+arrow word jumps move the cursor, and which keys Ctrl and Shift together give |
 | `shell_editor_delete` | Delete removes the next character or the selection; Ctrl+Z puts it back |
 | `shell_editor_long_line` | long-line clipping, ignored movement and saving the full buffer |

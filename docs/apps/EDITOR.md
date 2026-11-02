@@ -47,7 +47,7 @@ The status is one of:
 
 On macOS, Cmd with a letter works as Ctrl with it.
 
-A click on a line of text puts the cursor at the character clicked, or at the end of the line when the click is past it, and drops the selection. Pressing and dragging selects from where you pressed to the pointer; above or below the text it goes to the first or last line shown. A click on the title line does nothing. In the IDE a click on the output pane does nothing, and nor does any click while a run waits for input.
+A click on a line of text puts the cursor at the character clicked, or at the end of the line when the click is past it, and drops the selection. Pressing and dragging selects from where you pressed to the pointer; above or below the text it goes to the first or last line shown. A double-click selects the word under the pointer (word characters as for Ctrl+Left and Ctrl+Right), and a triple-click the whole line with its newline, as Ctrl+L does. A click on the title line does nothing. In the IDE a click on the output pane does nothing, and nor does any click while a run waits for input.
 
 The selection is drawn as a light blue box behind its text.
 
