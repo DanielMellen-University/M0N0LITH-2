@@ -1,0 +1,61 @@
+# Files F2: rename the selected row in its folder. The title shows the name
+# being typed; Return renames and keeps the row selected; not over a name
+# that is there, not to a name with a /; Esc gives up; .. cannot be renamed.
+use ../shell/wm
+use std/vfs
+let d = wm.new_desktop(640, 480, wm.default_apps())
+let f = wm.launch(d, wm.files_app)
+let fs = f.state.fs
+vfs.make_dir(fs, "/tmp/r")
+vfs.write(fs, "/tmp/r/a.txt", "x")
+vfs.write(fs, "/tmp/r/b.txt", "y")
+vfs.make_dir(fs, "/tmp/r/sub")
+f.state.path = "/tmp/r"
+fun title() = wm.visible_lines(f)[0]
+fun pick(name)
+    wm.visible_lines(f)
+    for i in 0..len(f.state.names)
+        if f.state.names[i] == name
+            f.state.sel = i
+fun keys(list)
+    for k in list
+        wm.key(d, k)
+fun typed(t)
+    for ch in t
+        if ch == " "
+            wm.key(d, "space")
+        else
+            wm.key(d, ch)
+pick("a.txt")
+keys(["f2"])
+print(title())
+keys(["backspace", "backspace", "backspace", "backspace", "backspace"])
+typed("c.md")
+print(title())
+keys(["return"])
+print(wm.visible_lines(f), vfs.exists(fs, "/tmp/r/c.md"), vfs.exists(fs, "/tmp/r/a.txt"))
+# not over a name that is there
+keys(["f2", "ctrl+u"])
+typed("b.txt")
+keys(["return"])
+print(title(), vfs.read(fs, "/tmp/r/b.txt"))
+# not a name with a /
+keys(["f2", "ctrl+u"])
+typed("x/y")
+keys(["return"])
+print(title())
+# Esc gives up and is taken; a folder renames too, with what is in it
+pick("sub")
+keys(["f2", "2"])
+print(title(), wm.dismiss(d), title())
+vfs.write(fs, "/tmp/r/sub/in.txt", "z")
+keys(["f2", "ctrl+backspace"])
+typed("folder two")
+keys(["return"])
+print(wm.visible_lines(f), vfs.read(fs, "/tmp/r/folder two/in.txt"))
+# the same name, or .., does nothing
+keys(["f2", "return"])
+print(title())
+f.state.sel = 0
+keys(["f2"])
+print(title())

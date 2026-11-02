@@ -1,0 +1,9 @@
+rename: a.txt_
+rename: c.md_
+["Files: /tmp/r", "  ..", "  b.txt", "> c.md", "  sub/"] true false
+already there: b.txt y
+not renamed: not a name
+rename: sub2_ true Files: /tmp/r
+["Files: /tmp/r", "  ..", "  b.txt", "  c.md", "> folder two/"] z
+Files: /tmp/r
+Files: /tmp/r
