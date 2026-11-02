@@ -107,7 +107,7 @@ Write `tests/shell_<topic>.relic`, run it, read its output, and save that as `te
 | `shell_terminal_why` | errors name the missing folder or the part that is a file |
 | `shell_terminal_slash` | a path ending in / must be a folder |
 | `shell_terminal_redirect` | echo redirects and missing destinations |
-| `shell_terminal_cursor` | Left, Right, Home and End move the cursor in the line, stopping at its ends; typing, Backspace, Tab and Ctrl+V at it; Return runs the whole line; Up and Ctrl+C put it back at the end; Ctrl+Left and Ctrl+Right by words, Delete and Ctrl+Delete, Ctrl+A, Ctrl+E and Ctrl+K; a click on the line, wrapped too, puts the cursor there and one on the output does nothing |
+| `shell_terminal_cursor` | Left, Right, Home and End move the cursor in the line, stopping at its ends; typing, Backspace, Tab and Ctrl+V at it; Return runs the whole line; Up and Ctrl+C put it back at the end; Ctrl+Left and Ctrl+Right by words, Delete and Ctrl+Delete, Ctrl+A, Ctrl+E and Ctrl+K; a click on the line, wrapped too, puts the cursor there and one on the output does nothing; Ctrl+U taking what is before the cursor |
 | `shell_terminal_quotes` | quoted words keep their spaces for touch, cat, wc, mkdir, mv, cd, cp, rm and echo >; the other quote inside, a quote inside a word as a letter, an empty quoted word, a quote left open, and a quoted > that is not a redirect; ls, find and wc quoting a name with a space; grep and find with a quoted phrase; Ctrl+V putting a path with a space in quotes |
 | `shell_terminal_redirect_errors` | failed redirects and output after clear |
 | `shell_terminal_edges` | Terminal path and input boundaries; `sort`, `uniq` and `nl` (an empty file, a last line with no newline), and the line count of `head` and `tail` |

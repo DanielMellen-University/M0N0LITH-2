@@ -131,3 +131,8 @@ print("ctrl+e", w.state.left)
 wm.key(d, "ctrl+left")
 wm.key(d, "ctrl+k")
 print("ctrl+k", w.state.input, w.state.left)
+# Ctrl+U removes what is before the cursor, as in a shell
+keys(["ctrl+u", "end", "ctrl+u"])
+typed("echo abc def")
+keys(["ctrl+left", "ctrl+u"])
+print("ctrl+u", prompt())
