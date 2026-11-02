@@ -43,7 +43,7 @@ Every key and click the desktop and its apps act on, checked against `shell/wm.r
 | Ctrl+Backspace | removes the last word |
 | Ctrl+U | empties the line |
 | Ctrl+Z | brings back the line from before the last Ctrl+U, Ctrl+X or Ctrl+Backspace; again puts it back |
-| Ctrl+V | adds the first line of the clipboard |
+| Ctrl+V | adds the first line of the clipboard; a path with a space that is there goes in quotes |
 
 ## Terminal
 
@@ -58,7 +58,7 @@ Every key and click the desktop and its apps act on, checked against `shell/wm.r
 | Ctrl+Backspace | removes the last word |
 | Ctrl+L | empties the output, like `clear` |
 | Ctrl+U | empties the line being typed |
-| Tab | completes a command name, or a file or folder name; lists the choices when it cannot add more |
+| Tab | completes a command name, or a file or folder name (in quotes when it has a space); lists the choices when it cannot add more |
 
 The commands are in [the Terminal doc](apps/TERMINAL.md).
 
