@@ -10,6 +10,9 @@ ctrl+backspace _world
 ctrl+z: the whole line back, cursor at the end hellobigworld_
 ctrl+u before the cursor _llobigworld
 ctrl+z hellobigworld_
+ctrl+delete one _ three
+ctrl+delete at the end one  three_
+ctrl+z one two three_
 at the end vwxyz0123456789ABCDEFGHIJ_
 home _abcdefghijklmnopqrstuvwxy
 30 right ghijklmnopqrstuvwxyz0123_4

@@ -798,6 +798,13 @@ fun _notes_key(s, k)
         s.left = n - _word_left(s.text, n - left)
     else if k == "ctrl+right"
         s.left = n - _word_right(s.text, n - left)
+    else if k == "ctrl+delete"
+        # the word after the cursor, as in the Editor; Ctrl+Z brings it back
+        let to = _word_right(s.text, n - left)
+        if to > n - left
+            s.before = s.text
+            s.text = slice(s.text, 0, n - left) + slice(s.text, to, n)
+            s.left = n - to
     else if k == "delete"
         if left > 0
             s.text = slice(s.text, 0, n - left) + slice(s.text, n - left + 1, n)
