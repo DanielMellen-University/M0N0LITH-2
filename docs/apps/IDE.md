@@ -23,7 +23,9 @@ Ctrl+R (or F5, or Ctrl+Return) runs the text in the buffer, saved or not. The pr
 
 | Input | What it does |
 |---|---|
-| Typing, Space, Backspace | edit the input line |
+| Typing, Space, Backspace | edit the input line at its cursor |
+| Left, Right, Home, End | move the cursor in the input line |
+| Delete | removes the character after the cursor |
 | Ctrl+Backspace | removes the last word of the input line |
 | Ctrl+U | empties the input line |
 | Ctrl+V | adds the first line of the desktop's clipboard to it |

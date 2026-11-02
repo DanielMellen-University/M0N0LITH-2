@@ -58,7 +58,7 @@ while true
 print("bye")
 _
 -- input (return: send, esc: stop) --
-name? Ann B_
+name? Ann _B
 waiting for input ["name? Ann B", "hi Ann B"] [true]
 ran ["name? Ann B", "hi Ann B", "1", "got 1", "end", "bye"]
 -- after input [ran] none
@@ -88,3 +88,5 @@ true [""]
 [""] true
 ctrl+return ran none
 keypad
+ _cd
+got  cd none

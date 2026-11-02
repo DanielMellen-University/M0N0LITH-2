@@ -2757,7 +2757,40 @@ fun _ide_error(s, err)
     append(s.out, where + ": " + err.msg)
 
 # Keys while a run waits for a line: typing, Backspace, Return sends it.
+# Left, Right, Home and End move a cursor in it, s.in_left characters
+# before its end, and Delete takes the character after it; the other keys
+# work on the part before the cursor, and Return sends the whole line.
+fun _ide_in_left(s)
+    if not "in_left" in s
+        return 0
+    return math.max(0, math.min(s.in_left, len(s.input)))
+
 fun _ide_input_key(s, k)
+    let n = len(s.input)
+    let left = _ide_in_left(s)
+    if k == "left"
+        s.in_left = math.min(n, left + 1)
+    else if k == "right"
+        s.in_left = math.max(0, left - 1)
+    else if k == "home"
+        s.in_left = n
+    else if k == "end"
+        s.in_left = 0
+    else if k == "delete"
+        if left > 0
+            s.input = slice(s.input, 0, n - left) + slice(s.input, n - left + 1, n)
+            s.in_left = left - 1
+    else if k in ["return", "enter", "ctrl+c"] or left == 0
+        s.in_left = 0
+        _ide_input_edit(s, k)
+    else
+        let after = slice(s.input, n - left, n)
+        s.input = slice(s.input, 0, n - left)
+        _ide_input_edit(s, k)
+        s.input = s.input + after
+        s.in_left = len(after)
+
+fun _ide_input_edit(s, k)
     if k == "return" or k == "enter"
         let rt = s.run
         let line = s.input
@@ -2889,7 +2922,8 @@ fun _ide_lines(s)
         for line in slice(s.out, len(s.out) - n, len(s.out))
             append(pane, line)
         if s.run != none
-            append(pane, str(s.run.waiting) + s.input + "_")
+            let at = len(s.input) - _ide_in_left(s)
+            append(pane, str(s.run.waiting) + slice(s.input, 0, at) + "_" + slice(s.input, at, len(s.input)))
     let rows = s.rows
     if rows > 0
         s.rows = math.max(2, rows - len(pane))

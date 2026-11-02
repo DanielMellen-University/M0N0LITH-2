@@ -131,3 +131,14 @@ print(s.out[len(s.out) - 1], s.run)
 s.text = "print(\"keypad\")\n"
 wm.key(d, wm.key_of_event({type: "key_down", key: "keypad enter", ctrl: true}))
 print(s.out[len(s.out) - 1])
+# the input line has a cursor: Left, Right, Home and End move it, typing,
+# Backspace and Delete work at it, and Return sends the whole line
+s.text = "use std/os\nprint(\"got \" + os.read_line())\n"
+wm.key(d, "ctrl+r")
+for k in ["a", "c", "left", "b", "home", "delete", "space", "end", "d", "left", "left", "backspace"]
+    wm.key(d, k)
+let pane = wm.ide.lines(s)
+print(pane[len(pane) - 1])
+wm.key(d, "home")
+wm.key(d, "return")
+print(s.out[len(s.out) - 1], s.run)
