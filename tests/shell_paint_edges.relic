@@ -36,3 +36,14 @@ wm.key(d, "ctrl+z")
 move([30, 20])
 print("brush after ctrl+z and a move", count(1), len(s.undo))
 wm.release(d)
+# c on a blank canvas is not an undo step and leaves the status alone
+let p2 = wm.launch(d, wm.paint_app)
+let s2 = p2.state
+let undo_before = len(s2.undo)
+wm.key(d, "c")
+print("clear blank", len(s2.undo) - undo_before, s2.status)
+s2.cells[5] = 3
+wm.key(d, "c")
+print("clear drawn", len(s2.undo) - undo_before, s2.status, s2.cells[5])
+wm.key(d, "ctrl+z")
+print("undone", s2.cells[5])

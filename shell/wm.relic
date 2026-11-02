@@ -3167,9 +3167,16 @@ fun _paint_key(s, k)
     else if k == "n"
         s.naming = ""
     else if k == "c"
-        _paint_snapshot(s)
-        s.cells = _paint_blank()
-        s.status = "edited"
+        # clearing a blank canvas changes nothing, so it is not an undo step
+        let blank = true
+        for c in s.cells
+            if c != 0
+                blank = false
+                break
+        if not blank
+            _paint_snapshot(s)
+            s.cells = _paint_blank()
+            s.status = "edited"
     else if k == "ctrl+z"
         if len(s.undo) > 0
             append(s.redo, s.cells)

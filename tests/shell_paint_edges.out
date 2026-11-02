@@ -1,3 +1,6 @@
 rect drawn true 1
 after ctrl+z and a move 0 0 1
 brush after ctrl+z and a move 0 0
+clear blank 0 new file
+clear drawn 1 edited 0
+undone 3
