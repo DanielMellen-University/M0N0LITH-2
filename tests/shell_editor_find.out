@@ -25,3 +25,12 @@ shift+f3 f3
 Editor [find: red_] /home/welcome.txt
 next red [10, 13]
 Editor [find: _] /home/welcome.txt
+Editor [replace: _] /home/welcome.txt
+Editor [replace: cat_] ...e/welcome.txt
+Editor [with: _] /home/welcome.txt
+dog sat on the dog mat | replaced 2
+undone cat sat on the cat mat
+cat sat on the cat mat | not found: zebra
+ct st on the ct mt | replaced 4
+ct st on the ct mt | Editor [replaced 4] /home/welcome.txt
+Editor [replace: _] /home/welcome.txt

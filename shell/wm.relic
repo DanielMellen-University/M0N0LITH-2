@@ -2549,7 +2549,37 @@ fun _editor_find_prev(s, what)
     _editor_set_pos(s, at)
     return true
 
+# Ctrl+H: replace every place a text is with another, in one undo step. The
+# title asks "replace: text_", Return goes on to "with: text_", and Return
+# again replaces them all and says how many; Esc or another key gives up.
+fun _editor_replace_all(s, what, with)
+    let parts = strings.split(s.text, what)
+    let n = len(parts) - 1
+    if n == 0
+        return 0
+    _editor_change(s, 0, len(s.text), strings.join(parts, with))
+    _editor_set_pos(s, 0)
+    return n
+
 fun _editor_find_key(s, k)
+    if (k == "return" or k == "enter") and "replacing" in s and s.replacing != none
+        if s.replacing == ""
+            # the first Return: that is the text; now what goes in its place
+            if s.find == ""
+                return true
+            s.replacing = s.find
+            s.find = ""
+            s.status = "with: _"
+            return true
+        let what = s.replacing
+        let with = s.find
+        s.find = none
+        s.replacing = none
+        let n = _editor_replace_all(s, what, with)
+        s.status = "replaced {n}"
+        if n == 0
+            s.status = "not found: " + what
+        return true
     if k == "return" or k == "enter"
         if _editor_find_next(s, s.find)
             s.status = "find: " + s.find
@@ -2572,11 +2602,17 @@ fun _editor_find_key(s, k)
     else
         _editor_find_end(s)
         return false
-    s.status = "find: " + s.find + "_"
+    let label = "find: "
+    if "replacing" in s and s.replacing != none
+        label = "replace: "
+        if s.replacing != ""
+            label = "with: "
+    s.status = label + s.find + "_"
     return true
 
 fun _editor_find_end(s)
     s.find = none
+    s.replacing = none
     s.status = s.find_was
 
 fun _editor_key(s, k)
@@ -2596,9 +2632,17 @@ fun _editor_key(s, k)
             if not found
                 s.status = "not found: " + s.last_find
         return
+    if k == "ctrl+h"
+        s.overwrite = false
+        s.find_was = s.status
+        s.find = ""
+        s.replacing = ""
+        s.status = "replace: _"
+        return
     if k == "ctrl+f"
         s.overwrite = false
         s.find_was = s.status
+        s.replacing = none
         s.find = ""
         # a selection on one line is the text to find, ready for Return
         let sel = _editor_selection(s)
