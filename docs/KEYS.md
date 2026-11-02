@@ -82,6 +82,7 @@ The commands are in [the Terminal doc](apps/TERMINAL.md).
 | Input | What it does |
 |---|---|
 | Click a line of text | puts the cursor there (at the line's end past it) and drops the selection |
+| Press and drag over text | selects from the press to the pointer |
 | Typing, Return | insert at the cursor, replacing any selection |
 | Backspace | removes the selection, or the character before the cursor; in a line's leading spaces, back to the multiple of 4 before (one Tab) |
 | Delete | removes the selection, or the character after the cursor |

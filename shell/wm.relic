@@ -2276,30 +2276,65 @@ fun _editor_marks(s)
         return s.marks
     return []
 
-# A click on a text line puts the cursor at that character (past the line's
-# end: at its end) and drops the selection. It uses the lines last drawn; the
-# title line and the IDE's pane do nothing, and nor does a click while an IDE
-# run waits for input.
-fun _editor_click(s, x, y)
-    if not "shown_lines" in s or not "starts" in s or y < text_top
+# The text position under a point in the window's content, from the lines
+# last drawn, or none: the title line, the IDE's pane, below the text. With
+# clamp a point above or below the text gives its first or last shown line
+# (for a drag).
+fun _editor_point(s, x, y, clamp)
+    if not "shown_lines" in s or not "starts" in s or len(s.starts) == 0
         return none
-    if "run" in s and s.run != none
-        return none
-    let row = int((y - text_top) / line_height)
-    if row >= len(s.shown_lines)
-        return none
-    let i = s.shown_lines[row] - 1
+    let row = -1
+    if y >= text_top
+        row = int((y - text_top) / line_height)
+    let i = -1
+    if row >= 0 and row < len(s.shown_lines)
+        i = s.shown_lines[row] - 1
     if i < 0 or i >= len(s.starts)
-        return none
+        if not clamp
+            return none
+        i = 0
+        if row > 0
+            i = len(s.starts) - 1
     let col = s.shifts[i]
     if x >= text_left
         col = col + int((x - text_left) / char_width)
     let start = s.starts[i]
     if i == s.cursor_line and col > _editor_pos(s) - start
         col = col - 1   # the "_" takes a column
+    return math.min(start + col, _line_end(s.text, start))
+
+# A click on a text line puts the cursor at that character (past the line's
+# end: at its end) and drops the selection; dragging from there selects. The
+# title line and the IDE's pane do nothing, and nor does a click while an IDE
+# run waits for input.
+fun _editor_click(s, x, y)
+    s.press = none
+    if "run" in s and s.run != none
+        return none
+    let pos = _editor_point(s, x, y, false)
+    if pos == none
+        return none
     s.mark = none
-    _editor_set_pos(s, math.min(start + col, _line_end(s.text, start)))
+    _editor_set_pos(s, pos)
+    s.press = s.back
     return none
+
+# A move with the button held after a click on the text: the selection runs
+# from where it was pressed to the point (the first or last shown line when
+# above or below the text). The lines are built again first, since the
+# cursor moved since the last draw.
+fun _editor_drag(s, x, y)
+    if not "press" in s or s.press == none or ("run" in s and s.run != none)
+        return
+    if "run" in s
+        _ide_lines(s)
+    else
+        _editor_lines(s)
+    let pos = _editor_point(s, x, y, true)
+    if pos == none
+        return
+    s.mark = s.press
+    _editor_set_pos(s, pos)
 
 fun _editor_key(s, k)
     if k == "ctrl+s"
@@ -3290,8 +3325,8 @@ let clicker = {name: "Clicker", width: 180, height: 60, init: _clicker_init, lin
 let notes = {name: "Notes", width: 220, height: 60, init: _notes_init, lines: _notes_lines, on_click: _notes_click, on_key: _notes_key, tail: true, pinned: 1}
 let terminal = {name: "Terminal", width: 280, height: 120, init: _term_init, lines: _term_lines, on_click: _term_click, on_key: _term_key, tail: true, pinned: 0}
 let files_app = {name: "Files", width: 260, height: 140, init: _files_init, lines: _files_lines, on_click: _files_click, on_key: _files_key, selected: _files_selected}
-let editor = {name: "Editor", width: 320, height: 80, init: _editor_init, lines: _editor_lines, on_click: _editor_click, on_key: _editor_key, on_escape: _editor_escape, tail: true, pinned: 1, marks: _editor_marks}
-let ide = {name: "IDE", width: 320, height: 200, init: _ide_init, lines: _ide_lines, on_click: _editor_click, on_key: _ide_key, on_escape: _ide_escape, tail: true, pinned: 1, marks: _editor_marks}
+let editor = {name: "Editor", width: 320, height: 80, init: _editor_init, lines: _editor_lines, on_click: _editor_click, on_key: _editor_key, on_drag: _editor_drag, on_escape: _editor_escape, tail: true, pinned: 1, marks: _editor_marks}
+let ide = {name: "IDE", width: 320, height: 200, init: _ide_init, lines: _ide_lines, on_click: _editor_click, on_key: _ide_key, on_drag: _editor_drag, on_escape: _ide_escape, tail: true, pinned: 1, marks: _editor_marks}
 let paint_app = {name: "Paint", width: 256, height: 190, init: _paint_init, lines: _paint_lines, on_click: _paint_click, on_key: _paint_key, on_drag: _paint_drag, on_escape: _paint_escape, paint: _paint_paint}
 let snake = {name: "Snake", width: 210, height: 170, init: _snake_init, lines: _snake_lines, on_click: _snake_click, on_key: _snake_key, on_tick: _snake_tick, paint: _snake_paint}
 fun default_apps() = [clicker, notes, terminal, files_app, editor, ide, paint_app, snake]

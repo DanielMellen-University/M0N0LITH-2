@@ -3,6 +3,7 @@
 # does nothing; the IDE's output pane and a waiting run ignore clicks.
 use ../shell/wm
 use std/strings
+use std/math
 let d = wm.new_desktop(640, 480, wm.default_apps())
 let e = wm.launch(d, wm.editor)
 e.state.text = "first line\nsecond\nthe third line"
@@ -70,3 +71,38 @@ wm.key(d, "ctrl+r")
 wm.visible_lines(ide)
 click_at(ide, 1, 2)
 print("waiting run pos", len(ide.state.text) - ide.state.back, ide.state.status)
+# press and drag selects from the press to the pointer, above or below the
+# text to the first or last shown line; a plain click after drops it
+let e2 = wm.launch(d, wm.editor)
+e2.state.text = "first line\nsecond\nthe third line"
+e2.state.back = 0
+fun sel(w)
+    wm.visible_lines(w)
+    let s = w.state
+    let a = len(s.text) - s.back
+    let b = len(s.text) - s.mark
+    return [math.min(a, b), math.max(a, b)]
+wm.visible_lines(e2)
+let p1 = at(e2, 1, 6)
+wm.click(d, p1[0], p1[1])
+let p2 = at(e2, 3, 3)
+wm.motion(d, p2[0], p2[1])
+print("dragged", sel(e2), e2.state.marks)
+let p3 = at(e2, 2, 2)
+wm.motion(d, p3[0], p3[1])
+print("back up", sel(e2))
+wm.motion(d, p3[0], e2.y + 2)
+print("above the text: the first line", sel(e2))
+wm.motion(d, p3[0], e2.y + e2.height + 10)
+print("below the text: the last line", sel(e2))
+wm.release(d)
+wm.key(d, "Z")
+let typed = wm.visible_lines(e2)
+print("typed over it", slice(typed, 1, len(typed)))
+# a click with no move selects nothing, and a move after the release does nothing
+let p4 = at(e2, 1, 2)
+wm.click(d, p4[0], p4[1])
+wm.release(d)
+wm.motion(d, p2[0], p2[1])
+wm.visible_lines(e2)
+print("click, release, move", e2.state.mark, e2.state.marks)

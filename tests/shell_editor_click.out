@@ -27,3 +27,9 @@ click row 5 col 0: app
 pane click pos 3
 click row 1 col 2: app
 waiting run pos 32 waiting for input
+dragged [6, 21] [[1, 6, 10], [2, 0, 6], [3, 0, 3]]
+back up [6, 13]
+above the text: the first line [2, 6]
+below the text: the last line [6, 20]
+typed over it ["first Z_e third line"]
+click, release, move none []
