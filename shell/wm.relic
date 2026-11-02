@@ -2600,7 +2600,11 @@ fun _editor_key(s, k)
         s.overwrite = false
         s.find_was = s.status
         s.find = ""
-        s.status = "find: _"
+        # a selection on one line is the text to find, ready for Return
+        let sel = _editor_selection(s)
+        if sel != none and not strings.contains(slice(s.text, sel[0], sel[1]), "\n")
+            s.find = slice(s.text, sel[0], sel[1])
+        s.status = "find: " + s.find + "_"
         return
     if k == "ctrl+s"
         # the same reasons the Terminal gives, shorter than "cannot write" and the whole path

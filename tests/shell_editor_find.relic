@@ -89,3 +89,16 @@ e2.state.mark = none
 keys(["f3"])
 print(e2.state.status)
 print(wm.key_of_event({type: "key_down", key: "f3", shift: true, ctrl: false}), wm.key_of_event({type: "key_down", key: "f3", shift: false, ctrl: false}))
+# Ctrl+F with a selection on one line starts with it; across lines it starts empty
+e2.state.text = "red green red\nblue"
+e2.state.back = len(e2.state.text)
+e2.state.mark = len(e2.state.text)
+keys(["shift+right", "shift+right", "shift+right"])
+keys(["ctrl+f"])
+print(wm.visible_lines(e2)[0])
+keys(["return"])
+print("next red", sel2())
+wm.dismiss(d)
+keys(["ctrl+a", "ctrl+f"])
+print(wm.visible_lines(e2)[0])
+wm.dismiss(d)
