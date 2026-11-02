@@ -39,3 +39,5 @@ Editor [replace: _] /home/welcome.txt
 Editor [replace: dog_] ...e/welcome.txt
 cat and cat | replaced 2
 Editor [replace: _] /home/welcome.txt
+Editor [find: _] /home/welcome.txt
+Editor [open] /home/welcome.txt

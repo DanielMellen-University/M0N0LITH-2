@@ -2677,6 +2677,8 @@ fun _editor_find_key(s, k)
         if n == 0
             s.status = "not found: " + what
         return true
+    if (k == "return" or k == "enter") and s.find == ""
+        return true   # nothing to find yet: it waits for the text, as Ctrl+H does
     if k == "return" or k == "enter"
         if _editor_find_next(s, s.find)
             s.status = "find: " + s.find

@@ -153,3 +153,10 @@ e3.state.text = "a\nb"
 keys(["ctrl+a", "ctrl+h"])
 print(wm.visible_lines(e3)[0])
 wm.dismiss(d)
+# Return with no text yet waits for one, and F3 has nothing to find again
+let e4 = wm.launch(d, wm.editor)
+keys(["ctrl+f", "return"])
+print(wm.visible_lines(e4)[0])
+wm.dismiss(d)
+keys(["f3"])
+print(wm.visible_lines(e4)[0])
