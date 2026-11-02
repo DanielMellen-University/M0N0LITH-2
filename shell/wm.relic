@@ -2919,7 +2919,7 @@ fun _editor_key(s, k)
         let to = _line_end(s.text, pos)
         if sel != none
             from = _line_start(s.text, sel[0])
-            to = _line_end(s.text, sel[1])
+            to = _line_end(s.text, _sel_last(s.text, sel))
         if to < len(s.text)
             to = to + 1
         else if from > 0
@@ -2936,7 +2936,7 @@ fun _editor_key(s, k)
         let to = _line_end(s.text, pos)
         if sel != none
             from = _line_start(s.text, sel[0])
-            to = _line_end(s.text, sel[1])
+            to = _line_end(s.text, _sel_last(s.text, sel))
         let block = slice(s.text, from, to)
         _editor_change(s, to, 0, "\n" + block)
         _editor_set_pos(s, pos + len(block) + 1)
@@ -3176,9 +3176,17 @@ fun _ide_escape(s)
 # With a selection, every line it is on: all commented (blank lines aside)
 # take the # off, else each gets one, in one undo step, and the lines stay
 # selected.
+# The lines a selection is on, for the line keys: a selection that ends at the
+# start of a line (after Ctrl+L or Shift+Down) does not take that line in.
+# The position whose line is the last one.
+fun _sel_last(text, sel)
+    if sel[1] > sel[0] and text[sel[1] - 1] == "\n"
+        return sel[1] - 1
+    return sel[1]
+
 fun _ide_comment_lines(s, sel)
     let from = _line_start(s.text, sel[0])
-    let to = _line_end(s.text, sel[1])
+    let to = _line_end(s.text, _sel_last(s.text, sel))
     let lines = strings.split(slice(s.text, from, to), "\n")
     let all = true
     for line in lines

@@ -80,7 +80,7 @@ e.app.on_key(s, "ctrl+z")
 print([s.text])
 # with a selection over two lines, both are copied
 s.text = "a\nbc\nd"
-s.back = 4
+s.back = 3
 s.mark = 6
 e.app.on_key(s, "ctrl+d")
 print([s.text])
@@ -98,6 +98,20 @@ e.app.on_key(s, "ctrl+k")
 print([s.text], s.back)
 e.app.on_key(s, "ctrl+z")
 e.app.on_key(s, "ctrl+z")
+print([s.text])
+# after Ctrl+L the selection ends at the next line's start: Ctrl+K and Ctrl+D
+# take only the selected line, not that one
+s.text = "one\ntwo\nthree"
+s.back = len(s.text)
+s.mark = none
+e.app.on_key(s, "ctrl+l")
+e.app.on_key(s, "ctrl+k")
+print([s.text])
+s.text = "one\ntwo\nthree"
+s.back = len(s.text)
+s.mark = none
+e.app.on_key(s, "ctrl+l")
+e.app.on_key(s, "ctrl+d")
 print([s.text])
 # Ctrl+Shift with Left, Right, Home or End selects as far as Ctrl alone moves
 print(wm.key_of_event({type: "key_down", key: "left", ctrl: true, shift: true}), wm.key_of_event({type: "key_down", key: "end", ctrl: true, shift: true}), wm.key_of_event({type: "key_down", key: "s", ctrl: true, shift: true}))

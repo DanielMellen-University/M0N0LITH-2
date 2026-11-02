@@ -34,10 +34,10 @@ The status is one of:
 | Ctrl+] | puts 4 spaces at the start of the line, wherever the cursor is in it; the cursor stays on its character |
 | Ctrl+A | selects everything |
 | Ctrl+L | selects the cursor's line with its newline; pressed again it takes in the next line too |
-| Ctrl+D | puts a copy of the cursor's line, or of every line the selection is on, under it; the cursor goes to the same column in the copy. One Ctrl+Z takes it back |
+| Ctrl+D | puts a copy of the cursor's line, or of every line the selection is on (not a line it only ends at the start of, as after Ctrl+L), under it; the cursor goes to the same column in the copy. One Ctrl+Z takes it back |
 | Ctrl+J | joins the next line onto the cursor's: the newline and the next line's leading spaces become one space (none when either side is empty), and the cursor goes to the join |
 | Ctrl+Up, Ctrl+Down | moves the cursor's line above the line before it, or below the line after it, the cursor going with it (Alt+Up and Alt+Down in VS Code); one Ctrl+Z puts it back |
-| Ctrl+K | removes the cursor's line, or every line the selection is on, with its newline (the last line takes the newline before it); the cursor goes to the start of what came after. One Ctrl+Z puts it back |
+| Ctrl+K | removes the cursor's line, or every line the selection is on (as for Ctrl+D), with its newline (the last line takes the newline before it); the cursor goes to the start of what came after. One Ctrl+Z puts it back |
 | Esc | drops the selection; with none, Esc quits the desktop as usual |
 | Ctrl+C, Ctrl+X | copies, or cuts, the selection to the desktop's clipboard (nothing without a selection) |
 | Ctrl+V | pastes the clipboard at the cursor, over any selection; a cut and a paste are one undo step each |

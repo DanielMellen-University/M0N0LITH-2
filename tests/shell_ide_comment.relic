@@ -24,9 +24,15 @@ e.app.on_key(e.state, "ctrl+/")
 print([e.state.text])
 # with a selection, every line it is on, one undo step, the lines still selected
 s.text = "a\n    b\n\nc\nd"
-s.back = 3
+s.back = 2
 s.mark = len(s.text)
 print(k("ctrl+/"), [slice(s.text, len(s.text) - s.mark, len(s.text) - s.back)])
+print(k("ctrl+/"))
+# a selection that ends at the start of a line (Ctrl+L, Shift+Down) leaves that line alone
+s.text = "a\nb\nc"
+s.back = len(s.text)
+s.mark = none
+i.app.on_key(s, "ctrl+l")
 print(k("ctrl+/"))
 s.text = "# a\nb"
 s.back = 0

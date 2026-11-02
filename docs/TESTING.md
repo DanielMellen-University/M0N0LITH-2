@@ -146,7 +146,7 @@ Write `tests/shell_<topic>.relic`, run it, read its output, and save that as `te
 | `shell_editor_find` | Ctrl+F and Return select the next match after the cursor and go round, case counts, not found, Esc and other keys stop finding, in the IDE too; F3 and Shift+F3 again, both ways round; a selection on one line as the text to find, replaced by typing; Ctrl+H replacing every match in one undo step, with nothing, not found, Esc halfway, and starting with a selection; Return with no text waits; a long text showing its end; a click giving up a find or a line number |
 | `shell_editor_goto` | Ctrl+G and a number go to the start of that line, the last past the end, 0 as 1; digits only, Esc and other keys give up, a selection goes |
 | `shell_editor_indent` | Return keeps leading spaces up to the cursor, the IDE adds a level after a block line but not after `fun f() = ...`, undo |
-| `shell_editor_word_keys` | Ctrl+Home and Ctrl+End go to the start and end of the file and drop the selection; Ctrl+Backspace and Ctrl+Delete remove a word, the selection, or nothing at the ends; Home stops after the leading spaces, then goes to the very start; Page Up and Page Down by the shown lines less one, Shift selecting; Ctrl+L selecting lines; Ctrl+D copying a line or the selected lines, and Ctrl+K removing them, each one undo; Ctrl+J joining lines; Ctrl+] and Ctrl+[ indenting and taking it off; Ctrl+Up and Ctrl+Down moving a line |
+| `shell_editor_word_keys` | Ctrl+Home and Ctrl+End go to the start and end of the file and drop the selection; Ctrl+Backspace and Ctrl+Delete remove a word, the selection, or nothing at the ends; Home stops after the leading spaces, then goes to the very start; Page Up and Page Down by the shown lines less one, Shift selecting; Ctrl+L selecting lines; Ctrl+D copying a line or the selected lines, and Ctrl+K removing them, each one undo, and only the selected line after Ctrl+L; Ctrl+J joining lines; Ctrl+] and Ctrl+[ indenting and taking it off; Ctrl+Up and Ctrl+Down moving a line |
 | `shell_editor_tab` | Tab types spaces to the next multiple of 4, over a selection, one undo step, in the IDE too; Shift+Tab takes an indent off and keeps the cursor on its character; Backspace in leading spaces goes back one indent, elsewhere one character |
 | `shell_editor_title` | Editor title keeps the file name and the status in view |
 | `shell_editor_open_status` | Editor status on opening: open, new file, or why not |
@@ -170,7 +170,7 @@ Write `tests/shell_<topic>.relic`, run it, read its output, and save that as `te
 | Test | What it covers |
 |---|---|
 | `shell_ide` | IDE: run with Ctrl+R, output pane, error line and Ctrl+E, stopped loops, refused host calls, `use` of desktop files, input lines, Ctrl+Backspace there, Esc or Ctrl+C to stop, F5 like Ctrl+R; Ctrl+Return running like Ctrl+R; the input line's cursor (Left, Right, Home, End, Delete), Return sending the whole line, a wide line keeping the cursor in view |
-| `shell_ide_comment` | Ctrl+/ puts `# ` in after the leading spaces and takes it (or a bare `#`) out, the cursor staying on its character, one undo step each; the Editor ignores it; with a selection, every line it is on in one step |
+| `shell_ide_comment` | Ctrl+/ puts `# ` in after the leading spaces and takes it (or a bare `#`) out, the cursor staying on its character, one undo step each; the Editor ignores it; with a selection, every line it is on in one step, not the line after a Ctrl+L |
 
 ### Paint
 
