@@ -1577,6 +1577,19 @@ fun _term_complete(s)
         _term_reply(s, s.cwd + "> " + s.input)
         _term_reply(s, strings.join(found, "  "))
 
+# Ctrl+V: the clipboard's first line. A path with a space that is there (what
+# Files' Ctrl+C copies) goes in quotes, so it stays one word; not when a
+# quote is already open or the paste goes on a word typed so far.
+fun _term_paste(s)
+    let text = _clip_line()
+    if not strings.contains(text, " ") or not strings.starts_with(text, "/") or not vfs.exists(s.fs, paths.normalize(text))
+        return text
+    if s.input != "" and not strings.ends_with(s.input, " ")
+        return text
+    if strings.contains(text, "\"")
+        return "'" + text + "'"
+    return "\"" + text + "\""
+
 fun _term_key(s, k)
     if k == "return" or k == "enter"
         let line = s.input
@@ -1610,7 +1623,7 @@ fun _term_key(s, k)
             else
                 s.input = s.past[len(s.past) - s.back]
     else if k == "ctrl+v"
-        s.input = s.input + _clip_line()
+        s.input = s.input + _term_paste(s)
     else if k == "ctrl+c"
         # gives up the line, as a shell does: shown with ^C, not run, not kept
         _term_reply(s, s.cwd + "> " + s.input + "^C")

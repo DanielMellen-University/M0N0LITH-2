@@ -47,3 +47,6 @@ no /tmp/x true
 ["/home> grep \"frog jumps\" '/tmp/poem.txt'", "a frog jumps in"]
 ["/home> find \"d st\"", "\"old stuff/\""]
 ["/home> grep \" \" /tmp/poem.txt", "the old pond", "a frog jumps in", "old  pond twice", "sound of water"]
+["cat \"/home/a folder/my notes.txt\"", "\"/home/a folder/my notes.txt\"", "cat x/home/a folder/my notes.txt", "cat \"/home/a folder/my notes.txt"]
+["echo /home/not there"]
+["echo two words"]

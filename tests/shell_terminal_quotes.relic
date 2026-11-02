@@ -72,3 +72,25 @@ run("grep 'old  pond' /tmp/poem.txt")
 run("grep \"frog jumps\" '/tmp/poem.txt'")
 run("find \"d st\"")
 run("grep \" \" /tmp/poem.txt")
+# Ctrl+V of a path with a space that is there (Files' Ctrl+C) goes in quotes;
+# other text, a path that is not there, or a paste onto a typed word, does not
+let files = wm.files_app.init()
+files.path = "/home/a folder"
+let names = wm.files_app.lines(files)
+for i in 0..len(files.names)
+    if files.names[i] == "my notes.txt"
+        files.sel = i
+wm.files_app.on_key(files, "ctrl+c")
+fun paste(before)
+    t.input = before
+    wm.terminal.on_key(t, "ctrl+v")
+    return t.input
+print([paste("cat "), paste(""), paste("cat x"), paste("cat \"")])
+let note = wm.notes.init()
+note.text = "/home/not there"
+wm.notes.on_key(note, "ctrl+c")
+print([paste("echo ")])
+note.text = "two words"
+wm.notes.on_key(note, "ctrl+c")
+print([paste("echo ")])
+t.input = ""
