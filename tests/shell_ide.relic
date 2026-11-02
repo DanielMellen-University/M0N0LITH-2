@@ -149,3 +149,14 @@ for k in ["o", "n", "e", "space", "t", "w", "o", "space", "s", "i", "x", "ctrl+l
 pane = wm.ide.lines(s)
 print(pane[len(pane) - 1])
 wm.key(d, "escape")
+# an input line wider than the window keeps the cursor in view
+s.text = "use std/os\nprint(os.prompt(\"name? \"))\n"
+wm.key(d, "ctrl+r")
+for ch in "abcdefghijklmnopqrstuvwxyz0123456789ABCDEFGHIJKLMNOP"
+    wm.key(d, ch)
+let wide = wm.visible_lines(i)
+print(wide[len(wide) - 1])
+wm.key(d, "home")
+wide = wm.visible_lines(i)
+print(wide[len(wide) - 1])
+wm.key(d, "escape")

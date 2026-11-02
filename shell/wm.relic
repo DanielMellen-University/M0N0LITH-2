@@ -782,6 +782,14 @@ fun _typed(text, k)
 
 fun _notes_init() = {text: "", before: none, left: 0}
 # The cursor is s.left characters before the end of the line (0: at the end).
+# A one-line input with its cursor at `at`, cut to cols so the cursor is in
+# view: a line wider than the window scrolls, as the Editor's does.
+fun _scroll_to(line, at, cols)
+    if cols <= 0 or len(line) <= cols
+        return line
+    let off = math.min(len(line) - cols, math.max(0, at + 2 - cols))
+    return slice(line, off, off + cols)
+
 fun _notes_left(s)
     if not "left" in s
         return 0
@@ -789,10 +797,8 @@ fun _notes_left(s)
 fun _notes_lines(s)
     let at = len(s.text) - _notes_left(s)
     let line = slice(s.text, 0, at) + "_" + slice(s.text, at, len(s.text))
-    if "cols" in s and s.cols > 0 and len(line) > s.cols
-        # a line wider than the window scrolls to keep the cursor in view, as the Editor's does
-        let off = math.min(len(line) - s.cols, math.max(0, at + 2 - s.cols))
-        line = slice(line, off, off + s.cols)
+    if "cols" in s
+        line = _scroll_to(line, at, s.cols)
     return ["Type something:", line]
 fun _notes_click(s, x, y)
     return none
@@ -3246,7 +3252,11 @@ fun _ide_lines(s)
             append(pane, line)
         if s.run != none
             let at = len(s.input) - _ide_in_left(s)
-            append(pane, str(s.run.waiting) + slice(s.input, 0, at) + "_" + slice(s.input, at, len(s.input)))
+            let prompt = str(s.run.waiting)
+            let line = prompt + slice(s.input, 0, at) + "_" + slice(s.input, at, len(s.input))
+            if "cols" in s
+                line = _scroll_to(line, len(prompt) + at, s.cols)   # the cursor stays in view
+            append(pane, line)
     let rows = s.rows
     if rows > 0
         s.rows = math.max(2, rows - len(pane))

@@ -19,7 +19,7 @@ Ctrl+R (or F5, or Ctrl+Return) runs the text in the buffer, saved or not. The pr
 
 ## Input
 
-`os.read_line` and `os.prompt` pause the run. The pane's header becomes `-- input (return: send, esc: stop) --` and its last line is the prompt and what you have typed.
+`os.read_line` and `os.prompt` pause the run. The pane's header becomes `-- input (return: send, esc: stop) --` and its last line is the prompt and what you have typed. A line wider than the window scrolls to keep the cursor in view.
 
 | Input | What it does |
 |---|---|
