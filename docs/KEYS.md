@@ -53,6 +53,7 @@ Every key and click the desktop and its apps act on, checked against `shell/wm.r
 | Left, Right, Home, End | move the cursor in the line |
 | Ctrl+Left, Ctrl+Right | move the cursor by words |
 | Delete | removes the character after the cursor |
+| Ctrl+Delete | removes on to the end of the next word |
 | Backspace | removes the character before the cursor |
 | Return | runs the command; `!!` runs the one before again |
 | Ctrl+V | adds the first line of the clipboard |

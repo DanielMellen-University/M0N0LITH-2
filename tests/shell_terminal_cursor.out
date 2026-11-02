@@ -18,3 +18,6 @@ ctrl+left at the start /home> _cat one/two three
 /home> cat one_/two three
 delete twice /home> cat one_wo three
 delete at the end /home> cat onewo three_
+/home> rm_/file.txt now
+/home> rm_.txt now
+to the end /home> rm_
