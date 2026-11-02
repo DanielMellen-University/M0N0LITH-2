@@ -85,7 +85,7 @@ Write `tests/shell_<topic>.relic`, run it, read its output, and save that as `te
 | `shell_clicker_edges` | rapid input and Clicker state after reopening; Return counts, Backspace and `-` take one off down to 0, Ctrl+C copies the number; Delete setting the count back to 0; + and = adding one |
 | `shell_app_focus` | Notes and Clicker state across focus and window controls |
 | `shell_notes_resize` | Notes text clipping and edits across resizes |
-| `shell_notes_input_edges` | single-line input and reopening Notes; Ctrl+Z bringing a cleared line back, one step |
+| `shell_notes_input_edges` | single-line input and reopening Notes; Ctrl+Z bringing a cleared line back, or taking a paste back, one step |
 
 ### Terminal
 

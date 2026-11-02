@@ -31,3 +31,17 @@ append(steps, un.state.text)
 wm.key(d, "ctrl+z")
 append(steps, un.state.text)
 print("undo", steps)
+# Ctrl+Z takes back a paste too, and a second one puts it back
+let n2 = wm.launch(d, wm.notes)
+for ch in "pasted"
+    wm.key(d, ch)
+wm.key(d, "ctrl+c")
+wm.key(d, "ctrl+u")
+for ch in "ab"
+    wm.key(d, ch)
+wm.key(d, "ctrl+v")
+print("pasted", n2.state.text)
+wm.key(d, "ctrl+z")
+print("undone", n2.state.text)
+wm.key(d, "ctrl+z")
+print("redone", n2.state.text)

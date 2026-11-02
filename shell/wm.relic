@@ -768,10 +768,10 @@ fun _notes_click(s, x, y)
 fun _drop_word(text) = slice(text, 0, _word_left(text, len(text)))
 
 fun _notes_key(s, k)
-    if k == "ctrl+u" or k == "ctrl+x" or k == "ctrl+backspace"
+    if k == "ctrl+u" or k == "ctrl+x" or k == "ctrl+backspace" or (k == "ctrl+v" and _clip_line() != "")
         s.before = s.text   # what Ctrl+Z brings back
     if k == "ctrl+z"
-        # one step: the line before the last Ctrl+U, Ctrl+X or Ctrl+Backspace,
+        # one step: the line before the last Ctrl+U, Ctrl+X, Ctrl+Backspace or paste,
         # and pressed again, the line after it
         if s.before != none
             let now = s.text
