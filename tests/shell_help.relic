@@ -20,10 +20,13 @@ for line in t.state.buf
     if not strings.starts_with(line, "/")
         append(help, line)
 print(help)
+# every word of the lines that list commands (not the lines about > and quotes)
 let words = []
-for line in slice(help, 1, 4)
-    for w in strings.split(line, " ")
-        append(words, w)
+for line in slice(help, 1, len(help))
+    if not strings.contains(line, ">") and not strings.contains(line, "\"")
+        for w in strings.split(line, " ")
+            append(words, w)
+print(len(words), "commands in help")
 let missing = []
 for w in words
     t.state.buf = []

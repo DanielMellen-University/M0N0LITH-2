@@ -1,4 +1,5 @@
 ["Terminal. Type help.", "help clear history echo apps date", "pwd cd ls cat head tail", "mkdir touch write rm mv cp", "wc grep find sort uniq nl", "echo text > file, >> adds"]
+24 commands in help
 unknown commands in help: []
 true Clicker, Notes, Terminal, Files, Editor, IDE, Paint, Snake
 true

@@ -114,7 +114,7 @@ Write `tests/shell_<topic>.relic`, run it, read its output, and save that as `te
 | `shell_terminal_ls` | Terminal packs directory listings to the window width |
 | `shell_terminal_wrap` | Terminal wraps long lines to the window width |
 | `shell_terminal_frame` | Terminal builds only the rows that fit, matching a full wrap |
-| `shell_help` | Terminal help and app names match the available commands and apps |
+| `shell_help` | Terminal help and app names match the available commands and apps; every command line of help is checked, not only the first three |
 | `shell_date` | the date command and its UTC format |
 
 ### Files
