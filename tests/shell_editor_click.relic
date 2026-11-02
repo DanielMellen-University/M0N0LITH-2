@@ -147,3 +147,16 @@ wm.key(d, "ctrl+end")
 il = wm.visible_lines(ide2)
 click_at(ide2, err_row - 1, 0)
 print("output line clicked: pos", ide_pos(), len(ide2.state.text))
+# a key while the button is held ends the drag: after the text went, a move
+# must not leave the selection's end past the text
+let e3 = wm.launch(d, wm.editor)
+e3.state.text = "hello world\nmore"
+e3.state.back = 0
+wm.visible_lines(e3)
+let p5 = at(e3, 1, 2)
+wm.click(d, p5[0], p5[1])
+wm.key(d, "ctrl+a")
+wm.key(d, "backspace")
+wm.motion(d, p5[0] + 20, p5[1])
+print("key during a drag", e3.state.back, e3.state.mark, len(e3.state.text))
+wm.release(d)

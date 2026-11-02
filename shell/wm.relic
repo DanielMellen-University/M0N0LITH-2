@@ -2393,6 +2393,7 @@ fun _editor_drag(s, x, y)
     _editor_set_pos(s, pos)
 
 fun _editor_key(s, k)
+    s.press = none   # a key ends a drag: the text or the cursor may have moved under it
     if k == "ctrl+s"
         # the same reasons the Terminal gives, shorter than "cannot write" and the whole path
         if vfs.is_dir(s.fs, s.path)
@@ -2782,6 +2783,7 @@ fun _ide_lines(s)
     return out
 
 fun _ide_key(s, k)
+    s.press = none
     if k == "f5" or k == "ctrl+return" or k == "ctrl+keypad enter"
         k = "ctrl+r"   # F5 and Ctrl+Return run too, as in most IDEs and notebooks
     if s.run != none and k == "ctrl+s"
