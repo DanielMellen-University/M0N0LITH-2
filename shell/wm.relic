@@ -3518,6 +3518,7 @@ fun _paint_swatch_at(x, y)
     return int(i) + 1
 
 fun _paint_click(s, x, y)
+    s.naming = none   # a click gives up a save-as name, as Esc does, then does what it does
     s.last = none
     s.stroke = false
     s.anchor = none

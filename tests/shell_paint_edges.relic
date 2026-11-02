@@ -74,3 +74,11 @@ print(wm.visible_lines(p2)[0])
 p2.width = 620
 print(wm.visible_lines(p2)[0])
 wm.dismiss(d)
+# a click gives up a save-as name too, and then does what it does
+wm.key(d, "n")
+wm.key(d, "q")
+wm.visible_lines(p2)
+let before = p2.state.cells[0]
+wm.click(d, p2.x + 8, p2.y + wm.title_height + 42)
+wm.release(d)
+print(wm.visible_lines(p2)[0], p2.state.cells[0] != before)
