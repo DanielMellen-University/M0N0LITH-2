@@ -119,7 +119,7 @@ s.back = len(s.text)
 s.mark = none
 e.app.on_key(s, "ctrl+l")
 e.app.on_key(s, "ctrl+d")
-print([s.text])
+print([s.text], [picked()])
 # Ctrl+Shift with Left, Right, Home or End selects as far as Ctrl alone moves
 print(wm.key_of_event({type: "key_down", key: "left", ctrl: true, shift: true}), wm.key_of_event({type: "key_down", key: "end", ctrl: true, shift: true}), wm.key_of_event({type: "key_down", key: "s", ctrl: true, shift: true}))
 fun chosen()

@@ -3007,8 +3007,13 @@ fun _editor_key(s, k)
             from = _line_start(s.text, sel[0])
             to = _line_end(s.text, _sel_last(s.text, sel))
         let block = slice(s.text, from, to)
+        let mark = none
+        if sel != none
+            mark = len(s.text) - s.mark
         _editor_change(s, to, 0, "\n" + block)
         _editor_set_pos(s, pos + len(block) + 1)
+        if mark != none
+            s.mark = len(s.text) - (mark + len(block) + 1)   # the same part of the copy stays selected
     else if k == "ctrl+c" or k == "ctrl+x"
         s.overwrite = false
         let sel = _editor_selection(s)
