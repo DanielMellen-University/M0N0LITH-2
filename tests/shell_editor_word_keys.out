@@ -40,3 +40,6 @@ ctrl+shift+left ctrl+shift+end ctrl+s
 ["one\nthree\ntwo"] 1
 ["one\nthree\ntwo"] 1
 ["one\ntwo\nthree"]
+["c\na\nb\nd"] ["a\nb"]
+["c\nd\na\nb"] ["a\nb"]
+["c\na\nb\nd"] ["a\nb"]

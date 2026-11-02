@@ -168,3 +168,16 @@ e.app.on_key(s, "ctrl+down")
 print([s.text], s.back)
 e.app.on_key(s, "ctrl+z")
 print([s.text])
+# with a selection, the lines it is on move together and stay selected
+s.text = "a\nb\nc\nd"
+s.back = len(s.text)
+s.mark = none
+e.app.on_key(s, "shift+down")
+e.app.on_key(s, "shift+right")
+e.app.on_key(s, "ctrl+down")
+print([s.text], [chosen()])
+e.app.on_key(s, "ctrl+down")
+e.app.on_key(s, "ctrl+down")
+print([s.text], [chosen()])
+e.app.on_key(s, "ctrl+up")
+print([s.text], [chosen()])
