@@ -49,6 +49,11 @@ keys(["end", "ctrl+delete"])
 show("ctrl+delete at the end")
 keys(["ctrl+z"])
 show("ctrl+z")
+# Ctrl+K takes the rest of the line, and Ctrl+Z brings it back
+keys(["ctrl+left", "ctrl+k"])
+show("ctrl+k")
+keys(["ctrl+z"])
+show("ctrl+z")
 # a line wider than the window keeps the cursor in view
 let d = wm.new_desktop(640, 480, wm.default_apps())
 let w = wm.launch(d, wm.notes)

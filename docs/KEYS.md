@@ -41,11 +41,12 @@ Every key and click the desktop and its apps act on, checked against `shell/wm.r
 | Left, Right, Home, End, Ctrl+Left, Ctrl+Right | move the cursor |
 | Delete | removes the character after the cursor |
 | Ctrl+Delete | removes the word after the cursor |
+| Ctrl+K | removes the rest of the line after the cursor |
 | Backspace | removes the character before the cursor |
 | Ctrl+C, Ctrl+X | copies, or cuts, the whole line to the clipboard |
 | Ctrl+Backspace | removes the word before the cursor |
 | Ctrl+U | removes everything before the cursor (all of it at the end) |
-| Ctrl+Z | brings back the line from before the last Ctrl+U, Ctrl+X, Ctrl+Backspace, Ctrl+Delete or Ctrl+V; again puts it back |
+| Ctrl+Z | brings back the line from before the last Ctrl+U, Ctrl+X, Ctrl+Backspace, Ctrl+Delete, Ctrl+K or Ctrl+V; again puts it back |
 | Ctrl+V | adds the first line of the clipboard; a path with a space that is there goes in quotes |
 
 ## Terminal

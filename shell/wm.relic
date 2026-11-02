@@ -824,6 +824,12 @@ fun _notes_key(s, k)
         s.left = n - _word_left(s.text, n - left)
     else if k == "ctrl+right"
         s.left = n - _word_right(s.text, n - left)
+    else if k == "ctrl+k"
+        # the rest of the line, as in the Terminal; Ctrl+Z brings it back
+        if left > 0
+            s.before = s.text
+            s.text = slice(s.text, 0, n - left)
+            s.left = 0
     else if k == "ctrl+delete"
         # the word after the cursor, as in the Editor; Ctrl+Z brings it back
         let to = _word_right(s.text, n - left)
