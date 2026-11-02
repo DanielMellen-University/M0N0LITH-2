@@ -1382,6 +1382,7 @@ fun _term_run(s, line)
         _term_reply(s, "mkdir touch write rm mv cp")
         _term_reply(s, "wc grep find sort uniq nl")
         _term_reply(s, "echo text > file, >> adds")
+        _term_reply(s, "\"my file\": quotes keep spaces")
     else if cmd == "clear"
         if _term_args(s, parts, 0, "clear")
             s.buf = []

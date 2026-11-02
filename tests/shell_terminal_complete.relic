@@ -32,13 +32,13 @@ print([tab("rm ../dr"), tab("rm p"), tab("rm ./plans")])
 # the commands added later complete too: sort, uniq and nl
 print([tab("so"), tab("un"), tab("n")])
 # every command help lists completes to itself, so a new command cannot be
-# left out of the Tab list again (the last help line is about >, not commands)
+# left out of the Tab list again (the last two help lines are about > and quotes)
 t.cwd = "/home"
 t.input = ""
 let shown = len(t.buf)
 typed("help")
 wm.terminal.on_key(t, "return")
-let listed = slice(t.buf, shown + 1, len(t.buf) - 1)
+let listed = slice(t.buf, shown + 1, len(t.buf) - 2)
 print(len(listed), "help lines of commands")
 let missing = []
 for line in listed
