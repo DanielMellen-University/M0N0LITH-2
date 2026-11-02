@@ -45,7 +45,9 @@ The status is one of:
 | Ctrl+Y | does again what Ctrl+Z undid, until the next edit |
 | Ctrl+S | saves |
 
-On macOS, Cmd with a letter works as Ctrl with it. Clicks inside the window do not move the cursor.
+On macOS, Cmd with a letter works as Ctrl with it.
+
+A click on a line of text puts the cursor at the character clicked, or at the end of the line when the click is past it, and drops the selection. A click on the title line does nothing. In the IDE a click on the output pane does nothing, and nor does any click while a run waits for input.
 
 The selection is drawn as a light blue box behind its text.
 

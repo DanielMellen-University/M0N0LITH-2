@@ -2167,6 +2167,11 @@ fun _editor_lines(s)
                 off = math.min(len(line) - cols, math.max(0, pos - starts[i] + 2 - cols))
             out[i + 1] = slice(line, off, off + cols)
         append(shift, off)
+    # for a click: where each line starts in the text, how far it is cut on
+    # the left, and which one has the cursor
+    s.starts = starts
+    s.shifts = shift
+    s.cursor_line = cursor_line
     s.marks = []
     let sel = _editor_selection(s)
     if sel != none
@@ -2193,7 +2198,29 @@ fun _editor_marks(s)
         return s.marks
     return []
 
+# A click on a text line puts the cursor at that character (past the line's
+# end: at its end) and drops the selection. It uses the lines last drawn; the
+# title line and the IDE's pane do nothing, and nor does a click while an IDE
+# run waits for input.
 fun _editor_click(s, x, y)
+    if not "shown_lines" in s or not "starts" in s or y < text_top
+        return none
+    if "run" in s and s.run != none
+        return none
+    let row = int((y - text_top) / line_height)
+    if row >= len(s.shown_lines)
+        return none
+    let i = s.shown_lines[row] - 1
+    if i < 0 or i >= len(s.starts)
+        return none
+    let col = s.shifts[i]
+    if x >= text_left
+        col = col + int((x - text_left) / char_width)
+    let start = s.starts[i]
+    if i == s.cursor_line and col > _editor_pos(s) - start
+        col = col - 1   # the "_" takes a column
+    s.mark = none
+    _editor_set_pos(s, math.min(start + col, _line_end(s.text, start)))
     return none
 
 fun _editor_key(s, k)

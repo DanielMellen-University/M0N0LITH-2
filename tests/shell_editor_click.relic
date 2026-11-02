@@ -1,0 +1,72 @@
+# Editor click: a click on a text line puts the cursor on that character,
+# past the line's end at its end, and drops the selection. The title line
+# does nothing; the IDE's output pane and a waiting run ignore clicks.
+use ../shell/wm
+use std/strings
+let d = wm.new_desktop(640, 480, wm.default_apps())
+let e = wm.launch(d, wm.editor)
+e.state.text = "first line\nsecond\nthe third line"
+fun show(label)
+    let lines = wm.visible_lines(e)
+    let shown = []
+    for i in 1..len(lines)
+        append(shown, lines[i])
+    print(label, shown)
+# the point of character col on shown row r (row 0 is the title)
+fun at(w, r, col)
+    return [w.x + wm.text_left + col * wm.char_width + 3, w.y + wm.title_height + wm.text_top + r * wm.line_height + 5]
+fun click_at(w, r, col)
+    let p = at(w, r, col)
+    print("click row {r} col {col}:", wm.click(d, p[0], p[1]))
+show("start")
+click_at(e, 1, 3)
+show("first line, col 3")
+click_at(e, 3, 4)
+show("third line, col 4")
+click_at(e, 3, 9)
+show("after the cursor: the _ does not count")
+click_at(e, 2, 20)
+show("past the end of second")
+wm.key(d, "X")
+show("typed there")
+# left of the text: the line's start
+let p = at(e, 1, 0)
+wm.click(d, p[0] - 5, p[1])
+show("left margin")
+# the title line does nothing
+click_at(e, 0, 5)
+show("title")
+# below the last line does nothing
+click_at(e, 4, 2)
+show("below the text")
+# a click drops the selection
+wm.key(d, "ctrl+a")
+click_at(e, 1, 2)
+wm.visible_lines(e)
+print("selection after click", e.state.marks)
+show("after select all and click")
+# a long line cut on the left: the click counts from what shows
+e.state.text = "short\n" + strings.repeat("abcdefghij", 6)
+e.state.back = 0
+e.state.mark = none
+show("long line")
+click_at(e, 2, 0)
+print("pos", len(e.state.text) - e.state.back)
+show("first shown character")
+# IDE: the pane ignores clicks, and so does a run waiting for input
+let ide = wm.launch(d, wm.ide)
+ide.state.text = "print(1)\nprint(2)"
+ide.state.back = 0
+wm.key(d, "ctrl+r")
+let lines = wm.visible_lines(ide)
+print(lines)
+click_at(ide, 1, 3)
+print("ide pos", len(ide.state.text) - ide.state.back)
+click_at(ide, len(lines) - 1, 0)
+print("pane click pos", len(ide.state.text) - ide.state.back)
+ide.state.text = "use std/os\nprint(os.read_line())"
+ide.state.back = 0
+wm.key(d, "ctrl+r")
+wm.visible_lines(ide)
+click_at(ide, 1, 2)
+print("waiting run pos", len(ide.state.text) - ide.state.back, ide.state.status)

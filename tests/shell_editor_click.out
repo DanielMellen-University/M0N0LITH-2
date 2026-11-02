@@ -1,0 +1,29 @@
+start ["first line", "second", "the third line_"]
+click row 1 col 3: app
+first line, col 3 ["fir_st line", "second", "the third line"]
+click row 3 col 4: app
+third line, col 4 ["first line", "second", "the _third line"]
+click row 3 col 9: app
+after the cursor: the _ does not count ["first line", "second", "the thir_d line"]
+click row 2 col 20: app
+past the end of second ["first line", "second_", "the third line"]
+typed there ["first line", "secondX_", "the third line"]
+left margin ["_first line", "secondX", "the third line"]
+click row 0 col 5: app
+title ["_first line", "secondX", "the third line"]
+click row 4 col 2: app
+below the text ["_first line", "secondX", "the third line"]
+click row 1 col 2: app
+selection after click []
+after select all and click ["fi_rst line", "secondX", "the third line"]
+long line ["short", "cdefghijabcdefghijabcdefghijabcdefghij_"]
+click row 2 col 0: app
+pos 28
+first shown character ["short", "abcdefghijabcdefghijab_cdefghijabcdefgh"]
+["IDE [ran] /home/welcome.txt", "print(1)", "print(2)_", "-- output --", "1", "2"]
+click row 1 col 3: app
+ide pos 3
+click row 5 col 0: app
+pane click pos 3
+click row 1 col 2: app
+waiting run pos 32 waiting for input
