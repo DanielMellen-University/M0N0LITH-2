@@ -2917,9 +2917,11 @@ fun _editor_key(s, k)
         s.overwrite = false
         let sel = _editor_selection(s)
         let from = _line_start(s.text, _editor_pos(s))
-        if sel != none
-            from = _line_start(s.text, sel[0])
         let to = _line_end(s.text, _editor_pos(s))
+        if sel != none
+            # from either end: a selection made upwards keeps all its lines
+            from = _line_start(s.text, sel[0])
+            to = _line_end(s.text, sel[1])
         if to < len(s.text)
             to = to + 1
         s.mark = len(s.text) - from

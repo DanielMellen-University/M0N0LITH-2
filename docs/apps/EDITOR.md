@@ -33,7 +33,7 @@ The status is one of:
 | Shift+Tab, Ctrl+[ | takes the line's leading spaces back to the multiple of 4 before; the cursor stays on its character. With a selection, every line it is on, in one undo step, the lines staying selected |
 | Ctrl+] | puts 4 spaces at the start of the line, wherever the cursor is in it; the cursor stays on its character. With a selection, every line it is on but empty ones, in one undo step, the lines staying selected |
 | Ctrl+A | selects everything |
-| Ctrl+L | selects the cursor's line with its newline; pressed again it takes in the next line too |
+| Ctrl+L | selects the cursor's line with its newline; pressed again it takes in the next line too. With a selection, it takes in every line the selection is on, whichever way it was made |
 | Ctrl+D | puts a copy of the cursor's line, or of every line the selection is on (not a line it only ends at the start of, as after Ctrl+L), under it; the cursor goes to the same column in the copy. One Ctrl+Z takes it back |
 | Ctrl+J | joins the next line onto the cursor's: the newline and the next line's leading spaces become one space (none when either side is empty), and the cursor goes to the join. With a selection on several lines, they all become one that way, in one undo step, and it stays selected |
 | Ctrl+Up, Ctrl+Down | moves the cursor's line above the line before it, or below the line after it, the cursor going with it (Alt+Up and Alt+Down in VS Code); with a selection, the lines it is on move together and stay selected; one Ctrl+Z puts it back |

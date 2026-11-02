@@ -70,6 +70,13 @@ e.app.on_key(s, "ctrl+l")
 print([picked()])
 e.app.on_key(s, "ctrl+x")
 print([s.text])
+# a selection made upwards keeps all its lines, and gains the next one
+s.text = "one\ntwo\nthree\nfour"
+s.back = 5
+s.mark = none
+e.app.on_key(s, "shift+up")
+e.app.on_key(s, "ctrl+l")
+print([picked()])
 # Ctrl+D copies the line under it, the cursor going with it; one undo
 s.text = "one\ntwo\nthree"
 s.back = 6
