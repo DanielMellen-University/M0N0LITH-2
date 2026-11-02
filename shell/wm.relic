@@ -2615,8 +2615,51 @@ fun _editor_find_end(s)
     s.replacing = none
     s.status = s.find_was
 
+# Ctrl+G: go to a line. The title asks "line: N_" (digits only); Return
+# puts the cursor at the start of that line (the last one when past the
+# end) and says which; Esc or another key gives up.
+fun _editor_goto_key(s, k)
+    if k == "return" or k == "enter"
+        let want = s.goto
+        s.goto = none
+        if want == ""
+            s.status = s.find_was
+            return true
+        let line = math.max(1, int(want))
+        let pos = 0
+        let at = 1
+        while at < line
+            let e = _line_end(s.text, pos)
+            if e >= len(s.text)
+                break
+            pos = e + 1
+            at = at + 1
+        s.mark = none
+        _editor_set_pos(s, pos)
+        s.status = "line {at}"
+        return true
+    if k == "backspace"
+        s.goto = slice(s.goto, 0, math.max(0, len(s.goto) - 1))
+    else if len(k) == 1 and k >= "0" and k <= "9" and len(s.goto) < 7
+        s.goto = s.goto + k
+    else if len(k) != 1
+        s.goto = none
+        s.status = s.find_was
+        return false
+    s.status = "line: " + s.goto + "_"
+    return true
+
 fun _editor_key(s, k)
     s.press = none   # a key ends a drag: the text or the cursor may have moved under it
+    if "goto" in s and s.goto != none
+        if _editor_goto_key(s, k)
+            return
+    if k == "ctrl+g"
+        s.overwrite = false
+        s.find_was = s.status
+        s.goto = ""
+        s.status = "line: _"
+        return
     if "find" in s and s.find != none
         if _editor_find_key(s, k)
             return
@@ -2954,6 +2997,10 @@ fun _ide_input_edit(s, k)
 # Esc in the Editor (and the IDE): drops a selection, so an Esc meant for it
 # does not quit the desktop. True when there was one.
 fun _editor_escape(s)
+    if "goto" in s and s.goto != none
+        s.goto = none
+        s.status = s.find_was
+        return true
     if "find" in s and s.find != none
         _editor_find_end(s)
         return true

@@ -1,0 +1,36 @@
+# Editor Ctrl+G: type a line number, Return puts the cursor at its start
+# (the last line when past the end); letters are not taken, Esc gives up.
+use ../shell/wm
+let d = wm.new_desktop(640, 480, wm.default_apps())
+let e = wm.launch(d, wm.editor)
+e.state.text = "one\ntwo\nthree\nfour"
+e.state.back = 0
+fun keys(list)
+    for k in list
+        wm.key(d, k)
+fun pos() = len(e.state.text) - e.state.back
+fun title() = wm.visible_lines(e)[0]
+keys(["ctrl+g"])
+print(title())
+keys(["3"])
+print(title())
+keys(["return"])
+print("line 3", pos(), title())
+keys(["ctrl+g", "9", "9", "return"])
+print("past the end", pos(), title())
+keys(["ctrl+g", "0", "return"])
+print("line 0 is the first", pos(), title())
+keys(["ctrl+g", "x", "2", "backspace", "4"])
+print("letters are not taken", title())
+keys(["return"])
+print(pos())
+keys(["ctrl+g", "2"])
+wm.dismiss(d)
+print("esc", pos(), title())
+keys(["ctrl+g", "2", "left"])
+print("another key gives up and moves", pos(), title())
+keys(["ctrl+g", "return"])
+print("empty", pos(), title())
+# with a selection, going to a line drops it
+keys(["ctrl+a", "ctrl+g", "2", "return"])
+print("selection", e.state.mark, pos())

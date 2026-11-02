@@ -1,0 +1,11 @@
+Editor [line: _] /home/welcome.txt
+Editor [line: 3_] /home/welcome.txt
+line 3 8 Editor [line 3] /home/welcome.txt
+past the end 14 Editor [line 4] /home/welcome.txt
+line 0 is the first 0 Editor [line 1] /home/welcome.txt
+letters are not taken Editor [line: 4_] /home/welcome.txt
+14
+esc 14 Editor [line 4] /home/welcome.txt
+another key gives up and moves 13 Editor [line 4] /home/welcome.txt
+empty 13 Editor [line 4] /home/welcome.txt
+selection none 4
