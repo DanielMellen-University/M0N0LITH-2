@@ -1,6 +1,7 @@
 # Files F2: rename the selected row in its folder. The title shows the name
 # being typed; Return renames and keeps the row selected; not over a name
-# that is there, not to a name with a /; Esc gives up; .. cannot be renamed.
+# that is there, not to a name with a /; Esc gives up; .. cannot be renamed. The next
+# Editor's file follows a rename.
 use ../shell/wm
 use std/vfs
 let d = wm.new_desktop(640, 480, wm.default_apps())
@@ -59,3 +60,21 @@ print(title())
 f.state.sel = 0
 keys(["f2"])
 print(title())
+# the file set for the next Editor follows a rename, of itself or of its folder
+pick("folder two")
+keys(["return"])
+pick("in.txt")
+keys(["return", "f2", "ctrl+u"])
+typed("moved.txt")
+keys(["return", "backspace"])
+pick("folder two")
+keys(["f2", "ctrl+u"])
+typed("three")
+keys(["return"])
+let e = wm.launch(d, wm.editor)
+print(e.state.path, e.state.text)
+# and so does a Terminal mv
+let t = wm.launch(d, wm.terminal)
+typed("mv /tmp/r/three /tmp/four")
+keys(["return"])
+print(wm.launch(d, wm.editor).state.path)

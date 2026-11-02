@@ -7,3 +7,5 @@ rename: sub2_ true Files: /tmp/r
 ["Files: /tmp/r", "  ..", "  b.txt", "  c.md", "> folder two/"] z
 Files: /tmp/r
 Files: /tmp/r
+/tmp/r/three/moved.txt z
+/tmp/four/moved.txt

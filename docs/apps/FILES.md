@@ -24,7 +24,7 @@ A long list scrolls just far enough to keep the selected row in view; the title 
 | Right | goes into the selected folder, as in a folder tree; on a file or `..` it does nothing |
 | Click a row | selects and opens it |
 
-Opening a folder enters it. Opening `..` is the same as Backspace. Opening a file does not show it: it sets the file the next Editor window opens.
+Opening a folder enters it. Opening `..` is the same as Backspace. Opening a file does not show it: it sets the file the next Editor window opens. Renaming that file, or its folder, here or with `mv` in the Terminal, takes it along.
 
 A row opens on a single click, and the second press of a double-click is ignored, so double-clicking a folder enters it once instead of also opening whatever row lands under the pointer.
 

@@ -57,6 +57,15 @@ let _shell_fs = vfs.new()
 # The file Editor opens next. Files sets it when you open a file.
 let _shell_open = {path: "/home/welcome.txt"}
 
+# A file or folder renamed or moved by Files or the Terminal takes the file the
+# next Editor opens with it, so that file is not lost to a new empty one.
+fun _follow_rename(from, to)
+    let p = _shell_open.path
+    if p == from
+        _shell_open.path = to
+    else if strings.starts_with(p, from + "/")
+        _shell_open.path = to + slice(p, len(from), len(p))
+
 # p if it is a folder, else its nearest parent that is. Used when a folder
 # an app is in gets removed or moved from another app.
 fun _existing_dir(fs, p)
@@ -1219,6 +1228,7 @@ fun _term_mv(s, a, b)
     else
         try
             vfs.rename(s.fs, src, dst)
+            _follow_rename(src, dst)
         catch err
             _term_reply(s, "mv: " + err.message)
 
@@ -1937,6 +1947,7 @@ fun _files_rename_key(s, k)
         catch err
             s.note = err.message
             return
+        _follow_rename(r.from, to)
         # the row keeps the selection under its new name
         for i in 0..len(s.names)
             if s.names[i] == old
