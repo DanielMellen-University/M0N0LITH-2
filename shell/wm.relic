@@ -2657,6 +2657,8 @@ fun _editor_replace_all(s, what, with)
     return n
 
 fun _editor_find_key(s, k)
+    let fresh = "find_new" in s and s.find_new
+    s.find_new = false
     if (k == "return" or k == "enter") and "replacing" in s and s.replacing != none
         if s.replacing == ""
             # the first Return: that is the text; now what goes in its place
@@ -2682,6 +2684,8 @@ fun _editor_find_key(s, k)
             s.status = "find: " + s.find + " (not found)"
         s.last_find = s.find
         return true
+    if fresh and (k == "space" or k == "ctrl+v" or len(k) == 1)
+        s.find = ""
     if k == "backspace"
         s.find = slice(s.find, 0, math.max(0, len(s.find) - 1))
     else if k == "ctrl+backspace"
@@ -2774,6 +2778,7 @@ fun _editor_key(s, k)
         s.overwrite = false
         s.find_was = s.status
         s.find = ""
+        s.find_new = false
         s.replacing = ""
         s.status = "replace: _"
         return
@@ -2786,6 +2791,7 @@ fun _editor_key(s, k)
         let sel = _editor_selection(s)
         if sel != none and not strings.contains(slice(s.text, sel[0], sel[1]), "\n")
             s.find = slice(s.text, sel[0], sel[1])
+        s.find_new = s.find != ""   # typing replaces it, as a selected find box would
         s.status = "find: " + s.find + "_"
         return
     if k == "ctrl+s"

@@ -102,6 +102,15 @@ wm.dismiss(d)
 keys(["ctrl+a", "ctrl+f"])
 print(wm.visible_lines(e2)[0])
 wm.dismiss(d)
+# typing replaces the text it started with; Backspace edits it
+e2.state.back = len(e2.state.text)
+e2.state.mark = len(e2.state.text)
+keys(["shift+right", "shift+right", "shift+right", "ctrl+f", "b", "l"])
+print(wm.visible_lines(e2)[0])
+wm.dismiss(d)
+keys(["ctrl+f", "backspace", "e"])
+print(wm.visible_lines(e2)[0])
+wm.dismiss(d)
 # Ctrl+H replaces every place a text is, in one undo step, and says how many
 let e3 = wm.launch(d, wm.editor)
 e3.state.text = "cat sat on the cat mat"

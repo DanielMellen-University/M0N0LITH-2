@@ -7,10 +7,10 @@ round to the first [0, 3]
 case counts [12, 15]
 not found [12, 15] Editor [find: nope (not found)] ....txt
 esc Editor [open] /home/welcome.txt [12, 15]
-right after Editor [open] /home/welcome.txt [15]
+right after Editor [open] /home/welcome.txt [25]
 one two one
-TwoX one
-three
+Two one
+threeX
 ide 15 17
 IDE [open] /home/welcome.txt
 f3 before any find none open
@@ -25,6 +25,8 @@ shift+f3 f3
 Editor [find: red_] /home/welcome.txt
 next red [10, 13]
 Editor [find: _] /home/welcome.txt
+Editor [find: bl_] /home/welcome.txt
+Editor [find: ree_] /home/welcome.txt
 Editor [replace: _] /home/welcome.txt
 Editor [replace: cat_] ...e/welcome.txt
 Editor [with: _] /home/welcome.txt
