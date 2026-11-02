@@ -129,7 +129,7 @@ Write `tests/shell_<topic>.relic`, run it, read its output, and save that as `te
 | `shell_files_boundaries` | root, empty folders, unusual names and reopening Files |
 | `shell_files_long_names` | clipped names open the full path and deleted selections do not open replacements |
 | `shell_files_title` | Files keeps the end of a long folder path in its title |
-| `shell_files_keys` | Home, End, and a letter or digit going to the next name with it (any case, round, never `..`), the root, an empty folder, Page Up and Page Down by a window of rows less one, Ctrl+Home and Ctrl+End, Left going up a folder and Right going into the selected one only; Ctrl+C copying the selected path; Delete asking, removing a file or an empty folder (not one with files in it, not `..`) and keeping the selection on its line |
+| `shell_files_keys` | Home, End, and a letter or digit going to the next name with it (any case, round, never `..`), the root, an empty folder, Page Up and Page Down by a window of rows less one, Ctrl+Home and Ctrl+End, Left going up a folder and Right going into the selected one only; Ctrl+C copying the selected path; Delete asking, removing a file or an empty folder (not one with files in it, not `..`) and keeping the selection on its line; a long name cut in the question |
 | `shell_files_hidden` | clicks below the visible Files rows do nothing |
 | `shell_files_stale` | Files when another app removed the selected file |
 | `shell_files_ancestor` | Files and Terminal recover after an ancestor folder moves |

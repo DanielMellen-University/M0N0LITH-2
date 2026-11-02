@@ -19,7 +19,7 @@ A long list scrolls just far enough to keep the selected row in view; the title 
 | Return | opens the selected row |
 | F2 | renames the selected row: the title reads `rename: name_` with its name to edit (Backspace, Ctrl+Backspace, Ctrl+U, Ctrl+V), Return renames it in the same folder and Esc gives up. A name too long for the title shows its end, `rename: ...end_`. Not over a name that is there (`already there: name`), and not to a name with a `/` |
 | Backspace or Left | goes up a folder, with the folder you were in selected, so going back down is one key (Right) |
-| Delete | asks first, in the title (`Delete notes.txt? Delete again`); a second Delete removes the file, or the folder if it is empty (a folder with anything in it says `not empty`), and any other key gives up. `..` cannot be removed. After a removal the selection stays on its line, now the next name (the one before when it was the last) |
+| Delete | asks first, in the title (`Delete notes.txt? Delete again`, a long name cut with `...`); a second Delete removes the file, or the folder if it is empty (a folder with anything in it says `not empty`), and any other key gives up. `..` cannot be removed. After a removal the selection stays on its line, now the next name (the one before when it was the last) |
 | Ctrl+C | copies the selected row's full path, such as `/home/docs/plan.txt`, to the desktop's clipboard, to paste into the Terminal or Notes; on `..` it copies nothing |
 | Right | goes into the selected folder, as in a folder tree; on a file or `..` it does nothing |
 | Click a row | selects and opens it |

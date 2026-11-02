@@ -1876,7 +1876,12 @@ fun _files_lines(s)
         out[0] = "rename: " + s.renaming.text + "_"
         out[0] = _fit_typing(out[0], cols)   # a long name keeps its end
     else if s.confirm != none
-        out[0] = "Delete " + paths.base(s.confirm) + "? Delete again"
+        # a long name is cut, not the "Delete again" that says what to press
+        let base = paths.base(s.confirm)
+        let room = cols - len("Delete ? Delete again")
+        if cols > 0 and len(base) > room and room >= 4
+            base = slice(base, 0, room - 3) + "..."
+        out[0] = "Delete " + base + "? Delete again"
     else if s.note != none
         out[0] = s.note
     _files_clamp_selection(s, names)
