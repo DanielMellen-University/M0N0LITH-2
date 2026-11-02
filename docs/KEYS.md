@@ -50,6 +50,7 @@ Every key and click the desktop and its apps act on, checked against `shell/wm.r
 | Input | What it does |
 |---|---|
 | Typing | adds to the command line at the cursor |
+| Click the line being typed | puts the cursor there |
 | Left, Right, Home, End | move the cursor in the line |
 | Ctrl+Left, Ctrl+Right | move the cursor by words |
 | Delete | removes the character after the cursor |

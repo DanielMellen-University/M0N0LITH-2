@@ -84,3 +84,34 @@ keys(["ctrl+delete"])
 print(prompt())
 keys(["ctrl+delete", "ctrl+delete"])
 print("to the end", prompt())
+# a click on the line being typed puts the cursor there; on the output it does nothing
+let d = wm.new_desktop(640, 480, wm.default_apps())
+let w = wm.launch(d, wm.terminal)
+for ch in "echo"
+    wm.key(d, ch)
+wm.key(d, "return")
+for ch in "cat abc"
+    wm.key(d, ch)
+fun click_at(r, col)
+    let lines = wm.visible_lines(w)
+    wm.click(d, w.x + wm.text_left + col * wm.char_width + 3, w.y + wm.title_height + wm.text_top + r * wm.line_height + 5)
+    let shown = wm.visible_lines(w)
+    print("click row {r} col {col}:", shown[len(shown) - 1])
+let rows = len(wm.visible_lines(w))
+click_at(rows - 1, 8)
+click_at(rows - 1, 12)
+click_at(rows - 1, 30)
+click_at(rows - 1, 0)
+click_at(rows - 2, 3)
+wm.key(d, "X")
+print(w.state.input)
+# a line that wraps: a click on its second row
+wm.key(d, "end")
+for ch in " 12345678901234567890123456789"
+    if ch == " "
+        wm.key(d, "space")
+    else
+        wm.key(d, ch)
+let rows2 = len(wm.visible_lines(w))
+click_at(rows2 - 1, 2)
+print(w.state.left, w.state.input)

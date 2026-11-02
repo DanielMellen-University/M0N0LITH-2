@@ -875,7 +875,28 @@ fun _term_lines(s)
         j = j - 1
     return out
 
+# A click on the line being typed puts the cursor at the character clicked
+# (past its end: at the end); a click on the output does nothing.
 fun _term_click(s, x, y)
+    if y < text_top or not "rows" in s or s.rows <= 0
+        return none
+    let lines = _term_lines(s)
+    let row = int((y - text_top) / line_height)
+    let head = len(s.cwd) + 2   # "/home> "
+    let at = len(s.input) - _term_left(s)
+    let total = len(_wrap_last(s.cwd + "> " + s.input + "_", s.cols, s.rows * 4))
+    let pieces = math.min(total, len(lines))
+    if row >= len(lines) or row < len(lines) - pieces
+        return none
+    let piece = total - (len(lines) - row)
+    let col = 0
+    if x >= text_left
+        col = int((x - text_left) / char_width)
+    let off = piece * s.cols + col - head
+    if off > at
+        off = off - 1   # the "_" takes a column
+    off = math.max(0, math.min(len(s.input), off))
+    s.left = len(s.input) - off
     return none
 
 # Older output falls off the top, so `cat` of a big file cannot grow the buffer (and the frame time) without limit.

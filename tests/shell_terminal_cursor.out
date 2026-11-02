@@ -21,3 +21,11 @@ delete at the end /home> cat onewo three_
 /home> rm_/file.txt now
 /home> rm_.txt now
 to the end /home> rm_
+click row 3 col 8: /home> c_at abc
+click row 3 col 12: /home> cat _abc
+click row 3 col 30: /home> cat abc_
+click row 3 col 0: /home> _cat abc
+click row 2 col 3: /home> _cat abc
+Xcat abc
+click row 4 col 2: 90_123456789
+9 Xcat abc 12345678901234567890123456789
