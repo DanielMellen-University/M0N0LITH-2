@@ -2579,6 +2579,12 @@ fun _editor_click(s, x, y)
     s.press = none
     if "run" in s and s.run != none
         return none
+    # a click gives up a find, replace or line number, as another key does
+    if "find" in s and s.find != none
+        _editor_find_end(s)
+    if "goto" in s and s.goto != none
+        s.goto = none
+        s.status = s.find_was
     let lines = _editor_relayout(s)
     if "err_line" in s and s.err_line != none and y >= text_top
         # in the IDE, a click on the error in the pane (or the line above it

@@ -42,3 +42,7 @@ Editor [replace: _] /home/welcome.txt
 Editor [find: _] /home/welcome.txt
 Editor [open] /home/welcome.txt
 Editor [find: ...rstuvwxyz0123456789_] 
+Editor [find: h_] /home/welcome.txt
+Editor [edited] /home/welcome.txt hzello
+
+Editor [edited] /home/welcome.txt

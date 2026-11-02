@@ -165,3 +165,17 @@ keys(["ctrl+f"])
 typed("abcdefghijklmnopqrstuvwxyz0123456789")
 print(wm.visible_lines(e4)[0])
 wm.dismiss(d)
+# a click in the text gives up finding, and typing goes in the text again
+e4.state.text = "hello\n"
+e4.state.back = 0
+keys(["ctrl+f", "h"])
+print(wm.visible_lines(e4)[0])
+wm.click(d, e4.x + 20, e4.y + wm.title_height + wm.text_top + wm.line_height + 2)
+wm.release(d)
+keys(["z"])
+print(wm.visible_lines(e4)[0], e4.state.text)
+keys(["ctrl+g", "1"])
+wm.visible_lines(e4)
+wm.click(d, e4.x + 20, e4.y + wm.title_height + wm.text_top + wm.line_height + 2)
+wm.release(d)
+print(wm.visible_lines(e4)[0])
