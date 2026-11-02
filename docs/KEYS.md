@@ -44,7 +44,7 @@ Every key and click the desktop and its apps act on, checked against `shell/wm.r
 | Backspace | removes the character before the cursor |
 | Ctrl+C, Ctrl+X | copies, or cuts, the whole line to the clipboard |
 | Ctrl+Backspace | removes the word before the cursor |
-| Ctrl+U | empties the line |
+| Ctrl+U | removes everything before the cursor (all of it at the end) |
 | Ctrl+Z | brings back the line from before the last Ctrl+U, Ctrl+X, Ctrl+Backspace, Ctrl+Delete or Ctrl+V; again puts it back |
 | Ctrl+V | adds the first line of the clipboard; a path with a space that is there goes in quotes |
 
@@ -66,7 +66,7 @@ Every key and click the desktop and its apps act on, checked against `shell/wm.r
 | Ctrl+C | gives up the line: shown with ^C, not run |
 | Ctrl+Backspace | removes the last word |
 | Ctrl+L | empties the output, like `clear` |
-| Ctrl+U | empties the line being typed |
+| Ctrl+U | removes everything before the cursor, as in a shell (all of it at the end) |
 | Tab | completes a command name, or a file or folder name (in quotes when it has a space); lists the choices when it cannot add more |
 
 The commands are in [the Terminal doc](apps/TERMINAL.md).
@@ -145,7 +145,7 @@ While a run waits for input:
 | Delete, Ctrl+Delete | remove the character, or the word, after the cursor |
 | Ctrl+Backspace | removes the word before the cursor |
 | Ctrl+K | removes the rest of the line after the cursor |
-| Ctrl+U | empties the input line |
+| Ctrl+U | removes everything before the cursor (all of it at the end) |
 | Ctrl+V | adds the first line of the clipboard |
 | Return | sends the line, and the run goes on |
 | Escape, Ctrl+C | stops the run |
