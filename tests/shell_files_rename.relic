@@ -60,6 +60,12 @@ print(title())
 f.state.sel = 0
 keys(["f2"])
 print(title())
+# a long name keeps its end in the title, where the typing is
+vfs.write(fs, "/tmp/r/a-long-name-for-the-files-title.txt", "x")
+pick("a-long-name-for-the-files-title.txt")
+keys(["f2", "x"])
+print(title(), len(title()) <= wm.cols_fit(f))
+wm.dismiss(d)
 # the file set for the next Editor follows a rename, of itself or of its folder
 pick("folder two")
 keys(["return"])

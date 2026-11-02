@@ -1863,6 +1863,10 @@ fun _files_lines(s)
     let out = [_fit_path("Files: ", s.path, cols)]
     if "renaming" in s and s.renaming != none
         out[0] = "rename: " + s.renaming.text + "_"
+        if len(out[0]) > cols
+            # a long name keeps its end, where the typing is
+            let t = s.renaming.text + "_"
+            out[0] = "rename: ..." + slice(t, len(t) - math.max(1, cols - 11), len(t))
     else if s.confirm != none
         out[0] = "Delete " + paths.base(s.confirm) + "? Delete again"
     else if s.note != none
