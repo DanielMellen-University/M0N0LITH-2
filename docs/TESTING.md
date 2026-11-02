@@ -93,7 +93,7 @@ Write `tests/shell_<topic>.relic`, run it, read its output, and save that as `te
 | Test | What it covers |
 |---|---|
 | `shell_terminal` | Terminal commands: extra spaces, folders, redirects, errors, `wc`, `cp` (to a name or into a folder, not a folder, not over a file) and `head`; `cat` with several files; `tail` and `grep`; `find` |
-| `shell_terminal_history` | the Terminal keeps its last 200 lines |
+| `shell_terminal_history` | the Terminal keeps its last 200 lines; `!N` runs command N of history again, and says when there is none |
 | `shell_terminal_recall` | Up and Down through earlier commands, the line being typed kept, blanks and repeats not kept, editing a recalled line, the last 50, and `history` listing them numbered |
 | `shell_terminal_keys` | Ctrl+C gives up the line (shown with ^C, not run or kept, ends a recall), Ctrl+L empties the output and keeps the line, Ctrl+Backspace takes off the last word there and in Notes, Ctrl+U empties the line, `!!` runs the command before (or says there is none) |
 | `shell_terminal_complete` | Tab: command names, names in the current folder and in a typed one (absolute, `..`, `.`), a folder gets `/`, several go as far as they agree or are listed, nothing for no match or a missing folder; every command `help` lists completes to itself; a name with a space goes in quotes, and a word begun with a quote completes from inside it |

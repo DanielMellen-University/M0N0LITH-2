@@ -28,3 +28,25 @@ type("clear")
 print(len(t.state.buf))
 type("echo after")
 print(t.state.buf)
+# !N runs command N of history again, as history numbers them, shown as it runs
+let h = wm.terminal.init()
+fun hrun(line)
+    for c in line
+        if c == " "
+            wm.terminal.on_key(h, "space")
+        else
+            wm.terminal.on_key(h, c)
+    wm.terminal.on_key(h, "return")
+hrun("echo first")
+hrun("echo second")
+h.buf = []
+hrun("!1")
+print(h.buf)
+h.buf = []
+hrun("history")
+print(h.buf)
+h.buf = []
+hrun("!9")
+hrun("!0")
+hrun("!x")
+print(h.buf)

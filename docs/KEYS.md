@@ -59,7 +59,7 @@ Every key and click the desktop and its apps act on, checked against `shell/wm.r
 | Delete | removes the character after the cursor |
 | Ctrl+Delete | removes on to the end of the next word |
 | Backspace | removes the character before the cursor |
-| Return | runs the command; `!!` runs the one before again |
+| Return | runs the command; `!!` runs the one before again, `!N` command N of `history` |
 | Ctrl+V | adds the first line of the clipboard |
 | Up, Down | the command before, or after, from the last 50 run; Down past the newest gives back the line being typed |
 | Ctrl+C | gives up the line: shown with ^C, not run |
