@@ -938,6 +938,15 @@ fun _pack(words, width)
         append(lines, line)
     return lines
 
+# A name as ls and find show it: in quotes when it has a space, so the two
+# spaces between names stay readable and it can be typed back as one word.
+fun _term_name(name)
+    if not strings.contains(name, " ")
+        return name
+    if strings.contains(name, "\"")
+        return "'" + name + "'"
+    return "\"" + name + "\""
+
 fun _term_ls(s, parts)
     if len(parts) > 1 and _term_not_folder(s, "ls", parts[1], false)
         return
@@ -946,14 +955,14 @@ fun _term_ls(s, parts)
         _term_reply(s, "ls: " + _term_missing(s, p))
         return
     if not vfs.is_dir(s.fs, p)
-        _term_reply(s, paths.base(p))
+        _term_reply(s, _term_name(paths.base(p)))
         return
     let names = []
     for e in vfs.entries(s.fs, p)
         if e[1]
-            append(names, e[0] + "/")
+            append(names, _term_name(e[0] + "/"))
         else
-            append(names, e[0])
+            append(names, _term_name(e[0]))
     for line in _pack(names, s.cols)
         _term_reply(s, line)
 
@@ -1271,9 +1280,9 @@ fun _term_find_in(s, dir, rel, word, out)
             shown = rel + "/" + e[0]
         if strings.contains(e[0], word)
             if e[1]
-                append(out, shown + "/")
+                append(out, _term_name(shown + "/"))
             else
-                append(out, shown)
+                append(out, _term_name(shown))
         if e[1]
             _term_find_in(s, paths.join(dir, e[0]), shown, word, out)
 
