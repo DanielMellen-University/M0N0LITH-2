@@ -113,7 +113,7 @@ The commands are in [the Terminal doc](apps/TERMINAL.md).
 | Ctrl+L | selects the line with its newline; again adds the next line |
 | Ctrl+D | puts a copy of the line, or of the selected lines, under it |
 | Ctrl+K | removes the line, or the selected lines, with the newline |
-| Ctrl+J | joins the next line onto this one with a space |
+| Ctrl+J | joins the next line onto this one with a space, or all the selected lines into one |
 | Ctrl+Up, Ctrl+Down | moves the line, or the selected lines, above the one before or below the one after |
 | Ctrl+C, Ctrl+X | copies, or cuts, the selection to the desktop's clipboard (shared by all windows, not the system's) |
 | Ctrl+V | pastes it, over any selection |

@@ -46,3 +46,5 @@ ctrl+shift+left ctrl+shift+end ctrl+s
 ["    a\n\n      b\n    c"] ["    a\n\n      b\n    c"]
 ["a\n\nb\nc"] ["a\n\nb\nc"]
 ["a\n\n    b\nc"]
+["one two\nthree\nfour"] ["one two"]
+["one\n  two\n\nthree\nfour"]

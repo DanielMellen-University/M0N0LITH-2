@@ -2218,6 +2218,22 @@ fun _editor_shift_lines(s, sel, more)
     s.mark = len(s.text) - from
     _editor_set_pos(s, from + len(block))
 
+# Ctrl+J over a selection on several lines: they all become one, joined as
+# Ctrl+J joins two, in one undo step, the line staying selected.
+fun _editor_join_lines(s, sel)
+    let from = _line_start(s.text, sel[0])
+    let to = _line_end(s.text, _sel_last(s.text, sel))
+    let lines = strings.split(slice(s.text, from, to), "\n")
+    let out = lines[0]
+    for line in slice(lines, 1, len(lines))
+        let t = strings.trim_start(line)
+        if out != "" and t != ""
+            out = out + " "
+        out = out + t
+    _editor_change(s, from, to - from, out)
+    s.mark = len(s.text) - from
+    _editor_set_pos(s, from + len(out))
+
 fun _editor_dedent(s)
     let sel = _editor_selection(s)
     if sel != none
@@ -2941,6 +2957,10 @@ fun _editor_key(s, k)
         # joins the next line onto the cursor's: its newline and leading spaces
         # become one space (none after an empty line), the cursor at the join
         s.overwrite = false
+        let sel = _editor_selection(s)
+        if sel != none and _line_end(s.text, sel[0]) < _sel_last(s.text, sel)
+            _editor_join_lines(s, sel)
+            return
         let at = _line_end(s.text, _editor_pos(s))
         if at < len(s.text)
             let n = 1

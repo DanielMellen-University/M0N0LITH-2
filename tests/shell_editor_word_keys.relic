@@ -194,3 +194,14 @@ e.app.on_key(s, "shift+tab")
 print([s.text], [chosen()])
 e.app.on_key(s, "ctrl+z")
 print([s.text])
+# Ctrl+J over a selection on several lines joins them all, one undo step
+s.text = "one\n  two\n\nthree\nfour"
+s.back = len(s.text)
+s.mark = none
+e.app.on_key(s, "shift+down")
+e.app.on_key(s, "shift+down")
+e.app.on_key(s, "shift+down")
+e.app.on_key(s, "ctrl+j")
+print([s.text], [chosen()])
+e.app.on_key(s, "ctrl+z")
+print([s.text])
