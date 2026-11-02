@@ -1678,9 +1678,12 @@ fun _term_key(s, k)
         s.left = math.min(n, left + 1)
     else if k == "right"
         s.left = math.max(0, left - 1)
-    else if k == "home"
-        s.left = n
-    else if k == "end"
+    else if k == "home" or k == "ctrl+a"
+        s.left = n   # Ctrl+A and Ctrl+E as in a shell
+    else if k == "end" or k == "ctrl+e"
+        s.left = 0
+    else if k == "ctrl+k"
+        s.input = slice(s.input, 0, n - left)   # the rest of the line, as in a shell
         s.left = 0
     else if k == "ctrl+left"
         s.left = n - _word_left(s.input, n - left)    # word jumps as in the Editor

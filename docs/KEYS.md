@@ -53,7 +53,8 @@ Every key and click the desktop and its apps act on, checked against `shell/wm.r
 |---|---|
 | Typing | adds to the command line at the cursor |
 | Click the line being typed | puts the cursor there |
-| Left, Right, Home, End | move the cursor in the line |
+| Left, Right, Home, End | move the cursor in the line (Ctrl+A and Ctrl+E too, as in a shell) |
+| Ctrl+K | removes the rest of the line after the cursor |
 | Ctrl+Left, Ctrl+Right | move the cursor by words |
 | Delete | removes the character after the cursor |
 | Ctrl+Delete | removes on to the end of the next word |

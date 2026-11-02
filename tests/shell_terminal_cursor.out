@@ -29,3 +29,6 @@ click row 2 col 3: /home> _cat abc
 Xcat abc
 click row 4 col 2: 90_123456789
 9 Xcat abc 12345678901234567890123456789
+ctrl+a 7
+ctrl+e 0
+ctrl+k ls / 0

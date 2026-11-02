@@ -115,3 +115,19 @@ for ch in " 12345678901234567890123456789"
 let rows2 = len(wm.visible_lines(w))
 click_at(rows2 - 1, 2)
 print(w.state.left, w.state.input)
+# Ctrl+A and Ctrl+E go to the start and end, Ctrl+K removes the rest of the line
+wm.key(d, "ctrl+u")
+wm.key(d, "end")
+wm.key(d, "ctrl+u")
+for ch in "ls /tmp"
+    if ch == " "
+        wm.key(d, "space")
+    else
+        wm.key(d, ch)
+wm.key(d, "ctrl+a")
+print("ctrl+a", w.state.left)
+wm.key(d, "ctrl+e")
+print("ctrl+e", w.state.left)
+wm.key(d, "ctrl+left")
+wm.key(d, "ctrl+k")
+print("ctrl+k", w.state.input, w.state.left)
