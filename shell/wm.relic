@@ -1008,7 +1008,7 @@ fun _term_wc(s, path)
         else if not inside
             inside = true
             words = words + 1
-    _term_reply(s, "{strings.count(text, "\n")} {words} {len(text)} {path}")
+    _term_reply(s, "{strings.count(text, "\n")} {words} {len(text)} " + _term_name(path))   # quoted like ls when it has a space
 
 fun _term_cd(s, parts)
     let p = _term_optional_path(s, parts, "/home")

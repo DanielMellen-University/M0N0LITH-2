@@ -4,7 +4,7 @@ made true
 ["/home> cat \"my notes.txt\"", "first line"]
 ["/home> echo more >> 'my notes.txt'"]
 ["/home> cat 'my notes.txt'", "first line", "more"]
-["/home> wc \"my notes.txt\"", "2 3 16 my notes.txt"]
+["/home> wc \"my notes.txt\"", "2 3 16 \"my notes.txt\""]
 ["/home> mkdir \"a folder\""]
 ["/home> mv 'my notes.txt' \"a folder\""]
 ["/home> ls \"a folder\"", "\"my notes.txt\""]

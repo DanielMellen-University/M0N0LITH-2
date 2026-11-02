@@ -27,7 +27,7 @@ Commands split on spaces. A part in double or single quotes is one word with its
 | `ls [path]` | lists a folder (the current one without a path), folders with a `/` after them, packed into lines that fit the window; for a file, prints its name |
 | `cat path...` | prints a file, or several one after another (only the last 200 lines are kept, like any output); a missing one is an error and the rest still print |
 | `cp from to` | copies a file to a new name, or into `to` when it is a folder; a folder is not copied, and a file already there is not written over |
-| `wc path` | the file's lines (its newlines, as Unix counts them), words and characters, then the path |
+| `wc path` | the file's lines (its newlines, as Unix counts them), words and characters, then the path (in quotes when it has a space, as `ls` shows names) |
 | `head path [lines]` | the first 10 lines of a file, or as many as `lines` says (a whole number in digits; 0 prints nothing) |
 | `tail path [lines]` | the last 10 lines of a file, or as many as `lines` says |
 | `find text` | every file and folder under the current folder whose own name has `text` in it, as paths from there (folders with a `/` after them), in the order `ls` gives, each folder followed by what is in it |
