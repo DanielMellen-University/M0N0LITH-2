@@ -6,3 +6,8 @@ list true false true
 same windows 20 true
 title
 false true
+Editor ctrl+f true false true
+Editor ctrl+h true false true
+Editor ctrl+g true false true
+Paint n true false true
+Files f2 true false true

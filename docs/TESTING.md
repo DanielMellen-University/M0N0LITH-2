@@ -42,7 +42,7 @@ Write `tests/shell_<topic>.relic`, run it, read its output, and save that as `te
 | `shell_missed_release` | a lost mouse-up does not leave a drag running |
 | `shell_outside_click` | presses outside the desktop do not hit its controls |
 | `shell_title` | window titles fit beside the title bar buttons |
-| `shell_escape` | Escape closes the Start menu or +N list before it quits |
+| `shell_escape` | Escape closes the Start menu or +N list before it quits, and gives up a find, a line number or a name once |
 
 ### Taskbar
 

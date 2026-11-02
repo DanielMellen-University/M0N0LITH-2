@@ -17,3 +17,15 @@ print("same windows", len(d.windows), wm.focused(d).id == top)
 let w = wm.focused(d)
 print(wm.click(d, w.x + 5, w.y + 4))
 print(wm.dismiss(d), d.drag != none)
+wm.release(d)
+# Escape gives up what a window is asking for, once; the next one is not taken
+let d2 = wm.new_desktop(640, 480, wm.default_apps())
+for pair in [[wm.editor, "ctrl+f"], [wm.editor, "ctrl+h"], [wm.editor, "ctrl+g"], [wm.paint_app, "n"], [wm.files_app, "f2"]]
+    let w2 = wm.launch(d2, pair[0])
+    if pair[0] == wm.files_app
+        wm.visible_lines(w2)
+        w2.state.sel = 1
+    wm.key(d2, pair[1])
+    let asking = wm.visible_lines(w2)[0]
+    print(pair[0].name, pair[1], wm.dismiss(d2), wm.dismiss(d2), asking != wm.visible_lines(w2)[0])
+    wm.close(d2, w2.id)
