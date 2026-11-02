@@ -14,7 +14,7 @@ Input goes in through four calls, or through `handle(d, e)`, which takes one `gr
 | Call | What it does |
 |---|---|
 | `click(d, x, y)` | a press: Start, a tab, a window's x or _ box, its title (starts a move), its corner (starts a resize), or the app inside. Gives a word for what it hit: `launch`, `start`, `overflow`, `tab`, `minimize`, `bar`, `close`, `title`, `resize`, `app`, `desktop` |
-| `motion(d, x, y)` | moves or resizes the window being dragged, if any, or passes the pointer to an app with `on_drag` after a press in it (Paint) |
+| `motion(d, x, y)` | moves or resizes the window being dragged, if any, or passes the pointer to an app with `on_drag` after a press in it (Paint draws, the Editor and the IDE select) |
 | `tick(d, ms)` | the clock for the focused window's app, if it has `on_tick` (Snake) |
 | `release(d)` | ends a drag |
 | `dismiss(d)` | Escape: closes the Start menu and the hidden-windows list, or else passes Escape to the focused window's `on_escape` if its app has one (the IDE stops a run waiting for input). True if something took it; desktop.relic quits on an Escape that nothing took, unless the key is held down and repeating |
@@ -39,10 +39,10 @@ When even `min_tab` tabs would run off the bar (more than 13 windows on a 640 pi
 An app is a map: `name`, `width`, `height`, `init()`, `lines(state)`, `on_click(state, x, y)` and `on_key(state, key)`. `lines` gives the text rows. `visible_lines(w)` cuts them to what fits the window, which is what `desktop.relic` draws, so no text leaves its window. Optional fields change how rows are chosen and what else the app takes:
 
 - `tail: true` and `pinned: n` for an app you type into at the end (Terminal, Editor, IDE, Notes): the first `n` lines stay, then the last ones that fit. Before it asks an app of this kind for `lines`, `visible_lines` puts the window's `rows` and `cols` in the app's state; Editor builds only `rows` lines of a big file, and Terminal wraps its output to `cols` and builds only the last `rows` rows.
-- `marks(state)` for highlighted text (the selection in the Editor and the IDE): `[line, from, to]` in the lines `lines` gave. `mark_boxes(w)` turns them into `[x, y, w, h]` boxes for the lines the last `visible_lines(w)` showed, and `desktop.relic` draws them behind the text.
+- `marks(state)` for highlighted text (the selection in the Editor and the IDE): `[line, from, to]` in the lines `lines` gave. `mark_boxes(w)` turns them into `[x, y, w, h]` boxes for the lines the last `visible_lines(w)` showed, and `desktop.relic` draws them behind the text. `visible_lines` also keeps which of the app's lines it showed in `state.shown_lines`, which the Editor reads to turn a click into a place in the text.
 - `selected(state)` for a list (Files): the title line stays and the list scrolls just far enough to show the selected line. `visible_lines` puts the window's `cols` in its state too, and Files shortens a long folder path in its title to fit.
 - `on_escape(state)` for an app that takes Escape (the Editor and the IDE while text is selected, the IDE during a run, and Paint while a name is typed): `dismiss(d)` calls it for the focused window once no menu or list was open to close, and it gives true when it used the key. The IDE uses it to stop a run that waits for input; any other time it gives false and Escape quits as before.
-- `on_drag(state, x, y)` for an app you draw in (Paint): after a press inside the window's content, `motion(d, x, y)` passes the pointer to it, in content coordinates, until `release(d)`.
+- `on_drag(state, x, y)` for an app you draw or select in (Paint, the Editor and the IDE): after a press inside the window's content, `motion(d, x, y)` passes the pointer to it, in content coordinates, until `release(d)`.
 - `on_tick(state, ms)` for an app that moves on its own (Snake): `tick(d, ms)` passes the clock in milliseconds to the focused window's app; `desktop.relic` calls it every frame with `graphics.ticks()`, and tests pass their own times.
 - `paint(state)` for an app that draws more than text (Paint, Snake): `[x, y, w, h, r, g, b]` boxes in content coordinates. `paint_boxes(w)` cuts them to the window's content and moves them to desktop coordinates, and `desktop.relic` draws them under the text.
 
