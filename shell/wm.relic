@@ -1598,7 +1598,8 @@ fun _term_left(s)
         return 0
     return math.max(0, math.min(s.left, len(s.input)))
 
-# Left, Right, Home and End move the cursor in the line; typing, Backspace,
+# Left, Right, Home and End move the cursor in the line, Ctrl+Left and
+# Ctrl+Right by words, and Delete takes the character after it; typing, Backspace,
 # Tab and the other editing keys work at it, on the part before it. Return,
 # Up, Down and Ctrl+C take the whole line and put the cursor back at the end.
 fun _term_key(s, k)
@@ -1612,6 +1613,15 @@ fun _term_key(s, k)
         s.left = n
     else if k == "end"
         s.left = 0
+    else if k == "ctrl+left"
+        s.left = n - _word_left(s.input, n - left)    # word jumps as in the Editor
+    else if k == "ctrl+right"
+        s.left = n - _word_right(s.input, n - left)
+    else if k == "delete"
+        # the character after the cursor (none at the end)
+        if left > 0
+            s.input = slice(s.input, 0, n - left) + slice(s.input, n - left + 1, n)
+            s.left = left - 1
     else if k in ["return", "enter", "up", "down", "ctrl+c"] or left == 0
         s.left = 0
         _term_edit(s, k)

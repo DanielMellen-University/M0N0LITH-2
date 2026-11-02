@@ -12,3 +12,9 @@ hi there /home> _
 /home> echo hi there_
 /home> echo hi there^C /home> _
 /home> aPASTE_b
+/home> cat one/two _three
+/home> cat _one/two three
+ctrl+left at the start /home> _cat one/two three
+/home> cat one_/two three
+delete twice /home> cat one_wo three
+delete at the end /home> cat onewo three_
