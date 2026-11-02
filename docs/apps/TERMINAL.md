@@ -31,7 +31,7 @@ Commands split on spaces. A part in double or single quotes is one word with its
 | `head path [lines]` | the first 10 lines of a file, or as many as `lines` says (a whole number in digits; 0 prints nothing) |
 | `tail path [lines]` | the last 10 lines of a file, or as many as `lines` says |
 | `find text` | every file and folder under the current folder whose own name has `text` in it, as paths from there (folders with a `/` after them), in the order `ls` gives, each folder followed by what is in it |
-| `grep text path` | the lines of a file that have `text` in them: plain text, not a pattern, and case counts |
+| `grep text path` | the lines of a file that have `text` in them: plain text, not a pattern, and case counts; quote it to look for words with spaces (`grep "old pond" poem.txt`) |
 | `sort path` | the lines of a file in order, by character (capitals before small letters); the file is not changed |
 | `uniq path` | the lines of a file, leaving out a line the same as the one just before it (so a repeat further on stays, as in Unix) |
 | `nl path` | the lines of a file, each after its number from 1, as `history` numbers commands |
