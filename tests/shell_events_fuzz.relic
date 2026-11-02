@@ -1,9 +1,10 @@
 # Random app input on all eight apps (fixed seeds): every app's keys (Paint's
 # tools and save as, Snake's turns, the IDE's run and input, the Editor's
-# selection), double clicks, drags in and out of windows, clock ticks and
+# selection), double and triple clicks, drags in and out of windows, clock ticks and
 # Escape, on a desktop where Files, Paint and the IDE share one filesystem.
 # Nothing may fail, and after every step each window's lines fit it and its
-# boxes stay inside its content.
+# boxes stay inside its content, and the Editor's and the IDE's cursor and
+# selection end stay inside their text.
 use ../shell/wm
 let seed = 0
 fun rnd(n)
@@ -18,6 +19,11 @@ fun check(step, what)
         if len(lines) > wm.rows_fit(w)
             print("step", step, what, w.app.name, "too many lines")
             bad = bad + 1
+        if "marks" in w.app
+            let n = len(w.state.text)
+            if w.state.back < 0 or w.state.back > n or (w.state.mark != none and (w.state.mark < 0 or w.state.mark > n))
+                print("step", step, what, w.app.name, "cursor out", w.state.back, w.state.mark, n)
+                bad = bad + 1
         let top = w.y + wm.title_height
         for b in wm.paint_boxes(w)
             if b[0] < w.x or b[1] < top or b[0] + b[2] > w.x + w.width or b[1] + b[3] > top + w.height or b[2] <= 0 or b[3] <= 0
@@ -36,7 +42,7 @@ for seed0 in [2026, 4242]
             what = "launch"
             counts[w.app.name] = true
         else if a < 30
-            d.clicks = 1 + rnd(2)
+            d.clicks = 1 + rnd(3)
             wm.click(d, rnd(640), rnd(480))
             d.clicks = 1
             what = "click"
