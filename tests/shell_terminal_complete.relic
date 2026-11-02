@@ -46,3 +46,12 @@ for line in listed
         if tab(word) != word + " "
             append(missing, word)
 print("help commands Tab misses:", missing)
+# a name with a space goes in quotes (open for a folder), and a word begun
+# with a quote, or with spaces in quotes, completes from inside them
+t.cwd = "/home"
+vfs.make_dir(t.fs, "/home/old stuff")
+vfs.write(t.fs, "/home/old stuff/a b.txt", "x")
+vfs.write(t.fs, "/home/my notes.txt", "x")
+vfs.write(t.fs, "/home/my notes 2.txt", "x")
+print([tab("cat ol"), tab("cat \"ol"), tab("cat 'ol"), tab("cat \"old stuff/a"), tab("cat old' 'stuff/"), tab("cat my")])
+print([tab("cat \"my notes.txt\" dr"), tab("echo \"a b\" > dr")])

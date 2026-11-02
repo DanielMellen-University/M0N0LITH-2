@@ -1502,9 +1502,29 @@ fun _after_last(text, c)
 fun _term_complete(s)
     if strings.trim(s.input) == ""
         return   # nothing typed: nothing to complete, and no list of every command
-    let cut = _after_last(s.input, " ")
+    # the last word starts after the last space outside quotes; it is read
+    # without its quotes, and one that started with a quote keeps it
+    let cut = 0
+    let q = ""
+    let i = 0
+    for c in s.input
+        if q != ""
+            if c == q
+                q = ""
+        else if c == "\"" or c == "'"
+            q = c
+        else if c == " "
+            cut = i + 1
+        i = i + 1
     let head = slice(s.input, 0, cut)
-    let word = slice(s.input, cut, len(s.input))
+    let raw = slice(s.input, cut, len(s.input))
+    let split = _split_words(raw + q)
+    let word = ""
+    if len(split.words) > 0
+        word = split.words[0]
+    let mark = ""
+    if len(raw) > 0 and (raw[0] == "\"" or raw[0] == "'")
+        mark = raw[0]
     let folder = ""
     let names = []
     let dirs = []
@@ -1528,15 +1548,20 @@ fun _term_complete(s)
             append(found, n)
     if len(found) == 0
         return
+    # a name with a space goes in quotes (left open for a folder, so Tab can go on in it)
     if len(found) == 1
-        let end = " "
+        if mark == "" and strings.contains(folder + found[0], " ")
+            mark = "\""
+        let end = mark + " "
         if found[0] in dirs
             end = "/"
-        s.input = head + folder + found[0] + end
+        s.input = head + mark + folder + found[0] + end
         return
     let common = _common_start(found)
     if len(common) > len(part)
-        s.input = head + folder + common
+        if mark == "" and strings.contains(folder + common, " ")
+            mark = "\""
+        s.input = head + mark + folder + common
     else
         _term_reply(s, s.cwd + "> " + s.input)
         _term_reply(s, strings.join(found, "  "))

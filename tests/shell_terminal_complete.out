@@ -5,3 +5,5 @@
 ["sort ", "uniq ", "nl "]
 4 help lines of commands
 help commands Tab misses: []
+["cat \"old stuff/", "cat \"old stuff/", "cat 'old stuff/", "cat \"old stuff/a b.txt\" ", "cat \"old stuff/a b.txt\" ", "cat \"my notes"]
+["cat \"my notes.txt\" draft.txt ", "echo \"a b\" > draft.txt "]
