@@ -123,7 +123,7 @@ The commands are in [the Terminal doc](apps/TERMINAL.md).
 | Ctrl+F | find: type the text, Return selects the next match after the cursor (going round to the start); Esc or another key stops. With a selection on one line it starts with that, and typing replaces it |
 | F3, Shift+F3 | finds the last text again, the next or the one before |
 | Ctrl+G | go to a line: type its number, Return |
-| Ctrl+H | replace: the text, Return, what goes in its place, Return replaces every one (one undo step) |
+| Ctrl+H | replace: the text, Return, what goes in its place, Return replaces every one (one undo step); starts with a selection on one line, as Ctrl+F does |
 
 ## IDE
 

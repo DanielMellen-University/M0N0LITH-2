@@ -2778,9 +2778,13 @@ fun _editor_key(s, k)
         s.overwrite = false
         s.find_was = s.status
         s.find = ""
-        s.find_new = false
         s.replacing = ""
-        s.status = "replace: _"
+        # like Ctrl+F, a selection on one line is the text, and typing replaces it
+        let sel = _editor_selection(s)
+        if sel != none and not strings.contains(slice(s.text, sel[0], sel[1]), "\n")
+            s.find = slice(s.text, sel[0], sel[1])
+        s.find_new = s.find != ""
+        s.status = "replace: " + s.find + "_"
         return
     if k == "ctrl+f"
         s.overwrite = false

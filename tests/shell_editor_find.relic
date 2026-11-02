@@ -140,3 +140,16 @@ print(e3.state.text, "|", wm.visible_lines(e3)[0])
 keys(["ctrl+h", "return"])
 print(wm.visible_lines(e3)[0])
 wm.dismiss(d)
+# Ctrl+H with a selection on one line starts with it; typing replaces it
+e3.state.text = "dog and dog"
+e3.state.back = len(e3.state.text)
+e3.state.mark = len(e3.state.text)
+keys(["shift+right", "shift+right", "shift+right", "ctrl+h"])
+print(wm.visible_lines(e3)[0])
+keys(["return", "c", "a", "t", "return"])
+print(e3.state.text, "|", e3.state.status)
+# across lines it starts empty
+e3.state.text = "a\nb"
+keys(["ctrl+a", "ctrl+h"])
+print(wm.visible_lines(e3)[0])
+wm.dismiss(d)

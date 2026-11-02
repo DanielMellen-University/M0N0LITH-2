@@ -45,7 +45,7 @@ The status is one of:
 | Ctrl+Y | does again what Ctrl+Z undid, until the next edit |
 | Ctrl+S | saves |
 | Ctrl+F | finds: type the text (the title shows `find: text_`), and Return selects the next place it is after the cursor, going round to the start; `(not found)` when it is nowhere. Case counts. With a selection on one line, Ctrl+F starts with it as the text, and typing replaces it (Backspace edits it). Backspace, Ctrl+Backspace, Ctrl+U and Ctrl+V edit the text; Esc, or any other key, stops finding, and that key then does what it always does |
-| Ctrl+H | replaces: type the text (`replace: text_`), Return, then what goes in its place (`with: text_`), and Return again replaces every place it is, in one undo step; the title says `replaced N`, or `not found: text`. The cursor goes to the start. Esc or another key gives up |
+| Ctrl+H | replaces: type the text (`replace: text_`), Return, then what goes in its place (`with: text_`), and Return again replaces every place it is, in one undo step; the title says `replaced N`, or `not found: text`. The cursor goes to the start. As with Ctrl+F, a selection on one line is the text to start with, and typing replaces it. Esc or another key gives up |
 | Ctrl+G | goes to a line: type its number (`line: N_`, digits only), and Return puts the cursor at its start, or on the last line when the number is past the end; the title then says `line N`. Esc or another key gives up |
 | F3, Shift+F3 | the last text found again: the next place, or with Shift the one before (both go round); `not found: text` when it is gone |
 
