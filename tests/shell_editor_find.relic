@@ -160,3 +160,8 @@ print(wm.visible_lines(e4)[0])
 wm.dismiss(d)
 keys(["f3"])
 print(wm.visible_lines(e4)[0])
+# a find text too long for the title keeps its end, where the typing is
+keys(["ctrl+f"])
+typed("abcdefghijklmnopqrstuvwxyz0123456789")
+print(wm.visible_lines(e4)[0])
+wm.dismiss(d)

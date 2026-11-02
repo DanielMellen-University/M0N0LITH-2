@@ -609,6 +609,18 @@ fun handle(d, e)
 fun rows_fit(w) = math.max(1, int((w.height - 4) / line_height))
 fun cols_fit(w) = math.max(1, int((w.width - text_left - 2) / char_width))
 
+# A prompt such as "find: text_" in at most cols characters: its label, then
+# "..." and the end of the text, where the typing is.
+fun _fit_typing(prompt, cols)
+    if len(prompt) <= cols
+        return prompt
+    let label = ""
+    let at = strings.find(prompt, ": ")
+    if at >= 0
+        label = slice(prompt, 0, at + 2)
+    let room = math.max(1, cols - len(label) - 3)
+    return label + "..." + slice(prompt, len(prompt) - room, len(prompt))
+
 fun _fit(text, cols, keep_end)
     if len(text) <= cols
         return text
@@ -1863,10 +1875,7 @@ fun _files_lines(s)
     let out = [_fit_path("Files: ", s.path, cols)]
     if "renaming" in s and s.renaming != none
         out[0] = "rename: " + s.renaming.text + "_"
-        if len(out[0]) > cols
-            # a long name keeps its end, where the typing is
-            let t = s.renaming.text + "_"
-            out[0] = "rename: ..." + slice(t, len(t) - math.max(1, cols - 11), len(t))
+        out[0] = _fit_typing(out[0], cols)   # a long name keeps its end
     else if s.confirm != none
         out[0] = "Delete " + paths.base(s.confirm) + "? Delete again"
     else if s.note != none
@@ -2428,11 +2437,15 @@ fun first_lines(text, count)
 # view, the others their start. s.marks gets the selected part of each line as
 # [line, from, to] (line 0 is the title), for marks().
 fun _editor_lines(s)
-    let head = "Editor [" + s.status + "] "
-    let title = head + s.path + "  (ctrl+s save)"
     let cols = 0
     if "cols" in s and s.cols > 0
         cols = s.cols
+    let head = "Editor [" + s.status + "] "
+    let asking = ("find" in s and s.find != none) or ("goto" in s and s.goto != none)
+    if asking and cols > 0 and len(head) > cols
+        # a long find or replace text keeps its end, where the typing is
+        head = "Editor [" + _fit_typing(s.status, cols - 10) + "] "
+    let title = head + s.path + "  (ctrl+s save)"
     if cols > 0 and len(title) > cols
         title = head + s.path
         if len(head) + 4 <= cols
