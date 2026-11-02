@@ -12,5 +12,6 @@ rename: ...he-files-title.txtx_
 Files: /tmp/r ["..", "a-long-name-for-the-files-title.txt", "b.txt", "c.md", "folder two"]
 Delete a-long-...? Delete again
 Files: /tmp/r
+Files: /tmp/r c.md
 /tmp/r/three/moved.txt z
 /tmp/four/moved.txt

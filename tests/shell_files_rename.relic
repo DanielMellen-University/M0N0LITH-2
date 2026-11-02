@@ -78,6 +78,10 @@ print(title())
 wm.click(d, f.x + 20, f.y + wm.title_height + wm.text_top + 2)
 wm.release(d)
 print(title())
+# another key, such as Down, gives up the rename and does what it does
+pick("b.txt")
+keys(["f2", "x", "down"])
+print(title(), f.state.names[f.state.sel])
 # the file set for the next Editor follows a rename, of itself or of its folder
 pick("folder two")
 keys(["return"])

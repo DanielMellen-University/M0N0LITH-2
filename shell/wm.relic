@@ -1995,6 +1995,10 @@ fun _files_rename_key(s, k)
         r.text = r.text + " "
     else if len(k) == 1
         r.text = r.text + k
+    else
+        # another key (an arrow, Delete, F2) gives up the rename and does what it does
+        s.renaming = none
+        _files_key(s, k)
 
 fun _files_escape(s)
     if "renaming" in s and s.renaming != none
