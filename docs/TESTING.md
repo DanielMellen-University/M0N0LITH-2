@@ -190,4 +190,4 @@ Write `tests/shell_<topic>.relic`, run it, read its output, and save that as `te
 | `shell_shared_desktops` | shared filesystem and Editor path across desktop maps |
 | `shell_fuzz` | random input against the window model, checking invariants each step |
 | `shell_apps_fuzz` | random Terminal commands with Files and Editor on the same filesystem |
-| `shell_events_fuzz` | random input for all eight apps (their keys, double and triple clicks, drags, clock ticks, Escape): nothing fails, lines fit, boxes stay in the window, and the Editor and IDE cursor and selection stay in their text |
+| `shell_events_fuzz` | random input for all eight apps (their keys, find and the Terminal line keys among them, double and triple clicks, drags, clock ticks, Escape): nothing fails, lines fit, boxes stay in the window, and the Editor and IDE cursor and selection stay in their text |
