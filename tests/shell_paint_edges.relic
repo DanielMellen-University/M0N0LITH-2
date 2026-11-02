@@ -65,3 +65,12 @@ print(wm.visible_lines(p2)[0])
 wm.key(d, "ctrl+v")
 wm.key(d, "return")
 print(s2.path, vfs.exists(s2.fs, "/tmp/sketch.paint"))
+# a name too long for the window keeps its end, where the typing is; a wider
+# window shows the hint again
+wm.key(d, "n")
+for ch in "/tmp/a-long-name-for-paint"
+    wm.key(d, ch)
+print(wm.visible_lines(p2)[0])
+p2.width = 620
+print(wm.visible_lines(p2)[0])
+wm.dismiss(d)

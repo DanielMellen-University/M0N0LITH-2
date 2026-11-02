@@ -648,8 +648,7 @@ fun visible_lines(w)
     if tail
         # lets an app build only the lines that can show, and wrap at the window's width
         w.state.rows = rows
-    if tail or "selected" in w.app
-        w.state.cols = cols_fit(w)   # Files shortens its title path to this
+    w.state.cols = cols_fit(w)   # Files shortens its title path to this, Paint its name prompt
     if "selected" in w.app
         w.state.rows = rows   # Files pages by it (a click sets it too)
     let lines = w.app.lines(w.state)
@@ -3671,7 +3670,11 @@ fun _paint_key(s, k)
 
 fun _paint_lines(s)
     if s.naming != none
-        return ["Paint save as: {s.naming}_ (return saves, esc cancels)"]
+        let ask = "Paint save as: {s.naming}_ (return saves, esc cancels)"
+        if "cols" in s and len(ask) > s.cols
+            # too narrow for the hint: the name, keeping its end where the typing is
+            ask = _fit_typing("Paint save as: {s.naming}_", s.cols)
+        return [ask]
     let tool = str(s.size)
     if s.tool == "fill" or s.tool == "pick"
         tool = s.tool
