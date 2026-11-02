@@ -10,7 +10,7 @@ Ctrl+R (or F5, or Ctrl+Return) runs the text in the buffer, saved or not. The pr
 
 - `print` and `eprint` lines go to the output pane. The pane shows the last 6 lines and keeps the last 200.
 - The status becomes `ran`, `error`, `waiting for input` or `stopped`.
-- An error in the program shows as `line L: message`, and the pane's header says `ctrl+e: to line L`. Ctrl+E puts the cursor at the start of that line. An error inside a module the program used shows that module's path and line instead, and Ctrl+E does nothing then.
+- An error in the program shows as `line L: message`, and the pane's header says `ctrl+e: to line L`. Ctrl+E puts the cursor at the start of that line, and so does a click on the error or on that header. An error inside a module the program used shows that module's path and line instead, and Ctrl+E does nothing then.
 - Ctrl+/ comments out the line the cursor is on, putting `# ` after its leading spaces, or takes a `#` (and the space after it) back off. It is one undo step, and the cursor stays on the same character. With a selection it does every line the selection is on: if they are all comments already (blank lines aside) it takes the `#` off each, else it puts one on each, in one undo step, and the lines stay selected.
 
 ## Modules
@@ -37,7 +37,7 @@ Ctrl+S saves the program and the run keeps waiting; the status reads `saved, wai
 
 - A run stops after 200,000 steps, and the pane shows `stopped: the program ran too long (200000 steps)`. The count starts again after each line of input, so a program can wait for input as long as it likes but cannot loop forever between inputs. `try` does not catch the stop.
 - Some host built-ins are refused: exit, sleep, graphics and clipboard (the desktop owns the window), and writing, removing, renaming or making files on the real disk. Reading real files works.
-- Not yet: programs that draw, clicking an error to jump to it, and runs that keep going in the background while not waiting for input.
+- Not yet: programs that draw, and runs that keep going in the background while not waiting for input.
 
 ## In the code
 

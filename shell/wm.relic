@@ -2308,11 +2308,10 @@ fun _editor_point(s, x, y, clamp)
 # step) reads where the "_" is now, not where the last frame drew it.
 fun _editor_relayout(s)
     if not "starts" in s
-        return
+        return []
     if "run" in s
-        _ide_lines(s)
-    else
-        _editor_lines(s)
+        return _ide_lines(s)
+    return _editor_lines(s)
 
 # A click on a text line puts the cursor at that character (past the line's
 # end: at its end) and drops the selection; dragging from there selects. The
@@ -2322,7 +2321,16 @@ fun _editor_click(s, x, y)
     s.press = none
     if "run" in s and s.run != none
         return none
-    _editor_relayout(s)
+    let lines = _editor_relayout(s)
+    if "err_line" in s and s.err_line != none and y >= text_top
+        # in the IDE, a click on the error in the pane (or the line above it
+        # that names Ctrl+E) goes to the error's line, as Ctrl+E does
+        let row = int((y - text_top) / line_height)
+        if row < len(s.shown_lines)
+            let li = s.shown_lines[row]
+            if li > len(s.starts) and li < len(lines) and (strings.starts_with(lines[li], "line {s.err_line}: ") or strings.starts_with(lines[li], "-- output (ctrl+e"))
+                _ide_to_error(s)
+                return none
     let pos = _editor_point(s, x, y, false)
     if pos == none
         return none

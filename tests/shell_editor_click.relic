@@ -126,3 +126,24 @@ press(e2, 1, 15, 2)
 press(e2, 1, 12, 2)
 press(e2, 1, 3, 3)
 press(e2, 2, 1, 3)
+# IDE: a click on the error in the pane, or on the line naming Ctrl+E, goes
+# to the error's line; other pane lines do nothing
+let ide2 = wm.launch(d, wm.ide)
+ide2.state.text = "print(1)\nprint(2)\nprint(nope)\nprint(4)"
+ide2.state.back = 0
+wm.key(d, "ctrl+r")
+let il = wm.visible_lines(ide2)
+print(il)
+fun ide_pos()
+    return len(ide2.state.text) - ide2.state.back
+let err_row = len(il) - 1
+click_at(ide2, err_row, 3)
+print("error clicked: pos", ide_pos())
+wm.key(d, "ctrl+end")
+wm.visible_lines(ide2)
+click_at(ide2, err_row - 3, 0)
+print("header clicked: pos", ide_pos())
+wm.key(d, "ctrl+end")
+il = wm.visible_lines(ide2)
+click_at(ide2, err_row - 1, 0)
+print("output line clicked: pos", ide_pos(), len(ide2.state.text))

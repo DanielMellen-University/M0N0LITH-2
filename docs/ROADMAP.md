@@ -26,7 +26,8 @@ M0N0LITH-2 is the MONOLITH 2 desktop written in Relic. The language roadmap is i
   - `use` of the user's own files (approved Oct 30): any other `use` reads the module from the desktop's files, relative to the file being edited, as last saved (only the edited file runs unsaved). A missing module is the usual "cannot find module" error; an error inside one shows its path and line (Relic 1.0.45, `rt.load`).
   - Input (approved Oct 30): `os.read_line` and `os.prompt` pause the run, and the pane ends in an input line with the prompt. While it waits, typing goes to that line (Backspace, Space), Return sends it and the run goes on, Esc stops the run, and Ctrl+R starts it again; Ctrl+S saves (since Oct 31), and the other Editor keys wait until the run ends. The pane shows each prompt and line sent, as a terminal would. The 200,000 steps start again after each line sent, so a program may wait for input as long as it likes but cannot spin between inputs (Relic 1.0.45, `rt.input` and `interp.resume`). Esc goes to the IDE only while a run waits; otherwise it closes menus or quits the desktop as before.
   - The pane shows the last 6 lines (5 and the input line while waiting) and keeps 200. An error inside a std module shows that module's file and line, and Ctrl+E does nothing then.
-  - Not yet: programs that draw, clicking an error to jump, and a run that goes on in the background while not waiting for input.
+  - Clicking the error, or the header naming Ctrl+E, jumps to its line (Nov 2 2026).
+  - Not yet: programs that draw, and a run that goes on in the background while not waiting for input.
   - Decided Oct 31 2026 (approved through CoS): Ctrl+S saves while a run waits for input, and the run keeps waiting; the 200,000 steps start again after each input line, so they are per line, not per run.
   - User docs: [IDE](apps/IDE.md).
 

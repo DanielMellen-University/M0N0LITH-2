@@ -39,3 +39,10 @@ clicks 2 at col 15: [14, 16] ["é1"]
 clicks 2 at col 12: [12, 12] [""]
 clicks 3 at col 3: [0, 21] ["let foo_bar = é1 + x\n"]
 clicks 3 at col 1: [21, 30] ["next line"]
+["IDE [error] /home/welcome.txt", "print(1)", "print(2)", "print(nope)", "print(4)_", "-- output (ctrl+e: to line 3) --", "1", "2", "line 3: 'nope' is not defined"]
+click row 8 col 3: app
+error clicked: pos 18
+click row 5 col 0: app
+header clicked: pos 18
+click row 7 col 0: app
+output line clicked: pos 38 38

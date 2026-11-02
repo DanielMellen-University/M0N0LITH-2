@@ -118,7 +118,7 @@ Every Editor key, plus:
 | Input | What it does |
 |---|---|
 | Ctrl+R, F5, Ctrl+Return | runs the program in the buffer, saved or not. While a run waits for input, it starts the run again |
-| Ctrl+E | puts the cursor at the start of the line of the last error in this file |
+| Ctrl+E, or a click on the error in the pane | puts the cursor at the start of the line of the last error in this file |
 | Ctrl+/ | comments the line out with `# ` after its leading spaces, or takes the `#` back off; with a selection, every line it is on |
 
 While a run waits for input:
