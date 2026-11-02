@@ -4,3 +4,7 @@ brush after ctrl+z and a move 0 0
 clear blank 0 new file
 clear drawn 1 edited 0
 undone 3
+Paint save as: /tmp/sketch_ (re
+Paint save as: /tmp/_ (return s
+Paint save as: _ (return saves,
+/tmp/sketch.paint true

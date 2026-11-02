@@ -3110,6 +3110,12 @@ fun _paint_name_key(s, k)
             s.naming = slice(s.naming, 0, len(s.naming) - 1)
     else if k == "space"
         s.naming = s.naming + " "
+    else if k == "ctrl+v"
+        s.naming = s.naming + _clip_line()   # a path Files copied, say
+    else if k == "ctrl+backspace"
+        s.naming = _drop_word(s.naming)
+    else if k == "ctrl+u"
+        s.naming = ""
     else if len(k) == 1
         s.naming = s.naming + k
 

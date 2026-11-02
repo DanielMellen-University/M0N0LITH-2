@@ -152,7 +152,7 @@ While a run waits for input:
 | Ctrl+Z | undoes the last stroke, fill, shape or clear, up to 20 |
 | Ctrl+Y | redoes what Ctrl+Z undid, until the next change |
 | Ctrl+S | saves the picture |
-| n | save as: type a name on the status line, Return saves, Backspace deletes, Esc gives up |
+| n | save as: type a name on the status line, Return saves, Backspace deletes, Ctrl+Backspace a word, Ctrl+U all of it, Ctrl+V pastes, Esc gives up |
 
 With Shift or Caps Lock a letter works as its small one (`F` is the fill tool), except `R` and `O`, which are the filled shapes.
 
