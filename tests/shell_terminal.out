@@ -40,7 +40,7 @@
 > cat
   usage: cat <path>...
 > touch
-  usage: touch <path>
+  usage: touch <path>...
 > mv x
   usage: mv <from> <to>
 > nope

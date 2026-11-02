@@ -32,7 +32,7 @@ not made true true
 no /tmp/x true
 ["/home> echo a > \"/tmp/with space\""]
 ["/home> cat '/tmp/with space'", "a"]
-["/home> rm \"a\" \"b\"", "usage: rm <path>"]
+["/home> rm \"a\" \"b\"", "rm: not found: /home/a", "rm: not found: /home/b"]
 ["/home> touch plain.txt"]
 ["/home> mkdir \"old stuff\""]
 ["/home> touch 'old stuff/say \"hi\".txt'"]

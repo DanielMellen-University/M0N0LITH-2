@@ -35,13 +35,13 @@ Commands split on spaces. A part in double or single quotes is one word with its
 | `sort path` | the lines of a file in order, by character (capitals before small letters); the file is not changed |
 | `uniq path` | the lines of a file, leaving out a line the same as the one just before it (so a repeat further on stays, as in Unix) |
 | `nl path` | the lines of a file, each after its number from 1, as `history` numbers commands |
-| `mkdir path` | makes a folder, and any missing folders above it |
-| `touch path` | makes an empty file; an existing file or folder is left as it is |
+| `mkdir path...` | makes each folder, and any missing folders above it |
+| `touch path...` | makes each an empty file; an existing file or folder is left as it is |
 | `write path text` | replaces the file with the text and a newline |
-| `rm path` | removes a file or an empty folder |
+| `rm path...` | removes each file or empty folder; an error for one (not found, not empty) does not stop the rest |
 | `mv from to` | renames, or moves into `to` when it is a folder; the file the next Editor opens goes along with it, and so does the Terminal when it is in the folder moved |
 
-`clear`, `history`, `apps`, `date` and `pwd` take no words, and a word too many is an error for every command but `cat`, which takes several (`rm a b` removes nothing); `head` and `tail` take a count after the path.
+`clear`, `history`, `apps`, `date` and `pwd` take no words, and a word too many is an error for every command but `cat`, `rm`, `mkdir` and `touch`, which take several paths and do each in turn (`rm a b` removes both); `head` and `tail` take a count after the path.
 
 ## Rules for paths
 

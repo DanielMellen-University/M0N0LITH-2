@@ -1018,7 +1018,8 @@ fun _term_optional_path(s, parts, default)
     return default
 
 # True when the command got exactly n words after it, else prints usage. A word
-# too many is an error too: `rm a b` must not quietly remove only a.
+# too many is an error too: `mv a b c` must not quietly move only a (cat, rm,
+# mkdir and touch take several paths instead).
 fun _term_args(s, parts, n, usage)
     if len(parts) - 1 == n
         return true
@@ -1549,11 +1550,17 @@ fun _term_run(s, line)
         for path in slice(parts, 1, len(parts))
             _term_cat(s, path)
     else if cmd == "mkdir"
-        if _term_args(s, parts, 1, "mkdir <path>")
-            _term_mkdir(s, parts[1])
+        # several paths, one after another as for cat; an error for one does not stop the rest
+        if len(parts) < 2
+            _term_reply(s, "usage: mkdir <path>...")
+        for path in slice(parts, 1, len(parts))
+            _term_mkdir(s, path)
     else if cmd == "touch"
-        if _term_args(s, parts, 1, "touch <path>")
-            _term_touch(s, parts[1])
+        # several paths, one after another as for cat; an error for one does not stop the rest
+        if len(parts) < 2
+            _term_reply(s, "usage: touch <path>...")
+        for path in slice(parts, 1, len(parts))
+            _term_touch(s, path)
     else if cmd == "write"
         if len(parts) > 1
             _term_write(s, "write", parts[1], strings.join(slice(parts, 2, len(parts)), " "), false)
@@ -1590,8 +1597,11 @@ fun _term_run(s, line)
         if _term_args(s, parts, 1, "wc <path>")
             _term_wc(s, parts[1])
     else if cmd == "rm"
-        if _term_args(s, parts, 1, "rm <path>")
-            _term_rm(s, parts[1])
+        # several paths, one after another as for cat; an error for one does not stop the rest
+        if len(parts) < 2
+            _term_reply(s, "usage: rm <path>...")
+        for path in slice(parts, 1, len(parts))
+            _term_rm(s, path)
     else if cmd == "mv"
         if _term_args(s, parts, 2, "mv <from> <to>")
             _term_mv(s, parts[1], parts[2])
