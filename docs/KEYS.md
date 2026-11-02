@@ -81,7 +81,7 @@ The commands are in [the Terminal doc](apps/TERMINAL.md).
 | Page Up, Page Down | a window of rows up or down, stopping at the ends |
 | A letter or digit | the next name that starts with it, any case, going round |
 | Return | opens the selected row |
-| F2 | renames the selected row: type the name, Return renames, Esc gives up |
+| F2 | renames the selected row: type the name, Return renames, Esc or a click gives up |
 | Backspace or Left | goes up a folder, with the folder you were in selected |
 | Right | goes into the selected folder (a file or `..` stays put) |
 | Ctrl+C | copies the selected row's full path to the clipboard (not for `..`) |
@@ -120,7 +120,7 @@ The commands are in [the Terminal doc](apps/TERMINAL.md).
 | Ctrl+Z | undoes the last edit (a cut or a paste is one), up to 500 |
 | Ctrl+Y | redoes what Ctrl+Z undid, newest first; a new edit ends it |
 | Ctrl+S | saves. If another app changed the file since it was opened or saved, the first Ctrl+S warns and writes nothing, and a second one right after overwrites |
-| Ctrl+F | find: type the text, Return selects the next match after the cursor (going round to the start); Esc or another key stops. With a selection on one line it starts with that, and typing replaces it |
+| Ctrl+F | find: type the text, Return selects the next match after the cursor (going round to the start); Esc, another key or a click stops. With a selection on one line it starts with that, and typing replaces it |
 | F3, Shift+F3 | finds the last text again, the next or the one before |
 | Ctrl+G | go to a line: type its number, Return |
 | Ctrl+H | replace: the text, Return, what goes in its place, Return replaces every one (one undo step); starts with a selection on one line, as Ctrl+F does |
@@ -169,7 +169,7 @@ While a run waits for input:
 | Ctrl+Z | undoes the last stroke, fill, shape or clear, up to 20 |
 | Ctrl+Y | redoes what Ctrl+Z undid, until the next change |
 | Ctrl+S | saves the picture |
-| n | save as: type a name on the status line, Return saves, Backspace deletes, Ctrl+Backspace a word, Ctrl+U all of it, Ctrl+V pastes, Esc gives up |
+| n | save as: type a name on the status line, Return saves, Backspace deletes, Ctrl+Backspace a word, Ctrl+U all of it, Ctrl+V pastes, Esc or a click gives up |
 
 With Shift or Caps Lock a letter works as its small one (`F` is the fill tool), except `R` and `O`, which are the filled shapes.
 
