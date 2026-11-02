@@ -1,0 +1,38 @@
+# Paint edges: a key while the button is held ends the stroke or shape, so
+# Ctrl+Z in the middle of one cannot draw it back over the undone picture.
+use ../shell/wm
+use std/vfs
+let d = wm.new_desktop(640, 480, wm.default_apps())
+let w = wm.launch(d, wm.paint_app)
+let s = w.state
+fun at(x, y) = [w.x + x, w.y + wm.title_height + y]
+fun cell(cx, cy) = [6 + cx * 4 + 2, 40 + cy * 4 + 2]
+fun press(c)
+    let p = at(cell(c[0], c[1])[0], cell(c[0], c[1])[1])
+    wm.click(d, p[0], p[1])
+fun move(c)
+    let p = at(cell(c[0], c[1])[0], cell(c[0], c[1])[1])
+    wm.motion(d, p[0], p[1])
+fun count(k)
+    let n = 0
+    for c in s.cells
+        if c == k
+            n = n + 1
+    return n
+# a rectangle, Ctrl+Z while still held, then the pointer moves on
+wm.key(d, "r")
+press([2, 2])
+move([10, 8])
+print("rect drawn", count(1) > 0, len(s.undo))
+wm.key(d, "ctrl+z")
+move([12, 9])
+print("after ctrl+z and a move", count(1), len(s.undo), len(s.redo))
+wm.release(d)
+# a brush stroke, Ctrl+Z while held, then more dragging
+wm.key(d, "b")
+press([20, 20])
+move([25, 20])
+wm.key(d, "ctrl+z")
+move([30, 20])
+print("brush after ctrl+z and a move", count(1), len(s.undo))
+wm.release(d)

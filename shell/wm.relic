@@ -3121,6 +3121,11 @@ fun _paint_escape(s)
     return true
 
 fun _paint_key(s, k)
+    # a key ends a stroke or a shape still held, so a Ctrl+Z in the middle of
+    # one is not drawn over by the next move
+    s.anchor = none
+    s.stroke = false
+    s.last = none
     if s.naming != none
         _paint_name_key(s, k)
         return
