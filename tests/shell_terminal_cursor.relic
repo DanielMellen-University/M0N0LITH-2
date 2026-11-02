@@ -1,0 +1,62 @@
+# Terminal cursor: Left, Right, Home and End move it in the line; typing,
+# Backspace, Tab and Ctrl+V work at it; Return runs the whole line; Up,
+# Down and Ctrl+C put it back at the end.
+use ../shell/wm
+use std/vfs
+let t = wm.terminal.init()
+t.rows = 3
+fun keys(list)
+    for k in list
+        wm.terminal.on_key(t, k)
+fun typed(line)
+    for ch in line
+        if ch == " "
+            wm.terminal.on_key(t, "space")
+        else
+            wm.terminal.on_key(t, ch)
+fun prompt()
+    let lines = wm.terminal.lines(t)
+    return lines[len(lines) - 1]
+typed("eco hi")
+keys(["left", "left", "left", "left"])
+print(prompt())
+typed("h")
+print(prompt())
+keys(["end"])
+print(prompt())
+keys(["home"])
+print(prompt())
+keys(["left"])
+print("left at the start", prompt())
+keys(["end", "right"])
+print("right at the end", prompt())
+keys(["home", "right", "right", "right", "right", "backspace"])
+print("backspace at the cursor", prompt())
+keys(["home", "backspace"])
+print("backspace at the start", prompt())
+keys(["right", "right", "right"])
+typed("o")
+keys(["end", "space"])
+typed("there")
+keys(["return"])
+print(t.buf[len(t.buf) - 1], prompt())
+# Tab completes the word before the cursor and keeps the rest
+vfs.write(t.fs, "/home/notes.txt", "x")
+typed("cat no > /tmp/x")
+for i in 0..9
+    keys(["left"])
+print(prompt())
+keys(["tab"])
+print(prompt())
+# Up brings back a command with the cursor at its end; Ctrl+C gives up the whole line
+keys(["ctrl+u", "end", "ctrl+u", "up"])
+print(prompt())
+keys(["home", "ctrl+c"])
+print(t.buf[len(t.buf) - 1], prompt())
+# Ctrl+V pastes at the cursor
+let n = wm.notes.init()
+n.text = "PASTE"
+wm.notes.on_key(n, "ctrl+c")
+typed("ab")
+keys(["left", "ctrl+v"])
+print(prompt())

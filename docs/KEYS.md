@@ -49,8 +49,9 @@ Every key and click the desktop and its apps act on, checked against `shell/wm.r
 
 | Input | What it does |
 |---|---|
-| Typing | adds to the command line |
-| Backspace | removes the last character |
+| Typing | adds to the command line at the cursor |
+| Left, Right, Home, End | move the cursor in the line |
+| Backspace | removes the character before the cursor |
 | Return | runs the command; `!!` runs the one before again |
 | Ctrl+V | adds the first line of the clipboard |
 | Up, Down | the command before, or after, from the last 50 run; Down past the newest gives back the line being typed |

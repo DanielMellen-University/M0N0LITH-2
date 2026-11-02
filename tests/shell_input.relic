@@ -23,7 +23,7 @@ wm.handle(d, down("return", false))
 print(t.app.lines(t.state))
 # unicode, named keys and keys that are only modifiers or plain letters
 type_in(d, "écho")
-for k in ["left shift", "right ctrl", "a", "space", "f1", "escape", "home"]
+for k in ["left shift", "right ctrl", "a", "space", "f1", "escape", "pageup"]
     wm.handle(d, down(k, false))
 print(t.state.input)
 wm.handle(d, down("backspace", false))

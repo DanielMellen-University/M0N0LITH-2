@@ -1,0 +1,14 @@
+/home> ec_o hi
+/home> ech_o hi
+/home> echo hi_
+/home> _echo hi
+left at the start /home> _echo hi
+right at the end /home> echo hi_
+backspace at the cursor /home> ech_ hi
+backspace at the start /home> _ech hi
+hi there /home> _
+/home> cat no_ > /tmp/x
+/home> cat notes.txt _ > /tmp/x
+/home> echo hi there_
+/home> echo hi there^C /home> _
+/home> aPASTE_b

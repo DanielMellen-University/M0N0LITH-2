@@ -819,7 +819,7 @@ fun _two(n)
 
 # Relic-native terminal (no host process spawn). It works on the shared VFS
 # from a current folder that starts at /home. Paths may be relative to it.
-fun _term_init() = {buf: ["Terminal. Type help."], input: "", cwd: "/home", fs: _shell_fs, cols: term_width, past: [], back: 0, draft: ""}
+fun _term_init() = {buf: ["Terminal. Type help."], input: "", left: 0, cwd: "/home", fs: _shell_fs, cols: term_width, past: [], back: 0, draft: ""}
 
 # A line cut into pieces of at most width characters, so a long line wraps
 # in the window instead of losing its end.
@@ -850,7 +850,8 @@ fun _wrap_last(line, width, k)
 # about 0.24 s after cat of a file with one 200,000-character line.
 fun _term_lines(s)
     s.cwd = _existing_dir(s.fs, s.cwd)   # another Terminal may have removed or moved it
-    let prompt = s.cwd + "> " + s.input + "_"
+    let at = len(s.input) - _term_left(s)
+    let prompt = s.cwd + "> " + slice(s.input, 0, at) + "_" + slice(s.input, at, len(s.input))
     let out = []
     if not "rows" in s or s.rows <= 0
         for line in s.buf
@@ -1590,7 +1591,38 @@ fun _term_paste(s)
         return "'" + text + "'"
     return "\"" + text + "\""
 
+# The cursor in the line being typed is s.left characters before its end (0:
+# at the end, where it starts).
+fun _term_left(s)
+    if not "left" in s
+        return 0
+    return math.max(0, math.min(s.left, len(s.input)))
+
+# Left, Right, Home and End move the cursor in the line; typing, Backspace,
+# Tab and the other editing keys work at it, on the part before it. Return,
+# Up, Down and Ctrl+C take the whole line and put the cursor back at the end.
 fun _term_key(s, k)
+    let n = len(s.input)
+    let left = _term_left(s)
+    if k == "left"
+        s.left = math.min(n, left + 1)
+    else if k == "right"
+        s.left = math.max(0, left - 1)
+    else if k == "home"
+        s.left = n
+    else if k == "end"
+        s.left = 0
+    else if k in ["return", "enter", "up", "down", "ctrl+c"] or left == 0
+        s.left = 0
+        _term_edit(s, k)
+    else
+        let after = slice(s.input, n - left, n)
+        s.input = slice(s.input, 0, n - left)
+        _term_edit(s, k)
+        s.input = s.input + after
+        s.left = len(after)   # the cursor stays in front of the same text
+
+fun _term_edit(s, k)
     if k == "return" or k == "enter"
         let line = s.input
         if strings.trim(line) == "!!"
