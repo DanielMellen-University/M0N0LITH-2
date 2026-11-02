@@ -2,7 +2,7 @@
 made true
 ["/home> echo first line > 'my notes.txt'"]
 ["/home> cat \"my notes.txt\"", "first line"]
-["/home> echo more >> my' 'notes.txt"]
+["/home> echo more >> 'my notes.txt'"]
 ["/home> cat 'my notes.txt'", "first line", "more"]
 ["/home> wc \"my notes.txt\"", "2 3 16 my notes.txt"]
 ["/home> mkdir \"a folder\""]
@@ -19,6 +19,10 @@ made true
 ["/home> echo \"a   b\"", "a   b"]
 ["/home> echo '' x", " x"]
 ["/home> mkdir \"\"", "mkdir: already there: /home"]
+["/home> echo don't stop, it's \"fine\"", "don't stop, it's fine"]
+["/home> touch it's"]
+made it's true
+["/home> rm it's"]
 ["/home> touch \"half open", "no closing \""]
 not made true true
 ["/home> echo 'x", "no closing '"]

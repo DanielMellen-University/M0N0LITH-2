@@ -1317,9 +1317,10 @@ fun _term_cp(s, a, b)
         catch err
             _term_reply(s, "cp: " + err.message)
 
-# The words of a line; a run of spaces counts as one. A part in double or
+# The words of a line; a run of spaces counts as one. A word in double or
 # single quotes keeps its spaces, so "my notes.txt" is one word, and the quotes
-# are dropped; the other kind of quote inside is plain text. Gives
+# are dropped; the other kind of quote inside is plain text. A quote opens only
+# at the start of a word, so the ' in don't is just a letter. Gives
 # {words, quoted, err}: quoted[i] is true when word i had quotes (echo does not
 # read a quoted > as a redirect), err is none or what is wrong (a quote left open).
 fun _split_words(line)
@@ -1335,7 +1336,7 @@ fun _split_words(line)
                 q = ""
             else
                 word = word + c
-        else if c == "\"" or c == "'"
+        else if (c == "\"" or c == "'") and not inside
             q = c
             inside = true
             had = true
@@ -1521,7 +1522,7 @@ fun _term_complete(s)
         if q != ""
             if c == q
                 q = ""
-        else if c == "\"" or c == "'"
+        else if (c == "\"" or c == "'") and i == cut
             q = c
         else if c == " "
             cut = i + 1
