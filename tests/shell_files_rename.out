@@ -8,5 +8,9 @@ rename: sub2_ true Files: /tmp/r
 Files: /tmp/r
 Files: /tmp/r
 rename: ...he-files-title.txtx_ true
+rename: ...he-files-title.txtx_
+Files: /tmp/r ["..", "a-long-name-for-the-files-title.txt", "b.txt", "c.md", "folder two"]
+Delete a-long-...? Delete again
+Files: /tmp/r
 /tmp/r/three/moved.txt z
 /tmp/four/moved.txt

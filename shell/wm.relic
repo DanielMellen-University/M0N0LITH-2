@@ -1931,6 +1931,9 @@ fun _files_open(s, name)
 # ignored, so double-clicking a folder enters it once instead of also opening
 # the row that lands under the pointer inside.
 fun _files_click(s, x, y)
+    # a click gives up a rename or a Delete question, as another key does
+    s.renaming = none
+    s.confirm = none
     if "clicks" in s and s.clicks >= 2
         return
     if y < text_top
