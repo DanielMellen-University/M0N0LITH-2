@@ -1,0 +1,63 @@
+# Editor find: Ctrl+F, type the text, Return selects the next place it is
+# after the cursor and goes round; Backspace edits it; Esc or another key
+# ends finding; the title shows it; case counts.
+use ../shell/wm
+let d = wm.new_desktop(640, 480, wm.default_apps())
+let e = wm.launch(d, wm.editor)
+e.state.text = "one two one\nTwo one\nthree"
+e.state.back = len(e.state.text)
+fun keys(list)
+    for k in list
+        if k == " "
+            wm.key(d, "space")
+        else
+            wm.key(d, k)
+fun typed(t)
+    for ch in t
+        keys([ch])
+fun sel()
+    let s = e.state
+    let a = len(s.text) - s.back
+    if s.mark == none
+        return [a]
+    return [len(s.text) - s.mark, a]
+fun title() = wm.visible_lines(e)[0]
+keys(["ctrl+f"])
+print(title())
+typed("one")
+print(title())
+keys(["return"])
+print("first", sel(), title())
+keys(["return"])
+print("second", sel())
+keys(["return"])
+print("third", sel())
+keys(["return"])
+print("round to the first", sel())
+keys(["backspace", "backspace", "backspace"])
+typed("Two")
+keys(["return"])
+print("case counts", sel())
+keys(["backspace", "backspace", "backspace"])
+typed("nope")
+keys(["return"])
+print("not found", sel(), title())
+# Esc ends finding and keeps the selection; the title is as before
+wm.dismiss(d)
+print("esc", title(), sel())
+# another key ends it and does what it does
+keys(["ctrl+f"])
+typed("three")
+keys(["return", "right"])
+print("right after", title(), sel())
+# typing after finding is plain typing again
+keys(["X"])
+print(e.state.text)
+# the IDE finds too
+let i = wm.launch(d, wm.ide)
+i.state.text = "print(1)\nprint(22)"
+i.state.back = len(i.state.text)
+keys(["ctrl+f", "2", "2", "return"])
+print("ide", len(i.state.text) - i.state.mark, len(i.state.text) - i.state.back)
+wm.dismiss(d)
+print(wm.visible_lines(i)[0])

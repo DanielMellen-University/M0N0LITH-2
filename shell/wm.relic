@@ -2511,8 +2511,67 @@ fun _editor_drag(s, x, y)
     s.mark = s.press
     _editor_set_pos(s, pos)
 
+# Ctrl+F: find. The title reads "find: text_" while it is typed; Return
+# selects the next place the text is after the cursor (going round to the
+# start), and again the one after; Backspace, Ctrl+Backspace, Ctrl+U and
+# Ctrl+V edit the text; Esc or any other key ends finding (that key then
+# does what it always does). Case counts, as in grep.
+fun _editor_find_next(s, what)
+    if what == ""
+        return false
+    let from = _editor_pos(s)
+    let at = strings.find(slice(s.text, from, len(s.text)), what)
+    if at >= 0
+        at = at + from
+    else
+        at = strings.find(s.text, what)
+    if at < 0
+        return false
+    s.mark = len(s.text) - at
+    _editor_set_pos(s, at + len(what))
+    return true
+
+fun _editor_find_key(s, k)
+    if k == "return" or k == "enter"
+        if _editor_find_next(s, s.find)
+            s.status = "find: " + s.find
+        else
+            s.status = "find: " + s.find + " (not found)"
+        s.last_find = s.find
+        return true
+    if k == "backspace"
+        s.find = slice(s.find, 0, math.max(0, len(s.find) - 1))
+    else if k == "ctrl+backspace"
+        s.find = _drop_word(s.find)
+    else if k == "ctrl+u"
+        s.find = ""
+    else if k == "ctrl+v"
+        s.find = s.find + _clip_line()
+    else if k == "space"
+        s.find = s.find + " "
+    else if len(k) == 1
+        s.find = s.find + k
+    else
+        _editor_find_end(s)
+        return false
+    s.status = "find: " + s.find + "_"
+    return true
+
+fun _editor_find_end(s)
+    s.find = none
+    s.status = s.find_was
+
 fun _editor_key(s, k)
     s.press = none   # a key ends a drag: the text or the cursor may have moved under it
+    if "find" in s and s.find != none
+        if _editor_find_key(s, k)
+            return
+    if k == "ctrl+f"
+        s.overwrite = false
+        s.find_was = s.status
+        s.find = ""
+        s.status = "find: _"
+        return
     if k == "ctrl+s"
         # the same reasons the Terminal gives, shorter than "cannot write" and the whole path
         if vfs.is_dir(s.fs, s.path)
@@ -2817,6 +2876,9 @@ fun _ide_input_edit(s, k)
 # Esc in the Editor (and the IDE): drops a selection, so an Esc meant for it
 # does not quit the desktop. True when there was one.
 fun _editor_escape(s)
+    if "find" in s and s.find != none
+        _editor_find_end(s)
+        return true
     if _editor_selection(s) == none
         return false
     s.mark = none

@@ -1,0 +1,15 @@
+Editor [find: _] /home/welcome.txt
+Editor [find: one_] /home/welcome.txt
+first [0, 3] Editor [find: one] /home/welcome.txt
+second [8, 11]
+third [16, 19]
+round to the first [0, 3]
+case counts [12, 15]
+not found [12, 15] Editor [find: nope (not found)] ....txt
+esc Editor [open] /home/welcome.txt [12, 15]
+right after Editor [open] /home/welcome.txt [25]
+one two one
+Two one
+threeX
+ide 15 17
+IDE [open] /home/welcome.txt
