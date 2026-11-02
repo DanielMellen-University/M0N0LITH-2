@@ -40,3 +40,14 @@ keys(["ctrl+u"])
 show("ctrl+u before the cursor")
 keys(["ctrl+z"])
 show("ctrl+z")
+# a line wider than the window keeps the cursor in view
+let d = wm.new_desktop(640, 480, wm.default_apps())
+let w = wm.launch(d, wm.notes)
+for ch in "abcdefghijklmnopqrstuvwxyz0123456789ABCDEFGHIJ"
+    wm.key(d, ch)
+print("at the end", wm.visible_lines(w)[1])
+wm.key(d, "home")
+print("home", wm.visible_lines(w)[1])
+for i in 0..30
+    wm.key(d, "right")
+print("30 right", wm.visible_lines(w)[1])
