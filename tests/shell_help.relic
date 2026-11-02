@@ -20,10 +20,10 @@ for line in t.state.buf
     if not strings.starts_with(line, "/")
         append(help, line)
 print(help)
-# every word of the lines that list commands (not the lines about > and quotes)
+# every word of the lines that list commands (not the lines about >, quotes and !)
 let words = []
 for line in slice(help, 1, len(help))
-    if not strings.contains(line, ">") and not strings.contains(line, "\"")
+    if not strings.contains(line, ">") and not strings.contains(line, "\"") and not strings.contains(line, "!")
         for w in strings.split(line, " ")
             append(words, w)
 print(len(words), "commands in help")

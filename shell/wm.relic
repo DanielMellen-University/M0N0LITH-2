@@ -1496,6 +1496,7 @@ fun _term_run(s, line)
         _term_reply(s, "wc grep find sort uniq nl")
         _term_reply(s, "echo text > file, >> adds")
         _term_reply(s, "\"my file\": quotes keep spaces")
+        _term_reply(s, "!! the last again, !N history N")
     else if cmd == "clear"
         if _term_args(s, parts, 0, "clear")
             s.buf = []

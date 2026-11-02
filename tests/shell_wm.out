@@ -47,6 +47,7 @@ mkdir touch write rm mv cp
 wc grep find sort uniq nl
 echo text > file, >> adds
 "my file": quotes keep spaces
+!! the last again, !N history N
 /home> pwd
 /home
 /home> ls

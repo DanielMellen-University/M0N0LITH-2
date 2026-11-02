@@ -14,7 +14,7 @@ Commands split on spaces. A part in double or single quotes is one word with its
 
 | Command | What it does |
 |---|---|
-| `help` | lists the commands, and how `>`, `>>` and quotes work |
+| `help` | lists the commands, and how `>`, `>>`, quotes, `!!` and `!N` work |
 | `clear` | empties the output |
 | `history` | the commands Up and Down go through (the last 50), numbered from the oldest; `history` itself is the last |
 | `echo text` | prints the text |
