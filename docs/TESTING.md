@@ -169,6 +169,7 @@ Write `tests/shell_<topic>.relic`, run it, read its output, and save that as `te
 | `shell_editor_replace_overlap` | Ctrl+H replaces non-overlapping matches in one pass, and a replacement containing the text does not get replaced again |
 | `shell_editor_find_prev_selection` | Shift+F3 finds the match before the selection start and goes round to the last match, and before the cursor with no selection |
 | `shell_editor_goto_leading_zeros` | Ctrl+G takes leading zeros in the line number and at most 7 digits, so a huge number lands on the last line |
+| `shell_editor_type_over_multiline` | Typing, Return and Backspace over a selection spanning lines replace the whole selection |
 | `shell_big_file` | the Editor on a file of thousands of lines stays quick |
 | `shell_last_lines` | Editor line splitting at empty and trailing newline boundaries |
 | `shell_last_lines_long` | the Editor on a 200,000-character line stays quick |
