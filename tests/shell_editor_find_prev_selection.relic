@@ -1,0 +1,41 @@
+# Editor Shift+F3 finds the match before the selection's start, not before the
+# cursor at its end, and goes round to the last match when there is none
+# before it. F3 from a found match goes to the next one after its end, and
+# Shift+F3 with no selection goes to the match before the cursor.
+use ../shell/wm
+let d = wm.new_desktop(640, 480, wm.default_apps())
+let e = wm.launch(d, wm.editor)
+let s = e.state
+fun keys(list)
+    for k in list
+        wm.key(d, k)
+fun chosen()
+    if s.mark == none
+        return none
+    let a = len(s.text) - s.mark
+    let b = len(s.text) - s.back
+    if a < b
+        return [a, b]
+    return [b, a]
+s.text = "ab ab ab"
+s.back = len(s.text)
+s.mark = none
+keys(["ctrl+f", "a", "b", "return"])
+print("first", chosen())
+keys(["f3"])
+print("f3", chosen())
+keys(["f3"])
+print("f3 again", chosen())
+keys(["f3"])
+print("f3 round", chosen())
+keys(["shift+f3"])
+print("shift+f3 round to last", chosen())
+keys(["shift+f3"])
+print("shift+f3", chosen())
+keys(["shift+f3"])
+print("shift+f3 again", chosen())
+# no selection: before the cursor, which sits between matches
+s.back = len(s.text) - 4
+s.mark = none
+keys(["shift+f3"])
+print("shift+f3 before cursor", chosen())

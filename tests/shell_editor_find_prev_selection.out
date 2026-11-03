@@ -1,0 +1,8 @@
+first [0, 2]
+f3 [3, 5]
+f3 again [6, 8]
+f3 round [0, 2]
+shift+f3 round to last [6, 8]
+shift+f3 [3, 5]
+shift+f3 again [0, 2]
+shift+f3 before cursor [0, 2]
