@@ -1,0 +1,18 @@
+# Notes: Ctrl+X or Ctrl+C on an empty line leaves the clipboard as it was.
+use ../shell/wm
+let d = wm.new_desktop(640, 480, wm.default_apps())
+let n1 = wm.launch(d, wm.notes)
+for ch in "keep"
+    wm.key(d, ch)
+wm.key(d, "ctrl+c")
+let n2 = wm.launch(d, wm.notes)
+wm.key(d, "ctrl+x")
+print("empty cut", n2.state.text)
+let n3 = wm.launch(d, wm.notes)
+wm.key(d, "ctrl+v")
+print("after empty cut", n3.state.text)
+let n4 = wm.launch(d, wm.notes)
+wm.key(d, "ctrl+c")
+let n5 = wm.launch(d, wm.notes)
+wm.key(d, "ctrl+v")
+print("after empty copy", n5.state.text)
