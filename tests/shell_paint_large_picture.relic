@@ -1,0 +1,39 @@
+# Paint: a picture bigger than the 60 by 36 canvas opens with only the
+# part that fits: the first 60 columns and the first 36 rows.
+use ../shell/wm
+use std/vfs
+let d = wm.new_desktop(640, 480, wm.default_apps())
+let w = wm.launch(d, wm.paint_app)
+let s = w.state
+let text = "paint 70 40\n"
+for y in 0..40
+    let row = ""
+    for x in 0..70
+        if y == 35 and x == 59
+            row = row + "3"
+        else if y == 35 and x == 60
+            row = row + "4"
+        else if y == 36 and x == 0
+            row = row + "5"
+        else
+            row = row + "2"
+    text = text + row + "\n"
+vfs.write(s.fs, "/home/big.paint", text)
+let f = wm.launch(d, wm.files_app)
+fun open_in_files(name)
+    let i = 0
+    for e in vfs.entries(s.fs, "/home")
+        if e[0] == name
+            f.state.sel = i + 1
+        i = i + 1
+    f.app.on_key(f.state, "return")
+open_in_files("big.paint")
+let w2 = wm.launch(d, wm.paint_app)
+let s2 = w2.state
+fun count(k)
+    let n = 0
+    for c in s2.cells
+        if c == k
+            n = n + 1
+    return n
+print(w2.state.status, w2.state.path, count(2), s2.cells[0], s2.cells[35 * 60 + 58], s2.cells[35 * 60 + 59])

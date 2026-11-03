@@ -183,6 +183,7 @@ Write `tests/shell_<topic>.relic`, run it, read its output, and save that as `te
 | `shell_paint_equal_size` | Paint: = grows the brush like + and ], stopping at size 4 |
 | `shell_paint_brush_centering` | Paint: a size 2 brush dot covers its cell and the ones right and below, a size 4 dot one up and left and two right and below |
 | `shell_paint_undo_cap` | Paint: undo keeps at most 20 steps |
+| `shell_paint_large_picture` | Paint: a picture bigger than the canvas opens with only the part that fits |
 
 ### Snake
 
