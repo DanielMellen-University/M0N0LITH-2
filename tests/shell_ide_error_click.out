@@ -1,0 +1,6 @@
+error ["first", "line 3: cannot add an int and a string"] 3
+rows 6 8 7
+header click 25
+after up 15
+error click 25
+plain click 15 15

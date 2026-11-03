@@ -1,0 +1,35 @@
+# IDE: a click on the error line or on the pane header goes to the error's
+# line, as Ctrl+E does; a click on a plain output line moves nothing.
+use ../shell/wm
+use std/vfs
+let d = wm.new_desktop(640, 480, wm.default_apps())
+let i = wm.launch(d, wm.ide)
+let s = i.state
+s.path = "/home/hello.relic"
+s.text = "print(\"first\")\nlet a = 1\nprint(a + \"x\")\nprint(\"after\")\n"
+wm.key(d, "ctrl+r")
+print(s.status, s.out, s.err_line)
+fun row_of(want)
+    let shown = wm.visible_lines(i)
+    for r in 0..len(shown)
+        if shown[r] == want
+            return r
+    return -1
+fun click_row(r)
+    wm.click(d, i.x + 10, i.y + 16 + 6 + r * 14 + 7)
+fun cursor()
+    return len(s.text) - s.back
+let header = row_of("-- output (ctrl+e: to line 3) --")
+let errrow = row_of("line 3: cannot add an int and a string")
+let plain = row_of("first")
+print("rows", header, errrow, plain)
+click_row(header)
+print("header click", cursor())
+wm.key(d, "up")
+print("after up", cursor())
+click_row(errrow)
+print("error click", cursor())
+wm.key(d, "up")
+let before = cursor()
+click_row(plain)
+print("plain click", before, cursor())
