@@ -1,0 +1,10 @@
+["/home> echo hi > c.txt"]
+["/home> mkdir cd"]
+["/home> echo bye > cd/c.txt"]
+["/home> cp c.txt cd", "cp: already there: /home/cd/c.txt"]
+["/home> cat cd/c.txt", "bye"]
+["/home> cat c.txt", "hi"]
+inside untouched true
+["/home> rm cd/c.txt"]
+["/home> rm cd"]
+["/home> rm c.txt"]
