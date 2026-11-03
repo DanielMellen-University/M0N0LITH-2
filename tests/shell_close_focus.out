@@ -1,0 +1,4 @@
+opened: 1 2 3 focus: 3
+close focus: 2 windows: 2
+close focus: 2 windows: 1
+close focus: none windows: 0
