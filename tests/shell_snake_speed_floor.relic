@@ -1,0 +1,18 @@
+# Snake: the step interval is 150 ms at first, 5 ms quicker per food eaten,
+# down to 70 ms. At score 20 the interval must stay 70, not drop to 50: no
+# move 69 ms after the beat starts, one move at 70 ms.
+use ../shell/wm
+let d = wm.new_desktop(640, 480, wm.default_apps())
+let w = wm.launch(d, wm.snake)
+let s = w.state
+s.body = [[5, 5], [6, 5], [7, 5]]
+s.food = [20, 10]
+s.dir = [1, 0]
+s.state = "playing"
+s.score = 20
+let now = 1000
+wm.tick(d, now)
+wm.tick(d, now + 69)
+print("at 69", s.body[len(s.body) - 1])
+wm.tick(d, now + 70)
+print("at 70", s.body[len(s.body) - 1])
