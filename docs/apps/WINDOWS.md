@@ -18,6 +18,8 @@ A new window opens at its app's size, cascading down and to the right from the t
 | Files | 260 by 140 |
 | Editor | 320 by 80 |
 | IDE | 320 by 200 |
+| Paint | 256 by 190 |
+| Snake | 210 by 170 |
 
 The height is the area under the 16 pixel title bar.
 
