@@ -38,4 +38,4 @@ The IDE runs Relic programs with Relic's own self-hosted interpreter: `wm.relic`
 
 ## Relic
 
-`relic/` is a git submodule pinned to one Relic commit (1.0.51 now). The `relic` program built from it runs everything, and the shell's `use std/...` and `use ../relic/selfhost/...` lines read files from that checkout. When the shell needs something the language or std lacks, the change goes into Relic first, and this repo moves its pin after it lands. See [Building](BUILDING.md#moving-to-a-newer-relic).
+`relic/` is a git submodule pinned to one Relic commit (1.0.52 now). The `relic` program built from it runs everything, and the shell's `use std/...` and `use ../relic/selfhost/...` lines read files from that checkout. When the shell needs something the language or std lacks, the change goes into Relic first, and this repo moves its pin after it lands. See [Building](BUILDING.md#moving-to-a-newer-relic).

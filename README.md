@@ -29,7 +29,7 @@ CONTRIBUTING.md  how changes are made here
 
 ## How it depends on Relic
 
-Relic is a git submodule at `relic/`, pinned to one commit, now Relic 1.0.51 (`ab69da4`). Building that commit gives the `relic` program, and its `std/` folder comes with it. To move to a newer Relic, check out the new commit inside `relic/`, run the tests, and commit the submodule change.
+Relic is a git submodule at `relic/`, pinned to one commit, now Relic 1.0.52 (`6659745`). Building that commit gives the `relic` program, and its `std/` folder comes with it. To move to a newer Relic, check out the new commit inside `relic/`, run the tests, and commit the submodule change.
 
 ## Build and test
 
