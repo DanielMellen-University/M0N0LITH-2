@@ -1,0 +1,26 @@
+# Saving does not clear the undo or the redo stack: after undoing, a save
+# writes the undone text, and Ctrl+Y still redoes what was undone.
+use ../shell/wm
+use std/vfs
+let d = wm.new_desktop(640, 480, wm.default_apps())
+let e = wm.launch(d, wm.editor)
+vfs.write(e.state.fs, "/home/u.txt", "")
+e.state.path = "/home/u.txt"
+e.state.text = "ab"
+e.state.disk = ""
+e.state.undo = []
+e.state.redo = []
+e.state.back = 0
+e.state.mark = none
+fun show(label)
+    print(label, "[" + e.state.status + "]", [e.state.text], "disk:", vfs.read(e.state.fs, "/home/u.txt"))
+wm.key(d, "c")
+show("typed")
+wm.key(d, "ctrl+z")
+show("undone")
+wm.key(d, "ctrl+s")
+show("saved the undone text")
+wm.key(d, "ctrl+y")
+show("redo still works after save")
+wm.key(d, "ctrl+s")
+show("saved the redone text")
