@@ -1,0 +1,20 @@
+# Terminal Ctrl+V with an empty clipboard pastes nothing: the line stays as
+# it was, at the end of the line and in the middle of it, and the cursor
+# does not move.
+use ../shell/wm
+let t = wm.terminal.init()
+fun typed(line)
+    for ch in line
+        if ch == " "
+            wm.terminal.on_key(t, "space")
+        else
+            wm.terminal.on_key(t, ch)
+fun prompt()
+    let lines = wm.terminal.lines(t)
+    return lines[len(lines) - 1]
+wm.terminal.on_key(t, "ctrl+v")
+print([t.input], t.left)
+typed("ab")
+wm.terminal.on_key(t, "left")
+wm.terminal.on_key(t, "ctrl+v")
+print([t.input], t.left, prompt())

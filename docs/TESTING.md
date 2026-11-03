@@ -125,6 +125,7 @@ Write `tests/shell_<topic>.relic`, run it, read its output, and save that as `te
 | `shell_terminal_recall_spacing` | the repeat check is on the exact line, so a command with an extra space is kept as a different line |
 | `shell_terminal_tab_empty` | Tab on an empty or whitespace-only line changes nothing and lists nothing |
 | `shell_terminal_ignored_keys` | Escape, Shift+arrows, Ctrl+W, Alt+Backspace and F1 do nothing in the Terminal, at the end or in the middle of the line |
+| `shell_terminal_paste_empty` | Ctrl+V with an empty clipboard pastes nothing and leaves the cursor where it was |
 | `shell_help` | Terminal help and app names match the available commands and apps; every command line of help is checked, not only the first three |
 | `shell_date` | the date command and its UTC format |
 
