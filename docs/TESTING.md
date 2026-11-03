@@ -138,6 +138,7 @@ Write `tests/shell_<topic>.relic`, run it, read its output, and save that as `te
 | `shell_files_changed_click` | Files ignores a click on rows changed since drawing |
 | `shell_files_rename` | F2 renames a file or a folder (with what is in it) and keeps it selected; not over a name that is there, not to a name with /, Esc, the same name and ..; a long name showing its end, a click or another key giving up a rename, a click a Delete question; the next Editor's file follows a rename or a Terminal mv |
 | `shell_files_resize_click` | Files waits for a redraw after a resize before accepting a row click |
+| `shell_files_up_down` | Up and Down move one row at a time and stop at the first and last row |
 
 ### Editor
 

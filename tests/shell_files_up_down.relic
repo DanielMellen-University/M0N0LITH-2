@@ -1,0 +1,23 @@
+# Files: Up and Down move one row at a time and stop at the first and last
+# row, in a populated folder.
+use ../shell/wm
+use std/vfs
+let d = wm.new_desktop(640, 480, wm.default_apps())
+let f = wm.launch(d, wm.files_app)
+let fs = f.state.fs
+vfs.make_dir(fs, "/tmp/updown")
+for n in ["a.txt", "b.txt", "c.txt"]
+    vfs.write(fs, "/tmp/updown/" + n, "x")
+f.state.path = "/tmp/updown"
+print(wm.visible_lines(f))
+let seen = [f.state.sel]
+wm.key(d, "up")
+append(seen, f.state.sel)
+for k in ["down", "down", "down", "down"]
+    wm.key(d, k)
+    append(seen, f.state.sel)
+for k in ["up", "up", "up", "up"]
+    wm.key(d, k)
+    append(seen, f.state.sel)
+print(seen)
+print(wm.visible_lines(f))
