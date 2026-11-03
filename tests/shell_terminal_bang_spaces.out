@@ -1,0 +1,7 @@
+["Terminal. Type help.", "/home> echo first", "first"]
+["/home> echo second", "second"]
+["/home> echo second", "second"]
+["/home> echo second", "second"]
+["/home> !12345", "!12345: not in history"]
+["/home> !123456", "unknown: !123456"]
+["echo first", "echo second", "!123456"]
