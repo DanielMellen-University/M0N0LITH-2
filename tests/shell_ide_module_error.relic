@@ -1,0 +1,17 @@
+# IDE: an error inside a module the program used shows that module's path and
+# line, and Ctrl+E does nothing then (it only jumps for errors in the edited
+# file itself).
+use ../shell/wm
+use std/vfs
+let d = wm.new_desktop(640, 480, wm.default_apps())
+let i = wm.launch(d, wm.ide)
+let s = i.state
+s.path = "/home/main.relic"
+vfs.write(s.fs, "/home/bad.relic", "fun hello(\n")
+s.text = "use bad\n"
+wm.key(d, "ctrl+r")
+print(s.status, s.out, s.err_line)
+let before = len(s.text) - s.back
+wm.key(d, "ctrl+e")
+let after = len(s.text) - s.back
+print("cursor unchanged", before == after, before, after)
