@@ -142,6 +142,7 @@ Write `tests/shell_<topic>.relic`, run it, read its output, and save that as `te
 | `shell_files_scroll` | a long list scrolls just far enough to keep the selected row in view, the title stays first, and Home shows the first rows again |
 | `shell_files_open_editor` | opening a file sets the next Editor's file without leaving the folder, and entering a folder leaves that file alone |
 | `shell_files_rename_edit` | F2 rename editing: Ctrl+Backspace drops the last word, Ctrl+U clears, Backspace on empty does nothing, Space inserts, Ctrl+V pastes the clipboard line |
+| `shell_files_rename_reject` | F2 rename refusals: an empty, dot, or dotdot name, a name that only differs by spaces, and a file removed meanwhile |
 
 ### Editor
 
