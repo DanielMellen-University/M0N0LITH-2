@@ -1,0 +1,13 @@
+# Snake: an empty best-score file reads as 0, and a number with spaces
+# around it reads as that number.
+use ../shell/wm
+use std/vfs
+let d = wm.new_desktop(640, 480, wm.default_apps())
+let w = wm.launch(d, wm.snake)
+let s = w.state
+vfs.write(s.fs, "/home/snake-best.txt", "")
+let w2 = wm.launch(d, wm.snake)
+print(w2.app.lines(w2.state)[0])
+vfs.write(s.fs, "/home/snake-best.txt", " 7 \n")
+let w3 = wm.launch(d, wm.snake)
+print(w3.app.lines(w3.state)[0])
