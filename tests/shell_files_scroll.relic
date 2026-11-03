@@ -1,0 +1,21 @@
+# Files: a long list scrolls just far enough to keep the selected row in
+# view, the title line always stays first, and going back to the top shows
+# the first rows again.
+use ../shell/wm
+use std/vfs
+use std/strings
+let d = wm.new_desktop(640, 480, wm.default_apps())
+let f = wm.launch(d, wm.files_app)
+vfs.make_dir(f.state.fs, "/tmp/scroll")
+for i in 0..20
+    vfs.write(f.state.fs, "/tmp/scroll/f" + strings.pad_left(str(i), 2, "0") + ".txt", "x")
+f.state.path = "/tmp/scroll"
+print("rows fit", wm.rows_fit(f))
+print("start", wm.visible_lines(f))
+for k in 0..8
+    wm.key(d, "down")
+print("after 8 down", f.state.sel, wm.visible_lines(f))
+wm.key(d, "end")
+print("at end", f.state.sel, wm.visible_lines(f))
+wm.key(d, "home")
+print("back home", f.state.sel, wm.visible_lines(f))

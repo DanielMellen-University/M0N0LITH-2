@@ -1,0 +1,3 @@
+Delete vacant? Delete again
+["Files: /tmp/del", "  ..", "  keep.txt", "> last.txt"] false
+["Files: /tmp/del2", "  ..", "> a.txt"] false

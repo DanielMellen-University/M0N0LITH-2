@@ -145,6 +145,15 @@ Write `tests/shell_<topic>.relic`, run it, read its output, and save that as `te
 | `shell_files_changed_click` | Files ignores a click on rows changed since drawing |
 | `shell_files_rename` | F2 renames a file or a folder (with what is in it) and keeps it selected; not over a name that is there, not to a name with /, Esc, the same name and ..; a long name showing its end, a click or another key giving up a rename, a click a Delete question; the next Editor's file follows a rename or a Terminal mv |
 | `shell_files_resize_click` | Files waits for a redraw after a resize before accepting a row click |
+| `shell_files_up_down` | Up and Down move one row at a time and stop at the first and last row |
+| `shell_files_scroll` | a long list scrolls just far enough to keep the selected row in view, the title stays first, and Home shows the first rows again |
+| `shell_files_open_editor` | opening a file sets the next Editor's file without leaving the folder, and entering a folder leaves that file alone |
+| `shell_files_rename_edit` | F2 rename editing: Ctrl+Backspace drops the last word, Ctrl+U clears, Backspace on empty does nothing, Space inserts, Ctrl+V pastes the clipboard line |
+| `shell_files_rename_reject` | F2 rename refusals: an empty, dot, or dotdot name, a name that only differs by spaces, and a file removed meanwhile |
+| `shell_files_delete_empty` | Delete removes an empty folder and keeps the selection on its line, next name or the one before for the last row |
+| `shell_files_copy_file` | Ctrl+C copies a file's full path, to paste into Notes |
+| `shell_files_click_scrolled` | a click on a visible row of a scrolled list opens the row shown there |
+| `shell_files_jump_symbol` | jump-to-letter works for a name starting with a symbol, going round to the top |
 
 ### Editor
 

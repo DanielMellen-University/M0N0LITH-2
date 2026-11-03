@@ -1,0 +1,47 @@
+# Files F2: a rename that is not a name is refused, a name that only looks
+# different because of spaces is left alone, and a rename of a file another
+# app removed meanwhile says it is gone.
+use ../shell/wm
+use std/vfs
+let d = wm.new_desktop(640, 480, wm.default_apps())
+let f = wm.launch(d, wm.files_app)
+let fs = f.state.fs
+vfs.make_dir(fs, "/tmp/rrej")
+vfs.write(fs, "/tmp/rrej/a.txt", "x")
+vfs.write(fs, "/tmp/rrej/b.txt", "y")
+f.state.path = "/tmp/rrej"
+fun title() = wm.visible_lines(f)[0]
+fun pick(name)
+    wm.visible_lines(f)
+    for i in 0..len(f.state.names)
+        if f.state.names[i] == name
+            f.state.sel = i
+fun keys(list)
+    for k in list
+        wm.key(d, k)
+fun typed(t)
+    for ch in t
+        if ch == " "
+            wm.key(d, "space")
+        else
+            wm.key(d, ch)
+pick("a.txt")
+keys(["f2", "ctrl+u", "return"])
+print("empty", title())
+keys(["f2", "ctrl+u"])
+typed(".")
+keys(["return"])
+print("dot", title())
+keys(["f2", "ctrl+u"])
+typed("..")
+keys(["return"])
+print("dotdot", title())
+keys(["f2", "ctrl+u"])
+typed("a.txt ")
+keys(["return"])
+print("spaces only", title(), vfs.exists(fs, "/tmp/rrej/a.txt"))
+keys(["f2", "ctrl+u"])
+typed("new.txt")
+vfs.remove(fs, "/tmp/rrej/a.txt")
+keys(["return"])
+print("gone", title(), vfs.exists(fs, "/tmp/rrej/a.txt"))

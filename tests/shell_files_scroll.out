@@ -1,0 +1,5 @@
+rows fit 9
+start ["Files: /tmp/scroll", "> ..", "  f00.txt", "  f01.txt", "  f02.txt", "  f03.txt", "  f04.txt", "  f05.txt", "  f06.txt"]
+after 8 down 8 ["Files: /tmp/scroll", "  f00.txt", "  f01.txt", "  f02.txt", "  f03.txt", "  f04.txt", "  f05.txt", "  f06.txt", "> f07.txt"]
+at end 20 ["Files: /tmp/scroll", "  f12.txt", "  f13.txt", "  f14.txt", "  f15.txt", "  f16.txt", "  f17.txt", "  f18.txt", "> f19.txt"]
+back home 0 ["Files: /tmp/scroll", "> ..", "  f00.txt", "  f01.txt", "  f02.txt", "  f03.txt", "  f04.txt", "  f05.txt", "  f06.txt"]

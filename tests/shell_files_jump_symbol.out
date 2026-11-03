@@ -1,0 +1,2 @@
+["Files: /tmp/jump", "> ..", "  !bang.txt", "  -dash.txt", "  _under.txt", "  plain.txt"]
+[["-dash.txt", 2], ["!bang.txt", 1], ["_under.txt", 3], ["-dash.txt", 2], ["!bang.txt", 1]]

@@ -1,0 +1,29 @@
+# Files Ctrl+C: copying a file, not just a folder, puts its full path on
+# the clipboard, to paste into Notes.
+use ../shell/wm
+use std/vfs
+let d = wm.new_desktop(640, 480, wm.default_apps())
+let f = wm.launch(d, wm.files_app)
+let fs = f.state.fs
+vfs.make_dir(fs, "/tmp/copy")
+vfs.write(fs, "/tmp/copy/doc.txt", "x")
+f.state.path = "/tmp/copy"
+fun pick(name)
+    wm.visible_lines(f)
+    for i in 0..len(f.state.names)
+        if f.state.names[i] == name
+            f.state.sel = i
+pick("doc.txt")
+wm.key(d, "ctrl+c")
+let note = wm.launch(d, wm.notes)
+wm.key(d, "ctrl+v")
+print("copied file", note.state.text)
+wm.close(d, note.id)
+wm.restore(d, f.id)
+f.state.path = "/home"
+wm.visible_lines(f)
+pick("welcome.txt")
+wm.key(d, "ctrl+c")
+let note2 = wm.launch(d, wm.notes)
+wm.key(d, "ctrl+v")
+print("copied home file", note2.state.text)

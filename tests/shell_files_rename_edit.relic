@@ -1,0 +1,39 @@
+# Files F2: the rename editing keys. Ctrl+Backspace drops the last word,
+# Ctrl+U clears, Backspace on an empty name does nothing, Space inserts a
+# space, and Ctrl+V pastes the clipboard line.
+use ../shell/wm
+use std/vfs
+let d = wm.new_desktop(640, 480, wm.default_apps())
+let f = wm.launch(d, wm.files_app)
+let fs = f.state.fs
+vfs.make_dir(fs, "/tmp/redit")
+vfs.write(fs, "/tmp/redit/my file.txt", "x")
+vfs.write(fs, "/tmp/redit/other.txt", "y")
+f.state.path = "/tmp/redit"
+fun title() = wm.visible_lines(f)[0]
+fun pick(name)
+    wm.visible_lines(f)
+    for i in 0..len(f.state.names)
+        if f.state.names[i] == name
+            f.state.sel = i
+pick("my file.txt")
+wm.key(d, "f2")
+print(title())
+wm.key(d, "ctrl+backspace")
+print(title())
+wm.key(d, "ctrl+u")
+print(title())
+wm.key(d, "backspace")
+print(title())
+wm.key(d, "space")
+print(title())
+wm.key(d, "down")
+pick("other.txt")
+wm.key(d, "ctrl+c")
+pick("my file.txt")
+wm.key(d, "f2")
+wm.key(d, "ctrl+u")
+wm.key(d, "ctrl+v")
+print(title())
+wm.dismiss(d)
+print(title(), wm.visible_lines(f))

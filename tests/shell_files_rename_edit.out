@@ -1,0 +1,7 @@
+rename: my file.txt_
+rename: my file._
+rename: _
+rename: _
+rename:  _
+rename: /tmp/redit/other.txt_
+Files: /tmp/redit ["Files: /tmp/redit", "  ..", "> my file.txt", "  other.txt"]

@@ -1,0 +1,5 @@
+empty not renamed: not a name
+dot not renamed: not a name
+dotdot not renamed: not a name
+spaces only Files: /tmp/rrej true
+gone gone: a.txt false

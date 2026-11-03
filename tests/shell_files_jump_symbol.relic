@@ -1,0 +1,19 @@
+# Files: jump-to-letter also works for a name starting with a symbol, going
+# round to the top, since any single character but . and / jumps.
+use ../shell/wm
+use std/vfs
+let d = wm.new_desktop(640, 480, wm.default_apps())
+let f = wm.launch(d, wm.files_app)
+let fs = f.state.fs
+vfs.make_dir(fs, "/tmp/jump")
+vfs.write(fs, "/tmp/jump/-dash.txt", "x")
+vfs.write(fs, "/tmp/jump/!bang.txt", "x")
+vfs.write(fs, "/tmp/jump/plain.txt", "x")
+vfs.write(fs, "/tmp/jump/_under.txt", "x")
+f.state.path = "/tmp/jump"
+print(wm.visible_lines(f))
+let seen = []
+for k in ["-", "!", "_", "-", "!"]
+    wm.key(d, k)
+    append(seen, [f.state.names[f.state.sel], f.state.sel])
+print(seen)
