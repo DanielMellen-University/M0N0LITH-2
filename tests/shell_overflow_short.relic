@@ -1,0 +1,26 @@
+# The hidden-windows list on a short desktop: rows per column shrink with
+# the desktop height, a new column starts to the left, and a row in the
+# second column picks its window.
+use ../shell/wm
+let d = wm.new_desktop(640, 150, wm.default_apps())
+for i in 0..30
+    wm.launch(d, wm.notes)
+fun ids(ws)
+    let out = []
+    for w in ws
+        append(out, w.id)
+    return out
+print("bar top:", wm.bar_top(d), "rows:", wm.overflow_rows(d), "cols:", wm.overflow_cols(d), "shown rows:", wm.overflow_shown(d), "hidden:", len(wm.hidden_tabs(d)))
+let bad = 0
+for i in 0..wm.overflow_shown(d)
+    let b = wm.overflow_item_box(d, i)
+    if b[0] < 0 or b[1] < 0 or b[0] + b[2] > d.width or b[1] + b[3] > wm.bar_top(d)
+        bad = bad + 1
+print("rows outside the desktop:", bad)
+print("last row of column 0:", wm.overflow_item_box(d, 6), "first row of column 1:", wm.overflow_item_box(d, 7))
+let ob = wm.overflow_box(d)
+print(wm.click(d, ob[0] + 2, ob[1] + 2), d.overflow_open)
+let hidden = wm.hidden_tabs(d)
+let row = wm.overflow_item_box(d, 7)
+print("pick hidden", hidden[7].id, ":", wm.click(d, row[0] + 5, row[1] + 5), "focus:", wm.focused(d).id, "list open:", d.overflow_open)
+print("after pick: shown:", ids(wm.shown_tabs(d)), "hidden:", ids(wm.hidden_tabs(d)))

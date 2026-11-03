@@ -1,0 +1,23 @@
+# Ctrl+1 to Ctrl+9 pick by launch order even when stacking has changed, and
+# restore a minimized window; Ctrl+0 is not a window key, so it changes
+# nothing and the focused app ignores it.
+use ../shell/wm
+let d = wm.new_desktop(640, 480, wm.default_apps())
+let w9 = none
+for i in 0..10
+    let w = wm.launch(d, wm.clicker)
+    if w.id == 9
+        w9 = w
+wm.restore(d, 3)
+print("raised 3, focus:", wm.focused(d).id)
+wm.key(d, "ctrl+9")
+print("ctrl+9, focus:", wm.focused(d).id)
+wm.minimize(d, 9)
+print("minimized 9, focus:", wm.focused(d).id, "minimized:", w9.minimized)
+wm.key(d, "ctrl+9")
+let f = wm.focused(d)
+print("ctrl+9 again, focus:", f.id, "minimized:", f.minimized, "count:", f.state.count)
+wm.key(d, "ctrl+0")
+print("ctrl+0, focus:", wm.focused(d).id, "count:", wm.focused(d).state.count)
+wm.key(d, "ctrl+9")
+print("ctrl+9 on the front window, focus:", wm.focused(d).id)

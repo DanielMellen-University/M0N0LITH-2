@@ -1,0 +1,18 @@
+menu rows: 8
+open 0 marked: 0
+launch Clicker expected: Clicker windows: 1
+open 1 marked: 0
+launch Notes expected: Notes windows: 1
+open 2 marked: 0
+launch Terminal expected: Terminal windows: 1
+open 3 marked: 0
+launch Files expected: Files windows: 1
+open 4 marked: 0
+launch Editor expected: Editor windows: 1
+open 5 marked: 0
+launch IDE expected: IDE windows: 1
+open 6 marked: 0
+launch Paint expected: Paint windows: 1
+open 7 marked: 0
+launch Snake expected: Snake windows: 1
+after all rows: 0 none

@@ -32,11 +32,14 @@ Write `tests/shell_<topic>.relic`, run it, read its output, and save that as `te
 | `shell_wm` | drives wm.relic with fake clicks and keys; output must match shell_wm.out |
 | `shell_lifecycle` | window ids, focus and tab order through lifecycle changes |
 | `shell_minimize` | minimize and restore from the taskbar and the _ box |
+| `shell_close_focus` | closing a focused window gives focus to the next window down, closing another leaves focus alone, closing the last leaves none |
 | `shell_start_menu` | the Start button opens and closes the menu; Up, Down and Return on the open menu |
+| `shell_menu_all_rows` | every Start menu row launches its app, in the documented order, with the first row marked on each open |
 | `shell_menu_focus` | keyboard focus while the Start menu or the +N list is open |
 | `shell_menu_edges` | Start menu row and taskbar hit boundaries |
 | `shell_drag_resize` | dragging and resizing keep windows reachable |
 | `shell_resize_offset` | resizing follows the point grabbed in the handle |
+| `shell_resize_handle` | presses just left of or above the resize handle go to the app, presses on its corners start a resize that keeps the top-left corner |
 | `shell_launch_small` | cascaded windows fit a small desktop |
 | `shell_launch_sizes` | each of the eight apps opens at its documented size on a desktop big enough to fit it |
 | `shell_cascade_gaps` | a new window does not open on top of another after closes |
@@ -54,6 +57,9 @@ Write `tests/shell_<topic>.relic`, run it, read its output, and save that as `te
 | `shell_taskbar_narrow` | taskbar tabs and the +N button on narrow desktops and with many windows |
 | `shell_overflow_edges` | overflow threshold and list row boundaries |
 | `shell_overflow_lifecycle` | focus and stacking as windows change with the list open |
+| `shell_taskbar_focus_swap` | the focused hidden window takes the last shown tab, and picking the displaced window from the list gives it a button again |
+| `shell_overflow_close_fit` | closing windows with the list open keeps it open while they overflow, and removes the +N button and the list once they all fit |
+| `shell_overflow_short` | the hidden-windows list on a short desktop: fewer rows per column, a new column to the left, picking a second-column row |
 | `shell_overflow_all_minimized` | overflow tabs and restore when no window is focused |
 | `shell_overflow_limit` | the last visible row and the 200-row list limit |
 | `shell_overflow_titles` | empty, long and non-ASCII window names in overflow |
@@ -69,6 +75,7 @@ Write `tests/shell_<topic>.relic`, run it, read its output, and save that as `te
 | `shell_cmd_keys` | Cmd with a letter acts like Ctrl (Cmd+S, Cmd+Z, Cmd+A on macOS) |
 | `shell_held_keys` | repeated key_down events from held keys, and key_up |
 | `shell_window_cycle` | Ctrl+Tab brings the lowest visible window to the front and goes round, skips minimized ones, does nothing with no windows, and no app sees the key; Ctrl+Shift+Tab going the other way and undoing a Ctrl+Tab; Ctrl+W closing the window with focus and leaving a minimized one; Ctrl+M minimizing it; Ctrl+1 to Ctrl+9 picking a window by its taskbar place |
+| `shell_window_digits` | Ctrl+9 picks by launch order after stacking changes and restores a minimized ninth window; Ctrl+0 changes nothing |
 | `shell_mouse_buttons` | left and right mouse buttons during a drag |
 
 ### Drawing and clipping

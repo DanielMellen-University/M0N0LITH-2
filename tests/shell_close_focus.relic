@@ -1,0 +1,23 @@
+# Closing a window gives focus to the next window down, not the oldest one;
+# closing a window that does not have focus leaves focus where it was, and
+# closing the last window leaves no focus.
+use ../shell/wm
+let d = wm.new_desktop(640, 480, wm.default_apps())
+let a = wm.launch(d, wm.notes)
+let b = wm.launch(d, wm.clicker)
+let c = wm.launch(d, wm.terminal)
+fun focus_id(d)
+    let f = wm.focused(d)
+    if f == none
+        return none
+    return f.id
+print("opened:", a.id, b.id, c.id, "focus:", focus_id(d))
+# the top window's x box: the Terminal's, clear of the Clicker below it
+let cb = wm.close_box(c)
+print(wm.click(d, cb[0] + 2, cb[1] + 2), "focus:", focus_id(d), "windows:", len(d.windows))
+# the Notes window's x box, while the Clicker has focus
+cb = wm.close_box(a)
+print(wm.click(d, cb[0] + 2, cb[1] + 2), "focus:", focus_id(d), "windows:", len(d.windows))
+# the last window's x box
+cb = wm.close_box(b)
+print(wm.click(d, cb[0] + 2, cb[1] + 2), "focus:", focus_id(d), "windows:", len(d.windows))

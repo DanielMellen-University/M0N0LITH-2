@@ -1,0 +1,13 @@
+# Every Start menu row launches the app in the documented order: Clicker,
+# Notes, Terminal, Files, Editor, IDE, Paint and Snake. Opening the menu
+# again always marks the first row, and picking a row launches only that app.
+use ../shell/wm
+let d = wm.new_desktop(640, 480, wm.default_apps())
+print("menu rows:", len(d.apps))
+for i in 0..len(d.apps)
+    wm.click(d, 10, 470)
+    print("open", i, "marked:", d.menu_sel)
+    let b = wm.menu_item_box(d, i)
+    print(wm.click(d, b[0] + 5, b[1] + 5), wm.focused(d).app.name, "expected:", d.apps[i].name, "windows:", len(d.windows))
+    wm.close(d, wm.focused(d).id)
+print("after all rows:", len(d.windows), wm.focused(d))
