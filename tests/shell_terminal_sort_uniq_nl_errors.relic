@@ -1,0 +1,22 @@
+# sort, uniq and nl share the same path checks: a path ending in / must be
+# a folder, a missing file is not found, and nl on a missing file says so
+# (sort and uniq on a missing file are covered by the edges test).
+use ../shell/wm
+let t = wm.terminal.init()
+fun run(line)
+    t.buf = []
+    for c in line
+        if c == " "
+            wm.terminal.on_key(t, "space")
+        else
+            wm.terminal.on_key(t, c)
+    wm.terminal.on_key(t, "return")
+    print(t.buf)
+run("write /tmp/s.txt one")
+run("sort /tmp/s.txt/")
+run("uniq /tmp/s.txt/")
+run("nl /tmp/s.txt/")
+run("nl /tmp/nothere")
+run("sort /tmp/nothere/")
+run("nl /tmp/s.txt")
+run("rm /tmp/s.txt")
