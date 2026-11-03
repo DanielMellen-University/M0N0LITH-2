@@ -57,6 +57,7 @@ Write `tests/shell_<topic>.relic`, run it, read its output, and save that as `te
 | `shell_taskbar_narrow` | taskbar tabs and the +N button on narrow desktops and with many windows |
 | `shell_overflow_edges` | overflow threshold and list row boundaries |
 | `shell_overflow_lifecycle` | focus and stacking as windows change with the list open |
+| `shell_taskbar_focus_swap` | the focused hidden window takes the last shown tab, and picking the displaced window from the list gives it a button again |
 | `shell_overflow_all_minimized` | overflow tabs and restore when no window is focused |
 | `shell_overflow_limit` | the last visible row and the 200-row list limit |
 | `shell_overflow_titles` | empty, long and non-ASCII window names in overflow |

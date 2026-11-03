@@ -1,0 +1,25 @@
+# The focused window always keeps a taskbar button: when it is not among the
+# first ones opened, it takes the place of the last shown tab, and the window
+# it displaced goes behind the +N button. Picking that displaced window from
+# the list brings it to the front and gives it a button again.
+use ../shell/wm
+let d = wm.new_desktop(640, 480, wm.default_apps())
+for i in 0..14
+    wm.launch(d, wm.notes)
+fun ids(ws)
+    let out = []
+    for w in ws
+        append(out, w.id)
+    return out
+print("14 windows: shown:", ids(wm.shown_tabs(d)), "hidden:", ids(wm.hidden_tabs(d)))
+wm.restore(d, 14)
+print("focused 14: shown:", ids(wm.shown_tabs(d)), "hidden:", ids(wm.hidden_tabs(d)), "focus:", wm.focused(d).id)
+let ob = wm.overflow_box(d)
+print(wm.click(d, ob[0] + 2, ob[1] + 2), d.overflow_open)
+let hidden = wm.hidden_tabs(d)
+let row = wm.overflow_item_box(d, 0)
+print("pick hidden", hidden[0].id, ":", wm.click(d, row[0] + 5, row[1] + 5), "focus:", wm.focused(d).id, "list open:", d.overflow_open)
+print("after pick: shown:", ids(wm.shown_tabs(d)), "hidden:", ids(wm.hidden_tabs(d)))
+# the picked window's button is the last shown one; clicking it minimizes it
+let t = wm.tab_box(d, len(wm.shown_tabs(d)) - 1)
+print(wm.click(d, t[0] + 5, t[1] + 5), "focus:", wm.focused(d).id)
