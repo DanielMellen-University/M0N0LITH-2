@@ -1,0 +1,29 @@
+# Editor Up and Down keep the column, or go to the end of a shorter line, and
+# the column is not remembered: going down to a short line and back to a long
+# one lands at the short line's column, not the one it started from. Up on the
+# first line goes to its start, Down on the last line to its end.
+use ../shell/wm
+let d = wm.new_desktop(640, 480, wm.default_apps())
+let e = wm.launch(d, wm.editor)
+let s = e.state
+fun pos() = len(s.text) - s.back
+fun go(k)
+    e.app.on_key(s, k)
+    return pos()
+s.text = "abcdefgh\nxy\nlonger line"
+s.back = len(s.text) - 6
+s.mark = none
+print("start", pos())
+print("down to short", go("down"))
+print("down to long, column lost", go("down"))
+print("up to short", go("up"))
+print("up to first, column lost", go("up"))
+print("up on the first line", go("up"))
+s.back = 0
+s.mark = none
+print("down on the last line", go("down"))
+# a plain Up and Down on lines of the same length keep the column exactly
+s.text = "abcd\nefgh\nijkl"
+s.back = 7
+s.mark = none
+print("same length down", go("down"), go("up"))
