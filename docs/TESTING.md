@@ -119,6 +119,7 @@ Write `tests/shell_<topic>.relic`, run it, read its output, and save that as `te
 | `shell_terminal_frame` | Terminal builds only the rows that fit, matching a full wrap |
 | `shell_terminal_ctrl_backspace_midline` | Ctrl+Backspace in the middle of the line takes off the word before the cursor and keeps the rest; trailing spaces and punctuation after a word go with it |
 | `shell_terminal_ctrl_l_cursor` | Ctrl+L in the middle of the line empties the output and keeps the line and the cursor where they were |
+| `shell_terminal_recall_edit_down` | editing a recalled line and pressing Down gives back the line being typed, not the edit; Up again gives the newest command |
 | `shell_help` | Terminal help and app names match the available commands and apps; every command line of help is checked, not only the first three |
 | `shell_date` | the date command and its UTC format |
 

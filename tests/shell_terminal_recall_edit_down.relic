@@ -1,0 +1,25 @@
+# Terminal recall: editing a recalled line does not change the draft, so
+# Down past the newest gives back the line being typed as it was, not the
+# edit; Up again gives back the newest command, unedited.
+use ../shell/wm
+let t = wm.terminal.init()
+fun typed(line)
+    for ch in line
+        if ch == " "
+            wm.terminal.on_key(t, "space")
+        else
+            wm.terminal.on_key(t, ch)
+fun run(line)
+    typed(line)
+    wm.terminal.on_key(t, "return")
+fun key(k)
+    wm.terminal.on_key(t, k)
+    return t.input
+run("echo one")
+run("echo two")
+typed("draft")
+print([key("up")])
+print([key("X")])
+print([key("down")])
+print([key("up")])
+print([key("down")])
