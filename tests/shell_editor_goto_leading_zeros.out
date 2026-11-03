@@ -1,0 +1,5 @@
+typed 003 Editor [line: 003_] /home/welcome.txt
+line 3 8 Editor [line 3] /home/welcome.txt
+typed 12345678, only 7 taken Editor [line: 1234567_] .../welcome.txt
+past the end 14 Editor [line 4] /home/welcome.txt
+line 1 0 Editor [line 1] /home/welcome.txt

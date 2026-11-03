@@ -1,0 +1,23 @@
+# Editor Ctrl+G takes leading zeros in the line number, and takes at most 7
+# digits: an 8th digit is ignored, so a huge number still lands on the last
+# line. A number with leading zeros goes to the line it names.
+use ../shell/wm
+let d = wm.new_desktop(640, 480, wm.default_apps())
+let e = wm.launch(d, wm.editor)
+fun keys(list)
+    for k in list
+        wm.key(d, k)
+fun pos() = len(e.state.text) - e.state.back
+fun title() = wm.visible_lines(e)[0]
+e.state.text = "one\ntwo\nthree\nfour"
+e.state.back = 0
+keys(["ctrl+g", "0", "0", "3"])
+print("typed 003", title())
+keys(["return"])
+print("line 3", pos(), title())
+keys(["ctrl+g", "1", "2", "3", "4", "5", "6", "7", "8"])
+print("typed 12345678, only 7 taken", title())
+keys(["return"])
+print("past the end", pos(), title())
+keys(["ctrl+g", "0", "0", "1", "return"])
+print("line 1", pos(), title())
