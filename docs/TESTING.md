@@ -126,6 +126,7 @@ Write `tests/shell_<topic>.relic`, run it, read its output, and save that as `te
 | `shell_terminal_mv_folder_into` | mv moves a folder inside a folder, and refuses when the folder already holds that name |
 | `shell_terminal_multipath_errors` | rm, mkdir and touch with several paths keep going after an error for one |
 | `shell_terminal_sort_uniq_nl_errors` | sort, uniq and nl on a path ending in /, and nl on a missing file |
+| `shell_terminal_head_tail_counts` | head and tail counts: tail 0, leading zeros, over six digits, a letter, a dash count, and a bad count on a missing file |
 
 ### Files
 
