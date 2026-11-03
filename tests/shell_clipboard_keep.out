@@ -1,0 +1,4 @@
+empty paste ["abc"] 0
+no selection copy and cut ["abc"] 0
+old clipboard still there ["abcabc"] 1
+undo the paste ["abc"] 0
