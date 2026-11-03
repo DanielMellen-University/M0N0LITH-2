@@ -1,0 +1,5 @@
+counts 2 1
+after c1 3 1
+deleted 0 1
+undone 3 1
+["Clicks: 3", "Click here to count."] ["Clicks: 1", "Click here to count."]

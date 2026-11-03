@@ -90,6 +90,7 @@ Write `tests/shell_<topic>.relic`, run it, read its output, and save that as `te
 | `shell_notes_input_edges` | single-line input and reopening Notes; Ctrl+Z bringing a cleared line back, or taking a paste back, one step |
 | `shell_notes_two_windows` | Notes: two windows keep their own lines; typing in one leaves the other alone |
 | `shell_notes_empty_clipboard` | Notes: Ctrl+X or Ctrl+C on an empty line leaves the clipboard as it was |
+| `shell_clicker_two_windows` | Clicker: two windows count on their own, and undoing one leaves the other alone |
 
 ### Terminal
 
