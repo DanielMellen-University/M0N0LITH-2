@@ -136,7 +136,7 @@ fun overflow_box(d)
     let w = overflow_width_for(d)
     return [d.width - w - 2, bar_top(d) + 3, w, bar_height - 6]
 
-fun overflow_label(d) = "+{len(d.windows) - tab_capacity(d)}"
+fun overflow_label(d) = "+{_hidden_count(d)}"
 
 # The +N button's width: overflow_width, or wider when the window count has
 # enough digits that the label (drawn 6 pixels in) would not fit. It goes by
