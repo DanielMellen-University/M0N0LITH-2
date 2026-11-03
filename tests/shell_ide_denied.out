@@ -1,0 +1,8 @@
+error ["line 2: time.sleep(): not available here"]
+error ["line 2: files.remove(): not available here"]
+kept true keep
+error ["line 2: files.rename(): not available here"]
+renamed false
+error ["line 2: files.make_dir(): not available here"]
+made false
+error ["line 2: graphics.open(): not available here"]
