@@ -33,6 +33,7 @@ Write `tests/shell_<topic>.relic`, run it, read its output, and save that as `te
 | `shell_lifecycle` | window ids, focus and tab order through lifecycle changes |
 | `shell_minimize` | minimize and restore from the taskbar and the _ box |
 | `shell_start_menu` | the Start button opens and closes the menu; Up, Down and Return on the open menu |
+| `shell_menu_all_rows` | every Start menu row launches its app, in the documented order, with the first row marked on each open |
 | `shell_menu_focus` | keyboard focus while the Start menu or the +N list is open |
 | `shell_menu_edges` | Start menu row and taskbar hit boundaries |
 | `shell_drag_resize` | dragging and resizing keep windows reachable |
