@@ -75,6 +75,7 @@ Write `tests/shell_<topic>.relic`, run it, read its output, and save that as `te
 | `shell_cmd_keys` | Cmd with a letter acts like Ctrl (Cmd+S, Cmd+Z, Cmd+A on macOS) |
 | `shell_held_keys` | repeated key_down events from held keys, and key_up |
 | `shell_window_cycle` | Ctrl+Tab brings the lowest visible window to the front and goes round, skips minimized ones, does nothing with no windows, and no app sees the key; Ctrl+Shift+Tab going the other way and undoing a Ctrl+Tab; Ctrl+W closing the window with focus and leaving a minimized one; Ctrl+M minimizing it; Ctrl+1 to Ctrl+9 picking a window by its taskbar place |
+| `shell_window_digits` | Ctrl+9 picks by launch order after stacking changes and restores a minimized ninth window; Ctrl+0 changes nothing |
 | `shell_mouse_buttons` | left and right mouse buttons during a drag |
 
 ### Drawing and clipping

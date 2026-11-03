@@ -1,0 +1,6 @@
+raised 3, focus: 3
+ctrl+9, focus: 9
+minimized 9, focus: 3 minimized: true
+ctrl+9 again, focus: 9 minimized: false count: 0
+ctrl+0, focus: 9 count: 0
+ctrl+9 on the front window, focus: 9
