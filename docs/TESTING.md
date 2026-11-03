@@ -155,6 +155,7 @@ Write `tests/shell_<topic>.relic`, run it, read its output, and save that as `te
 | `shell_editor_edges` | Editor empty buffers, line edges and failed saves |
 | `shell_editor_disk_changed` | Ctrl+S warns once when another app changed the file |
 | `shell_editor_undo` | Ctrl+Z undoes edits one step at a time, up to 500, and Ctrl+Y redoes them until the next edit |
+| `shell_editor_save_status` | Editor status through save, undo and redo: saved again with nothing new, undone, redone, and nothing to undo or redo past the end |
 | `shell_editor_escape` | Esc drops a selection in the Editor and the IDE and is taken, with none it is not; the IDE stops a waiting run first |
 | `shell_editor_select` | Shift+arrows and Ctrl+A select; typing and Backspace replace the selection |
 | `shell_editor_click` | a click puts the cursor on the character clicked (the `_` not counted), at the end past a line's end, from what shows of a line cut on the left; the title, a click below the text, the IDE's pane and a waiting run do nothing; press and drag selects, above and below the text too; a double-click selects a word, a triple-click the line; in the IDE a click on the error or its header goes to its line; a key during a drag ends it |

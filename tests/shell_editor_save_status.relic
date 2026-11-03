@@ -1,0 +1,27 @@
+# Editor status through save, undo and redo: a save with nothing new still
+# says saved, undo says undone, redo says redone, and undoing or redoing
+# past the end says so instead of changing anything.
+use ../shell/wm
+let d = wm.new_desktop(640, 480, wm.default_apps())
+let e = wm.launch(d, wm.editor)
+fun show(label)
+    print(label, e.state.status)
+show("open")
+wm.key(d, "x")
+show("typed")
+wm.key(d, "ctrl+s")
+show("saved")
+wm.key(d, "ctrl+s")
+show("saved again, nothing new")
+wm.key(d, "ctrl+z")
+show("undone")
+wm.key(d, "ctrl+y")
+show("redone")
+wm.key(d, "ctrl+z")
+show("undone again")
+wm.key(d, "ctrl+z")
+show("nothing left to undo")
+wm.key(d, "ctrl+y")
+show("redone again")
+wm.key(d, "ctrl+y")
+show("nothing left to redo")
