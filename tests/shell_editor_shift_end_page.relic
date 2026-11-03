@@ -1,0 +1,42 @@
+# Editor Shift+End selects to the end of the line, and a plain End then drops
+# the selection by moving to the line's end. Shift+Page Up selects a page up,
+# as Shift+Page Down selects a page down.
+use ../shell/wm
+use std/strings
+let d = wm.new_desktop(640, 480, wm.default_apps())
+let e = wm.launch(d, wm.editor)
+let s = e.state
+fun pos() = len(s.text) - s.back
+fun chosen()
+    if s.mark == none
+        return none
+    let a = len(s.text) - s.mark
+    let b = pos()
+    if a < b
+        return [a, b]
+    return [b, a]
+fun keys(ks)
+    for k in ks
+        e.app.on_key(s, k)
+    return [s.text, pos(), chosen()]
+s.text = "one\ntwo three\nfour"
+s.back = len(s.text) - 6
+s.mark = none
+print(keys(["shift+end"]))
+print(keys(["end"]))
+print(keys(["shift+home"]))
+# Shift+Page Up from near the end of a long file, after a draw sets the rows
+let many = ""
+for i in 0..30
+    many = many + "line " + str(i) + "\n"
+s.text = many
+s.back = 0
+s.mark = none
+wm.visible_lines(e)
+fun line_no() = len(strings.split(slice(s.text, 0, pos()), "\n")) - 1
+print("rows", s.rows, "at line", line_no())
+e.app.on_key(s, "shift+pageup")
+print("shift+pageup", line_no(), chosen())
+e.app.on_key(s, "shift+pageup")
+print("shift+pageup again", line_no(), chosen())
+print(wm.key_of_event({type: "key_down", key: "end", shift: true, ctrl: false}), wm.key_of_event({type: "key_down", key: "pageup", shift: true, ctrl: false}))

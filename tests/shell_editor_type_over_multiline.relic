@@ -1,0 +1,29 @@
+# Editor typing, Return and Backspace over a selection that spans lines
+# replace the whole selection, not just one line of it: the typed character
+# lands where the selection started, a new line starts there, and Backspace
+# leaves the text joined at that point.
+use ../shell/wm
+let d = wm.new_desktop(640, 480, wm.default_apps())
+let e = wm.launch(d, wm.editor)
+let s = e.state
+fun pos() = len(s.text) - s.back
+fun select(a, b)
+    s.mark = len(s.text) - a
+    s.back = len(s.text) - b
+fun keys(ks)
+    for k in ks
+        e.app.on_key(s, k)
+    return [s.text, pos()]
+s.text = "one\ntwo\nthree"
+select(2, 10)
+print(keys(["X"]))
+s.text = "one\ntwo\nthree"
+select(2, 10)
+print(keys(["return"]))
+s.text = "one\ntwo\nthree"
+select(4, 8)
+print(keys(["backspace"]))
+s.text = "one\ntwo\nthree"
+select(0, 13)
+print(keys(["backspace"]))
+print(keys(["ctrl+z"]))

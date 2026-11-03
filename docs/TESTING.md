@@ -198,6 +198,14 @@ Write `tests/shell_<topic>.relic`, run it, read its output, and save that as `te
 | `shell_editor_delete` | Delete removes the next character or the selection; Ctrl+Z puts it back |
 | `shell_editor_long_line` | long-line clipping, ignored movement and saving the full buffer |
 | `shell_editor_replaced` | saving after a file is removed or replaced by a folder |
+| `shell_editor_backspace_join` | Backspace at a line start joins it to the line before, at the file start it does nothing, and one Ctrl+Z puts the lines back |
+| `shell_editor_word_across_lines` | Ctrl+Right and Ctrl+Left word jumps cross newlines and punctuation, and stay put at the ends of the file |
+| `shell_editor_up_down_column` | Up and Down keep the column, go to the end of a shorter line, and do not remember the column when returning to a longer line; Up on the first line goes to its start, Down on the last line to its end |
+| `shell_editor_shift_end_page` | Shift+End selects to the line end, a plain End drops the selection, and Shift+Page Up selects a page up |
+| `shell_editor_replace_overlap` | Ctrl+H replaces non-overlapping matches in one pass, and a replacement containing the text does not get replaced again |
+| `shell_editor_find_prev_selection` | Shift+F3 finds the match before the selection start and goes round to the last match, and before the cursor with no selection |
+| `shell_editor_goto_leading_zeros` | Ctrl+G takes leading zeros in the line number and at most 7 digits, so a huge number lands on the last line |
+| `shell_editor_type_over_multiline` | Typing, Return and Backspace over a selection spanning lines replace the whole selection |
 | `shell_big_file` | the Editor on a file of thousands of lines stays quick |
 | `shell_last_lines` | Editor line splitting at empty and trailing newline boundaries |
 | `shell_last_lines_long` | the Editor on a 200,000-character line stays quick |

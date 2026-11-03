@@ -1,0 +1,7 @@
+["one\ntwo three\nfour", 13, [6, 13]]
+["one\ntwo three\nfour", 13, none]
+["one\ntwo three\nfour", 4, [4, 13]]
+rows 5 at line 30
+shift+pageup 27 [206, 230]
+shift+pageup again 24 [182, 230]
+shift+end shift+pageup
