@@ -1,0 +1,30 @@
+# mv into a folder moves a folder inside it, and refuses when the folder
+# already holds a file or folder of that name, leaving both sides untouched.
+use ../shell/wm
+use std/vfs
+let t = wm.terminal.init()
+fun run(line)
+    t.buf = []
+    for c in line
+        if c == " "
+            wm.terminal.on_key(t, "space")
+        else
+            wm.terminal.on_key(t, c)
+    wm.terminal.on_key(t, "return")
+    print(t.buf)
+run("mkdir box")
+run("mkdir item")
+run("echo in > item/f.txt")
+run("mv item box")
+run("ls box")
+run("ls box/item")
+run("echo one > a.txt")
+run("echo two > box/a.txt")
+run("mv a.txt box")
+run("cat box/a.txt")
+run("cat a.txt")
+run("mkdir dup")
+run("mkdir box/dup")
+run("mv dup box")
+run("ls box")
+print("kept", vfs.read(t.fs, "/home/box/a.txt") == "two\n" and vfs.read(t.fs, "/home/a.txt") == "one\n" and vfs.is_dir(t.fs, "/home/dup") and vfs.is_dir(t.fs, "/home/box/dup"))

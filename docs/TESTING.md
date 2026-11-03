@@ -123,6 +123,7 @@ Write `tests/shell_<topic>.relic`, run it, read its output, and save that as `te
 | `shell_terminal_help_words` | help ignores extra words and prints the full help |
 | `shell_terminal_echo_bare` | echo with no text, or an empty quoted word, prints an empty line |
 | `shell_terminal_cp_folder_collision` | cp into a folder that already holds the name refuses and leaves it untouched |
+| `shell_terminal_mv_folder_into` | mv moves a folder inside a folder, and refuses when the folder already holds that name |
 
 ### Files
 
