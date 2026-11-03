@@ -38,6 +38,7 @@ Write `tests/shell_<topic>.relic`, run it, read its output, and save that as `te
 | `shell_drag_resize` | dragging and resizing keep windows reachable |
 | `shell_resize_offset` | resizing follows the point grabbed in the handle |
 | `shell_launch_small` | cascaded windows fit a small desktop |
+| `shell_launch_sizes` | each of the eight apps opens at its documented size on a desktop big enough to fit it |
 | `shell_cascade_gaps` | a new window does not open on top of another after closes |
 | `shell_missed_release` | a lost mouse-up does not leave a drag running |
 | `shell_outside_click` | presses outside the desktop do not hit its controls |
@@ -178,6 +179,7 @@ Write `tests/shell_<topic>.relic`, run it, read its output, and save that as `te
 |---|---|
 | `shell_paint_edges` | Paint: a key while a stroke or shape is held ends it, so Ctrl+Z then a move draws nothing back; `c` on a blank canvas is not an undo step; Ctrl+V, Ctrl+Backspace and Ctrl+U while typing a name, a long name showing its end, and a click giving up the name |
 | `shell_paint` | Paint: a drag with no gaps, the fill tool (side by side only, no-op fills, undo), the line, rectangle and ellipse tools, outline and filled (the shape follows the drag, its end stays on the canvas, one undo step, brush size), save as (a typed name, `.paint` added, whole paths, Esc, no name, a folder, a file that is not a picture, a folder that is not there), swatches and keys, brush sizes (also with [ and ]), the eraser, undo, redo and clear, a stroke off the canvas and back, boxes cut to the window, save and open again from Files, a file that is not a picture, another size, a failed save; the i color picker (the tool before comes back, no undo step); x swapping back to the color before |
+| `shell_paint_unknown_digits` | Paint: digits outside 0 to 8 in a picture file read as white, while valid digits keep their colors |
 
 ### Snake
 
@@ -185,6 +187,7 @@ Write `tests/shell_<topic>.relic`, run it, read its output, and save that as `te
 |---|---|
 | `shell_snake` | Snake: no move before a key, the beat, no turning back, two turns in one step, pause without catching up (Space or P), no move while another window is focused, eating and growing, speed, the wall, its own body, keys after the end, a new game (R or Return), the best score saved in the files and read back (junk reads as 0); N starting a new game mid-game or paused |
 | `shell_snake_speed_floor` | Snake: at score 20 the step interval stays at its 70 ms floor, with no move at 69 ms and one move at 70 ms |
+| `shell_snake_win` | Snake: eating the last free cell fills the board and wins, with no food left and the win help line |
 
 ### Shared filesystem and fuzzing
 
