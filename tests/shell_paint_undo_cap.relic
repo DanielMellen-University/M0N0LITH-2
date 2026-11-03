@@ -1,0 +1,21 @@
+# Paint: undo keeps at most 20 steps, so after 22 single-cell strokes only
+# the first two survive 20 undos, and a further Ctrl+Z changes nothing.
+use ../shell/wm
+let d = wm.new_desktop(640, 480, wm.default_apps())
+let w = wm.launch(d, wm.paint_app)
+let s = w.state
+fun cell(cx, cy) = [6 + cx * 4 + 2, 40 + cy * 4 + 2]
+fun row(y, a, b)
+    let out = ""
+    for x in a..b
+        out = out + str(s.cells[y * 60 + x])
+    return out
+for i in 0..22
+    let p = cell(i, 0)
+    w.app.on_click(s, p[0], p[1])
+print(len(s.undo), row(0, 0, 22))
+for i in 0..20
+    w.app.on_key(s, "ctrl+z")
+print(len(s.undo), row(0, 0, 22))
+w.app.on_key(s, "ctrl+z")
+print(len(s.undo), row(0, 0, 22))

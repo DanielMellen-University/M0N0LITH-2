@@ -182,6 +182,7 @@ Write `tests/shell_<topic>.relic`, run it, read its output, and save that as `te
 | `shell_paint_unknown_digits` | Paint: digits outside 0 to 8 in a picture file read as white, while valid digits keep their colors |
 | `shell_paint_equal_size` | Paint: = grows the brush like + and ], stopping at size 4 |
 | `shell_paint_brush_centering` | Paint: a size 2 brush dot covers its cell and the ones right and below, a size 4 dot one up and left and two right and below |
+| `shell_paint_undo_cap` | Paint: undo keeps at most 20 steps |
 
 ### Snake
 
