@@ -1,0 +1,34 @@
+# Files: opening a file sets the file the next Editor window opens without
+# leaving the folder, and entering a folder leaves that pending file alone,
+# so the next Editor still opens the file picked before.
+use ../shell/wm
+use std/vfs
+let d = wm.new_desktop(640, 480, wm.default_apps())
+let f = wm.launch(d, wm.files_app)
+let fs = f.state.fs
+vfs.make_dir(fs, "/tmp/pend/sub")
+vfs.write(fs, "/tmp/pend/a.txt", "A")
+vfs.write(fs, "/tmp/pend/sub/b.txt", "B")
+f.state.path = "/tmp/pend"
+fun pick(name)
+    wm.visible_lines(f)
+    for i in 0..len(f.state.names)
+        if f.state.names[i] == name
+            f.state.sel = i
+pick("a.txt")
+wm.key(d, "return")
+print("after opening a file", f.state.path, f.state.names[f.state.sel])
+let e1 = wm.launch(d, wm.editor)
+print("editor 1", e1.state.path, e1.state.text)
+wm.restore(d, f.id)
+pick("sub")
+wm.key(d, "return")
+print("after entering sub", f.state.path, f.state.sel)
+let e2 = wm.launch(d, wm.editor)
+print("editor 2", e2.state.path, e2.state.text)
+wm.restore(d, f.id)
+pick("b.txt")
+wm.key(d, "return")
+print("after opening b", f.state.path, f.state.names[f.state.sel])
+let e3 = wm.launch(d, wm.editor)
+print("editor 3", e3.state.path, e3.state.text)

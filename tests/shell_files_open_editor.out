@@ -1,0 +1,6 @@
+after opening a file /tmp/pend a.txt
+editor 1 /tmp/pend/a.txt A
+after entering sub /tmp/pend/sub 0
+editor 2 /tmp/pend/a.txt A
+after opening b /tmp/pend/sub b.txt
+editor 3 /tmp/pend/sub/b.txt B
