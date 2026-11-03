@@ -9,7 +9,7 @@ A text editor for files in the desktop's in-memory filesystem. A new Editor wind
 The status is one of:
 
 - `open`, `new file` (the file does not exist yet; Ctrl+S makes it), or why it cannot be opened or saved, such as `is a folder`, `not a folder: /home/notes.txt` or `no folder: /home/missing`
-- `edited`, `undone` or `saved` after those actions
+- `edited`, `undone`, `redone` or `saved` after those actions, and `nothing to undo` or `nothing to redo` when there is nothing left to undo or redo
 - `changed on disk: ctrl+s again` (see below)
 
 ## Keys
