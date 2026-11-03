@@ -1487,8 +1487,6 @@ fun _term_run(s, line)
         return
     let parts = split.words
     s.quoted = split.quoted
-    if len(parts) == 0
-        return
     let cmd = parts[0]
     if cmd in _path_commands
         for word in slice(parts, 1, len(parts))
