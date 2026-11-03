@@ -1,0 +1,34 @@
+# Editor word jumps cross newlines: Ctrl+Right from the end of a word goes to
+# the end of the next word even on the next line, and Ctrl+Left comes back the
+# same way, past punctuation. At either end of the file they stay put.
+use ../shell/wm
+let d = wm.new_desktop(640, 480, wm.default_apps())
+let e = wm.launch(d, wm.editor)
+let s = e.state
+fun pos() = len(s.text) - s.back
+fun go(k)
+    e.app.on_key(s, k)
+    return pos()
+s.text = "one two\nthree four"
+s.back = len(s.text) - 3
+s.mark = none
+let stops = []
+for i in 0..4
+    append(stops, go("ctrl+right"))
+print("right", stops)
+let back = []
+for i in 0..4
+    append(back, go("ctrl+left"))
+print("left", back)
+# punctuation and a newline between words
+s.text = "a, b\nc.d"
+s.back = len(s.text)
+s.mark = none
+let p = []
+for i in 0..5
+    append(p, go("ctrl+right"))
+print("punct right", p)
+let q = []
+for i in 0..5
+    append(q, go("ctrl+left"))
+print("punct left", q)

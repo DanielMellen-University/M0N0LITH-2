@@ -163,6 +163,7 @@ Write `tests/shell_<topic>.relic`, run it, read its output, and save that as `te
 | `shell_editor_long_line` | long-line clipping, ignored movement and saving the full buffer |
 | `shell_editor_replaced` | saving after a file is removed or replaced by a folder |
 | `shell_editor_backspace_join` | Backspace at a line start joins it to the line before, at the file start it does nothing, and one Ctrl+Z puts the lines back |
+| `shell_editor_word_across_lines` | Ctrl+Right and Ctrl+Left word jumps cross newlines and punctuation, and stay put at the ends of the file |
 | `shell_big_file` | the Editor on a file of thousands of lines stays quick |
 | `shell_last_lines` | Editor line splitting at empty and trailing newline boundaries |
 | `shell_last_lines_long` | the Editor on a 200,000-character line stays quick |
