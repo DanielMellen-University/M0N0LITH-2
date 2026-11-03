@@ -1,0 +1,11 @@
+# Clicker: a click on its title bar or on the empty desktop counts nothing;
+# only a click inside the window does.
+use ../shell/wm
+let d = wm.new_desktop(640, 480, wm.default_apps())
+let c = wm.launch(d, wm.clicker)
+wm.key(d, "space")
+print("key", c.state.count)
+print("title", wm.click(d, c.x + 10, c.y + 5), c.state.count)
+print("desktop", wm.click(d, 630, 10), c.state.count)
+print("inside", wm.click(d, c.x + 5, c.y + 16 + 5), c.state.count)
+print(wm.visible_lines(c))

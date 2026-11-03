@@ -91,6 +91,7 @@ Write `tests/shell_<topic>.relic`, run it, read its output, and save that as `te
 | `shell_notes_two_windows` | Notes: two windows keep their own lines; typing in one leaves the other alone |
 | `shell_notes_empty_clipboard` | Notes: Ctrl+X or Ctrl+C on an empty line leaves the clipboard as it was |
 | `shell_clicker_two_windows` | Clicker: two windows count on their own, and undoing one leaves the other alone |
+| `shell_clicker_title_click` | Clicker: a click on its title bar or on the empty desktop counts nothing; only a click inside the window does |
 
 ### Terminal
 
