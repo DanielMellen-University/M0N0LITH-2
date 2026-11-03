@@ -1,0 +1,25 @@
+# rm, mkdir and touch take several paths and do each in turn: an error for
+# one does not stop the rest, as the Terminal doc says for rm.
+use ../shell/wm
+use std/vfs
+let t = wm.terminal.init()
+fun run(line)
+    t.buf = []
+    for c in line
+        if c == " "
+            wm.terminal.on_key(t, "space")
+        else
+            wm.terminal.on_key(t, c)
+    wm.terminal.on_key(t, "return")
+    print(t.buf)
+run("touch keep.txt")
+run("rm nope.txt keep.txt gone.txt")
+print("rm kept going", not vfs.exists(t.fs, "/home/keep.txt"))
+run("mkdir have")
+run("mkdir have new1 have")
+print("mkdir kept going", vfs.is_dir(t.fs, "/home/new1"))
+run("touch gone/x good.txt")
+print("touch kept going", vfs.exists(t.fs, "/home/good.txt"))
+run("rm have")
+run("rm new1")
+run("rm good.txt")

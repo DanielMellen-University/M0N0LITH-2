@@ -1,0 +1,11 @@
+["/home> touch keep.txt"]
+["/home> rm nope.txt keep.txt gone.txt", "rm: not found: /home/nope.txt", "rm: not found: /home/gone.txt"]
+rm kept going true
+["/home> mkdir have"]
+["/home> mkdir have new1 have", "mkdir: already there: /home/have", "mkdir: already there: /home/have"]
+mkdir kept going true
+["/home> touch gone/x good.txt", "touch: no folder: /home/gone"]
+touch kept going true
+["/home> rm have"]
+["/home> rm new1"]
+["/home> rm good.txt"]
