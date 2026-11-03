@@ -3940,7 +3940,7 @@ fun _snake_step(s)
             try
                 vfs.write(s.fs, _snake_best_path, "{s.best}\n")
             catch e
-                s.best = s.best   # a best that cannot be saved still shows
+                none   # a best that cannot be saved still shows
         _snake_place_food(s)
         if s.food == none
             s.state = "won"
