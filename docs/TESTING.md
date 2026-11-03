@@ -181,6 +181,7 @@ Write `tests/shell_<topic>.relic`, run it, read its output, and save that as `te
 | `shell_paint` | Paint: a drag with no gaps, the fill tool (side by side only, no-op fills, undo), the line, rectangle and ellipse tools, outline and filled (the shape follows the drag, its end stays on the canvas, one undo step, brush size), save as (a typed name, `.paint` added, whole paths, Esc, no name, a folder, a file that is not a picture, a folder that is not there), swatches and keys, brush sizes (also with [ and ]), the eraser, undo, redo and clear, a stroke off the canvas and back, boxes cut to the window, save and open again from Files, a file that is not a picture, another size, a failed save; the i color picker (the tool before comes back, no undo step); x swapping back to the color before |
 | `shell_paint_unknown_digits` | Paint: digits outside 0 to 8 in a picture file read as white, while valid digits keep their colors |
 | `shell_paint_equal_size` | Paint: = grows the brush like + and ], stopping at size 4 |
+| `shell_paint_brush_centering` | Paint: a size 2 brush dot covers its cell and the ones right and below, a size 4 dot one up and left and two right and below |
 
 ### Snake
 

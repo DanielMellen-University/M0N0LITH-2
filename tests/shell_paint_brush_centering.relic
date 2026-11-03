@@ -1,0 +1,24 @@
+# Paint: the brush square is centered on the cell under the pointer as near
+# as it can be: a size 2 dot covers its cell and the ones right and below,
+# a size 4 dot covers one cell up and left and two right and below.
+use ../shell/wm
+let d = wm.new_desktop(640, 480, wm.default_apps())
+let w = wm.launch(d, wm.paint_app)
+let s = w.state
+fun cell(cx, cy) = [6 + cx * 4 + 2, 40 + cy * 4 + 2]
+fun row(y, a, b)
+    let out = ""
+    for x in a..b
+        out = out + str(s.cells[y * 60 + x])
+    return out
+wm.key(d, "]")
+print(s.size)
+let p = cell(10, 10)
+w.app.on_click(s, p[0], p[1])
+print(row(9, 9, 12), row(10, 9, 12), row(11, 9, 12))
+wm.key(d, "]")
+wm.key(d, "]")
+print(s.size)
+p = cell(20, 20)
+w.app.on_click(s, p[0], p[1])
+print(row(18, 18, 23), row(19, 18, 23), row(20, 18, 23), row(21, 18, 23), row(22, 18, 23), row(23, 18, 23))
