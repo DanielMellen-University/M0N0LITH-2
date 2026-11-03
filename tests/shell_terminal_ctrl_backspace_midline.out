@@ -1,0 +1,5 @@
+/home> cat one/_ three
+["cat one/ three"]
+["rm "]
+[""]
+["echo "]

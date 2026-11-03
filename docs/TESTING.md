@@ -117,6 +117,7 @@ Write `tests/shell_<topic>.relic`, run it, read its output, and save that as `te
 | `shell_terminal_ls` | Terminal packs directory listings to the window width |
 | `shell_terminal_wrap` | Terminal wraps long lines to the window width |
 | `shell_terminal_frame` | Terminal builds only the rows that fit, matching a full wrap |
+| `shell_terminal_ctrl_backspace_midline` | Ctrl+Backspace in the middle of the line takes off the word before the cursor and keeps the rest; trailing spaces and punctuation after a word go with it |
 | `shell_help` | Terminal help and app names match the available commands and apps; every command line of help is checked, not only the first three |
 | `shell_date` | the date command and its UTC format |
 
