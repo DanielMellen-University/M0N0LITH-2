@@ -1,0 +1,7 @@
+# Windows: a new window opens at its app's size. Launch each app on a desktop
+# big enough that nothing is cut to fit, and print its size.
+use ../shell/wm
+let d = wm.new_desktop(640, 480, wm.default_apps())
+for app in wm.default_apps()
+    let w = wm.launch(d, app)
+    print(w.app.name, w.width, w.height)

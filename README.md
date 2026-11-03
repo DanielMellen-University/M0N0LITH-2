@@ -12,7 +12,7 @@ shell/
   wm.relic        desktop model: windows, taskbar, Start menu, the apps. No drawing, runs without SDL
   desktop.relic   draws the model with std/graphics and runs the event loop
 tests/
-  shell_*.relic   101 programs that drive wm.relic with fake clicks and keys; each one's output must match its .out file
+  shell_*.relic   109 programs that drive wm.relic with fake clicks and keys; each one's output must match its .out file
 tools/
   run_golden.cmake  golden test runner (Relic's, cut down to what these tests use)
 relic/            Relic, pinned as a git submodule

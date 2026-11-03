@@ -1,0 +1,19 @@
+# Paint: unknown digits in a picture file read as white. Only digits 0 to 8
+# are colors, so a 9 or a letter leaves the blank white cell.
+use ../shell/wm
+use std/vfs
+let d = wm.new_desktop(640, 480, wm.default_apps())
+let f = wm.launch(d, wm.files_app)
+vfs.write(f.state.fs, "/home/odd.paint", "paint 4 2\n192a\n8231\n")
+# open the file from Files: the next Paint opens it
+let i = 0
+for e in vfs.entries(f.state.fs, "/home")
+    if e[0] == "odd.paint"
+        f.state.sel = i + 1   # row 0 is ".."
+    i = i + 1
+f.app.on_key(f.state, "return")
+let w = wm.launch(d, wm.paint_app)
+let s = w.state
+print(s.status, s.path)
+print(s.cells[0], s.cells[1], s.cells[2], s.cells[3])
+print(s.cells[60], s.cells[61], s.cells[62], s.cells[63])
