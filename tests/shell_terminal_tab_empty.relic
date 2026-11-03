@@ -1,0 +1,11 @@
+# Terminal Tab on an empty line, or one with only spaces, changes nothing
+# and lists nothing: the line stays as it was and no output is added.
+use ../shell/wm
+let t = wm.terminal.init()
+let before = t.buf
+wm.terminal.on_key(t, "tab")
+print([t.input], t.buf == before)
+for i in 0..3
+    wm.terminal.on_key(t, "space")
+wm.terminal.on_key(t, "tab")
+print([t.input], t.buf == before)
