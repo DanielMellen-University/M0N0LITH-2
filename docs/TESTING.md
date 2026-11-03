@@ -128,6 +128,15 @@ Write `tests/shell_<topic>.relic`, run it, read its output, and save that as `te
 | `shell_terminal_ls` | Terminal packs directory listings to the window width |
 | `shell_terminal_wrap` | Terminal wraps long lines to the window width |
 | `shell_terminal_frame` | Terminal builds only the rows that fit, matching a full wrap |
+| `shell_terminal_ctrl_backspace_midline` | Ctrl+Backspace in the middle of the line takes off the word before the cursor and keeps the rest; trailing spaces and punctuation after a word go with it |
+| `shell_terminal_ctrl_l_cursor` | Ctrl+L in the middle of the line empties the output and keeps the line and the cursor where they were |
+| `shell_terminal_recall_edit_down` | editing a recalled line and pressing Down gives back the line being typed, not the edit; Up again gives the newest command |
+| `shell_terminal_bang_spaces` | `!!` and `!N` with spaces around them still run, shown as the command resolved; a number out of history is not kept, a longer one is not a bang number and runs as an unknown command |
+| `shell_terminal_unknown_kept` | a command that fails is still kept, so `!!` runs it again and it fails again, kept once |
+| `shell_terminal_recall_spacing` | the repeat check is on the exact line, so a command with an extra space is kept as a different line |
+| `shell_terminal_tab_empty` | Tab on an empty or whitespace-only line changes nothing and lists nothing |
+| `shell_terminal_ignored_keys` | Escape, Shift+arrows, Ctrl+W, Alt+Backspace and F1 do nothing in the Terminal, at the end or in the middle of the line |
+| `shell_terminal_paste_empty` | Ctrl+V with an empty clipboard pastes nothing and leaves the cursor where it was |
 | `shell_help` | Terminal help and app names match the available commands and apps; every command line of help is checked, not only the first three |
 | `shell_date` | the date command and its UTC format |
 | `shell_terminal_history_words` | history rejects extra words, while history itself still lists every kept command numbered |

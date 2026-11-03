@@ -1,0 +1,15 @@
+# Terminal history keeps a command that fails: it is kept when run, so !!
+# runs it again and it fails again, and it is kept once, not twice.
+use ../shell/wm
+let t = wm.terminal.init()
+fun run(line)
+    for c in line
+        if c == " "
+            wm.terminal.on_key(t, "space")
+        else
+            wm.terminal.on_key(t, c)
+    wm.terminal.on_key(t, "return")
+run("nosuchcmd")
+print(t.buf, t.past)
+run("!!")
+print(t.buf, t.past)

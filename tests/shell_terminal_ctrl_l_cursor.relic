@@ -1,0 +1,24 @@
+# Terminal Ctrl+L in the middle of the line: it empties the output, as
+# shell_terminal_keys shows at the end, and keeps both the line being typed
+# and the cursor where it was, so typing goes on at the cursor.
+use ../shell/wm
+let t = wm.terminal.init()
+fun typed(line)
+    for ch in line
+        if ch == " "
+            wm.terminal.on_key(t, "space")
+        else
+            wm.terminal.on_key(t, ch)
+fun keys(list)
+    for k in list
+        wm.terminal.on_key(t, k)
+fun prompt()
+    let lines = wm.terminal.lines(t)
+    return lines[len(lines) - 1]
+typed("echo hi")
+keys(["left", "left", "left"])
+print(prompt())
+keys(["ctrl+l"])
+print(t.buf, prompt())
+typed("!")
+print(prompt())

@@ -1,0 +1,22 @@
+# Terminal !! and !N with spaces around them: the spaces are trimmed, so
+# they still run, and are shown as the command resolved, as in a shell. A
+# number out of history is not kept; a longer one is not a bang number at
+# all, so it runs as an unknown command and is kept like any other.
+use ../shell/wm
+let t = wm.terminal.init()
+fun run(line)
+    for c in line
+        if c == " "
+            wm.terminal.on_key(t, "space")
+        else
+            wm.terminal.on_key(t, c)
+    wm.terminal.on_key(t, "return")
+    print(t.buf)
+    t.buf = []
+run("echo first")
+run("echo second")
+run(" !! ")
+run(" !2 ")
+run("!12345")
+run("!123456")
+print(t.past)
