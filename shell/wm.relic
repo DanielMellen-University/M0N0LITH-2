@@ -2109,8 +2109,9 @@ fun _editor_init()
     else if not vfs.exists(_shell_fs, path)
         # nothing to read yet: Ctrl+S makes it, unless a part of the path is wrong
         status = "new file"
-        if _why_not_new(_shell_fs, path) != none
-            status = _why_not_new(_shell_fs, path)
+        let why = _why_not_new(_shell_fs, path)
+        if why != none
+            status = why
     else
         try
             text = vfs.read(_shell_fs, path)
