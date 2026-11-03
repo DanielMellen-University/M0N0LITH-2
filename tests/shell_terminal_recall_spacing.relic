@@ -1,0 +1,18 @@
+# Terminal history keeps a command only once when it is exactly the same as
+# the one before it: a trailing or leading space makes a different line, so
+# each spelling is kept, and a plain repeat after a spaced one is kept too.
+use ../shell/wm
+let t = wm.terminal.init()
+fun run(line)
+    for c in line
+        if c == " "
+            wm.terminal.on_key(t, "space")
+        else
+            wm.terminal.on_key(t, c)
+    wm.terminal.on_key(t, "return")
+run("pwd")
+run("pwd")
+run("pwd ")
+run(" pwd")
+run("pwd")
+print(t.past)
