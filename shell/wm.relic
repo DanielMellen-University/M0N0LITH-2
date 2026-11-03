@@ -2202,8 +2202,9 @@ let _block_words = ["if", "else", "for", "while", "fun", "try", "catch"]
 
 fun _editor_indent(s)
     let pos = _editor_pos(s)
-    if _editor_selection(s) != none
-        pos = _editor_selection(s)[0]
+    let sel = _editor_selection(s)
+    if sel != none
+        pos = sel[0]
     let start = _line_start(s.text, pos)
     let line = slice(s.text, start, pos)
     let n = 0
@@ -3078,8 +3079,9 @@ fun _editor_key(s, k)
         else if k == "tab"
             # spaces to the next multiple of 4 (Relic's indent); never a tab character
             let pos = _editor_pos(s)
-            if _editor_selection(s) != none
-                pos = _editor_selection(s)[0]
+            let sel = _editor_selection(s)
+            if sel != none
+                pos = sel[0]
             let col = pos - _line_start(s.text, pos)
             _editor_type(s, strings.repeat(" ", 4 - col % 4))
         else if k == "backspace"
