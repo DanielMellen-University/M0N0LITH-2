@@ -1,0 +1,4 @@
+overflow list open: true windows: 16
+after closing 16: 15 button: true list open: true
+after closing 15: 14 button: true list open: true
+after closing 14: 13 button: false list open: false

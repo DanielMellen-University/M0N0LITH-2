@@ -1,0 +1,15 @@
+# Closing windows while the hidden-windows list is open: the list stays open
+# while windows still overflow, and closing down until they all fit removes
+# the +N button and closes the list with it.
+use ../shell/wm
+let d = wm.new_desktop(640, 480, wm.default_apps())
+for i in 0..16
+    wm.launch(d, wm.notes)
+let ob = wm.overflow_box(d)
+print(wm.click(d, ob[0] + 2, ob[1] + 2), "list open:", d.overflow_open, "windows:", len(d.windows))
+wm.close(d, 16)
+print("after closing 16:", len(d.windows), "button:", wm.overflow_box(d) != none, "list open:", d.overflow_open)
+wm.close(d, 15)
+print("after closing 15:", len(d.windows), "button:", wm.overflow_box(d) != none, "list open:", d.overflow_open)
+wm.close(d, 14)
+print("after closing 14:", len(d.windows), "button:", wm.overflow_box(d) != none, "list open:", d.overflow_open)
