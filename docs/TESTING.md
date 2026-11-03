@@ -154,6 +154,7 @@ Write `tests/shell_<topic>.relic`, run it, read its output, and save that as `te
 | `shell_editor_stale` | Editor reports a file removed before opening |
 | `shell_editor_edges` | Editor empty buffers, line edges and failed saves |
 | `shell_editor_disk_changed` | Ctrl+S warns once when another app changed the file |
+| `shell_editor_disk_warn_keys` | Ctrl+S warns again when a cursor move or selection key comes between the warning and the next save |
 | `shell_editor_undo` | Ctrl+Z undoes edits one step at a time, up to 500, and Ctrl+Y redoes them until the next edit |
 | `shell_editor_save_status` | Editor status through save, undo and redo: saved again with nothing new, undone, redone, and nothing to undo or redo past the end |
 | `shell_editor_escape` | Esc drops a selection in the Editor and the IDE and is taken, with none it is not; the IDE stops a waiting run first |
