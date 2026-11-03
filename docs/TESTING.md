@@ -145,6 +145,7 @@ Write `tests/shell_<topic>.relic`, run it, read its output, and save that as `te
 | `shell_files_rename_reject` | F2 rename refusals: an empty, dot, or dotdot name, a name that only differs by spaces, and a file removed meanwhile |
 | `shell_files_delete_empty` | Delete removes an empty folder and keeps the selection on its line, next name or the one before for the last row |
 | `shell_files_copy_file` | Ctrl+C copies a file's full path, to paste into Notes |
+| `shell_files_click_scrolled` | a click on a visible row of a scrolled list opens the row shown there |
 
 ### Editor
 

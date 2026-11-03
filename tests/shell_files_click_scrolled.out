@@ -1,0 +1,3 @@
+scrolled 12 ["Files: /tmp/clickscroll", "  f04.txt", "  f05.txt", "  f06.txt", "  f07.txt", "  f08.txt", "  f09.txt", "  f10.txt", "> f11.txt"]
+app 7 f06.txt
+opened /tmp/clickscroll/f06.txt
