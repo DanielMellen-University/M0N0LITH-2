@@ -1,0 +1,17 @@
+# history takes no words: an extra word prints usage and changes nothing,
+# while history itself still lists every command kept, numbered from the oldest.
+use ../shell/wm
+let t = wm.terminal.init()
+fun run(line)
+    t.buf = []
+    for c in line
+        if c == " "
+            wm.terminal.on_key(t, "space")
+        else
+            wm.terminal.on_key(t, c)
+    wm.terminal.on_key(t, "return")
+    print(t.buf)
+run("history x")
+run("history x y")
+run("echo hi")
+run("history")
