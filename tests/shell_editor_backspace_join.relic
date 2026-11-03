@@ -1,0 +1,31 @@
+# Editor Backspace at a line's start joins it to the line before: it removes
+# the newline, not a character, and at the very start of the file it does
+# nothing. One Ctrl+Z puts the joined lines back.
+use ../shell/wm
+let d = wm.new_desktop(640, 480, wm.default_apps())
+let e = wm.launch(d, wm.editor)
+let s = e.state
+fun pos() = len(s.text) - s.back
+fun keys(ks)
+    for k in ks
+        e.app.on_key(s, k)
+    return [s.text, pos()]
+s.text = "one\ntwo\nthree"
+s.back = len(s.text) - 4
+s.mark = none
+print(keys(["backspace"]))
+s.back = len(s.text)
+s.mark = none
+print(keys(["backspace"]))
+print(keys(["ctrl+z"]))
+# joining keeps the next line's leading spaces
+s.text = "one\n  two"
+s.back = len(s.text) - 4
+s.mark = none
+print(keys(["backspace"]))
+# joining at the start of the last line, then undoing it
+s.text = "one\ntwo\nthree"
+s.back = 5
+s.mark = none
+print(keys(["backspace"]))
+print(keys(["ctrl+z"]))

@@ -1,0 +1,6 @@
+["onetwo\nthree", 3]
+["onetwo\nthree", 0]
+["one\ntwo\nthree", 4]
+["one  two", 3]
+["one\ntwothree", 7]
+["one\ntwo\nthree", 8]
