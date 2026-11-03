@@ -1,0 +1,17 @@
+# echo with no text prints an empty line, as does an empty quoted word;
+# an empty word in the middle leaves a double space where it was.
+use ../shell/wm
+let t = wm.terminal.init()
+fun run(line)
+    t.buf = []
+    for c in line
+        if c == " "
+            wm.terminal.on_key(t, "space")
+        else
+            wm.terminal.on_key(t, c)
+    wm.terminal.on_key(t, "return")
+    print(t.buf)
+run("echo")
+run("echo ''")
+run("echo a '' b")
+run("echo '' ''")

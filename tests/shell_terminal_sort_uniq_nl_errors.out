@@ -1,0 +1,8 @@
+["/home> write /tmp/s.txt one"]
+["/home> sort /tmp/s.txt/", "sort: not a folder: /tmp/s.txt"]
+["/home> uniq /tmp/s.txt/", "uniq: not a folder: /tmp/s.txt"]
+["/home> nl /tmp/s.txt/", "nl: not a folder: /tmp/s.txt"]
+["/home> nl /tmp/nothere", "nl: not found: /tmp/nothere"]
+["/home> sort /tmp/nothere/", "sort: not found: /tmp/nothere"]
+["/home> nl /tmp/s.txt", "  1  one"]
+["/home> rm /tmp/s.txt"]

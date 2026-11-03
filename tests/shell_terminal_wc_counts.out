@@ -1,0 +1,8 @@
+["/home> wc /tmp/bare", "0 3 14 /tmp/bare"]
+["/home> wc /tmp/blanks", "3 2 5 /tmp/blanks"]
+["/home> wc /tmp/onlynl", "1 0 1 /tmp/onlynl"]
+["/home> wc /tmp/spaces", "1 2 8 /tmp/spaces"]
+["/home> rm /tmp/bare"]
+["/home> rm /tmp/blanks"]
+["/home> rm /tmp/onlynl"]
+["/home> rm /tmp/spaces"]

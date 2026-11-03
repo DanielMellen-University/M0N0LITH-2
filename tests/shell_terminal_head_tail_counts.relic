@@ -1,0 +1,29 @@
+# head and tail counts beyond the edges test: tail 0 prints nothing, a count
+# with leading zeros counts as that number, a count over six digits or with
+# a letter is not a count, a count starting with - is refused as an option,
+# and a bad count is reported before the file is even looked for.
+use ../shell/wm
+let t = wm.terminal.init()
+fun run(line)
+    t.buf = []
+    for c in line
+        if c == " "
+            wm.terminal.on_key(t, "space")
+        else
+            wm.terminal.on_key(t, c)
+    wm.terminal.on_key(t, "return")
+    print(t.buf)
+run("echo 1 > /tmp/c.txt")
+run("echo 2 >> /tmp/c.txt")
+run("echo 3 >> /tmp/c.txt")
+run("echo 4 >> /tmp/c.txt")
+run("echo 5 >> /tmp/c.txt")
+run("tail /tmp/c.txt 0")
+run("head /tmp/c.txt 02")
+run("tail /tmp/c.txt 03")
+run("head /tmp/c.txt 1234567")
+run("head /tmp/c.txt 1x")
+run("head /tmp/c.txt -1")
+run("head /tmp/nothere two")
+run("tail /tmp/nothere 999999")
+run("rm /tmp/c.txt")

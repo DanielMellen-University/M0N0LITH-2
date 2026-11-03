@@ -1,0 +1,3 @@
+["/home> help extra", "help clear history echo apps date", "pwd cd ls cat head tail", "mkdir touch write rm mv cp", "wc grep find sort uniq nl", "echo text > file, >> adds", "\"my file\": quotes keep spaces", "!! the last again, !N history N"]
+["/home> help clear history", "help clear history echo apps date", "pwd cd ls cat head tail", "mkdir touch write rm mv cp", "wc grep find sort uniq nl", "echo text > file, >> adds", "\"my file\": quotes keep spaces", "!! the last again, !N history N"]
+["/home> help", "help clear history echo apps date", "pwd cd ls cat head tail", "mkdir touch write rm mv cp", "wc grep find sort uniq nl", "echo text > file, >> adds", "\"my file\": quotes keep spaces", "!! the last again, !N history N"]

@@ -1,0 +1,24 @@
+# cp into a folder that already holds a file of the same name refuses and
+# leaves the file inside the folder untouched, as cp to a name does.
+use ../shell/wm
+use std/vfs
+let t = wm.terminal.init()
+fun run(line)
+    t.buf = []
+    for c in line
+        if c == " "
+            wm.terminal.on_key(t, "space")
+        else
+            wm.terminal.on_key(t, c)
+    wm.terminal.on_key(t, "return")
+    print(t.buf)
+run("echo hi > c.txt")
+run("mkdir cd")
+run("echo bye > cd/c.txt")
+run("cp c.txt cd")
+run("cat cd/c.txt")
+run("cat c.txt")
+print("inside untouched", vfs.read(t.fs, "/home/cd/c.txt") == "bye\n")
+run("rm cd/c.txt")
+run("rm cd")
+run("rm c.txt")

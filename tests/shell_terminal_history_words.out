@@ -1,0 +1,4 @@
+["/home> history x", "usage: history"]
+["/home> history x y", "usage: history"]
+["/home> echo hi", "hi"]
+["/home> history", "  1  history x", "  2  history x y", "  3  echo hi", "  4  history"]
