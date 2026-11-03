@@ -1,0 +1,14 @@
+# Notes: two windows keep their own lines; typing in one leaves the other alone.
+use ../shell/wm
+let d = wm.new_desktop(640, 480, wm.default_apps())
+let n1 = wm.launch(d, wm.notes)
+for ch in "first"
+    wm.key(d, ch)
+let n2 = wm.launch(d, wm.notes)
+for ch in "second"
+    wm.key(d, ch)
+print("n1", n1.state.text, "n2", n2.state.text)
+wm.click(d, n1.x + 10, n1.y + 5)
+wm.key(d, "!")
+print("after", n1.state.text, n2.state.text)
+print(wm.visible_lines(n1), wm.visible_lines(n2))

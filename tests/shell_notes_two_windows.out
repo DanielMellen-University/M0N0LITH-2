@@ -1,0 +1,3 @@
+n1 first n2 second
+after first! second
+["Type something:", "first!_"] ["Type something:", "second_"]

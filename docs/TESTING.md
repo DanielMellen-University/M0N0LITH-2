@@ -88,6 +88,7 @@ Write `tests/shell_<topic>.relic`, run it, read its output, and save that as `te
 | `shell_notes_resize` | Notes text clipping and edits across resizes |
 | `shell_notes_cursor` | Notes: Left, Right, Home, End and word jumps move the cursor, Delete, typing, Backspace, Ctrl+Backspace, Ctrl+Delete, Ctrl+K and Ctrl+U at it, and Ctrl+Z bringing back the whole line; a long line keeps the cursor in view |
 | `shell_notes_input_edges` | single-line input and reopening Notes; Ctrl+Z bringing a cleared line back, or taking a paste back, one step |
+| `shell_notes_two_windows` | Notes: two windows keep their own lines; typing in one leaves the other alone |
 
 ### Terminal
 
