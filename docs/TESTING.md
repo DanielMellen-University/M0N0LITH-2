@@ -193,6 +193,7 @@ Write `tests/shell_<topic>.relic`, run it, read its output, and save that as `te
 |---|---|
 | `shell_snake` | Snake: no move before a key, the beat, no turning back, two turns in one step, pause without catching up (Space or P), no move while another window is focused, eating and growing, speed, the wall, its own body, keys after the end, a new game (R or Return), the best score saved in the files and read back (junk reads as 0); N starting a new game mid-game or paused |
 | `shell_snake_win` | Snake: eating the last free cell fills the board and wins, with no food left and the win help line |
+| `shell_snake_lowercase_wasd` | Snake: lowercase w, a, s, d turn like the arrows, and a turn straight back is ignored |
 
 ### Shared filesystem and fuzzing
 
