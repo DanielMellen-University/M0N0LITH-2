@@ -121,6 +121,7 @@ Write `tests/shell_<topic>.relic`, run it, read its output, and save that as `te
 | `shell_date` | the date command and its UTC format |
 | `shell_terminal_history_words` | history rejects extra words, while history itself still lists every kept command numbered |
 | `shell_terminal_help_words` | help ignores extra words and prints the full help |
+| `shell_terminal_echo_bare` | echo with no text, or an empty quoted word, prints an empty line |
 
 ### Files
 
