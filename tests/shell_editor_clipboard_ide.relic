@@ -1,0 +1,21 @@
+# The Editor and the IDE share the desktop clipboard the other way round
+# from the usual check: text copied in the Editor pastes in full, all its
+# lines, into the IDE buffer (not just its first line), in one undo step.
+use ../shell/wm
+let d = wm.new_desktop(640, 480, wm.default_apps())
+let e = wm.launch(d, wm.editor)
+e.state.text = "first line\nsecond line"
+e.state.back = 0
+e.state.mark = none
+e.state.undo = []
+for k in ["ctrl+a", "ctrl+c"]
+    e.app.on_key(e.state, k)
+let i = wm.launch(d, wm.ide)
+i.state.text = ""
+i.state.back = 0
+i.state.mark = none
+i.state.undo = []
+i.app.on_key(i.state, "ctrl+v")
+print("ide paste", [i.state.text], len(i.state.undo))
+i.app.on_key(i.state, "ctrl+z")
+print("ide undo", [i.state.text], len(i.state.undo))
