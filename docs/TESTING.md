@@ -39,6 +39,7 @@ Write `tests/shell_<topic>.relic`, run it, read its output, and save that as `te
 | `shell_menu_edges` | Start menu row and taskbar hit boundaries |
 | `shell_drag_resize` | dragging and resizing keep windows reachable |
 | `shell_resize_offset` | resizing follows the point grabbed in the handle |
+| `shell_resize_handle` | presses just left of or above the resize handle go to the app, presses on its corners start a resize that keeps the top-left corner |
 | `shell_launch_small` | cascaded windows fit a small desktop |
 | `shell_launch_sizes` | each of the eight apps opens at its documented size on a desktop big enough to fit it |
 | `shell_cascade_gaps` | a new window does not open on top of another after closes |

@@ -1,0 +1,9 @@
+handle: [248, 94, 12, 12] window: 40 30 220 60
+left of handle: app drag: none
+no drag moved it: 40 30
+above handle: app drag: none
+still: 40 30
+top-left corner: resize drag mode: resize
+resized: 40 30 270 90
+bottom-right corner: resize drag mode: resize
+resized again: 40 30 161 40

@@ -1,0 +1,23 @@
+# The 12 pixel resize handle's edges: a press just left of it or just above
+# it goes to the app inside, not to a resize, while a press on its top-left
+# or bottom-right corner starts one. Resizing never moves the top-left corner.
+use ../shell/wm
+let d = wm.new_desktop(640, 480, wm.default_apps())
+let w = wm.launch(d, wm.notes)
+let rb = wm.resize_box(w)
+print("handle:", rb, "window:", w.x, w.y, w.width, w.height)
+print("left of handle:", wm.click(d, rb[0] - 1, rb[1] + 5), "drag:", d.drag)
+wm.motion(d, 500, 500)
+print("no drag moved it:", w.x, w.y)
+print("above handle:", wm.click(d, rb[0] + 5, rb[1] - 1), "drag:", d.drag)
+wm.motion(d, 500, 500)
+print("still:", w.x, w.y)
+print("top-left corner:", wm.click(d, rb[0], rb[1]), "drag mode:", d.drag.mode)
+wm.motion(d, rb[0] + 50, rb[1] + 30)
+wm.release(d)
+print("resized:", w.x, w.y, w.width, w.height)
+rb = wm.resize_box(w)
+print("bottom-right corner:", wm.click(d, rb[0] + rb[2] - 1, rb[1] + rb[3] - 1), "drag mode:", d.drag.mode)
+wm.motion(d, 200, 80)
+wm.release(d)
+print("resized again:", w.x, w.y, w.width, w.height)
