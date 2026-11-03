@@ -195,6 +195,7 @@ Write `tests/shell_<topic>.relic`, run it, read its output, and save that as `te
 | `shell_snake_win` | Snake: eating the last free cell fills the board and wins, with no food left and the win help line |
 | `shell_snake_lowercase_wasd` | Snake: lowercase w, a, s, d turn like the arrows, and a turn straight back is ignored |
 | `shell_snake_best_empty` | Snake: an empty best-score file reads as 0, a padded number as that number |
+| `shell_snake_minimized` | Snake: a minimized window does not move, and the beat restarts on return instead of catching up |
 
 ### Shared filesystem and fuzzing
 

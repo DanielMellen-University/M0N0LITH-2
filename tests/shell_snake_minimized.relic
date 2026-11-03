@@ -1,0 +1,27 @@
+# Snake: a minimized window does not move, and after it comes back the
+# beat starts again instead of catching up.
+use ../shell/wm
+let d = wm.new_desktop(640, 480, wm.default_apps())
+let w = wm.launch(d, wm.snake)
+let s = w.state
+let now = 1000
+fun run(ms)
+    let stop = now + ms
+    while now < stop
+        now = now + 10
+        wm.tick(d, now)
+fun head() = s.body[len(s.body) - 1]
+wm.tick(d, now)
+wm.key(d, "right")
+run(150)
+run(150)
+let held = head()
+print(s.state, held)
+wm.minimize(d, w.id)
+run(1000)
+print("minimized", head() == held, s.state)
+wm.restore(d, w.id)
+run(150)
+print("back", head() == held)
+run(150)
+print("moving", head())
