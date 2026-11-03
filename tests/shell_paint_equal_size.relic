@@ -1,0 +1,11 @@
+# Paint: = grows the brush like + and ], and stops at 4, as documented.
+use ../shell/wm
+let d = wm.new_desktop(640, 480, wm.default_apps())
+let w = wm.launch(d, wm.paint_app)
+let s = w.state
+let sizes = []
+for k in ["=", "=", "=", "=", "=", "-", "="]
+    wm.key(d, k)
+    append(sizes, s.size)
+print(sizes)
+print(s.color, s.tool)

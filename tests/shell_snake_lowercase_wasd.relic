@@ -1,0 +1,29 @@
+# Snake: lowercase w, a, s, d turn the snake like the arrows and the
+# capital letters, and a lowercase turn straight back is ignored.
+use ../shell/wm
+let d = wm.new_desktop(640, 480, wm.default_apps())
+let w = wm.launch(d, wm.snake)
+let s = w.state
+let now = 1000
+fun run(ms)
+    let stop = now + ms
+    while now < stop
+        now = now + 10
+        wm.tick(d, now)
+fun head() = s.body[len(s.body) - 1]
+wm.tick(d, now)
+wm.key(d, "w")
+run(150)
+run(150)
+print(s.state, s.dir, head())
+wm.key(d, "s")
+wm.key(d, "a")
+run(150)
+print(s.dir, head())
+wm.key(d, "d")
+run(150)
+print(s.dir, head())
+let w2 = wm.launch(d, wm.snake)
+let s2 = w2.state
+w2.app.on_key(s2, "s")
+print(s2.state, s2.turns)

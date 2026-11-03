@@ -1,0 +1,20 @@
+# Paint: the color picker on a white cell picks the eraser, the tool
+# before comes back, it is not an undo step, and the eraser then erases.
+use ../shell/wm
+let d = wm.new_desktop(640, 480, wm.default_apps())
+let w = wm.launch(d, wm.paint_app)
+let s = w.state
+fun cell(cx, cy) = [6 + cx * 4 + 2, 40 + cy * 4 + 2]
+wm.key(d, "3")
+let p = cell(5, 5)
+w.app.on_click(s, p[0], p[1])
+print(s.cells[5 * 60 + 5])
+let undo_before = len(s.undo)
+w.app.on_key(s, "i")
+print(w.app.lines(s), s.tool)
+p = cell(10, 10)
+w.app.on_click(s, p[0], p[1])
+print(s.color, s.tool, len(s.undo) == undo_before)
+p = cell(5, 5)
+w.app.on_click(s, p[0], p[1])
+print(s.cells[5 * 60 + 5])
