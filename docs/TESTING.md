@@ -185,6 +185,7 @@ Write `tests/shell_<topic>.relic`, run it, read its output, and save that as `te
 | `shell_paint_undo_cap` | Paint: undo keeps at most 20 steps |
 | `shell_paint_large_picture` | Paint: a picture bigger than the canvas opens with only the part that fits |
 | `shell_paint_pick_white` | Paint: the picker on a white cell picks the eraser, with the tool before back and no undo step |
+| `shell_paint_line_thick` | Paint: a line with a bigger brush is that many cells thick, still one undo step |
 
 ### Snake
 
