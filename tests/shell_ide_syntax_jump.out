@@ -1,0 +1,4 @@
+error ["line 2: unclosed '('"] 2
+cursor at 9 ["print"]
+good run ran none
+no error 12 12

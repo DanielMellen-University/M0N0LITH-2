@@ -1,0 +1,21 @@
+# IDE: Ctrl+E goes to a syntax error's line too, and after a good run, when
+# there is no error, Ctrl+E moves nothing.
+use ../shell/wm
+use std/vfs
+let d = wm.new_desktop(640, 480, wm.default_apps())
+let i = wm.launch(d, wm.ide)
+let s = i.state
+s.path = "/home/hello.relic"
+s.text = "print(1)\nprint(2\nprint(3)\n"
+wm.key(d, "ctrl+r")
+print(s.status, s.out, s.err_line)
+wm.key(d, "ctrl+e")
+let pos = len(s.text) - s.back
+print("cursor at", pos, [slice(s.text, pos, pos + 5)])
+s.text = "print(\"ok\")\n"
+s.back = 0
+wm.key(d, "ctrl+r")
+print("good run", s.status, s.err_line)
+let before = len(s.text) - s.back
+wm.key(d, "ctrl+e")
+print("no error", before, len(s.text) - s.back)

@@ -1,0 +1,28 @@
+# IDE: a `use` of another file reads it as last saved. An unsaved edit to
+# that file in another IDE window changes nothing until it is saved.
+use ../shell/wm
+use std/vfs
+let d = wm.new_desktop(640, 480, wm.default_apps())
+let main = wm.launch(d, wm.ide)
+let s = main.state
+s.path = "/home/main.relic"
+s.text = "use lib/greet\nprint(greet.word())\n"
+vfs.make_dir(s.fs, "/home/lib")
+vfs.write(s.fs, "/home/lib/greet.relic", "fun word() = \"saved one\"\n")
+wm.key(d, "ctrl+r")
+print("saved", s.status, s.out)
+let lib = wm.launch(d, wm.ide)
+let ls = lib.state
+ls.path = "/home/lib/greet.relic"
+ls.text = "fun word() = \"edited two\"\n"
+ls.disk = vfs.read(s.fs, "/home/lib/greet.relic")
+ls.back = 0
+wm.key(d, "ctrl+tab")
+wm.key(d, "ctrl+r")
+print("unsaved", s.status, s.out)
+wm.key(d, "ctrl+tab")
+wm.key(d, "ctrl+s")
+print("lib saved", ls.status, vfs.read(s.fs, "/home/lib/greet.relic"))
+wm.key(d, "ctrl+tab")
+wm.key(d, "ctrl+r")
+print("after save", s.status, s.out)

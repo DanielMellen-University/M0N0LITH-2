@@ -1,0 +1,17 @@
+# Clicker: two windows count on their own, and undoing one leaves the other alone.
+use ../shell/wm
+let d = wm.new_desktop(640, 480, wm.default_apps())
+let c1 = wm.launch(d, wm.clicker)
+wm.key(d, "space")
+wm.key(d, "space")
+let c2 = wm.launch(d, wm.clicker)
+wm.key(d, "space")
+print("counts", c1.state.count, c2.state.count)
+wm.click(d, c1.x + 10, c1.y + 5)
+wm.key(d, "space")
+print("after c1", c1.state.count, c2.state.count)
+wm.key(d, "delete")
+print("deleted", c1.state.count, c2.state.count)
+wm.key(d, "ctrl+z")
+print("undone", c1.state.count, c2.state.count)
+print(wm.visible_lines(c1), wm.visible_lines(c2))

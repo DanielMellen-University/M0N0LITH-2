@@ -95,6 +95,10 @@ Write `tests/shell_<topic>.relic`, run it, read its output, and save that as `te
 | `shell_notes_resize` | Notes text clipping and edits across resizes |
 | `shell_notes_cursor` | Notes: Left, Right, Home, End and word jumps move the cursor, Delete, typing, Backspace, Ctrl+Backspace, Ctrl+Delete, Ctrl+K and Ctrl+U at it, and Ctrl+Z bringing back the whole line; a long line keeps the cursor in view |
 | `shell_notes_input_edges` | single-line input and reopening Notes; Ctrl+Z bringing a cleared line back, or taking a paste back, one step |
+| `shell_notes_two_windows` | Notes: two windows keep their own lines; typing in one leaves the other alone |
+| `shell_notes_empty_clipboard` | Notes: Ctrl+X or Ctrl+C on an empty line leaves the clipboard as it was |
+| `shell_clicker_two_windows` | Clicker: two windows count on their own, and undoing one leaves the other alone |
+| `shell_clicker_title_click` | Clicker: a click on its title bar or on the empty desktop counts nothing; only a click inside the window does |
 
 ### Terminal
 
@@ -204,6 +208,11 @@ Write `tests/shell_<topic>.relic`, run it, read its output, and save that as `te
 |---|---|
 | `shell_ide` | IDE: run with Ctrl+R, output pane, error line and Ctrl+E, stopped loops, refused host calls, `use` of desktop files, input lines, Ctrl+Backspace there, Esc or Ctrl+C to stop, F5 like Ctrl+R; Ctrl+Return running like Ctrl+R; the input line's cursor (Left, Right, Home, End, Delete), Return sending the whole line, word keys and Ctrl+K, a wide line keeping the cursor in view |
 | `shell_ide_comment` | Ctrl+/ puts `# ` in after the leading spaces and takes it (or a bare `#`) out, the cursor staying on its character, one undo step each; the Editor ignores it; with a selection, every line it is on in one step, not the line after a Ctrl+L |
+| `shell_ide_error_click` | IDE: a click on the error line or on the pane header goes to the error's line, as Ctrl+E does; a click on a plain output line moves nothing |
+| `shell_ide_input_paste` | IDE input: Ctrl+V adds the first line of the clipboard only, and with an empty clipboard it adds nothing |
+| `shell_ide_denied` | IDE: refused host calls beyond exit and writing: sleeping, removing, renaming and making folders, and opening a graphics window; a refused remove leaves the file, a refused make_dir makes nothing |
+| `shell_ide_module_saved` | IDE: a `use` of another file reads it as last saved; an unsaved edit in another window changes nothing until it is saved |
+| `shell_ide_syntax_jump` | IDE: Ctrl+E goes to a syntax error's line too, and after a good run, when there is no error, Ctrl+E moves nothing |
 | `shell_ide_module_error` | an error inside a module the program used shows that module's path and line, and Ctrl+E leaves the cursor where it was |
 
 ### Paint

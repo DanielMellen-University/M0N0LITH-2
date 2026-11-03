@@ -1,0 +1,27 @@
+# IDE input: Ctrl+V adds the first line of the desktop's clipboard only, and
+# with an empty clipboard it adds nothing.
+use ../shell/wm
+use std/vfs
+let d = wm.new_desktop(640, 480, wm.default_apps())
+let i = wm.launch(d, wm.ide)
+let s = i.state
+s.path = "/home/hello.relic"
+s.text = "use std/os\nprint(os.read_line())\n"
+wm.key(d, "ctrl+r")
+print("waiting", s.status, s.run != none)
+wm.key(d, "ctrl+v")
+print("empty paste", [s.input])
+wm.key(d, "escape")
+# the Editor copies two lines; only the first lands in the input line
+let e = wm.launch(d, wm.editor)
+e.state.text = "one\ntwo\n"
+e.state.back = 0
+wm.key(d, "ctrl+a")
+wm.key(d, "ctrl+c")
+wm.close(d, e.id)
+wm.key(d, "ctrl+r")
+wm.key(d, "ctrl+v")
+let pane = wm.ide.lines(s)
+print("pasted", pane[len(pane) - 1], [s.input])
+wm.key(d, "return")
+print("sent", s.status, s.out)

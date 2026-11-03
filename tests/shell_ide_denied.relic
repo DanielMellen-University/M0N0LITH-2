@@ -1,0 +1,22 @@
+# IDE: host calls beyond exit and writing are refused too: sleeping, removing,
+# renaming and making folders, and opening a graphics window. A refused remove
+# leaves the file in place, and a refused make_dir makes nothing.
+use ../shell/wm
+use std/vfs
+let d = wm.new_desktop(640, 480, wm.default_apps())
+let i = wm.launch(d, wm.ide)
+let s = i.state
+s.path = "/home/hello.relic"
+fun run(text)
+    s.text = text
+    wm.key(d, "ctrl+r")
+    print(s.status, s.out)
+run("use std/time\ntime.sleep(10)\nprint(\"after\")\n")
+vfs.write(s.fs, "/home/keep.txt", "keep")
+run("use std/files\nfiles.remove(\"/home/keep.txt\")\nprint(\"after\")\n")
+print("kept", vfs.exists(s.fs, "/home/keep.txt"), vfs.read(s.fs, "/home/keep.txt"))
+run("use std/files\nfiles.rename(\"/home/keep.txt\", \"/home/gone.txt\")\nprint(\"after\")\n")
+print("renamed", vfs.exists(s.fs, "/home/gone.txt"))
+run("use std/files\nfiles.make_dir(\"/home/newdir\")\nprint(\"after\")\n")
+print("made", vfs.exists(s.fs, "/home/newdir"))
+run("use std/graphics\ngraphics.open(10, 10, \"t\")\nprint(\"after\")\n")
