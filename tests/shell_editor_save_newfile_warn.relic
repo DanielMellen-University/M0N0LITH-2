@@ -1,0 +1,22 @@
+# A new file saved once by the Editor is then guarded like any other file:
+# another app changing it after that first save makes the next Ctrl+S warn,
+# and a second Ctrl+S right after overwrites.
+use ../shell/wm
+use std/vfs
+let d = wm.new_desktop(640, 480, wm.default_apps())
+let fs = wm.launch(d, wm.files_app).state.fs
+let e = wm.launch(d, wm.editor)
+e.state.path = "/home/new.txt"
+e.state.status = "new file"
+e.state.text = ""
+e.state.disk = none
+fun show(label)
+    print(label, "[" + e.state.status + "]", "disk:", vfs.read(fs, "/home/new.txt"))
+wm.key(d, "n")
+wm.key(d, "ctrl+s")
+print("first save", "[" + e.state.status + "]", vfs.read(fs, "/home/new.txt"))
+vfs.write(fs, "/home/new.txt", "from terminal")
+wm.key(d, "ctrl+s")
+show("warned after another app changed it")
+wm.key(d, "ctrl+s")
+print("overwritten", "[" + e.state.status + "]", vfs.read(fs, "/home/new.txt"))

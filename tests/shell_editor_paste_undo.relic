@@ -1,0 +1,36 @@
+# Pasting over a selection, and cutting several lines, are each one undo
+# step: one Ctrl+Z takes the whole paste or cut back, Ctrl+Y brings it back.
+use ../shell/wm
+let d = wm.new_desktop(640, 480, wm.default_apps())
+let e = wm.launch(d, wm.editor)
+let s = e.state
+fun keys(ks)
+    for k in ks
+        e.app.on_key(s, k)
+s.text = "hello world"
+s.back = 0
+s.mark = none
+s.undo = []
+s.redo = []
+keys(["ctrl+a", "ctrl+c", "left"])
+s.text = "goodbye"
+s.back = 0
+s.mark = none
+s.undo = []
+keys(["ctrl+a", "ctrl+v"])
+print("paste over all", [s.text], len(s.undo))
+keys(["ctrl+z"])
+print("undo paste", [s.text])
+keys(["ctrl+y"])
+print("redo paste", [s.text])
+s.text = "one\ntwo\nthree"
+s.back = 0
+s.mark = none
+s.undo = []
+s.redo = []
+keys(["ctrl+a", "ctrl+x"])
+print("cut all lines", [s.text], len(s.undo))
+keys(["ctrl+z"])
+print("undo cut", [s.text])
+keys(["ctrl+y"])
+print("redo cut", [s.text])

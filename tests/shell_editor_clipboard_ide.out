@@ -1,0 +1,2 @@
+ide paste ["first line\nsecond line"] 1
+ide undo [""] 0

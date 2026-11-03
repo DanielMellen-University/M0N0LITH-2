@@ -1,0 +1,22 @@
+# Copying or cutting with nothing selected leaves the clipboard and the
+# undo stack alone, and pasting an empty clipboard is no edit either.
+use ../shell/wm
+let d = wm.new_desktop(640, 480, wm.default_apps())
+let e = wm.launch(d, wm.editor)
+let s = e.state
+s.text = "abc"
+s.back = 0
+s.mark = none
+s.undo = []
+fun keys(ks)
+    for k in ks
+        e.app.on_key(s, k)
+keys(["ctrl+v"])
+print("empty paste", [s.text], len(s.undo))
+keys(["ctrl+a", "ctrl+c"])
+keys(["left", "ctrl+c", "ctrl+x"])
+print("no selection copy and cut", [s.text], len(s.undo))
+keys(["ctrl+end", "ctrl+v"])
+print("old clipboard still there", [s.text], len(s.undo))
+keys(["ctrl+z"])
+print("undo the paste", [s.text], len(s.undo))

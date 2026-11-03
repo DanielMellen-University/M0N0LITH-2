@@ -1,0 +1,5 @@
+typed [edited] ["abc"] disk: 
+undone [undone] ["ab"] disk: 
+saved the undone text [saved] ["ab"] disk: ab
+redo still works after save [redone] ["abc"] disk: ab
+saved the redone text [saved] ["abc"] disk: abc

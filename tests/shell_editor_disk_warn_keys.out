@@ -1,0 +1,5 @@
+plain save [saved] disk: one!
+warned [changed on disk: ctrl+s again] disk: from terminal
+cursor move, warned again [changed on disk: ctrl+s again] disk: from terminal
+selection key, warned again [changed on disk: ctrl+s again] disk: from terminal
+then overwrites [saved] disk: one!?

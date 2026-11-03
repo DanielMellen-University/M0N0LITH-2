@@ -1,0 +1,31 @@
+# A disk-change warning is cancelled by any other key, not only by typing:
+# a cursor move or a selection key in between means the next Ctrl+S warns
+# again, while a second Ctrl+S right after the warning overwrites.
+use ../shell/wm
+use std/vfs
+let d = wm.new_desktop(640, 480, wm.default_apps())
+let fs = wm.launch(d, wm.files_app).state.fs
+vfs.write(fs, "/home/a.txt", "one")
+let e = wm.launch(d, wm.editor)
+e.state = wm.editor.init()
+e.state.path = "/home/a.txt"
+e.state.text = "one"
+e.state.disk = "one"
+e.state.status = "open"
+fun show(label)
+    print(label, "[" + e.state.status + "]", "disk:", vfs.read(fs, "/home/a.txt"))
+wm.key(d, "!")
+wm.key(d, "ctrl+s")
+show("plain save")
+vfs.write(fs, "/home/a.txt", "from terminal")
+wm.key(d, "?")
+wm.key(d, "ctrl+s")
+show("warned")
+wm.key(d, "left")
+wm.key(d, "ctrl+s")
+show("cursor move, warned again")
+wm.key(d, "ctrl+a")
+wm.key(d, "ctrl+s")
+show("selection key, warned again")
+wm.key(d, "ctrl+s")
+show("then overwrites")

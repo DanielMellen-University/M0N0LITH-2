@@ -151,6 +151,11 @@ Write `tests/shell_<topic>.relic`, run it, read its output, and save that as `te
 | Test | What it covers |
 |---|---|
 | `shell_clipboard` | Ctrl+C, Ctrl+X and Ctrl+V in the Editor and the IDE (no selection, over a selection, one undo step each), and the first line pasted into Notes, the Terminal and an IDE run waiting for input; Notes copying and cutting its whole line |
+| `shell_clipboard_keep` | Copying or cutting with nothing selected leaves the clipboard and the undo stack alone, and pasting an empty clipboard is no edit |
+| `shell_editor_clipboard_ide` | Text copied in the Editor pastes in full into the IDE buffer, in one undo step |
+| `shell_editor_paste_undo` | Pasting over a selection and cutting several lines are each one undo step, undone and redone whole |
+| `shell_editor_redo_after_save` | Saving does not clear undo or redo: a save writes the undone text and Ctrl+Y still redoes it |
+| `shell_editor_save_newfile_warn` | A new file saved once is then guarded like any other file against changes by another app |
 | `shell_editor_find` | Ctrl+F and Return select the next match after the cursor and go round, case counts, not found, Esc and other keys stop finding, in the IDE too; F3 and Shift+F3 again, both ways round; a selection on one line as the text to find, replaced by typing; Ctrl+H replacing every match in one undo step, with nothing, not found, Esc halfway, and starting with a selection; Return with no text waits; a long text showing its end; a click giving up a find or a line number |
 | `shell_editor_goto` | Ctrl+G and a number go to the start of that line, the last past the end, 0 as 1; digits only, Esc and other keys give up, a selection goes |
 | `shell_editor_indent` | Return keeps leading spaces up to the cursor, the IDE adds a level after a block line but not after `fun f() = ...`, undo |
@@ -161,7 +166,9 @@ Write `tests/shell_<topic>.relic`, run it, read its output, and save that as `te
 | `shell_editor_stale` | Editor reports a file removed before opening |
 | `shell_editor_edges` | Editor empty buffers, line edges and failed saves |
 | `shell_editor_disk_changed` | Ctrl+S warns once when another app changed the file |
+| `shell_editor_disk_warn_keys` | Ctrl+S warns again when a cursor move or selection key comes between the warning and the next save |
 | `shell_editor_undo` | Ctrl+Z undoes edits one step at a time, up to 500, and Ctrl+Y redoes them until the next edit |
+| `shell_editor_save_status` | Editor status through save, undo and redo: saved again with nothing new, undone, redone, and nothing to undo or redo past the end |
 | `shell_editor_escape` | Esc drops a selection in the Editor and the IDE and is taken, with none it is not; the IDE stops a waiting run first |
 | `shell_editor_select` | Shift+arrows and Ctrl+A select; typing and Backspace replace the selection |
 | `shell_editor_click` | a click puts the cursor on the character clicked (the `_` not counted), at the end past a line's end, from what shows of a line cut on the left; the title, a click below the text, the IDE's pane and a waiting run do nothing; press and drag selects, above and below the text too; a double-click selects a word, a triple-click the line; in the IDE a click on the error or its header goes to its line; a key during a drag ends it |

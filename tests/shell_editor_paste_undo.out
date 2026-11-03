@@ -1,0 +1,6 @@
+paste over all ["hello world"] 1
+undo paste ["goodbye"]
+redo paste ["hello world"]
+cut all lines [""] 1
+undo cut ["one\ntwo\nthree"]
+redo cut [""]
