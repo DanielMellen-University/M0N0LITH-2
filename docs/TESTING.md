@@ -38,6 +38,7 @@ Write `tests/shell_<topic>.relic`, run it, read its output, and save that as `te
 | `shell_drag_resize` | dragging and resizing keep windows reachable |
 | `shell_resize_offset` | resizing follows the point grabbed in the handle |
 | `shell_launch_small` | cascaded windows fit a small desktop |
+| `shell_launch_sizes` | each of the eight apps opens at its documented size on a desktop big enough to fit it |
 | `shell_cascade_gaps` | a new window does not open on top of another after closes |
 | `shell_missed_release` | a lost mouse-up does not leave a drag running |
 | `shell_outside_click` | presses outside the desktop do not hit its controls |
