@@ -120,6 +120,7 @@ Write `tests/shell_<topic>.relic`, run it, read its output, and save that as `te
 | `shell_help` | Terminal help and app names match the available commands and apps; every command line of help is checked, not only the first three |
 | `shell_date` | the date command and its UTC format |
 | `shell_terminal_history_words` | history rejects extra words, while history itself still lists every kept command numbered |
+| `shell_terminal_help_words` | help ignores extra words and prints the full help |
 
 ### Files
 
