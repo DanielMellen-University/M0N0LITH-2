@@ -1,0 +1,24 @@
+# Snake: filling the whole board wins. The body starts one cell short of full,
+# with the food on the last free cell, and one step eats it and leaves no free
+# cell for new food.
+use ../shell/wm
+let d = wm.new_desktop(640, 480, wm.default_apps())
+let w = wm.launch(d, wm.snake)
+let s = w.state
+let body = []
+for y in 0..16
+    for x in 0..24
+        if not (x == 23 and y == 15) and not (x == 22 and y == 15)
+            append(body, [x, y])
+append(body, [22, 15])
+s.body = body
+s.food = [23, 15]
+s.dir = [1, 0]
+s.state = "playing"
+s.score = 0
+let now = 1000
+wm.tick(d, now)
+now = now + 200
+wm.tick(d, now)
+print(s.state, s.food, s.score, len(s.body))
+print(wm.visible_lines(w))
