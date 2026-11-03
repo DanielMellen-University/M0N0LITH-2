@@ -1,0 +1,15 @@
+# Paint: a new window opens the file last opened in Files when its name ends
+# in .paint, else /home/picture.paint. Open a plain text file in Files, then
+# launch Paint and check it falls back to the default.
+use ../shell/wm
+use std/vfs
+let d = wm.new_desktop(640, 480, wm.default_apps())
+let f = wm.launch(d, wm.files_app)
+let i = 0
+for e in vfs.entries(f.state.fs, "/home")
+    if e[0] == "welcome.txt"
+        f.state.sel = i + 1   # row 0 is ".."
+    i = i + 1
+f.app.on_key(f.state, "return")
+let w = wm.launch(d, wm.paint_app)
+print(w.state.path, w.state.status)
