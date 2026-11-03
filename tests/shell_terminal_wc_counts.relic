@@ -1,0 +1,27 @@
+# wc counts lines as newlines, words as runs of non-space (spaces, tabs and
+# newlines all break words), and characters as every character in the file,
+# so a last line with no newline adds words and characters but no line.
+use ../shell/wm
+use std/vfs
+let t = wm.terminal.init()
+fun run(line)
+    t.buf = []
+    for c in line
+        if c == " "
+            wm.terminal.on_key(t, "space")
+        else
+            wm.terminal.on_key(t, c)
+    wm.terminal.on_key(t, "return")
+    print(t.buf)
+vfs.write(t.fs, "/tmp/bare", "one  two\tthree")
+run("wc /tmp/bare")
+vfs.write(t.fs, "/tmp/blanks", "a\n\nb\n")
+run("wc /tmp/blanks")
+vfs.write(t.fs, "/tmp/onlynl", "\n")
+run("wc /tmp/onlynl")
+vfs.write(t.fs, "/tmp/spaces", "  a b  \n")
+run("wc /tmp/spaces")
+run("rm /tmp/bare")
+run("rm /tmp/blanks")
+run("rm /tmp/onlynl")
+run("rm /tmp/spaces")
