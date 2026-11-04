@@ -21,4 +21,4 @@ The score line reads `Snake  score N  best M`. The help line says what to press 
 - Walls end the game (no wrapping), which keeps the rules plain.
 - Not yet: levels or obstacles, and sound.
 
-Tests: `shell_snake`, and `shell_events_fuzz` for random input.
+Tests: the `shell_snake*` goldens, and `shell_events_fuzz` for random input (see [the test list](../TESTING.md)).
