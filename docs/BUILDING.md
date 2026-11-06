@@ -22,7 +22,7 @@ ctest --test-dir build -C Release --output-on-failure
 
 Already cloned without the submodule? Run `git submodule update --init`.
 
-Checked on Nov 3 2026 on Linux (GCC, CMake 4.4, Ninja, with `-G Ninja` added to both configure lines since that machine has no Make) at Relic 1.0.52: all 183 tests pass. CI runs the same steps without `-G` on Linux, macOS and Windows.
+Checked on Nov 6 2026 on Linux (Clang 18.1, CMake 3.28, Make) at Relic 1.0.53 (`f97ad87`): all 183 tests pass. CI runs the same steps on Linux, macOS and Windows.
 
 ### Why `-DRELIC_BUILD_HOST=ON`
 
@@ -34,7 +34,7 @@ The top-level CMake looks for `relic` in `relic/build/Release` and `relic/build`
 
 ## Run the desktop
 
-This part needs SDL2 (`apt install libsdl2-dev`, `brew install sdl2`, or vcpkg on Windows), and it was not run when this page was checked, since that machine has no SDL2 and no display. The steps are the ones in the README:
+This part needs SDL2 (`apt install libsdl2-dev`, `brew install sdl2`, or vcpkg on Windows). Checked on Nov 6 2026 on Linux (SDL 2.30, with a display): the steps below open the desktop, and Start, Terminal, the Editor and Snake run. macOS and Windows were not tried. The steps are the ones in the README:
 
 ```
 cmake -S relic -B relic/build-sdl -DCMAKE_BUILD_TYPE=Release -DRELIC_SDL=ON

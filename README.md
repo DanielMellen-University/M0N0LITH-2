@@ -29,7 +29,7 @@ CONTRIBUTING.md  how changes are made here
 
 ## How it depends on Relic
 
-Relic is a git submodule at `relic/`, pinned to one commit, now Relic 1.0.52 (`6659745`). Building that commit gives the `relic` program, and its `std/` folder comes with it. To move to a newer Relic, check out the new commit inside `relic/`, run the tests, and commit the submodule change.
+Relic is a git submodule at `relic/`, pinned to one commit, now Relic 1.0.53 (`f97ad87`). Building that commit gives the `relic` program, and its `std/` folder comes with it. To move to a newer Relic, check out the new commit inside `relic/`, run the tests, and commit the submodule change.
 
 ## Build and test
 
@@ -62,7 +62,7 @@ relic/build-sdl/relic shell/desktop.relic
 
 With Visual Studio the program is `relic\build-sdl\Release\relic.exe`.
 
-The machine these docs were last checked on has no SDL2, so these run steps were not re-run then (the build and test steps were). See [Building](docs/BUILDING.md).
+Checked on Nov 6 2026 on Linux with SDL 2.30: the desktop opens, and Start, Terminal, the Editor and Snake run. macOS and Windows were not tried. See [Building](docs/BUILDING.md).
 
 ### Using it
 
