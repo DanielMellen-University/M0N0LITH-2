@@ -41,7 +41,7 @@ Ctrl+S saves the program and the run keeps waiting; the status reads `saved, wai
 
 - A run stops after 200,000 steps, and the pane shows `stopped: the program ran too long (200000 steps)`. The count starts again after each line of input, so a program can wait for input as long as it likes but cannot loop forever between inputs. `try` does not catch the stop.
 - Some host built-ins are refused: exit, sleep, graphics and clipboard (the desktop owns the window), and writing, removing, renaming or making files on the real disk. Reading real files works.
-- Not yet: programs that draw, and runs that keep going in the background while not waiting for input.
+- Parked with the Nov 7 2026 acceptance, not scheduled: programs that draw, and runs that keep going in the background while not waiting for input.
 
 ## In the code
 
