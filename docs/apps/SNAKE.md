@@ -19,6 +19,6 @@ The score line reads `Snake  score N  best M`. The help line says what to press 
 - After a pause or a slow frame the beat starts again instead of catching up, so the snake never jumps several cells at once.
 - Food comes from a small seeded generator mixed with the clock when a game starts, so a test can replay a game exactly.
 - Walls end the game (no wrapping), which keeps the rules plain.
-- Not yet: levels or obstacles, and sound.
+- Parked with the Nov 7 2026 acceptance, not scheduled: levels or obstacles, and sound.
 
 Tests: the `shell_snake*` goldens, and `shell_events_fuzz` for random input (see [the test list](../TESTING.md)).

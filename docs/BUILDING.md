@@ -22,7 +22,7 @@ ctest --test-dir build -C Release --output-on-failure
 
 Already cloned without the submodule? Run `git submodule update --init`.
 
-Checked on Nov 6 2026 on Linux (Clang 18.1, CMake 3.28, Make) at Relic 1.0.53 (`f97ad87`): all 183 tests pass. CI runs the same steps on Linux, macOS and Windows.
+Checked on Nov 7 2026 on Linux (Clang 18.1, CMake 3.28, Make) at Relic 1.0.53 (`f97ad87`): all 183 tests pass. CI runs the same steps on Linux, macOS and Windows. Those tests do not open the SDL window.
 
 ### Why `-DRELIC_BUILD_HOST=ON`
 
@@ -34,7 +34,7 @@ The top-level CMake looks for `relic` in `relic/build/Release` and `relic/build`
 
 ## Run the desktop
 
-This part needs SDL2 (`apt install libsdl2-dev`, `brew install sdl2`, or vcpkg on Windows). Checked on Nov 6 2026 on Linux (SDL 2.30, with a display): the steps below open the desktop, and Start, Terminal, the Editor and Snake run. macOS and Windows were not tried. The steps are the ones in the README:
+This part needs SDL2 (`apt install libsdl2-dev`, `brew install sdl2`, or vcpkg on Windows). Checked on Nov 7 2026 on Linux (SDL 2.30, on a real display, with the mouse and the keyboard): the steps below open the 640 by 480 desktop, and the walkthrough in the [roadmap](ROADMAP.md#accepted-nov-7-2026) was done there. macOS and Windows were not tried. The steps are the ones in the README:
 
 ```
 cmake -S relic -B relic/build-sdl -DCMAKE_BUILD_TYPE=Release -DRELIC_SDL=ON
@@ -45,6 +45,8 @@ relic/build-sdl/relic shell/desktop.relic
 `-DRELIC_SDL=ON` turns on the C++ host as well. With Visual Studio the program is `relic\build-sdl\Release\relic.exe`. A `relic` built without SDL prints `this relic was built without graphics; rebuild with -DRELIC_SDL=ON` and exits.
 
 ## Moving to a newer Relic
+
+Do not move the pin as a matter of course. As of the Nov 7 2026 acceptance it stays at 1.0.53 (`f97ad87`) unless a defect in that accepted scope cannot be fixed here. When a move is actually needed:
 
 ```
 cd relic

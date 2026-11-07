@@ -52,7 +52,7 @@ Commands split on spaces. A part in double or single quotes is one word with its
 
 ## Output
 
-The Terminal keeps the last 200 lines of output; older ones fall off the top. Long lines wrap to the window's width, so one kept line can take several rows. Only the rows that fit the window are built each frame, so a big `cat` stays quick.
+The Terminal keeps the last 200 lines of output; older ones fall off the top. Scrollback is parked with the Nov 7 2026 acceptance, not scheduled. Long lines wrap to the window's width, so one kept line can take several rows. Only the rows that fit the window are built each frame, so a big `cat` stays quick.
 
 ## In the code
 

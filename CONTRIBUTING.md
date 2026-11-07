@@ -6,7 +6,7 @@ These are the habits the project's history follows.
 
 - Desktop, window manager and app changes go here, in `shell/`.
 - Language, std and self-hosted interpreter changes go to [Relic](https://github.com/DanielMellen-University/Relic). Once they land there, move the `relic/` pin here in its own commit (see [Building](docs/BUILDING.md#moving-to-a-newer-relic)).
-- New apps and features follow [the roadmap](docs/ROADMAP.md); ideas listed there as not approved need Daniel's go-ahead first.
+- New apps and features follow [the roadmap](docs/ROADMAP.md). The Nov 7 2026 acceptance is the scope. Items listed there as parked stay parked. Do not move the Relic pin unless a defect in that scope cannot be fixed on `f97ad87`.
 
 ## Before a commit
 

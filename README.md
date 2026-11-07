@@ -3,7 +3,7 @@ M0N0LITH written in [Relic](https://github.com/DanielMellen-University/Relic).
 
 This repo is the MONOLITH 2 desktop environment: the window manager, taskbar, Start menu and the apps, all written in [Relic](https://github.com/DanielMellen-University/Relic). The language itself (host, std, self-host) lives in the Relic repo. Language changes go there, desktop and app changes go here.
 
-> Status: early. The shell started inside the Relic repo during its M11 milestone and moved here with its history in Relic 1.0.1. It has a window model with drag, resize and minimize, a taskbar with a +N button for windows that do not fit, a Start menu, and eight apps: Clicker, Notes, Terminal, Files, Editor, IDE, Paint and Snake. Terminal, Files, the Editor, the IDE and Paint share one in-memory filesystem (`std/vfs` from Relic), and Snake keeps its best score there. The IDE is the Editor plus Ctrl+R to run a Relic program in an output pane, with input, `use` of your own files and Ctrl+E to jump to an error. Next up is in the [roadmap](docs/ROADMAP.md).
+> Status: a 640 by 480 SDL demo, accepted on Linux on Nov 7 2026 for the eight apps as they are documented now. Not a bootable OS, a durable disk, or a sandbox. The shell started inside the Relic repo during its M11 milestone and moved here with its history in Relic 1.0.1. It has a window model with drag, resize and minimize, a taskbar with a +N button for windows that do not fit, a Start menu, and eight apps: Clicker, Notes, Terminal, Files, Editor, IDE, Paint and Snake. Terminal, Files, the Editor, the IDE and Paint share one in-memory filesystem (`std/vfs` from Relic), and Snake keeps its best score there. The IDE is the Editor plus Ctrl+R to run a Relic program in an output pane, with input, `use` of your own files and Ctrl+E to jump to an error. The Relic pin stays at 1.0.53 (`f97ad87`). What is accepted, and what is parked, is in the [roadmap](docs/ROADMAP.md).
 
 ## Layout
 
@@ -62,7 +62,7 @@ relic/build-sdl/relic shell/desktop.relic
 
 With Visual Studio the program is `relic\build-sdl\Release\relic.exe`.
 
-Checked on Nov 6 2026 on Linux with SDL 2.30: the desktop opens, and Start, Terminal, the Editor and Snake run. macOS and Windows were not tried. See [Building](docs/BUILDING.md).
+Checked on Nov 7 2026 on Linux with SDL 2.30, on a real display, with the mouse and the keyboard: Start, the taskbar (including +N), drag, resize, minimize and close, and all eight apps. Terminal, Files and the Editor shared one file inside the session; the IDE ran, read a line, showed an error and stopped a loop at 200,000 steps; Paint saved a picture and opened it again; quitting dropped the files. macOS and Windows GUI were not tried. The model tests are not that check. See [Building](docs/BUILDING.md) and the [roadmap](docs/ROADMAP.md).
 
 ### Using it
 

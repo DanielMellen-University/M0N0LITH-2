@@ -1,6 +1,6 @@
 # Editor
 
-A text editor for files in the desktop's in-memory filesystem. A new Editor window opens the file last opened in Files, or `/home/welcome.txt` if none was.
+A text editor for files in the desktop's in-memory filesystem. A new Editor window opens the file last opened in Files, or `/home/welcome.txt` if none was. Opening a file by a path typed in the Editor is parked with the Nov 7 2026 acceptance, not scheduled.
 
 ## The title line
 
