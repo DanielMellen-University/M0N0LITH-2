@@ -1,0 +1,18 @@
+# mv to a new name removes the old one and keeps the bytes.
+use ../shell/wm
+use std/vfs
+let t = wm.terminal.init()
+fun run(line)
+    t.buf = []
+    for c in line
+        if c == " "
+            wm.terminal.on_key(t, "space")
+        else
+            wm.terminal.on_key(t, c)
+    wm.terminal.on_key(t, "return")
+    print(t.buf)
+vfs.write(t.fs, "/tmp/old.txt", "same")
+run("mv /tmp/old.txt /tmp/new.txt")
+print("old", not vfs.exists(t.fs, "/tmp/old.txt"))
+print("new", vfs.read(t.fs, "/tmp/new.txt") == "same")
+run("ls /tmp")
