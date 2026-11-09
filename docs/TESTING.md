@@ -315,6 +315,7 @@ Write `tests/shell_<topic>.relic`, run it, read its output, and save that as `te
 | `shell_ide_disk_keys` | Ctrl+R, F5, Ctrl+E, Ctrl+/ and a key typed while a run waits cancel the changed-on-disk warning; two Ctrl+S presses with nothing between them still overwrite |
 | `shell_ide_empty_run` | an empty buffer runs and prints nothing |
 | `shell_ide_rerun` | a second run replaces the output of the first |
+| `shell_ide_input_u` | Ctrl+U in the input line removes what is before the cursor and keeps the rest |
 
 ### Paint
 
