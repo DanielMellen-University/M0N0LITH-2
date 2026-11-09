@@ -221,6 +221,7 @@ Write `tests/shell_<topic>.relic`, run it, read its output, and save that as `te
 | `shell_files_rename_dir` | renaming a folder keeps what is inside it and leaves that folder selected |
 | `shell_files_delete_jump` | a letter gives up a Delete question and jumps to that name, and the file stays |
 | `shell_files_page_ends` | Page Up on the first row and Page Down on the last row stay there |
+| `shell_files_jump_same` | the only name starting with a letter stays selected when that letter is pressed again |
 
 ### Editor
 
