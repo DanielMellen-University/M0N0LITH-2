@@ -1,0 +1,16 @@
+# uniq compares the whole line, so A and a are kept, and a later repeat of A is kept too.
+use ../shell/wm
+use std/vfs
+let t = wm.terminal.init()
+fun run(line)
+    t.buf = []
+    for c in line
+        if c == " "
+            wm.terminal.on_key(t, "space")
+        else
+            wm.terminal.on_key(t, c)
+    wm.terminal.on_key(t, "return")
+    print(t.buf)
+vfs.write(t.fs, "/tmp/u.txt", "A\nA\na\nA\n")
+run("uniq /tmp/u.txt")
+print("file", vfs.read(t.fs, "/tmp/u.txt") == "A\nA\na\nA\n")
