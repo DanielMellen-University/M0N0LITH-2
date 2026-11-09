@@ -1,0 +1,7 @@
+["/home> cd \"\""]
+["/home> pwd", "/home"]
+["/home> cd ''"]
+["/home> pwd", "/home"]
+["/home> cd /tmp"]
+["/tmp> cd \"\""]
+["/tmp> pwd", "/tmp"]
