@@ -59,11 +59,34 @@ let text_top = 6         # and this far below the title bar
 let _shell_fs = vfs.new()
 # The file Editor opens next. Files sets it when you open a file.
 let _shell_open = {path: "/home/welcome.txt"}
+# The desktop whose windows are stored with the vfs. Tests leave this unset,
+# so a save stays the files alone, as it did before windows were recorded.
+let _shell_desk = none
+let _did_commit = false
+let _did_persist = false
 
 # "" when the vfs change is durable, or when the caller asked for a session-only
 # workspace (empty path). A store that was requested and could not be opened,
 # or that is held, is a failure the app must show. It is not "saved".
+fun _commit_lines(lines)
+    if lines == none
+        return workspace.refuse("image too large")
+    try
+        return workspace.save_with(_shell_fs, lines)
+    catch err
+        let note = workspace.notice()
+        if note == ""
+            return "workspace: save failed; cannot write store; kept defaults"
+        return note
+
+fun _persist_desk(d)
+    if _shell_desk != d or not workspace.enabled()
+        return ""
+    _did_persist = true
+    return _commit_lines(_session_lines(d))
+
 fun _fs_commit()
+    _did_commit = true
     if not workspace.requested()
         return ""
     if not workspace.enabled()
@@ -71,6 +94,8 @@ fun _fs_commit()
         if note == ""
             return "workspace: save failed; store unavailable; kept defaults"
         return note
+    if _shell_desk != none
+        return _commit_lines(_session_lines(_shell_desk))
     try
         return workspace.save(_shell_fs)
     catch err
@@ -100,6 +125,21 @@ fun workspace_enabled()
 
 fun workspace_release()
     workspace.release()
+
+# Remember this desktop and open the windows the loaded generation recorded.
+# A generation with no snapshot leaves the desktop as it is.
+fun workspace_bind(d)
+    _shell_desk = d
+    let sess = workspace.session()
+    if sess == none
+        return
+    _apply_session(d, sess)
+
+# Quit, or a test standing in for it. Writes the open windows and unsaved text.
+fun workspace_flush()
+    if _shell_desk == none
+        return ""
+    return _persist_desk(_shell_desk)
 
 # A file or folder renamed or moved by Files or the Terminal takes the file the
 # next Editor opens with it, so that file is not lost to a new empty one.
@@ -259,6 +299,7 @@ fun launch(d, app)
     _clamp_size(d, w)   # a small desktop cuts the window to fit, as a resize would
     _clamp_pos(d, w)
     append(d.windows, w)
+    _persist_desk(d)
     return w
 
 # The cascade step for a new window: the window count, or the next step after it
@@ -307,6 +348,8 @@ fun close(d, id)
     _end_drag_for(d, id)
     if overflow_box(d) == none
         d.overflow_open = false
+    if i >= 0
+        _persist_desk(d)
 
 # Hide a window. Focus goes to the next visible window down.
 fun minimize(d, id)
@@ -315,6 +358,7 @@ fun minimize(d, id)
         return
     d.windows[i].minimized = true
     _end_drag_for(d, id)
+    _persist_desk(d)
 
 # Show a window again and bring it to the front.
 fun restore(d, id)
@@ -323,6 +367,7 @@ fun restore(d, id)
         return
     d.windows[i].minimized = false
     _raise(d, i)
+    _persist_desk(d)
 
 # Keep enough of the title bar on screen so the window stays reachable: 40
 # pixels of it at either edge. Off the left edge the _ and x boxes sit in the part
@@ -513,13 +558,16 @@ fun tick(d, ms)
 
 # Mouse button up ends any drag or resize.
 fun release(d)
+    let dragging = d.drag != none
     d.drag = none
+    if dragging
+        _persist_desk(d)
 
 # Escape closes the Start menu or the hidden-windows list if one is open, else
 # goes to the window on top when its app has on_escape (the IDE stops a run
 # waiting for input), and gives true when something took it; desktop.relic
-# quits on an Escape that nothing took. Quitting drops the whole in-memory
-# filesystem, so it should not be how a menu closes.
+# quits on an Escape that nothing took. Quitting is not how a menu closes.
+# With a workspace open, quit writes the snapshot first.
 fun dismiss(d)
     let was_open = d.menu_open or d.overflow_open
     d.menu_open = false
@@ -537,6 +585,19 @@ fun dismiss(d)
 # minimized to the front, so pressing it again goes round all of them. Every
 # other key goes to the window in front.
 fun key(d, k)
+    _did_commit = false
+    _did_persist = false
+    _key_do(d, k)
+    # A finished Terminal command that did not touch a file (cd, ls, history)
+    # still has a folder and a history worth keeping. Typing in the Editor is
+    # not a commit: that waits for Ctrl+S or quit, so an interrupted save can
+    # still fall back to the previous file. Launching from the menu already saved.
+    if not _did_commit and not _did_persist and _shell_desk == d and (k == "return" or k == "enter")
+        let w = focused(d)
+        if w != none and w.app.name == "Terminal"
+            _persist_desk(d)
+
+fun _key_do(d, k)
     if d.menu_open and (k == "up" or k == "down" or k == "return")
         # the open Start menu takes Up, Down and Return: move the marked row
         # (round at the ends) and launch it
@@ -3023,12 +3084,12 @@ fun _editor_key(s, k)
         s.overwrite = false
         try
             vfs.write(s.fs, s.path, s.text)
+            s.disk = s.text
             let saved = _fs_commit()
             if saved != ""
                 s.status = saved
             else
                 s.status = "saved"
-            s.disk = s.text
         catch err
             s.status = err.message
     else if k == "ctrl+z"
@@ -4145,4 +4206,178 @@ let editor = {name: "Editor", width: 320, height: 80, init: _editor_init, lines:
 let ide = {name: "IDE", width: 320, height: 200, init: _ide_init, lines: _ide_lines, on_click: _editor_click, on_key: _ide_key, on_drag: _editor_drag, on_escape: _ide_escape, tail: true, pinned: 1, marks: _editor_marks}
 let paint_app = {name: "Paint", width: 256, height: 190, init: _paint_init, lines: _paint_lines, on_click: _paint_click, on_key: _paint_key, on_drag: _paint_drag, on_escape: _paint_escape, paint: _paint_paint}
 let snake = {name: "Snake", width: 210, height: 170, init: _snake_init, lines: _snake_lines, on_click: _snake_click, on_key: _snake_key, on_tick: _snake_tick, paint: _snake_paint}
+
+fun _app_by_name(name)
+    if name == "Clicker"
+        return clicker
+    if name == "Notes"
+        return notes
+    if name == "Terminal"
+        return terminal
+    if name == "Files"
+        return files_app
+    if name == "Editor"
+        return editor
+    if name == "IDE"
+        return ide
+    if name == "Paint"
+        return paint_app
+    if name == "Snake"
+        return snake
+    return none
+
+fun _sf(lines, key, value)
+    if len(value) > 262144
+        return false
+    append(lines, "F " + key + " " + workspace.escape(value))
+    return true
+
+fun _sf_lines(lines, key, rows)
+    let packed = workspace.pack_lines(rows)
+    if packed == none
+        return false
+    return _sf(lines, key, packed)
+
+fun _paint_digits(cells)
+    if len(cells) != _paint_w * _paint_h
+        return none
+    let out = ""
+    for c in cells
+        if c < 0 or c > 8
+            return none
+        out = out + str(c)
+    return out
+
+fun _window_header(w)
+    let m = 0
+    if w.minimized
+        m = 1
+    return "W " + w.app.name + " " + str(w.id) + " " + str(w.x) + " " + str(w.y) + " " + str(w.width) + " " + str(w.height) + " " + str(m)
+
+fun _fields_of(w, lines)
+    let s = w.state
+    let name = w.app.name
+    if name == "Terminal"
+        if not _sf(lines, "cwd", s.cwd) or not _sf(lines, "input", s.input) or not _sf(lines, "draft", s.draft)
+            return false
+        if not _sf(lines, "left", str(_term_left(s))) or not _sf(lines, "back", str(s.back))
+            return false
+        return _sf_lines(lines, "buf", s.buf) and _sf_lines(lines, "past", s.past)
+    if name == "Files"
+        return _sf(lines, "path", s.path) and _sf(lines, "sel", str(s.sel))
+    if name == "Editor" or name == "IDE"
+        if not _sf(lines, "path", s.path) or not _sf(lines, "text", s.text) or not _sf(lines, "back", str(s.back))
+            return false
+        let mark = "-"
+        if s.mark != none
+            mark = str(s.mark)
+        if not _sf(lines, "mark", mark)
+            return false
+        if s.disk == none
+            if not _sf(lines, "disk_set", "0") or not _sf(lines, "disk", "")
+                return false
+        else if not _sf(lines, "disk_set", "1") or not _sf(lines, "disk", s.disk)
+            return false
+        if name == "IDE"
+            let err = "-"
+            if s.err_line != none
+                err = str(s.err_line)
+            return _sf_lines(lines, "out", s.out) and _sf(lines, "err", err)
+        return true
+    if name == "Notes"
+        return _sf(lines, "text", s.text) and _sf(lines, "left", str(_notes_left(s)))
+    if name == "Clicker"
+        return _sf(lines, "count", str(s.count))
+    if name == "Paint"
+        let digits = _paint_digits(s.cells)
+        if digits == none
+            return false
+        let foreign = "0"
+        if s.foreign
+            foreign = "1"
+        if not _sf(lines, "path", s.path) or not _sf(lines, "cells", digits)
+            return false
+        if not _sf(lines, "color", str(s.color)) or not _sf(lines, "size", str(s.size))
+            return false
+        return _sf(lines, "tool", s.tool) and _sf(lines, "status", s.status) and _sf(lines, "foreign", foreign)
+    if name == "Snake"
+        return true
+    return false
+
+fun _session_lines(d)
+    let lines = []
+    for w in d.windows
+        append(lines, _window_header(w))
+        if not _fields_of(w, lines)
+            return none
+    return lines
+
+fun _restore_editor(f)
+    let disk = none
+    if f.disk_set == "1"
+        disk = f.disk
+    let mark = none
+    if f.mark != "-"
+        mark = int(f.mark)
+    let text = f.text
+    let status = "open"
+    if vfs.is_dir(_shell_fs, f.path)
+        status = "is a folder"
+    else if disk == none
+        status = "new file"
+        let why = _why_not_new(_shell_fs, f.path)
+        if why != none
+            status = why
+    else if text != disk
+        status = "edited"
+    return {fs: _shell_fs, path: f.path, text: text, status: status, rows: 0, disk: disk, overwrite: false, undo: [], redo: [], back: int(f.back), mark: mark}
+
+fun _restore_state(w)
+    let f = w.fields
+    if w.app == "Terminal"
+        return {buf: workspace.unpack_lines(f.buf, 201), input: f.input, left: int(f.left), cwd: f.cwd, fs: _shell_fs, cols: term_width, past: workspace.unpack_lines(f.past, 51), back: int(f.back), draft: f.draft}
+    if w.app == "Files"
+        return {fs: _shell_fs, path: f.path, sel: int(f.sel), first: 1, rows: 0, names: [], dirs: [], names_path: "", stale: false, recovered: false, confirm: none, note: none}
+    if w.app == "Editor"
+        return _restore_editor(f)
+    if w.app == "IDE"
+        let s = _restore_editor(f)
+        s.out = workspace.unpack_lines(f.out, 201)
+        s.err_line = none
+        if f.err != "-"
+            s.err_line = int(f.err)
+        s.run = none
+        s.input = ""
+        return s
+    if w.app == "Notes"
+        return {text: f.text, before: none, left: int(f.left)}
+    if w.app == "Clicker"
+        return {count: int(f.count), before: none}
+    if w.app == "Paint"
+        let cells = []
+        for c in f.cells
+            append(cells, ord(c) - 48)
+        return {fs: _shell_fs, path: f.path, cells: cells, color: int(f.color), size: int(f.size), last: none, stroke: false, undo: [], redo: [], status: f.status, foreign: f.foreign == "1", tool: f.tool, anchor: none, base: none, naming: none, other: 0}
+    return _snake_init()
+
+fun _apply_session(d, sess)
+    d.windows = []
+    d.drag = none
+    d.menu_open = false
+    d.overflow_open = false
+    let max_id = 0
+    for w in sess
+        let app = _app_by_name(w.app)
+        let state = _restore_state(w)
+        let win = {id: w.id, app: app, state: state, x: w.x, y: w.y, width: w.width, height: w.height, minimized: w.minimized}
+        if w.id > max_id
+            max_id = w.id
+        _clamp_size(d, win)
+        _clamp_pos(d, win)
+        append(d.windows, win)
+        if w.app == "Editor" or w.app == "IDE"
+            _shell_open.path = state.path
+    if max_id + 1 > d.next_id
+        d.next_id = max_id + 1
+
 fun default_apps() = [clicker, notes, terminal, files_app, editor, ide, paint_app, snake]

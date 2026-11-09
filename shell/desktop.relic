@@ -110,9 +110,11 @@ if not graphics.available()
     print("this relic was built without graphics; rebuild with -DRELIC_SDL=ON")
 else
     let d = wm.new_desktop(640, 480, wm.default_apps())
-    # Saved files outlive this process. Unset M0N0LITH_WORKSPACE uses
-    # ~/.m0n0lith2/workspace; an empty value keeps the old one-run vfs.
+    # Saved files and open windows outlive this process. Unset
+    # M0N0LITH_WORKSPACE uses ~/.m0n0lith2/workspace; an empty value keeps
+    # the old one-run vfs.
     wm.workspace_open_default()
+    wm.workspace_bind(d)
     graphics.open(d.width, d.height, "MONOLITH 2")
     let running = true
     while running and not graphics.quit_requested()
@@ -128,4 +130,5 @@ else
         wm.tick(d, graphics.ticks())   # Snake moves on the clock
         draw(d)
         graphics.wait(16)
+    wm.workspace_flush()
     graphics.close()
