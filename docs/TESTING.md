@@ -328,6 +328,7 @@ Write `tests/shell_<topic>.relic`, run it, read its output, and save that as `te
 | `shell_ide_error_top` | Ctrl+E on an error in line 1 puts the cursor at the start |
 | `shell_ide_math` | use std/math loads Relic's math and abs runs |
 | `shell_ide_input_home` | Home and End move the cursor in the input line |
+| `shell_ide_input_word` | Ctrl+Left in the input line moves to the start of the word |
 
 ### Paint
 
