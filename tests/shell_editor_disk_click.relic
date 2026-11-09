@@ -1,0 +1,35 @@
+# A click or a drag cancels a changed-on-disk warning, the way any other key
+# does. The next Ctrl+S warns again and writes nothing. A second Ctrl+S with
+# nothing in between still overwrites.
+use ../shell/wm
+use std/vfs
+use std/strings
+let d = wm.new_desktop(640, 480, wm.default_apps())
+let fs = wm.launch(d, wm.files_app).state.fs
+vfs.write(fs, "/home/a.txt", "one")
+let e = wm.launch(d, wm.editor)
+let s = e.state
+s.path = "/home/a.txt"
+s.text = "one\ntwo\n"
+s.disk = "one"
+s.status = "open"
+s.back = 0
+fun show(label)
+    print(label, s.overwrite, "[" + s.status + "]", strings.replace(vfs.read(fs, "/home/a.txt"), "\n", "\\n"))
+vfs.write(fs, "/home/a.txt", "from disk")
+wm.visible_lines(e)
+wm.key(d, "ctrl+s")
+show("warned")
+e.app.on_click(s, 30, 20)
+wm.key(d, "ctrl+s")
+show("click, warned again")
+wm.key(d, "ctrl+s")
+show("second save overwrites")
+vfs.write(fs, "/home/a.txt", "again")
+wm.key(d, "ctrl+s")
+show("warned after the write")
+wm.visible_lines(e)
+s.press = len(s.text)
+e.app.on_drag(s, 80, 30)
+wm.key(d, "ctrl+s")
+show("drag, warned again")

@@ -2668,6 +2668,7 @@ fun _editor_relayout(s)
 # run waits for input.
 fun _editor_click(s, x, y)
     s.press = none
+    s.overwrite = false   # a click is not the second Ctrl+S, so the warning stands
     if "run" in s and s.run != none
         return none
     # a click gives up a find, replace or line number, as another key does
@@ -2726,6 +2727,7 @@ fun _editor_click(s, x, y)
 fun _editor_drag(s, x, y)
     if not "press" in s or s.press == none or ("run" in s and s.run != none)
         return
+    s.overwrite = false   # dragging a selection is not the second Ctrl+S
     _editor_relayout(s)
     let pos = _editor_point(s, x, y, true)
     if pos == none
