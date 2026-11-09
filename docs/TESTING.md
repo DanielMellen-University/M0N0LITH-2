@@ -165,6 +165,7 @@ Write `tests/shell_<topic>.relic`, run it, read its output, and save that as `te
 | `shell_terminal_history_keep` | history keeps the last 50 commands, the oldest falls off, and !1 runs whatever is now first |
 | `shell_terminal_bang_zero` | !0 is not in history, and !001 runs command 1 |
 | `shell_terminal_case_kept` | Echo is unknown, it is kept, and !! runs that same failure again without keeping it twice |
+| `shell_terminal_two` | two Terminals share the files and each keeps its own folder |
 
 ### Files
 

@@ -1,0 +1,17 @@
+# Two Terminals share the files and keep their own folders.
+use ../shell/wm
+use std/vfs
+let a = wm.terminal.init()
+let b = wm.terminal.init()
+fun go(s, line)
+    for c in line
+        if c == " "
+            wm.terminal.on_key(s, "space")
+        else
+            wm.terminal.on_key(s, c)
+    wm.terminal.on_key(s, "return")
+go(a, "cd /tmp")
+go(a, "echo from-a > shared.txt")
+go(b, "cat /tmp/shared.txt")
+print("a", a.cwd, "b", b.cwd)
+print(b.buf[len(b.buf) - 1])
