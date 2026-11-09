@@ -168,6 +168,7 @@ Write `tests/shell_<topic>.relic`, run it, read its output, and save that as `te
 | `shell_terminal_two` | two Terminals share the files and each keeps its own folder |
 | `shell_terminal_clear_past` | clear empties the screen and leaves the remembered commands, including clear itself |
 | `shell_terminal_cat_mix` | cat reports a folder and still prints a file named after it |
+| `shell_terminal_wc_tab` | wc treats a tab as a break between words |
 
 ### Files
 
