@@ -1,0 +1,11 @@
+# Escape closes the Start menu. With nothing else open, Notes does not take Escape.
+use ../shell/wm
+let d = wm.new_desktop(640, 480, wm.default_apps())
+let w = wm.launch(d, wm.notes)
+wm.handle(d, {type: "text", text: "keep"})
+wm.click(d, 10, 470)
+print("took menu", wm.dismiss(d))
+print("menu", d.menu_open)
+print("text", w.state.text)
+print("took none", wm.dismiss(d))
+print("still", w.state.text)
