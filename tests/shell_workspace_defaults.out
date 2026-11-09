@@ -1,0 +1,24 @@
+workspace: unknown fault nope
+before false [""]
+off hi
+ false
+first true [""] Welcome to Relic.
+ false
+notice [""]
+--- image
+M2WS1
+D /home
+F /home/a.txt hi\n
+F /home/welcome.txt Welcome\sto\sRelic.\n
+D /tmp
+.
+
+--- end
+pointer ["g1\n"]
+reopen [""] hi
+
+disabled false [""]
+memory only more
+
+store kept hi
+ [""]

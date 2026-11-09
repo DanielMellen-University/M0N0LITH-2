@@ -1,6 +1,6 @@
 # Editor
 
-A text editor for files in the desktop's in-memory filesystem. A new Editor window opens the file last opened in Files, or `/home/welcome.txt` if none was. Opening a file by a path typed in the Editor is parked with the Nov 7 2026 acceptance, not scheduled.
+A text editor for files in the desktop's filesystem. A new Editor window opens the file last opened in Files, or `/home/welcome.txt` if none was. Opening a file by a path typed in the Editor is parked with the Nov 7 2026 acceptance, not scheduled. Ctrl+S writes the vfs and, when a workspace is open, commits it. The status stays off `saved` when that commit fails. Text that was not saved is not in the store. See [Workspace recovery](../workspace-recovery.md).
 
 ## The title line
 

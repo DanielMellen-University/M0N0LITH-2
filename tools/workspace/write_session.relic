@@ -1,0 +1,43 @@
+# First process of the restart test. Args: the workspace directory.
+use ../../shell/wm
+use std/os
+
+fun type_line(t, line)
+    for ch in line
+        if ch == " "
+            wm.terminal.on_key(t, "space")
+        else
+            wm.terminal.on_key(t, ch)
+    wm.terminal.on_key(t, "return")
+
+fun keys(app, s, line)
+    for ch in line
+        app.on_key(s, ch)
+
+let args = os.args()
+if len(args) != 1
+    fail("write_session needs the workspace directory")
+wm.workspace_open(args[0])
+let t = wm.terminal.init()
+type_line(t, "echo session-note > note.txt")
+type_line(t, "mkdir docs")
+type_line(t, "echo alpha > docs/plan.txt")
+type_line(t, "echo beta >> docs/plan.txt")
+type_line(t, "rm welcome.txt")
+type_line(t, "echo print(\"ide-out\") > hello.relic")
+type_line(t, "touch edit.txt")
+let f = wm.files_app.init()
+wm.files_app.on_key(f, "e")
+wm.files_app.on_key(f, "f2")
+wm.files_app.on_key(f, "ctrl+u")
+keys(wm.files_app, f, "renamed.txt")
+wm.files_app.on_key(f, "return")
+wm.files_app.on_key(f, "n")
+wm.files_app.on_key(f, "return")
+let e = wm.editor.init()
+wm.editor.on_key(e, "!")
+wm.editor.on_key(e, "ctrl+s")
+let notes = wm.notes.init()
+wm.notes.on_key(notes, "k")
+wm.clicker.on_key(wm.clicker.init(), "space")
+print("wrote", e.status, [wm.workspace_notice()])

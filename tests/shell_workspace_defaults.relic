@@ -1,0 +1,54 @@
+# No workspace: a Terminal write stays in the process and creates no store.
+# An empty directory is the first run (welcome.txt, nothing committed).
+# One save writes the generation file this milestone promises, and opening
+# the directory again drops a change that was only made in memory.
+use ../shell/wm
+use std/files
+use std/vfs
+
+fun wipe(path)
+    try
+        files.remove_tree(path)
+    catch e
+        none
+
+fun type_line(t, line)
+    for ch in line
+        if ch == " "
+            wm.terminal.on_key(t, "space")
+        else
+            wm.terminal.on_key(t, ch)
+    wm.terminal.on_key(t, "return")
+
+try
+    wm.workspace_fault("nope")
+    print("armed nope")
+catch e
+    print(e.message)
+
+wipe("ws-defaults")
+print("before", wm.workspace_enabled(), [wm.workspace_notice()])
+let t = wm.terminal.init()
+type_line(t, "echo hi > z.txt")
+print("off", vfs.read(t.fs, "/home/z.txt"), files.exists("ws-defaults"))
+
+wm.workspace_open("ws-defaults")
+print("first", wm.workspace_enabled(), [wm.workspace_notice()], vfs.read(t.fs, "/home/welcome.txt"), files.exists("ws-defaults/COMMITTED"))
+type_line(t, "echo hi > a.txt")
+print("notice", [wm.workspace_notice()])
+print("--- image")
+print(files.read("ws-defaults/g1.m2ws"))
+print("--- end")
+print("pointer", [files.read("ws-defaults/COMMITTED")])
+
+vfs.write(t.fs, "/home/a.txt", "DIRTY")
+wm.workspace_open("ws-defaults")
+print("reopen", [wm.workspace_notice()], vfs.read(t.fs, "/home/a.txt"))
+
+wm.workspace_open("")
+print("disabled", wm.workspace_enabled(), [wm.workspace_notice()])
+type_line(t, "echo more > a.txt")
+print("memory only", vfs.read(t.fs, "/home/a.txt"))
+wm.workspace_open("ws-defaults")
+print("store kept", vfs.read(t.fs, "/home/a.txt"), [wm.workspace_notice()])
+wipe("ws-defaults")

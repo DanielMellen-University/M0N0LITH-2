@@ -1,0 +1,84 @@
+# Terminal, Files, the Editor and the IDE share one store. A second open in
+# this process, after the memory-only copy is dirtied, reads the commits.
+# Notes and Clicker are not in the store. The fresh-process copy of this
+# session is tools/run_workspace_restart.cmake.
+use ../shell/wm
+use std/files
+use std/vfs
+
+fun wipe(path)
+    try
+        files.remove_tree(path)
+    catch e
+        none
+
+fun type_line(t, line)
+    for ch in line
+        if ch == " "
+            wm.terminal.on_key(t, "space")
+        else
+            wm.terminal.on_key(t, ch)
+    wm.terminal.on_key(t, "return")
+
+fun keys(app, s, line)
+    for ch in line
+        app.on_key(s, ch)
+
+wipe("ws-round")
+wm.workspace_open("ws-round")
+let t = wm.terminal.init()
+type_line(t, "echo session-note > note.txt")
+type_line(t, "mkdir docs")
+type_line(t, "echo alpha > docs/plan.txt")
+type_line(t, "echo beta >> docs/plan.txt")
+type_line(t, "rm welcome.txt")
+type_line(t, "echo print(\"ide-out\") > hello.relic")
+type_line(t, "echo hi > \"my note.txt\"")
+type_line(t, "touch edit.txt")
+
+let f = wm.files_app.init()
+wm.files_app.on_key(f, "e")
+wm.files_app.on_key(f, "f2")
+wm.files_app.on_key(f, "ctrl+u")
+keys(wm.files_app, f, "renamed.txt")
+wm.files_app.on_key(f, "return")
+
+wm.files_app.on_key(f, "n")
+wm.files_app.on_key(f, "return")
+let e = wm.editor.init()
+print("editor opened", e.path, [e.text])
+wm.editor.on_key(e, "!")
+wm.editor.on_key(e, "ctrl+s")
+print("editor saved", e.status, [vfs.read(e.fs, "/home/note.txt")])
+
+let notes = wm.notes.init()
+wm.notes.on_key(notes, "k")
+let clicker = wm.clicker.init()
+wm.clicker.on_key(clicker, "space")
+
+vfs.write(t.fs, "/home/note.txt", "DIRTY")
+wm.workspace_open("ws-round")
+print("notice", [wm.workspace_notice()])
+let t2 = wm.terminal.init()
+type_line(t2, "cat note.txt")
+type_line(t2, "cat docs/plan.txt")
+type_line(t2, "cat hello.relic")
+type_line(t2, "cat \"my note.txt\"")
+type_line(t2, "ls")
+for line in t2.buf
+    print(line)
+
+let f2 = wm.files_app.init()
+print("files", wm.files_app.lines(f2))
+wm.files_app.on_key(f2, "n")
+wm.files_app.on_key(f2, "return")
+let e2 = wm.editor.init()
+print("editor again", e2.status, [e2.text])
+wm.files_app.on_key(f2, "h")
+wm.files_app.on_key(f2, "return")
+let ide = wm.ide.init()
+wm.ide.on_key(ide, "ctrl+r")
+print("ide", ide.status, ide.out)
+print("notes", wm.notes.lines(wm.notes.init()))
+print("clicker", wm.clicker.lines(wm.clicker.init())[0])
+wipe("ws-round")

@@ -15,7 +15,7 @@ One test: `ctest --test-dir build -C Release -R golden_shell_ide`. Or run it str
 
 ## How they are checked
 
-CMake finds every `tests/*.relic` and adds it as `golden_<name>`. `tools/run_golden.cmake` runs it from `tests/`, and it passes when it exits with 0 and its standard output matches `<name>.out` exactly (Windows line endings are ignored). A test with no `.out` file must print nothing. One more test, `check_shell`, runs `relic check` on `wm.relic` and `desktop.relic`, which catches syntax errors and undefined names in the drawing code no test runs. That is 183 tests in all, and CI runs them on Linux, macOS and Windows.
+CMake finds every `tests/*.relic` and adds it as `golden_<name>`. `tools/run_golden.cmake` runs it from `tests/`, and it passes when it exits with 0 and its standard output matches `<name>.out` exactly (Windows line endings are ignored). A test with no `.out` file must print nothing. One more test, `check_shell`, runs `relic check` on `wm.relic`, `workspace.relic` and `desktop.relic`, which catches syntax errors and undefined names in the drawing code no test runs. That is 188 tests in all, and CI runs them on Linux, macOS and Windows. Four of the golden programs and `workspace_restart` cover the store. `workspace_restart` is not a golden file: it runs four relic processes against one directory.
 
 None of them opens the SDL window. A passing run does not prove what the desktop draws. The Linux GUI pass, and what it did not try, is in the [roadmap](ROADMAP.md#accepted-nov-7-2026).
 
@@ -259,6 +259,16 @@ Write `tests/shell_<topic>.relic`, run it, read its output, and save that as `te
 | `shell_snake_lowercase_wasd` | Snake: lowercase w, a, s, d turn like the arrows, and a turn straight back is ignored |
 | `shell_snake_best_empty` | Snake: an empty best-score file reads as 0, a padded number as that number |
 | `shell_snake_minimized` | Snake: a minimized window does not move, and the beat restarts on return instead of catching up |
+
+### Workspace
+
+| Test | What it covers |
+|---|---|
+| `shell_workspace_defaults` | no store means no host files; an empty directory is the first run; one save writes `g1.m2ws`; reopening drops a memory-only change; `workspace_open("")` stops committing |
+| `shell_workspace_roundtrip` | Terminal create, append and remove, a quoted name, Files rename, Editor save, IDE run, then a reopen; Notes and Clicker do not come back |
+| `shell_workspace_faults` | each fault stage keeps the previous generation and says so; the Editor does not say `saved` |
+| `shell_workspace_corrupt` | hand-written wrong version, truncated, extra, `..`, duplicate, missing parent, CR, bad escape, NUL, bad pointers, a number that is text, an empty image, an uncommitted generation, a partial, too many names, a too-long path |
+| `workspace_restart` | the same session across two processes, then a torn pointer and a fourth process |
 
 ### Shared filesystem and fuzzing
 

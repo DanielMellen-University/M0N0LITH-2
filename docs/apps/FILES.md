@@ -1,6 +1,6 @@
 # Files
 
-A file browser over the desktop's in-memory filesystem, the same one the Terminal, the Editor and the IDE use. A new Files window opens `/home`.
+A file browser over the desktop's filesystem, the same one the Terminal, the Editor and the IDE use. A new Files window opens `/home`. A rename or a delete is committed with the workspace when one is open. A failed commit replaces the title line until the next key, and the desktop notice stays up. See [Workspace recovery](../workspace-recovery.md).
 
 ## What it shows
 

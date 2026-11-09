@@ -85,6 +85,12 @@ fun draw_menu(d)
 fun draw(d)
     graphics.clear(30, 60, 90)
     graphics.text(8, 8, "MONOLITH 2", 200, 220, 240)
+    let note = wm.workspace_notice()
+    if note != ""
+        if len(note) > 78
+            note = slice(note, 0, 75) + "..."
+        graphics.rect(0, 22, d.width, 16, 90, 50, 20)
+        graphics.text(8, 24, note, 255, 230, 200)
     for w in d.windows
         if not w.minimized
             draw_window(d, w)
@@ -98,6 +104,9 @@ if not graphics.available()
     print("this relic was built without graphics; rebuild with -DRELIC_SDL=ON")
 else
     let d = wm.new_desktop(640, 480, wm.default_apps())
+    # Saved files outlive this process. Unset M0N0LITH_WORKSPACE uses
+    # ~/.m0n0lith2/workspace; an empty value keeps the old one-run vfs.
+    wm.workspace_open_default()
     graphics.open(d.width, d.height, "MONOLITH 2")
     let running = true
     while running and not graphics.quit_requested()
