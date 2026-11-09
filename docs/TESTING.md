@@ -332,6 +332,7 @@ Write `tests/shell_<topic>.relic`, run it, read its output, and save that as `te
 | `shell_ide_click_out` | a click on a plain output line does not move the cursor |
 | `shell_ide_title` | a wide IDE title names Ctrl+R as well as Ctrl+S |
 | `shell_ide_fun_tight` | fun f()=1, with no spaces around =, still opens a block |
+| `shell_ide_comment_mix` | a selection that is not all comments gets a comment on every line, including one already commented |
 
 ### Paint
 
