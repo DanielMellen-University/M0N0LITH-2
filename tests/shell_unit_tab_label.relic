@@ -1,0 +1,6 @@
+# A taskbar label is cut to the letters that fit, and is empty when even one will not.
+use ../shell/wm
+let d = wm.new_desktop(640, 480, wm.default_apps())
+let w = wm.launch(d, wm.terminal)
+print("[" + wm.tab_label(d, w) + "]")
+print(wm.tab_box(d, 0))
