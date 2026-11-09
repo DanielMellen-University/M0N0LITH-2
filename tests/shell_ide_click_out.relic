@@ -1,0 +1,15 @@
+# A click on a plain output line does not move the cursor.
+use ../shell/wm
+let d = wm.new_desktop(640, 480, wm.default_apps())
+let i = wm.launch(d, wm.ide)
+let s = i.state
+fun pos() = len(s.text) - s.back
+
+s.text = "print(1)\n"
+s.back = 0
+let at = pos()
+wm.key(d, "ctrl+r")
+let lines = wm.visible_lines(i)
+let y = 6 + (len(lines) - 1) * 14 + 2
+i.app.on_click(s, 20, y)
+print(pos() == at, s.status)
