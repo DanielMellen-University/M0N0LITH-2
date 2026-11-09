@@ -1,0 +1,16 @@
+# A dash word after the path is still an option: cat prints nothing of the file.
+use ../shell/wm
+use std/vfs
+let t = wm.terminal.init()
+fun run(line)
+    t.buf = []
+    for c in line
+        if c == " "
+            wm.terminal.on_key(t, "space")
+        else
+            wm.terminal.on_key(t, c)
+    wm.terminal.on_key(t, "return")
+    print(t.buf)
+run("cat welcome.txt -n")
+run("cat -n welcome.txt")
+run("cat welcome.txt")

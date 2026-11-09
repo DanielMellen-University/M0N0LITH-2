@@ -1,0 +1,3 @@
+["/home> cat welcome.txt -n", "cat: no options, not even -n"]
+["/home> cat -n welcome.txt", "cat: no options, not even -n"]
+["/home> cat welcome.txt", "Welcome to Relic."]
