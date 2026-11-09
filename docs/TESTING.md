@@ -326,6 +326,7 @@ Write `tests/shell_<topic>.relic`, run it, read its output, and save that as `te
 | `shell_ide_runtime_keep` | lines printed before a runtime error stay in the pane |
 | `shell_ide_hash_text` | a # inside a string is not a comment, and Ctrl+/ comments that whole line |
 | `shell_ide_error_top` | Ctrl+E on an error in line 1 puts the cursor at the start |
+| `shell_ide_math` | use std/math loads Relic's math and abs runs |
 
 ### Paint
 
