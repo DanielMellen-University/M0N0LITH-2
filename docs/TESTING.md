@@ -172,6 +172,7 @@ Write `tests/shell_<topic>.relic`, run it, read its output, and save that as `te
 | `shell_terminal_sort_file` | sort orders by character, digits before letters, and does not change the file |
 | `shell_terminal_uniq_case` | uniq drops only a line equal to the one just before it, so A and a both stay |
 | `shell_terminal_nl_blank` | nl numbers a blank line |
+| `shell_terminal_cd_stay` | cd of a file says it is not a folder and stays put |
 
 ### Files
 
