@@ -1,0 +1,10 @@
+# Raising a window does not change taskbar order, which stays the order they were opened.
+use ../shell/wm
+let d = wm.new_desktop(640, 480, wm.default_apps())
+let a = wm.launch(d, wm.notes)
+let b = wm.launch(d, wm.clicker)
+let c = wm.launch(d, wm.terminal)
+wm.click(d, a.x + 4, a.y + wm.title_height + 4)
+let order = wm.tabs(d)
+print(order[0].id, order[1].id, order[2].id)
+print("top", wm.focused(d).id == a.id)
