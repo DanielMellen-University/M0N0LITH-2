@@ -1,0 +1,27 @@
+ctrl+u no-op _xy
+undo hello_
+redo xy_
+ctrl+u no-op _
+undo hello_
+redo _
+ctrl+backspace no-op _xy
+undo hello_
+redo xy_
+ctrl+backspace no-op _
+undo hello_
+redo _
+ctrl+delete no-op xy_
+undo hello_
+redo xy_
+ctrl+delete no-op _
+undo hello_
+redo _
+ctrl+k no-op xy_
+undo hello_
+redo xy_
+ctrl+k no-op _
+undo hello_
+redo _
+ctrl+x no-op _
+undo hello_
+redo _
