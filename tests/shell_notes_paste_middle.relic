@@ -1,0 +1,20 @@
+# Ctrl+V inserts the copied line at the cursor, not only at the end.
+use ../shell/wm
+let n = wm.notes.init()
+fun key(k)
+    wm.notes.on_key(n, k)
+fun type(text)
+    for ch in text
+        if ch == " "
+            key("space")
+        else
+            key(ch)
+fun line()
+    print(wm.notes.lines(n)[1])
+type("XY")
+key("ctrl+c")
+type("ab")
+key("left")
+key("ctrl+v")
+line()
+print("text", n.text)
