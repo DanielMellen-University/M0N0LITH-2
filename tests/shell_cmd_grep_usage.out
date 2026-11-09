@@ -1,0 +1,4 @@
+["/home> grep", "usage: grep <text> <path>"]
+["/home> grep hello", "usage: grep <text> <path>"]
+["/home> grep hello /tmp/g.txt extra", "usage: grep <text> <path>"]
+file true
