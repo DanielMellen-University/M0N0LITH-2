@@ -226,6 +226,7 @@ Write `tests/shell_<topic>.relic`, run it, read its output, and save that as `te
 | `shell_files_sorted` | names are shown in order, with .. first |
 | `shell_files_dotfile` | a name that starts with a dot is listed |
 | `shell_files_delete_last` | deleting the last row leaves the selection on the row before it |
+| `shell_files_rename_title_click` | a click on the title gives up a rename and does not open a row |
 
 ### Editor
 
