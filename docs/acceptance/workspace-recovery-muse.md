@@ -26,6 +26,21 @@ start until the interface is ready. When the contract lands, each case
 gains a fixture note naming the assets it uses, and its status moves
 from UNRUN to PASS or FAIL with the date and the build it ran on.
 
+### Update: the contract is now on main (D0120, 2026-11-09)
+
+Engineer's implementation PR #28 has since merged (head d520a17f,
+merge 625dcc8a, merged by DanielMellen-University 2026-11-09), so
+docs/workspace-recovery.md now exists on main. That contract replaces
+the rejected head c94f809: it adds the META backup file,
+wm.workspace_release(), and the fallback and hold rules. Cases 6 to 9
+below are specified against that contract as it stands on main. No
+fixture assets are created in this batch, and every case in this
+document is still UNRUN. Whether the merged contract is the published
+fixture contract Engineer meant in D0118 is for Engineer to confirm;
+until then, no fixtures are built. The seven earlier cases still
+carry no fixture notes; those are added when the cases are first
+executed.
+
 ## How to read a case
 
 - Setup: the visible state before the case starts.
@@ -237,6 +252,41 @@ Data-preservation assertions:
 - Closing and starting the desktop again, still with no save, shows
   the same defaults.
 
+## Case 6: Corrupt committed generation must not load a newer uncommitted generation (D0118-1)
+
+Status: UNRUN.
+
+Setup: Start the desktop, open the Editor on a file with saved text,
+and save the workspace twice, so the store holds an older generation
+from the first save and a committed generation from the second save,
+with newer text. Quit the desktop. Then damage the committed
+generation so it no longer parses, and add a newer complete generation
+that was never committed, holding yet newer text.
+
+Action: Start the desktop again.
+
+Expected visible outcome: The desktop starts, it does not hang, and it
+shows that the committed image could not be used and that it recovered
+the older generation. It restores the older generation's content, the
+text from the first save. It does not load the newer uncommitted
+generation, and it does not show that generation's text as if it were
+the saved state.
+
+Data-preservation assertions:
+
+- The file shows exactly the older generation's text, the text from
+  the first save.
+- No content from the newer uncommitted generation appears anywhere.
+- No content from the damaged generation appears anywhere.
+- The failure is reported on screen instead of being silent.
+
+Fixture note: COMMITTED names g2; g2.m2ws is truncated or altered so
+it does not parse; g1.m2ws is complete and valid; g3.m2ws is complete
+and valid and is named by neither COMMITTED nor META. Per the contract
+load rule for a truncated committed generation, the fallback is the
+newest valid generation older than the named one, which is g1. A newer
+complete file is ignored uncommitted and is not installed.
+
 ---
 
 ## Case list
@@ -250,6 +300,9 @@ Data-preservation assertions:
 | 3c | Unsupported-version saved workspace data | UNRUN |
 | 4 | Visible save failure | UNRUN |
 | 5 | First-run defaults | UNRUN |
+| 6 | Corrupt committed generation, newer uncommitted not loaded | UNRUN |
 
-Specified cases: 7. Executed cases: 0. Fixture assets: blocked,
-pending Engineer's fixture and fault-injection contract.
+Specified cases: 8. Executed cases: 0. Fixture assets: none built in
+this batch. The contract is now on main (docs/workspace-recovery.md,
+PR #28 merged 2026-11-09); fixture notes for the earlier cases are
+still pending.
