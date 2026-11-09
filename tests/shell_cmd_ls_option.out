@@ -1,0 +1,3 @@
+["/home> ls -a", "ls: no options, not even -a"]
+["/home> ls --", "ls: no options, not even --"]
+["/home> ls", "welcome.txt"]
