@@ -1344,8 +1344,6 @@ fun _term_count(s, cmd, parts)
     return int(word)
 
 fun _term_head(s, path, count)
-    if count == 0
-        return   # first_lines and last_lines read 0 as every line
     if _term_not_folder(s, "head", path, false)
         return
     let p = _term_path(s, path)
@@ -1355,6 +1353,8 @@ fun _term_head(s, path, count)
     if vfs.is_dir(s.fs, p)
         _term_reply(s, "head: is a folder: " + p)
         return
+    if count == 0
+        return   # first_lines and last_lines read 0 as every line
     let text = vfs.read(s.fs, p)
     if text == ""
         return
@@ -1372,8 +1372,6 @@ fun _term_head(s, path, count)
 # tail: the last 10 lines of a file (or as many as asked), the way cat finds
 # them from the end.
 fun _term_tail(s, path, count)
-    if count == 0
-        return   # first_lines and last_lines read 0 as every line
     if _term_not_folder(s, "tail", path, false)
         return
     let p = _term_path(s, path)
@@ -1383,6 +1381,8 @@ fun _term_tail(s, path, count)
     if vfs.is_dir(s.fs, p)
         _term_reply(s, "tail: is a folder: " + p)
         return
+    if count == 0
+        return   # first_lines and last_lines read 0 as every line
     let text = vfs.read(s.fs, p)
     if strings.ends_with(text, "\n")
         text = slice(text, 0, len(text) - 1)
