@@ -161,6 +161,7 @@ Write `tests/shell_<topic>.relic`, run it, read its output, and save that as `te
 | `shell_terminal_rm_full` | rm refuses a folder that is not empty, then removes it once it is empty |
 | `shell_terminal_mkdir_deep` | mkdir creates missing parent folders, and a second time says the folder is already there |
 | `shell_terminal_grep_dot` | grep matches characters as written: a dot is not a pattern, and case counts |
+| `shell_terminal_find_own` | find matches an entry's own name, shows a folder with a slash, and does not match text only in a parent path |
 
 ### Files
 
