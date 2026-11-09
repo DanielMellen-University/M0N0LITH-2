@@ -287,6 +287,46 @@ load rule for a truncated committed generation, the fallback is the
 newest valid generation older than the named one, which is g1. A newer
 complete file is ignored uncommitted and is not installed.
 
+## Case 7: Corrupted retry commit keeps the actual prior committed generation (D0118-2)
+
+Status: UNRUN.
+
+Setup: Start the desktop with no saved workspace. Open the Editor on
+a file, write a first version, and save the workspace, so the first
+version is committed. Edit the file to a second version. Start a
+workspace save and cut it off partway, with the fault stage
+partial-generation or full-uncommitted, so the second version is never
+committed. The fault arm is one-shot, so the next save runs with no
+fault armed: save the workspace again, so the second version commits
+as a new generation. Then damage that new committed generation so it
+no longer parses, and quit the desktop.
+
+Action: Start the desktop again.
+
+Expected visible outcome: The desktop starts, it does not hang, and it
+shows that the committed image could not be used and that it recovered
+the first version. It restores exactly the first version's text. It
+does not show the second version, does not show a mix of the two
+versions, and does not fall back to first-run defaults.
+
+Data-preservation assertions:
+
+- The file shows exactly the first version, the version from the last
+  completed workspace save.
+- No content from the interrupted save appears anywhere.
+- No content from the corrupted save appears anywhere.
+- The failure is reported on screen instead of being silent.
+
+Fixture note: COMMITTED names g3; g3.m2ws is truncated or altered so
+it does not parse; g1.m2ws is complete and valid; META names committed
+g3, previous g1. The uncommitted g2 leftover (g2.m2ws, or
+g2.m2ws.partial for the partial-generation variant) was pruned by the
+successful g3 commit, which keeps only the new commit and the
+generation installed when that save started, which is g1. Per the
+contract load rule for a truncated committed generation, the fallback
+is the newest valid generation older than the named one, which is g1.
+A newer complete file would be ignored uncommitted, not installed.
+
 ---
 
 ## Case list
@@ -301,8 +341,9 @@ complete file is ignored uncommitted and is not installed.
 | 4 | Visible save failure | UNRUN |
 | 5 | First-run defaults | UNRUN |
 | 6 | Corrupt committed generation, newer uncommitted not loaded | UNRUN |
+| 7 | Corrupted retry commit keeps prior committed generation | UNRUN |
 
-Specified cases: 8. Executed cases: 0. Fixture assets: none built in
+Specified cases: 9. Executed cases: 0. Fixture assets: none built in
 this batch. The contract is now on main (docs/workspace-recovery.md,
 PR #28 merged 2026-11-09); fixture notes for the earlier cases are
 still pending.
