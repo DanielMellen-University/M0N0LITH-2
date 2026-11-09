@@ -1,0 +1,18 @@
+# mv refuses to replace a file that is already there and leaves both alone.
+use ../shell/wm
+use std/vfs
+let t = wm.terminal.init()
+fun run(line)
+    t.buf = []
+    for c in line
+        if c == " "
+            wm.terminal.on_key(t, "space")
+        else
+            wm.terminal.on_key(t, c)
+    wm.terminal.on_key(t, "return")
+    return slice(t.buf, 1, len(t.buf))
+
+vfs.write(t.fs, "/tmp/a.txt", "AAA")
+vfs.write(t.fs, "/tmp/b.txt", "BBB")
+print(run("mv /tmp/a.txt /tmp/b.txt"))
+print([vfs.read(t.fs, "/tmp/a.txt")], [vfs.read(t.fs, "/tmp/b.txt")])
