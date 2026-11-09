@@ -1,0 +1,5 @@
+["/home> touch /tmp"]
+["/home> touch /home"]
+tmp dir true
+home dir true
+["/home> ls /tmp"]
