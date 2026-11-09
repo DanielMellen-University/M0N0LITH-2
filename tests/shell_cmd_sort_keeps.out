@@ -1,0 +1,3 @@
+["/home> sort /tmp/s.txt", "apple", "fig", "pear"]
+["/home> cat /tmp/s.txt", "pear", "apple", "fig"]
+same true
