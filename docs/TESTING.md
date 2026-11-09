@@ -227,6 +227,7 @@ Write `tests/shell_<topic>.relic`, run it, read its output, and save that as `te
 | `shell_files_dotfile` | a name that starts with a dot is listed |
 | `shell_files_delete_last` | deleting the last row leaves the selection on the row before it |
 | `shell_files_rename_title_click` | a click on the title gives up a rename and does not open a row |
+| `shell_files_note_next` | the already-there note from a rename clears on the next key |
 
 ### Editor
 
