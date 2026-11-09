@@ -21,6 +21,7 @@ let _committed = none   # the generation installed, or none when the session is 
 let _hold = ""          # non-empty: do not write or delete the store until release()
 let _opt_out = false    # explicit session-only (empty path). Not a failed open.
 let _requested = false  # a store was asked for. Unset means the old one-run vfs.
+let _session = none     # none: installed generation has no window snapshot. A list: those windows.
 
 fun enabled() = _dir != none
 
@@ -43,6 +44,61 @@ fun notice()
     if _boot != ""
         return _boot
     return _save
+
+# The window snapshot installed with the current generation, or none when that
+# generation did not record one (a files-only save, or the defaults).
+fun session()
+    return _session
+
+fun escape(s)
+    if type(s) != "string"
+        fail("workspace.escape(): text must be a string, got " + type(s))
+    return _esc(s)
+
+# Length-prefixed lines, so a line may contain anything. none when it will not fit.
+fun pack_lines(rows)
+    if type(rows) != "list"
+        fail("workspace.pack_lines(): rows must be a list, got " + type(rows))
+    let out = ""
+    for row in rows
+        if type(row) != "string"
+            return none
+        let piece = str(len(row)) + "\n" + row
+        if len(piece) > max_file or len(out) + len(piece) > max_file
+            return none
+        out = out + piece
+    return out
+
+fun unpack_lines(value, limit)
+    if type(value) != "string"
+        fail("workspace.unpack_lines(): text must be a string, got " + type(value))
+    if type(limit) != "int"
+        fail("workspace.unpack_lines(): limit must be an int, got " + type(limit))
+    if value == ""
+        return []
+    let rows = []
+    let i = 0
+    let nlen = len(value)
+    while i < nlen
+        if len(rows) >= limit
+            return none
+        let got = _read_count(value, i)
+        if got == none
+            return none
+        let j = got.at
+        if j >= nlen or value[j] != "\n"
+            return none
+        j = j + 1
+        if j + got.n > nlen
+            return none
+        append(rows, slice(value, j, j + got.n))
+        i = j + got.n
+    return rows
+
+fun refuse(why)
+    if type(why) != "string"
+        fail("workspace.refuse(): why must be a string, got " + type(why))
+    return _fail(why)
 
 fun _known_fault(stage)
     return stage == "partial-generation" or stage == "full-uncommitted" or stage == "staged-pointer" or stage == "torn-pointer" or stage == "corrupt-committed"
@@ -71,6 +127,7 @@ fun _strip_slash(path)
 fun open(path)
     _dir = none
     _committed = none
+    _session = none
     _hold = ""
     _opt_out = false
     _requested = false
@@ -107,6 +164,7 @@ fun open_default()
     if home == none or home == ""
         _dir = none
         _committed = none
+        _session = none
         _hold = ""
         _opt_out = false
         _requested = true
@@ -252,6 +310,227 @@ fun _parent(p)
 fun _bad(reason)
     return {ok: false, reason: reason}
 
+# Decimal integer in range. No leading zero, no plus sign. none when it is not one.
+fun _parse_int(s, lo, hi)
+    if s == none or s == "" or len(s) > 11
+        return none
+    let i = 0
+    let neg = false
+    if s[0] == "-"
+        neg = true
+        i = 1
+        if i == len(s)
+            return none
+    if s[i] == "0" and i + 1 != len(s)
+        return none
+    let n = 0
+    while i < len(s)
+        let c = s[i]
+        if c < "0" or c > "9"
+            return none
+        n = n * 10 + ord(c) - 48
+        if n > 2000000000
+            return none
+        i = i + 1
+    if neg
+        n = -n
+    if n < lo or n > hi
+        return none
+    return n
+
+# A length prefix at i: digits, no leading zero, then the caller expects a newline.
+fun _read_count(value, i)
+    if i >= len(value) or value[i] < "0" or value[i] > "9"
+        return none
+    if value[i] == "0"
+        return {n: 0, at: i + 1}
+    let n = 0
+    let j = i
+    while j < len(value) and value[j] >= "0" and value[j] <= "9"
+        n = n * 10 + ord(value[j]) - 48
+        if n > max_file
+            return none
+        j = j + 1
+    return {n: n, at: j}
+
+fun _is_app(name)
+    return name == "Clicker" or name == "Notes" or name == "Terminal" or name == "Files" or name == "Editor" or name == "IDE" or name == "Paint" or name == "Snake"
+
+fun _field_key(s)
+    if s == "" or len(s) > 16 or s[0] < "a" or s[0] > "z"
+        return false
+    for c in s
+        if not ((c >= "a" and c <= "z") or (c >= "0" and c <= "9") or c == "_")
+            return false
+    return true
+
+fun _path_ok(p)
+    if p == "/"
+        return true
+    return _valid_path(p)
+
+fun _paint_tool_ok(s)
+    return s == "brush" or s == "fill" or s == "pick" or s == "line" or s == "rect" or s == "oval" or s == "fill rect" or s == "fill oval"
+
+fun _session_need(app)
+    if app == "Terminal"
+        return ["cwd", "input", "draft", "buf", "past", "left", "back"]
+    if app == "Files"
+        return ["path", "sel"]
+    if app == "Editor"
+        return ["path", "text", "back", "mark", "disk_set", "disk"]
+    if app == "IDE"
+        return ["path", "text", "back", "mark", "disk_set", "disk", "out", "err"]
+    if app == "Notes"
+        return ["text", "left"]
+    if app == "Clicker"
+        return ["count"]
+    if app == "Paint"
+        return ["path", "cells", "color", "size", "tool", "status", "foreign"]
+    return []
+
+fun _mark_ok(text, mark)
+    if mark == "-"
+        return true
+    let n = _parse_int(mark, 0, max_file)
+    return n != none and n <= len(text)
+
+fun _disk_ok(f)
+    if f.disk_set != "0" and f.disk_set != "1"
+        return false
+    if f.disk_set == "0" and f.disk != ""
+        return false
+    return true
+
+fun _editor_fields_ok(f)
+    if not _valid_path(f.path) or not _disk_ok(f) or not _mark_ok(f.text, f.mark)
+        return false
+    let back = _parse_int(f.back, 0, max_file)
+    return back != none and back <= len(f.text)
+
+fun _session_values(win)
+    let f = win.fields
+    if win.app == "Terminal"
+        if not _path_ok(f.cwd)
+            return false
+        let left = _parse_int(f.left, 0, max_file)
+        let back = _parse_int(f.back, 0, 50)
+        if left == none or back == none or left > len(f.input)
+            return false
+        let buf = unpack_lines(f.buf, 201)
+        let past = unpack_lines(f.past, 51)
+        if buf == none or past == none or len(buf) > 200 or len(past) > 50 or back > len(past)
+            return false
+        return true
+    if win.app == "Files"
+        let sel = _parse_int(f.sel, 0, 100000)
+        return _path_ok(f.path) and sel != none
+    if win.app == "Editor"
+        return _editor_fields_ok(f)
+    if win.app == "IDE"
+        if not _editor_fields_ok(f)
+            return false
+        let out = unpack_lines(f.out, 201)
+        if out == none or len(out) > 200
+            return false
+        if f.err == "-"
+            return true
+        return _parse_int(f.err, 1, 1000000) != none
+    if win.app == "Notes"
+        let left = _parse_int(f.left, 0, max_file)
+        return left != none and left <= len(f.text)
+    if win.app == "Clicker"
+        return _parse_int(f.count, 0, 1000000000) != none
+    if win.app == "Paint"
+        if not _valid_path(f.path) or not _paint_tool_ok(f.tool)
+            return false
+        if f.foreign != "0" and f.foreign != "1"
+            return false
+        if _parse_int(f.color, 0, 8) == none or _parse_int(f.size, 1, 4) == none
+            return false
+        if len(f.cells) != 2160
+            return false
+        for c in f.cells
+            if c < "0" or c > "8"
+                return false
+        return true
+    return true
+
+fun _start_window(line, ids)
+    let tok = strings.split(line, " ")
+    if len(tok) != 8 or tok[0] != "W" or not _is_app(tok[1])
+        return none
+    let id = _parse_int(tok[2], 1, 1000000)
+    let x = _parse_int(tok[3], -100000, 100000)
+    let y = _parse_int(tok[4], -100000, 100000)
+    let w = _parse_int(tok[5], 1, 100000)
+    let h = _parse_int(tok[6], 1, 100000)
+    let m = _parse_int(tok[7], 0, 1)
+    if id == none or x == none or y == none or w == none or h == none or m == none
+        return none
+    if str(id) in ids
+        return none
+    ids[str(id)] = true
+    let minimized = m == 1
+    return {app: tok[1], id: id, x: x, y: y, width: w, height: h, minimized: minimized, fields: {}}
+
+fun _add_field(win, line)
+    let rest = slice(line, 2, len(line))
+    let sp = strings.find(rest, " ")
+    let key = rest
+    let raw = ""
+    if sp >= 0
+        key = slice(rest, 0, sp)
+        raw = slice(rest, sp + 1, len(rest))
+    if not _field_key(key) or key in win.fields or strings.find(raw, " ") >= 0
+        return false
+    let value = _unesc(raw)
+    if value == none
+        return false
+    win.fields[key] = value
+    return true
+
+fun _finish_window(win)
+    let need = _session_need(win.app)
+    let got = 0
+    for k in win.fields
+        got = got + 1
+    if got != len(need)
+        return false
+    for k in need
+        if not k in win.fields
+            return false
+    return _session_values(win)
+
+# none when the S records are not a session this desktop can apply.
+# [] is a desktop that was saved with no windows.
+fun _parse_session(raw)
+    if len(raw) == 1 and raw[0] == "-"
+        return []
+    let windows = []
+    let cur = none
+    let ids = {}
+    for line in raw
+        if line == "-"
+            return none
+        if strings.starts_with(line, "W ")
+            if cur != none
+                if not _finish_window(cur)
+                    return none
+                append(windows, cur)
+            cur = _start_window(line, ids)
+            if cur == none
+                return none
+        else if strings.starts_with(line, "F ")
+            if cur == none or not _add_field(cur, line)
+                return none
+        else
+            return none
+    if cur == none or not _finish_window(cur) or len(windows) >= 64
+        return none
+    append(windows, cur)
+    return windows
+
 fun _parse(text)
     # A CR byte is corruption (a text-mode rewrite), not a short write.
     if strings.contains(text, chr(13))
@@ -277,11 +556,21 @@ fun _parse(text)
     let dirs = []
     let files = []
     let seen = {}
+    let raw_session = []
+    let z_text = none
     for i in 1..len(lines) - 1
         let line = lines[i]
-        if len(dirs) + len(files) >= max_entries
+        if strings.starts_with(line, "Z ")
+            if i != len(lines) - 2 or z_text != none
+                return _bad("invalid")
+            z_text = slice(line, 2, len(line))
+        else if strings.starts_with(line, "S ")
+            append(raw_session, slice(line, 2, len(line)))
+            if len(raw_session) > 2000
+                return _bad("invalid")
+        else if len(dirs) + len(files) >= max_entries
             return _bad("invalid")
-        if strings.starts_with(line, "D ")
+        else if strings.starts_with(line, "D ")
             let path = _unesc(slice(line, 2, len(line)))
             if not _valid_path(path) or path in seen
                 return _bad("invalid")
@@ -311,7 +600,32 @@ fun _parse(text)
         let up = _parent(row[0])
         if up != "/" and (not up in seen or seen[up] != "D")
             return _bad("invalid")
-    return {ok: true, dirs: dirs, files: files}
+    let session = none
+    if len(raw_session) > 0
+        if z_text == none
+            return _bad("invalid")
+        session = _parse_session(raw_session)
+        if session == none or not _checksum_ok(lines, z_text)
+            return _bad("invalid")
+    else if z_text != none
+        return _bad("invalid")
+    return {ok: true, dirs: dirs, files: files, session: session}
+
+# Sum of code points of every character before the Z line. A one-character
+# change no longer matches, so a still-shaped file is not installed as if it
+# were the saved one. A generation with no session line has no Z line.
+fun _checksum_ok(lines, z_text)
+    let want = _parse_int(z_text, 0, 2000000000)
+    if want == none
+        return false
+    let head = []
+    for i in 0..len(lines) - 2
+        append(head, lines[i])
+    let prefix = strings.join(head, "\n") + "\n"
+    let sum = 0
+    for c in prefix
+        sum = sum + ord(c)
+    return sum == want
 
 fun _gen_of(name, suffix)
     if not strings.ends_with(name, suffix)
@@ -369,6 +683,12 @@ fun _reset_default(fs)
     vfs.make_dir(fs, "/home")
     vfs.make_dir(fs, "/tmp")
     vfs.write(fs, "/home/welcome.txt", "Welcome to Relic.\n")
+    _session = none
+
+fun _use(fs, parsed, n)
+    _install(fs, parsed)
+    _committed = n
+    _session = parsed.session
 
 fun _install(fs, parsed)
     _clear(fs)
@@ -447,6 +767,7 @@ fun load(fs)
     _boot = ""
     _save = ""
     _committed = none
+    _session = none
     _hold = ""
     if _dir == none
         return
@@ -503,8 +824,7 @@ fun load(fs)
         if pointer.state == "ok"
             let older = _highest_below(valid_nums, pointer.n)
             if older != none
-                _install(fs, valid[str(older)])
-                _committed = older
+                _use(fs, valid[str(older)], older)
                 _boot = "workspace: committed image wrong version; store held; recovered g" + str(older)
             _boot = _with_ignored(_boot, _highest_above(valid_nums, pointer.n), part)
         else if len(valid_nums) > 0
@@ -513,8 +833,7 @@ fun load(fs)
     # A readable pointer that names a generation which parses is the commit.
     # A newer complete file was not committed and is not installed.
     if pointer.state == "ok" and str(pointer.n) in valid
-        _install(fs, valid[str(pointer.n)])
-        _committed = pointer.n
+        _use(fs, valid[str(pointer.n)], pointer.n)
         if _hold == "wrong-version"
             _boot = "workspace: wrong version file present; store held"
             _boot = _with_ignored(_boot, _highest_above(valid_nums, pointer.n), part)
@@ -540,8 +859,7 @@ fun load(fs)
         let older = _highest_below(valid_nums, pointer.n)
         let newer = _highest_above(valid_nums, pointer.n)
         if older != none
-            _install(fs, valid[str(older)])
-            _committed = older
+            _use(fs, valid[str(older)], older)
             if _hold != ""
                 _boot = "workspace: " + why + "; store held; recovered g" + str(older)
             else
@@ -584,8 +902,7 @@ fun load(fs)
             if part != none
                 _boot = _boot + "; ignored partial g" + str(part)
         return
-    _install(fs, valid[str(chosen)])
-    _committed = chosen
+    _use(fs, valid[str(chosen)], chosen)
     _boot = "workspace: pointer " + word + "; recovered g" + str(chosen)
     _boot = _with_ignored(_boot, _highest_above(valid_nums, chosen), part)
 
@@ -615,7 +932,7 @@ fun _walk(fs, path, rows, count)
                 return
             append(rows, {kind: "F", path: child, text: text})
 
-fun _encode(rows)
+fun _encode(rows, extra)
     let by = {}
     let paths = []
     for r in rows
@@ -628,6 +945,17 @@ fun _encode(rows)
             append(lines, "D " + _esc(r.path))
         else
             append(lines, "F " + _esc(r.path) + " " + _esc(r.text))
+    if extra != none
+        if len(extra) == 0
+            append(lines, "S -")
+        else
+            for line in extra
+                append(lines, "S " + line)
+        let prefix = strings.join(lines, "\n") + "\n"
+        let sum = 0
+        for c in prefix
+            sum = sum + ord(c)
+        append(lines, "Z " + str(sum))
     append(lines, ".")
     return strings.join(lines, "\n") + "\n"
 
@@ -765,7 +1093,7 @@ fun _wrote(path, text)
         _fail("cannot write store")
     return false
 
-fun save(fs)
+fun _commit(fs, extra)
     if not _requested or _opt_out
         return ""
     if _dir == none
@@ -795,11 +1123,14 @@ fun save(fs)
         return _fail("image too large")
     let image = ""
     try
-        image = _encode(rows)
+        image = _encode(rows, extra)
     catch err
         return _fail("cannot write store")
     if len(image) > max_generation_bytes
         return _fail("image too large")
+    let checked = _parse(image)
+    if not checked.ok
+        return _fail("cannot write store")
     let n = _next_gen()
     if n == none
         return _fail("cannot write store")
@@ -866,3 +1197,14 @@ fun save(fs)
     _prune(n, prev)
     _fault = none
     return ""
+
+fun save(fs)
+    return _commit(fs, none)
+
+fun save_with(fs, lines)
+    if type(lines) != "list"
+        fail("workspace.save_with(): lines must be a list, got " + type(lines))
+    for line in lines
+        if type(line) != "string" or strings.contains(line, "\n") or strings.contains(line, chr(13))
+            fail("workspace.save_with(): bad session line")
+    return _commit(fs, lines)

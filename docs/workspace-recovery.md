@@ -105,7 +105,7 @@ M2WS1
 .
 ```
 
-The first-run image is not that. With no `COMMITTED` and no generation names, the session keeps `vfs.new()`: `/home`, `/tmp`, and `/home/welcome.txt` holding `Welcome to Relic.\n`. No file is written until an app changes the vfs.
+The first-run image is not that. With no `COMMITTED` and no generation names, the session keeps `vfs.new()`: `/home`, `/tmp`, and `/home/welcome.txt` holding `Welcome to Relic.\n`. `save` on its own writes a file when the vfs changes. The desktop also writes when a window opens, closes, moves, resizes, or is minimized, when a Terminal command finishes, and when the window quits.
 
 Example, after `echo hi > a.txt` on a fresh workspace (`Welcome to Relic.` is the default file):
 
@@ -118,9 +118,40 @@ D /tmp
 .
 ```
 
+## Window session
+
+A generation written by the desktop records the open windows in the same file as the vfs. The rename of `COMMITTED` publishes both. A generation written by `save` with no session, which is what a test does when it never binds a desktop, has no window records. A file from before windows were stored still loads: the files come back and no windows open.
+
+`S` lines come after the `D` and `F` lines. `Z` is the last line before `.`, and only when there is an `S` line.
+
+| Line | Meaning |
+|---|---|
+| `S -` | the desktop was saved with no windows. It is the only `S` line |
+| `S W <App> <id> <x> <y> <width> <height> <0 or 1>` | one window, back to front. App is Clicker, Notes, Terminal, Files, Editor, IDE, Paint, or Snake. `1` means minimized. id is unique, from 1 |
+| `S F <key> <escaped value>` | one field of the window started by the previous `W`. The value uses the same escapes as a file. No raw space |
+
+A missing field, an extra field, a bad number, a duplicate id, or anything else in an `S` line is `invalid`. The vfs in that same file is not installed either.
+
+| App | Fields |
+|---|---|
+| Terminal | `cwd`, `input`, `draft`, `buf`, `past`, `left`, `back`. `buf` and `past` are length-prefixed lines (a decimal length, a newline, then that many characters), at most 200 and 50 |
+| Files | `path`, `sel` |
+| Editor | `path`, `text`, `back`, `mark` (`-` or a count from the end of the text), `disk_set` (`0` or `1`), `disk` |
+| IDE | the Editor fields, plus `out` (length-prefixed lines, at most 200) and `err` (`-` or a line number) |
+| Notes | `text`, `left` |
+| Clicker | `count` |
+| Paint | `path`, `cells` (2160 digits, each `0` to `8`), `color`, `size`, `tool`, `status`, `foreign` (`0` or `1`) |
+| Snake | none. The window opens on a new game. The best score is the vfs file |
+
+`Z <sum>` is the sum of the code points of every character before that line, including the newline after the previous line. No leading zeros, and no sum above 2,000,000,000. A sum that does not match is `invalid`. One changed character no longer matches, so the file is not installed as if it were the saved one. A generation with no `S` line has no `Z` line.
+
+The desktop writes this snapshot when a window opens, closes, moves, resizes, or is minimized or restored, when a Terminal command finishes, when a file change is committed, and when the window quits. Typing in the Editor, the IDE, Notes, or Paint is included in the next one of those, and on quit. It is not its own commit. A kill between those keystrokes keeps the previous snapshot.
+
+Not in the snapshot: undo and redo, a find or a rename still being typed, the clipboard, an IDE run (including one that is waiting for a line), and Snake's board. After a restart, Ctrl+Z has nothing to undo until the next edit, and an IDE program does not keep running.
+
 ## What a save does
 
-Each change made by Terminal, Files, the Editor, the IDE's Ctrl+S, Paint's save, or Snake writing its best score builds a new generation from the whole vfs. N is one past every generation id already in the directory and every id named by `COMMITTED` or `META`. An existing `gN.m2ws` is never rewritten.
+Each change made by Terminal, Files, the Editor, the IDE's Ctrl+S, Paint's save, or Snake writing its best score builds a new generation from the whole vfs. When a desktop is bound, that generation includes the window session above. Typing in the Editor is not, by itself, one of these changes. N is one past every generation id already in the directory and every id named by `COMMITTED` or `META`. An existing `gN.m2ws` is never rewritten.
 
 1. Write `gN.m2ws.partial` and read it back. A mismatch stops here. `COMMITTED` and `META` are unchanged.
 2. Rename that partial to `gN.m2ws`. This creates the image. It does not commit it. If that rename fails, stop. `COMMITTED` is unchanged.
@@ -190,7 +221,7 @@ The next generation number is one past every id already stored or named. A faile
 - A wrong-version committed file, more than 32 generation names, or an ambiguous torn pointer holds the store. Continued use does not overwrite or delete it. `workspace_release` then a later successful save may.
 - The first successful commit has no older generation. From the second on, the generation that was installed when the save started is kept until the save after next replaces it as the backup.
 - Two processes must not write one store. The format has no lock.
-- Unsaved Editor, IDE, and Paint buffers, Notes, Clicker, and window layout are not in the store.
+- Open windows are in the snapshot the desktop writes: place, size, minimized, the Terminal's folder, output and command history, Files' folder, Editor and IDE text (saved or not), Notes' line, Clicker's count, and Paint's cells. Undo, the clipboard, a running IDE program, and Snake's board are not. A files-only `save` does not write them. Keystrokes since the last snapshot are not on disk until the next snapshot or quit.
 - A program run in the IDE still cannot write the host disk. The store is written by the desktop, not by that program.
 - There is no fsync. This is not a promise about power loss.
 
