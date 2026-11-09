@@ -1294,7 +1294,15 @@ fun _term_head(s, path, count)
     let text = vfs.read(s.fs, p)
     if text == ""
         return
-    for line in first_lines(text, count)
+    # first_lines keeps the empty place after a final newline, where the Editor
+    # can put the cursor. Ask for one extra line and drop that place, so head
+    # agrees with cat and tail.
+    let lines = first_lines(text, count + 1)
+    if len(lines) > count
+        lines = slice(lines, 0, count)
+    else if strings.ends_with(text, "\n") and len(lines) > 0 and lines[len(lines) - 1] == ""
+        lines = slice(lines, 0, len(lines) - 1)
+    for line in lines
         _term_reply(s, line)
 
 # tail: the last 10 lines of a file (or as many as asked), the way cat finds

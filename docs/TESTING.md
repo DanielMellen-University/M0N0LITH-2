@@ -149,6 +149,7 @@ Write `tests/shell_<topic>.relic`, run it, read its output, and save that as `te
 | `shell_terminal_multipath_errors` | rm, mkdir and touch with several paths keep going after an error for one |
 | `shell_terminal_sort_uniq_nl_errors` | sort, uniq and nl on a path ending in /, and nl on a missing file |
 | `shell_terminal_head_tail_counts` | head and tail counts: tail 0, leading zeros, over six digits, a letter, a dash count, and a bad count on a missing file |
+| `shell_terminal_head_end` | head of a short file prints the same lines as cat and tail, including a blank line in the file and a file that is only a newline, and no blank line after a final newline |
 | `shell_terminal_wc_counts` | wc counts newlines, space-separated words and characters, including a last line with no newline |
 
 ### Files
