@@ -1,0 +1,10 @@
+# A window smaller than a character still reports one row and one column.
+use ../shell/wm
+let d = wm.new_desktop(640, 480, wm.default_apps())
+let w = wm.launch(d, wm.notes)
+w.width = 1
+w.height = 1
+print(wm.rows_fit(w), wm.cols_fit(w))
+w.width = 80
+w.height = 40
+print("min window", wm.rows_fit(w), wm.cols_fit(w))
