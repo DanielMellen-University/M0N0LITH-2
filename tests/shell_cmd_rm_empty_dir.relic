@@ -1,0 +1,21 @@
+# rm removes an empty folder and refuses one that still has a file.
+use ../shell/wm
+use std/vfs
+let t = wm.terminal.init()
+fun run(line)
+    t.buf = []
+    for c in line
+        if c == " "
+            wm.terminal.on_key(t, "space")
+        else
+            wm.terminal.on_key(t, c)
+    wm.terminal.on_key(t, "return")
+    print(t.buf)
+run("mkdir /tmp/box")
+run("touch /tmp/box/a.txt")
+run("rm /tmp/box")
+print("box", vfs.is_dir(t.fs, "/tmp/box"))
+run("rm /tmp/box/a.txt")
+run("rm /tmp/box")
+print("gone", not vfs.exists(t.fs, "/tmp/box"))
+run("ls /tmp")

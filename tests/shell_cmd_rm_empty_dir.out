@@ -1,0 +1,8 @@
+["/home> mkdir /tmp/box"]
+["/home> touch /tmp/box/a.txt"]
+["/home> rm /tmp/box", "rm: folder not empty: /tmp/box"]
+box true
+["/home> rm /tmp/box/a.txt"]
+["/home> rm /tmp/box"]
+gone true
+["/home> ls /tmp"]
