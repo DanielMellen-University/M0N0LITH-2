@@ -1,0 +1,17 @@
+# sort needs exactly one path, and a second path does not sort the file.
+use ../shell/wm
+use std/vfs
+let t = wm.terminal.init()
+fun run(line)
+    t.buf = []
+    for c in line
+        if c == " "
+            wm.terminal.on_key(t, "space")
+        else
+            wm.terminal.on_key(t, c)
+    wm.terminal.on_key(t, "return")
+    print(t.buf)
+vfs.write(t.fs, "/tmp/s.txt", "b\na")
+run("sort")
+run("sort /tmp/s.txt /tmp/s.txt")
+print("same", vfs.read(t.fs, "/tmp/s.txt") == "b\na")

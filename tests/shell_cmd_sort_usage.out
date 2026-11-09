@@ -1,0 +1,3 @@
+["/home> sort", "usage: sort <path>"]
+["/home> sort /tmp/s.txt /tmp/s.txt", "usage: sort <path>"]
+same true
