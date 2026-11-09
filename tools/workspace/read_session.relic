@@ -1,0 +1,37 @@
+# Second process. The vfs is new; only the store can bring the files back.
+use ../../shell/wm
+use std/os
+
+fun type_line(t, line)
+    for ch in line
+        if ch == " "
+            wm.terminal.on_key(t, "space")
+        else
+            wm.terminal.on_key(t, ch)
+    wm.terminal.on_key(t, "return")
+
+let args = os.args()
+if len(args) != 1
+    fail("read_session needs the workspace directory")
+wm.workspace_open(args[0])
+print("notice", [wm.workspace_notice()])
+let t = wm.terminal.init()
+type_line(t, "cat note.txt")
+type_line(t, "cat docs/plan.txt")
+type_line(t, "cat hello.relic")
+type_line(t, "ls")
+for line in t.buf
+    print(line)
+let f = wm.files_app.init()
+print("files", wm.files_app.lines(f))
+wm.files_app.on_key(f, "n")
+wm.files_app.on_key(f, "return")
+let e = wm.editor.init()
+print("editor", e.status, [e.text])
+wm.files_app.on_key(f, "h")
+wm.files_app.on_key(f, "return")
+let ide = wm.ide.init()
+wm.ide.on_key(ide, "ctrl+r")
+print("ide", ide.status, ide.out)
+print("notes", wm.notes.lines(wm.notes.init()))
+print("clicker", wm.clicker.lines(wm.clicker.init())[0])

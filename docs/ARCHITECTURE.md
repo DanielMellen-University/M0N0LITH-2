@@ -29,7 +29,7 @@ An app is a map of functions (`init`, `lines`, `on_click`, `on_key` and some opt
 
 Two things in `wm.relic` are module-level, so every window and even every desktop map in the same process shares them:
 
-- `_shell_fs`, one in-memory filesystem from Relic's `std/vfs`. Terminal, Files, the Editor and the IDE all read and write it, so a change in one shows in the others, and each app checks again what is there rather than trusting what it saw last frame. Nothing reaches the real disk. Host mounts are parked with the Nov 7 2026 acceptance, not scheduled. The files are gone when the desktop quits.
+- `_shell_fs`, one in-memory filesystem from Relic's `std/vfs`. Terminal, Files, the Editor, the IDE, Paint and Snake's best score all read and write it, so a change in one shows in the others, and each app checks again what is there rather than trusting what it saw last frame. Host mounts are parked with the Nov 7 2026 acceptance, not scheduled. `shell/desktop.relic` also opens a workspace directory and commits that vfs after each of those changes, so a new process sees the committed files. The format and the crash rules are in [Workspace recovery](workspace-recovery.md). A test that never calls `workspace_open` still drops the files at the end of the process. Notes, Clicker, unsaved editor text and the window layout are not in the store.
 - `_shell_open`, the path the next Editor or IDE window opens (or Paint, when it ends in `.paint`). Files sets it.
 
 ## The IDE's runs

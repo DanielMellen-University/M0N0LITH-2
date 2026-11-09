@@ -1,0 +1,18 @@
+version ["workspace: committed image wrong version; store held; recovered g1"] ["kept"]
+truncated ["workspace: committed image truncated; recovered g1"] ["kept"]
+extra ["workspace: committed image truncated; recovered g1"] ["kept"]
+dotdot ["workspace: no valid generation; using defaults"] true false
+duplicate ["workspace: no valid generation; using defaults"] true
+parent ["workspace: no valid generation; using defaults"] false
+cr ["workspace: no valid generation; using defaults"] true
+escape ["workspace: no valid generation; using defaults"]
+nul ["workspace: no valid generation; using defaults"] true
+short pointer ["workspace: pointer invalid; recovered g1"] ["kept"]
+zero ["workspace: pointer invalid; recovered g1"] ["kept"]
+leading zero ["workspace: pointer invalid; recovered g1"] ["kept"]
+length is text [""] 9 999999999
+empty image [""] false
+uncommitted ["workspace: ignored uncommitted g2"] ["kept"]
+partial ["workspace: ignored partial g2"] ["kept"]
+too many ["workspace: too many generation files; store held; using defaults"] true
+long path ["workspace: no valid generation; using defaults"] 241

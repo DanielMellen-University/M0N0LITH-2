@@ -3,21 +3,23 @@ M0N0LITH written in [Relic](https://github.com/DanielMellen-University/Relic).
 
 This repo is the MONOLITH 2 desktop environment: the window manager, taskbar, Start menu and the apps, all written in [Relic](https://github.com/DanielMellen-University/Relic). The language itself (host, std, self-host) lives in the Relic repo. Language changes go there, desktop and app changes go here.
 
-> Status: a 640 by 480 SDL demo, accepted on Linux on Nov 7 2026 for the behavior the walkthrough showed on all eight apps. For Snake that shown slice is launch, the board, clock-driven movement, one turn, a wall (`game over`, score 0, best 0), and `r` starting again. Pause, eating, hitting itself, and a win were not exercised in the window. Not a bootable OS, a durable disk, or a sandbox. The shell started inside the Relic repo during its M11 milestone and moved here with its history in Relic 1.0.1. It has a window model with drag, resize and minimize, a taskbar with a +N button for windows that do not fit, a Start menu, and eight apps: Clicker, Notes, Terminal, Files, Editor, IDE, Paint and Snake. Terminal, Files, the Editor, the IDE and Paint share one in-memory filesystem (`std/vfs` from Relic), and Snake keeps its best score there. The IDE is the Editor plus Ctrl+R to run a Relic program in an output pane, with input, `use` of your own files and Ctrl+E to jump to an error. The Relic pin stays at 1.0.53 (`f97ad87`). What is accepted, and what is parked, is in the [roadmap](docs/ROADMAP.md).
+> Status: a 640 by 480 SDL demo, accepted on Linux on Nov 7 2026 for the behavior the walkthrough showed on all eight apps. For Snake that shown slice is launch, the board, clock-driven movement, one turn, a wall (`game over`, score 0, best 0), and `r` starting again. Pause, eating, hitting itself, and a win were not exercised in the window. Not a bootable OS or a sandbox. The shell started inside the Relic repo during its M11 milestone and moved here with its history in Relic 1.0.1. It has a window model with drag, resize and minimize, a taskbar with a +N button for windows that do not fit, a Start menu, and eight apps: Clicker, Notes, Terminal, Files, Editor, IDE, Paint and Snake. Those file apps share one in-memory filesystem (`std/vfs` from Relic), and Snake keeps its best score there. The desktop commits that filesystem to a workspace directory so a new process sees the saved files; the crash rules are in [Workspace recovery](docs/workspace-recovery.md). Notes, Clicker and unsaved editor text are not in it. The IDE is the Editor plus Ctrl+R to run a Relic program in an output pane, with input, `use` of your own files and Ctrl+E to jump to an error. The Relic pin stays at 1.0.53 (`f97ad87`). What is accepted, and what is parked, is in the [roadmap](docs/ROADMAP.md).
 
 ## Layout
 
 ```
-shell/
+  shell/
   wm.relic        desktop model: windows, taskbar, Start menu, the apps. No drawing, runs without SDL
+  workspace.relic commits the shared vfs to a directory of generations
   desktop.relic   draws the model with std/graphics and runs the event loop
 tests/
   shell_*.relic   182 programs that drive wm.relic with fake clicks and keys; each one's output must match its .out file
 tools/
   run_golden.cmake  golden test runner (Relic's, cut down to what these tests use)
 relic/            Relic, pinned as a git submodule
-docs/
+  docs/
   SHELL.md       the model, the input calls, what an app is
+  workspace-recovery.md  the store format, crash rules and fault stages
   ARCHITECTURE.md  how the desktop, Relic and the self-hosted interpreter fit together
   KEYS.md        every key and click
   BUILDING.md    build, test, run, and moving the Relic pin
@@ -48,7 +50,7 @@ Already cloned without submodules? Run `git submodule update --init`.
 
 `-DRELIC_BUILD_HOST=ON` matters. Since Relic 1.0.7 the default Relic build is C only and makes `relicc` (the compiler to C), not the `relic` program the tests and `relic check` use. The flag builds the C++ host that provides `relic`.
 
-CMake discovers every `tests/*.relic` program and compares its standard output with the matching `.out` file (or empty output if there is no `.out`). It also runs `relic check` on both shell files, 289 tests in all. CI runs the same steps on Linux, macOS and Windows. More in [Building](docs/BUILDING.md) and [Tests](docs/TESTING.md).
+CMake discovers every `tests/*.relic` program and compares its standard output with the matching `.out` file (or empty output if there is no `.out`). It also runs `relic check` on the three shell files, 295 tests in all. CI runs the same steps on Linux, macOS and Windows. More in [Building](docs/BUILDING.md) and [Tests](docs/TESTING.md).
 
 ## Run the desktop
 
@@ -62,7 +64,7 @@ relic/build-sdl/relic shell/desktop.relic
 
 With Visual Studio the program is `relic\build-sdl\Release\relic.exe`.
 
-Checked on Nov 7 2026 on Linux with SDL 2.30, on a real display, with the mouse and the keyboard: Start, the taskbar (including +N), drag, resize, minimize and close, and all eight apps, for the behavior named in the [roadmap](docs/ROADMAP.md). Snake moved right on the clock after one Right, Down turned it, it stopped on the bottom row with `game over: r to play` at score 0 best 0, and `r` restored `arrows or space to start` at the start cells. Pause, eating, hitting itself, and a win were not part of that GUI pass. Terminal, Files and the Editor shared one file inside the session; the IDE ran, read a line, showed an error and stopped a loop at 200,000 steps; Paint saved a picture and opened it again; quitting dropped the files. macOS and Windows GUI were not tried. The model tests are not that check. See [Building](docs/BUILDING.md) and the [roadmap](docs/ROADMAP.md).
+Checked on Nov 7 2026 on Linux with SDL 2.30, on a real display, with the mouse and the keyboard: Start, the taskbar (including +N), drag, resize, minimize and close, and all eight apps, for the behavior named in the [roadmap](docs/ROADMAP.md). Snake moved right on the clock after one Right, Down turned it, it stopped on the bottom row with `game over: r to play` at score 0 best 0, and `r` restored `arrows or space to start` at the start cells. Pause, eating, hitting itself, and a win were not part of that GUI pass. Terminal, Files and the Editor shared one file inside the session; the IDE ran, read a line, showed an error and stopped a loop at 200,000 steps; Paint saved a picture and opened it again; quitting dropped the files. That pass had no workspace. On Nov 9 2026, on the same kind of Linux display (SDL 2.30), a later check used an isolated workspace directory: Terminal created and appended a file, Files renamed and deleted, the Editor saved, and the IDE saved with Ctrl+S and, after a new process, opened that same file and ran it. A failed save showed a notice and did not say saved. An interrupted partial and a truncated committed generation showed their notices and did not replace the last good files. Notes text and window layout are not part of that store. The Muse acceptance note is a specification and was not marked passed. macOS and Windows GUI were not tried. There is no fsync. The model tests are not that check. See [Building](docs/BUILDING.md) and [Workspace recovery](docs/workspace-recovery.md).
 
 ### Using it
 
@@ -76,7 +78,7 @@ Checked on Nov 7 2026 on Linux with SDL 2.30, on a real display, with the mouse 
 - **Snake:** arrows or W A S D start and turn, Space pauses, R plays again; it moves only while its window is focused, and the best score is saved in `/home/snake-best.txt`. See [Snake](docs/apps/SNAKE.md).
 - **Clicker and Notes:** a click counter (Space or Return counts, Backspace takes one off, Delete starts again and Ctrl+Z right after brings the count back) and a one-line note with a cursor (Ctrl+C, Ctrl+X and Ctrl+V with the desktop clipboard, Ctrl+Z for the last clear). See [Clicker and Notes](docs/apps/SMALL_APPS.md).
 
-On macOS, Cmd with a letter works as Ctrl with it. Escape closes the Start menu or the +N list, gives up a find or a name being typed, stops an IDE run that waits for input, drops a selection, and otherwise quits, which loses the in-memory files. All the keys are in [Keyboard and mouse](docs/KEYS.md).
+On macOS, Cmd with a letter works as Ctrl with it. Escape closes the Start menu or the +N list, gives up a find or a name being typed, stops an IDE run that waits for input, drops a selection, and otherwise quits. Saved files are in the workspace directory (`$HOME/.m0n0lith2/workspace`, or `M0N0LITH_WORKSPACE` when that is set; an empty value turns the store off). Unsaved editor text is not. All the keys are in [Keyboard and mouse](docs/KEYS.md).
 
 ## Docs
 

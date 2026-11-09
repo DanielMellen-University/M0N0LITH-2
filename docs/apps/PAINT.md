@@ -2,7 +2,7 @@
 
 A small paint app. Its window is 256 by 190: a status line, a row of color swatches, and a canvas of 60 by 36 cells, each 4 pixels square.
 
-The status line reads `Paint [status] color tool file` (the tool is the brush size, `fill`, `line 2`, `rect 2`, `oval 2`, `filled rect` or `filled oval`), for example `Paint [edited] red 2 picture.paint`. The status is `new file`, `open`, `edited`, `saved`, `not a picture`, or why a save failed.
+The status line reads `Paint [status] color tool file` (the tool is the brush size, `fill`, `line 2`, `rect 2`, `oval 2`, `filled rect` or `filled oval`), for example `Paint [edited] red 2 picture.paint`. The status is `new file`, `open`, `edited`, `saved`, `not a picture`, or why a save failed. A workspace commit that fails leaves that failure in the status instead of `saved`. The `.paint` file is part of the shared vfs. See [Workspace recovery](../workspace-recovery.md).
 
 ## Drawing
 

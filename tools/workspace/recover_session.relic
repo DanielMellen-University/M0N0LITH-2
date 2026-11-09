@@ -1,0 +1,24 @@
+# Fourth process: the torn pointer must not drop the last good generation.
+use ../../shell/wm
+use std/os
+use std/vfs
+
+fun type_line(t, line)
+    for ch in line
+        if ch == " "
+            wm.terminal.on_key(t, "space")
+        else
+            wm.terminal.on_key(t, ch)
+    wm.terminal.on_key(t, "return")
+
+let args = os.args()
+if len(args) != 1
+    fail("recover_session needs the workspace directory")
+wm.workspace_open(args[0])
+print("notice", [wm.workspace_notice()])
+let t = wm.terminal.init()
+type_line(t, "cat note.txt")
+type_line(t, "cat lost.txt")
+for line in t.buf
+    print(line)
+print("lost", vfs.exists(t.fs, "/home/lost.txt"))

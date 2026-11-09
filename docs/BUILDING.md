@@ -44,6 +44,8 @@ relic/build-sdl/relic shell/desktop.relic
 
 `-DRELIC_SDL=ON` turns on the C++ host as well. With Visual Studio the program is `relic\build-sdl\Release\relic.exe`. A `relic` built without SDL prints `this relic was built without graphics; rebuild with -DRELIC_SDL=ON` and exits.
 
+The window commits the shared files to `$HOME/.m0n0lith2/workspace` (or `$USERPROFILE/.m0n0lith2/workspace`). Set `M0N0LITH_WORKSPACE` to another directory, or to an empty value to keep the old one-run behavior. The rules are in [Workspace recovery](workspace-recovery.md).
+
 ## Moving to a newer Relic
 
 Do not move the pin as a matter of course. As of the Nov 7 2026 acceptance it stays at 1.0.53 (`f97ad87`) unless a defect in that accepted scope cannot be fixed here. When a move is actually needed:

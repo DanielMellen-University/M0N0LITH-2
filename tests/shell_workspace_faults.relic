@@ -1,0 +1,52 @@
+# Each fault stops one save. The next open installs the previous generation
+# and says so. The Editor does not say saved when the store refused the write.
+use ../shell/wm
+use std/files
+use std/vfs
+
+fun wipe(path)
+    try
+        files.remove_tree(path)
+    catch e
+        none
+
+fun type_line(t, line)
+    for ch in line
+        if ch == " "
+            wm.terminal.on_key(t, "space")
+        else
+            wm.terminal.on_key(t, ch)
+    wm.terminal.on_key(t, "return")
+
+fun scenario(dir, stage)
+    wipe(dir)
+    wm.workspace_open(dir)
+    let t = wm.terminal.init()
+    type_line(t, "echo one > a.txt")
+    wm.workspace_fault(stage)
+    type_line(t, "echo two > b.txt")
+    print(stage, "save", [wm.workspace_notice()])
+    print(stage, "memory", vfs.exists(t.fs, "/home/b.txt"), [vfs.read(t.fs, "/home/a.txt")])
+    vfs.write(t.fs, "/home/a.txt", "DIRTY")
+    wm.workspace_open(dir)
+    print(stage, "load", [wm.workspace_notice()])
+    print(stage, "disk", vfs.exists(t.fs, "/home/b.txt"), [vfs.read(t.fs, "/home/a.txt")])
+    wipe(dir)
+
+for stage in ["partial-generation", "full-uncommitted", "staged-pointer", "torn-pointer", "corrupt-committed"]
+    scenario("ws-fault", stage)
+
+wipe("ws-edit")
+wm.workspace_open("ws-edit")
+let t = wm.terminal.init()
+type_line(t, "echo one > a.txt")
+wm.workspace_fault("partial-generation")
+let e = wm.editor.init()
+wm.editor.on_key(e, "x")
+wm.editor.on_key(e, "ctrl+s")
+print("editor", e.status, [vfs.read(e.fs, e.path)])
+wm.workspace_open("ws-edit")
+let e2 = wm.editor.init()
+print("editor load", [wm.workspace_notice()], [e2.text])
+wipe("ws-edit")
+wipe("ws-fault")

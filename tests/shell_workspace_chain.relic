@@ -1,0 +1,233 @@
+# Recovery follows the committed generation, not the highest file number.
+# A later save must not delete that backup because a failed save left a gap.
+use ../shell/wm
+use std/files
+use std/vfs
+
+fun wipe(path)
+    try
+        files.remove_tree(path)
+    catch e
+        none
+
+fun type_line(t, line)
+    for ch in line
+        if ch == " "
+            wm.terminal.on_key(t, "space")
+        else
+            wm.terminal.on_key(t, ch)
+    wm.terminal.on_key(t, "return")
+
+fun image(body)
+    return "M2WS1\n" + body + ".\n"
+
+fun prepare(dir)
+    wipe(dir)
+    files.make_dir(dir)
+
+fun read_a()
+    return vfs.read(wm.terminal.init().fs, "/home/a.txt")
+
+let old = image("D /home\nF /home/a.txt old\n")
+let new = image("D /home\nF /home/a.txt new\n")
+
+# Corrupt g2 must not install newer uncommitted g3.
+prepare("ws-chain")
+files.write("ws-chain/g1.m2ws", old)
+files.write("ws-chain/g2.m2ws", "M2WS1\n")
+files.write("ws-chain/g3.m2ws", new)
+files.write("ws-chain/COMMITTED", "g2\n")
+wm.workspace_open("ws-chain")
+print("not newer", [wm.workspace_notice()], [read_a()], files.exists("ws-chain/g3.m2ws"))
+
+# partial g2, retry, then corrupt the new commit: g1 is still the backup.
+prepare("ws-chain")
+wm.workspace_open("ws-chain")
+let t = wm.terminal.init()
+type_line(t, "echo one > a.txt")
+wm.workspace_fault("partial-generation")
+type_line(t, "echo two > a.txt")
+wm.workspace_open("ws-chain")
+type_line(t, "echo two > a.txt")
+let retry_ptr = files.read("ws-chain/COMMITTED")
+let retry_name = slice(retry_ptr, 0, len(retry_ptr) - 1)
+print("retry files", files.exists("ws-chain/g1.m2ws"), files.exists("ws-chain/g2.m2ws"), [retry_ptr])
+files.write("ws-chain/" + retry_name + ".m2ws", "M2WS1\n")
+wm.workspace_open("ws-chain")
+print("after corrupt", [wm.workspace_notice()], [read_a()], files.exists("ws-chain/g1.m2ws"))
+
+# A full uncommitted g2 must not become the backup in place of g1.
+prepare("ws-chain")
+wm.workspace_open("ws-chain")
+t = wm.terminal.init()
+type_line(t, "echo one > a.txt")
+wm.workspace_fault("full-uncommitted")
+type_line(t, "echo two > a.txt")
+wm.workspace_open("ws-chain")
+type_line(t, "echo two > a.txt")
+let again = files.read("ws-chain/COMMITTED")
+print("uncommitted backup", files.exists("ws-chain/g1.m2ws"), files.exists("ws-chain/g2.m2ws"), [again])
+files.write("ws-chain/" + slice(again, 0, len(again) - 1) + ".m2ws", "M2WS1\n")
+wm.workspace_open("ws-chain")
+print("uncommitted corrupt", [wm.workspace_notice()], [read_a()])
+
+# Torn pointer: META names g1, and a newer complete g2 is not the commit.
+prepare("ws-chain")
+files.write("ws-chain/g1.m2ws", old)
+files.write("ws-chain/g2.m2ws", new)
+files.write("ws-chain/COMMITTED", "x")
+files.write("ws-chain/META", "committed g1\nprevious none\n")
+wm.workspace_open("ws-chain")
+print("torn meta", [wm.workspace_notice()], [read_a()])
+
+# Torn pointer, two valid files, no META: do not promote one, and do not delete them.
+prepare("ws-chain")
+files.write("ws-chain/g1.m2ws", old)
+files.write("ws-chain/g2.m2ws", new)
+files.write("ws-chain/COMMITTED", "x")
+wm.workspace_open("ws-chain")
+print("torn ambiguous", [wm.workspace_notice()], vfs.exists(wm.terminal.init().fs, "/home/a.txt"))
+t = wm.terminal.init()
+type_line(t, "echo hi > z.txt")
+print("torn kept", files.exists("ws-chain/g1.m2ws"), files.exists("ws-chain/g2.m2ws"), files.exists("ws-chain/g3.m2ws"), [files.read("ws-chain/COMMITTED")])
+
+# Wrong version stays on disk through later writes until an explicit release.
+prepare("ws-chain")
+files.write("ws-chain/g1.m2ws", "M2WS9\n.\n")
+files.write("ws-chain/COMMITTED", "g1\n")
+wm.workspace_open("ws-chain")
+print("version held", [wm.workspace_notice()])
+t = wm.terminal.init()
+type_line(t, "echo hi > a.txt")
+type_line(t, "echo more > b.txt")
+print("version files", files.exists("ws-chain/g2.m2ws"), [files.read("ws-chain/COMMITTED")], [files.read("ws-chain/g1.m2ws")])
+let e = wm.editor.init()
+wm.editor.on_key(e, "ctrl+s")
+print("version editor", e.status)
+wm.workspace_release()
+type_line(t, "echo hi > a.txt")
+let released_ptr = files.read("ws-chain/COMMITTED")
+let released_body = files.read("ws-chain/" + slice(released_ptr, 0, len(released_ptr) - 1) + ".m2ws")
+print("version released", [released_ptr], slice(released_body, 0, 5) == "M2WS1", files.exists("ws-chain/g1.m2ws"))
+
+# Too many names: held, and a write does not add a generation.
+prepare("ws-chain")
+for n in 1..34
+    files.write("ws-chain/g" + str(n) + ".m2ws.partial", "M2WS1\n")
+wm.workspace_open("ws-chain")
+let before = len(files.list("ws-chain"))
+t = wm.terminal.init()
+type_line(t, "echo hi > a.txt")
+print("too many", [wm.workspace_notice()], len(files.list("ws-chain")) == before, files.exists("ws-chain/COMMITTED"))
+
+# A path that was requested and could not be opened is not "saved".
+files.write("ws-chain-file", "x")
+wm.workspace_open("ws-chain-file")
+e = wm.editor.init()
+wm.editor.on_key(e, "ctrl+s")
+let ide = wm.ide.init()
+wm.ide.on_key(ide, "ctrl+s")
+let paint = wm.paint_app.init()
+wm.paint_app.on_key(paint, "ctrl+s")
+print("unavailable", e.status, ide.status, paint.status)
+
+# Empty path is the session-only opt-out. "saved" means the vfs, and no store is opened.
+wm.workspace_open("")
+e = wm.editor.init()
+wm.editor.on_key(e, "x")
+wm.editor.on_key(e, "ctrl+s")
+print("opt out", e.status, wm.workspace_enabled())
+
+# IDE Ctrl+S is the same commit as the Editor, and a fault does not say saved.
+prepare("ws-chain")
+wm.workspace_open("ws-chain")
+t = wm.terminal.init()
+type_line(t, "echo start > run.relic")
+let f = wm.files_app.init()
+wm.files_app.on_key(f, "r")
+wm.files_app.on_key(f, "return")
+ide = wm.ide.init()
+wm.ide.on_key(ide, "!")
+wm.ide.on_key(ide, "ctrl+s")
+print("ide save", ide.status, [vfs.read(ide.fs, ide.path)])
+wm.workspace_open("ws-chain")
+f = wm.files_app.init()
+wm.files_app.on_key(f, "r")
+wm.files_app.on_key(f, "return")
+let ide2 = wm.ide.init()
+print("ide reload", [ide2.text])
+wm.workspace_fault("partial-generation")
+wm.ide.on_key(ide2, "z")
+wm.ide.on_key(ide2, "ctrl+s")
+print("ide fault", ide2.status)
+
+# 1. Do not reuse g2. A failed full-uncommitted write must not become the file
+# COMMITTED already names.
+prepare("ws-chain")
+files.write("ws-chain/g1.m2ws", old)
+files.write("ws-chain/g2.m2ws", "M2WS1\n")
+files.write("ws-chain/COMMITTED", "g2\n")
+wm.workspace_open("ws-chain")
+wm.workspace_fault("full-uncommitted")
+t = wm.terminal.init()
+type_line(t, "echo failed > a.txt")
+print("id reuse save", [wm.workspace_notice()], [files.read("ws-chain/g2.m2ws")], [files.read("ws-chain/COMMITTED")])
+wm.workspace_open("ws-chain")
+print("id reuse load", [wm.workspace_notice()], [read_a()])
+
+# 2. Pointer publish fails (COMMITTED.next is a directory). META must stay on
+# g1. A later torn pointer must not install that failed generation.
+prepare("ws-chain")
+wm.workspace_open("ws-chain")
+t = wm.terminal.init()
+type_line(t, "echo one > a.txt")
+files.make_dir("ws-chain/COMMITTED.next")
+type_line(t, "echo two > a.txt")
+print("meta ahead save", [wm.workspace_notice()], [files.read("ws-chain/COMMITTED")], [files.read("ws-chain/META")])
+wm.workspace_fault("torn-pointer")
+type_line(t, "echo three > a.txt")
+print("meta ahead torn", [files.read("ws-chain/COMMITTED")], [files.read("ws-chain/META")])
+wm.workspace_open("ws-chain")
+print("meta ahead load", [wm.workspace_notice()], [read_a()])
+
+# Stale META must not beat a readable COMMITTED.
+prepare("ws-chain")
+files.write("ws-chain/g1.m2ws", old)
+files.write("ws-chain/g2.m2ws", new)
+files.write("ws-chain/COMMITTED", "g1\n")
+files.write("ws-chain/META", "committed g2\nprevious none\n")
+wm.workspace_open("ws-chain")
+print("stale meta", [read_a()], [wm.workspace_notice()])
+
+# 3. Wrong version named by META, pointer torn: hold, and do not overwrite g1.
+prepare("ws-chain")
+files.write("ws-chain/g1.m2ws", "M2WS9\n.\n")
+files.write("ws-chain/COMMITTED", "x")
+files.write("ws-chain/META", "committed g1\nprevious none\n")
+wm.workspace_open("ws-chain")
+print("version torn", [wm.workspace_notice()], vfs.exists(wm.terminal.init().fs, "/home/welcome.txt"))
+t = wm.terminal.init()
+type_line(t, "echo hi > a.txt")
+print("version torn bytes", [files.read("ws-chain/g1.m2ws")], files.exists("ws-chain/g2.m2ws"), [files.read("ws-chain/COMMITTED")])
+
+# COMMITTED can publish while META.next is a directory. That is a committed
+# save with a degraded backup, not a failed commit, and the next open loads it.
+prepare("ws-chain")
+wm.workspace_open("ws-chain")
+t = wm.terminal.init()
+type_line(t, "echo one > a.txt")
+files.make_dir("ws-chain/META.next")
+let fmeta = wm.files_app.init()
+wm.files_app.on_key(fmeta, "a")
+wm.files_app.on_key(fmeta, "return")
+let emeta = wm.editor.init()
+wm.editor.on_key(emeta, "x")
+wm.editor.on_key(emeta, "ctrl+s")
+print("meta degrade status", emeta.status)
+print("meta degrade notice", [wm.workspace_notice()])
+print("meta degrade pointer", [files.read("ws-chain/COMMITTED")])
+print("meta degrade meta", [files.read("ws-chain/META")])
+wm.workspace_open("ws-chain")
+print("meta degrade reopen", [read_a()], [files.read("ws-chain/COMMITTED")])
+wipe("ws-chain")
+files.remove("ws-chain-file")
