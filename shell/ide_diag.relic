@@ -1,0 +1,141 @@
+# shell/ide_diag.relic: compile and runtime errors as a list the IDE can show
+# and jump from. Relic's own tools print "path:line:col: error: message"
+# (selfhost/errfmt). The pane shows "path:line:col message". Parsing that text
+# is how a click finds the line and column; the same functions turn a lexer,
+# parser or interpreter error into one list entry.
+use std/strings
+
+# The part of a diagnostic line after the column, or none when it is not one.
+# " error:" and " warning:" are the words the toolchain prints. A warning keeps
+# that word so the list still says what kind it was. Anything else after a colon
+# or a space is the message itself.
+fun _message(rest)
+    if strings.starts_with(rest, ": error:")
+        return strings.trim(slice(rest, 8, len(rest)))
+    if strings.starts_with(rest, ": warning:")
+        return "warning: " + strings.trim(slice(rest, 10, len(rest)))
+    if strings.starts_with(rest, ": ")
+        return strings.trim(slice(rest, 2, len(rest)))
+    if rest == "" or strings.starts_with(rest, " ")
+        return strings.trim(rest)
+    return none
+
+# A whole number at text[i], and the index after it. At most 9 digits, so a
+# huge column cannot overflow an int. none when there is no digit.
+fun _number(text, i)
+    let n = 0
+    let k = 0
+    let len_text = len(text)
+    while i < len_text and k < 9 and text[i] >= "0" and text[i] <= "9"
+        n = n * 10 + (ord(text[i]) - 48)
+        i = i + 1
+        k = k + 1
+    if k == 0
+        return none
+    return [n, i]
+
+# One diagnostic from one line, or none. The file may contain colons (a Windows
+# path), so the line and column are the first ":digits:digits" that is followed
+# by a message. A source line, a caret and ordinary output do not match.
+fun parse_line(text)
+    if text == none
+        return none
+    text = strings.trim(text)
+    let n = len(text)
+    let i = 0
+    while i < n
+        if text[i] == ":"
+            let line = _number(text, i + 1)
+            if line != none and line[1] < n and text[line[1]] == ":"
+                let col = _number(text, line[1] + 1)
+                if col != none
+                    let msg = _message(slice(text, col[1], n))
+                    let file = slice(text, 0, i)
+                    if msg != none and file != ""
+                        return {file: file, line: line[0], col: col[0], msg: msg}
+            i = i + 1
+        else
+            i = i + 1
+    return none
+
+# Every diagnostic in a block of toolchain text, in order. Blank lines, the
+# source line and the caret under it are skipped.
+fun parse_text(text)
+    let out = []
+    if text == none or text == ""
+        return out
+    let lines = strings.split(text, "\n")
+    for line in lines
+        if len(line) > 0 and line[len(line) - 1] == chr(13)
+            line = slice(line, 0, len(line) - 1)
+        let d = parse_line(line)
+        if d != none
+            append(out, d)
+    return out
+
+# A lexer, parser or interpreter error, as one list entry. path is the file
+# being edited, used when the error names no file. A column or line below 1
+# (the step limit reports 0) is brought up to 1 so a jump still lands somewhere.
+fun from_err(err, path)
+    if err == none or not ("msg" in err) or not ("line" in err)
+        return none
+    let file = path
+    if "file" in err and err.file != ""
+        file = err.file
+    let line = err.line
+    if line < 1
+        line = 1
+    let col = 1
+    if "col" in err
+        col = err.col
+    if col < 1
+        col = 1
+    return {file: file, line: line, col: col, msg: err.msg}
+
+# The pane's line for one entry: "file:line:col message".
+fun format(d)
+    if d.msg == ""
+        return "{d.file}:{d.line}:{d.col}"
+    return "{d.file}:{d.line}:{d.col} {d.msg}"
+
+# True when a click on this entry should move the cursor in the buffer. An
+# error in a module names that module's path, and the buffer is a different file.
+fun same_file(path, file)
+    if file == none or file == ""
+        return true
+    return file == path
+
+# Where line (1-based) sits in text: [start, end, landed]. end is the newline
+# or the end of the text. A line past the last one lands on the last line.
+fun line_bounds(text, line)
+    if line < 1
+        line = 1
+    let pos = 0
+    let n = len(text)
+    let cur = 1
+    while cur < line and pos < n
+        let end = pos
+        while end < n and text[end] != "\n"
+            end = end + 1
+        if end >= n
+            break
+        pos = end + 1
+        cur = cur + 1
+    let end = pos
+    while end < n and text[end] != "\n"
+        end = end + 1
+    return [pos, end, cur]
+
+# The cursor index for a 1-based line and column. The column counts characters,
+# as Relic's errors do. Past the end of the line it stays on that line.
+fun cursor_at(text, line, col)
+    let b = line_bounds(text, line)
+    let at = b[0]
+    let end = b[1]
+    if col < 1
+        col = 1
+    let c = 1
+    while c < col and at < end
+        at = at + 1
+        c = c + 1
+    return at
