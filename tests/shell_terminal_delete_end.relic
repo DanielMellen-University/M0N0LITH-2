@@ -1,0 +1,10 @@
+# Delete at the end of the line adds nothing and removes nothing.
+use ../shell/wm
+let t = wm.terminal.init()
+for c in "ab"
+    wm.terminal.on_key(t, c)
+wm.terminal.on_key(t, "delete")
+print([t.input], t.left)
+wm.terminal.on_key(t, "left")
+wm.terminal.on_key(t, "delete")
+print([t.input], t.left)
