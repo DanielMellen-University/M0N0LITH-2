@@ -1,0 +1,5 @@
+["/home> touch /tmp/gone.txt"]
+["/home> rm /tmp/gone.txt"]
+["/home> cat /tmp/gone.txt", "cat: not found: /tmp/gone.txt"]
+["/home> ls /tmp/gone.txt", "ls: not found: /tmp/gone.txt"]
+gone true
