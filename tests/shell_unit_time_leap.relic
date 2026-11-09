@@ -1,0 +1,7 @@
+# format_time keeps 29 February in leap years and skips it in 2100.
+use ../shell/wm
+print(wm.format_time(68169600))
+print(wm.format_time(68256000))
+print(wm.format_time(951696000))
+print(wm.format_time(951868800))
+print(wm.format_time(4107456000))
