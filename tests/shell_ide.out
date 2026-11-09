@@ -17,14 +17,14 @@ let b = 2
 print(a + "x")
 print("after")
 _
--- output (ctrl+e: to line 3) --
-line 3: cannot add an int and a string
-cursor at 20 ["print"]
-["line 1: unclosed '('"] 1
+-- output (ctrl+e: line 3 col 9) --
+/home/hello.relic:3:9 cannot add an int
+cursor at 28 ["+ \"x\""]
+["/home/hello.relic:1:6 unclosed '('"] 1
 ran ["caught boom"] none
 error ["stopped: the program ran too long (200000 steps)"]
-error ["before", "line 3: os.exit(): not available here"]
-error ["line 2: files.write(): not available here"]
+error ["before", "/home/hello.relic:3:8 os.exit(): not available here"]
+error ["/home/hello.relic:2:12 files.write(): not available here"]
 ran 200 0100 0299
 -- long output [ran] none
 IDE [ran] /home/hello.relic
@@ -40,10 +40,10 @@ _
 0298
 0299
 saved ["p"]
-error ["line 1: 'p' is not defined"]
+error ["/home/hello.relic:1:1 'p' is not defined"]
 ran ["hello ANN"]
-error ["line 1: cannot find module 'nothere' (no file nothere.relic)"] 1
-error ["/home/bad.relic line 1: unclosed '('"] none
+error ["/home/hello.relic:1:1 cannot find module 'nothere' (no file nothere.relic)"] 1
+error ["/home/bad.relic:1:10 unclosed '('"] none
 waiting for input []
 -- waiting [saved, waiting for input] none
 IDE [saved, waiting for input] ...ic
@@ -57,7 +57,7 @@ while true
     print("got", l)
 print("bye")
 _
--- input (return: send, esc: stop) --
+[stop] return: send, esc: stop
 name? Ann _B
 waiting for input ["name? Ann B", "hi Ann B"] [true]
 ran ["name? Ann B", "hi Ann B", "1", "got 1", "end", "bye"]

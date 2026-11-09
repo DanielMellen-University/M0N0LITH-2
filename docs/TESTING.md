@@ -15,7 +15,7 @@ One test: `ctest --test-dir build -C Release -R golden_shell_ide`. Or run it str
 
 ## How they are checked
 
-CMake finds every `tests/*.relic` and adds it as `golden_<name>`. `tools/run_golden.cmake` runs it from `tests/`, and it passes when it exits with 0 and its standard output matches `<name>.out` exactly (Windows line endings are ignored). A test with no `.out` file must print nothing. One more test, `check_shell`, runs `relic check` on `wm.relic`, `workspace.relic` and `desktop.relic`, which catches syntax errors and undefined names in the drawing code no test runs. That is 295 tests in all, and CI runs them on Linux, macOS and Windows. Four of the golden programs and `workspace_restart` cover the store. `workspace_restart` is not a golden file: it runs four relic processes against one directory.
+CMake finds every `tests/*.relic` and adds it as `golden_<name>`. `tools/run_golden.cmake` runs it from `tests/`, and it passes when it exits with 0 and its standard output matches `<name>.out` exactly (Windows line endings are ignored). A test with no `.out` file must print nothing. One more test, `check_shell`, runs `relic check` on `wm.relic`, `workspace.relic`, `desktop.relic` and `ide_diag.relic`, which catches syntax errors and undefined names in the drawing code no test runs. That is 297 tests in all, and CI runs them on Linux, macOS and Windows. Four of the golden programs and `workspace_restart` cover the store. `workspace_restart` is not a golden file: it runs four relic processes against one directory.
 
 None of them opens the SDL window. A passing run does not prove what the desktop draws. The Linux GUI pass, and what it did not try, is in the [roadmap](ROADMAP.md#accepted-nov-7-2026).
 
@@ -301,15 +301,17 @@ Write `tests/shell_<topic>.relic`, run it, read its output, and save that as `te
 
 | Test | What it covers |
 |---|---|
-| `shell_ide` | IDE: run with Ctrl+R, output pane, error line and Ctrl+E, stopped loops, refused host calls, `use` of desktop files, input lines, Ctrl+Backspace there, Esc or Ctrl+C to stop, F5 like Ctrl+R; Ctrl+Return running like Ctrl+R; the input line's cursor (Left, Right, Home, End, Delete), Return sending the whole line, word keys and Ctrl+K, a wide line keeping the cursor in view |
+| `shell_ide` | IDE: run with Ctrl+R, output pane, an error as `file:line:col message` and Ctrl+E on that column, stopped loops, refused host calls, `use` of desktop files, input lines, Ctrl+Backspace there, Esc or Ctrl+C to stop, F5 like Ctrl+R; Ctrl+Return running like Ctrl+R; the input line's cursor (Left, Right, Home, End, Delete), Return sending the whole line, word keys and Ctrl+K, a wide line keeping the cursor in view |
 | `shell_ide_comment` | Ctrl+/ puts `# ` in after the leading spaces and takes it (or a bare `#`) out, the cursor staying on its character, one undo step each; the Editor ignores it; with a selection, every line it is on in one step, not the line after a Ctrl+L |
 | `shell_ide_comment_indent` | uncommenting keeps a cursor that is still in the indent on that space, and a cursor on a later character stays on it |
 | `shell_ide_comment_blank` | a selection of only blank lines is not an undo step and does not mark the buffer edited; a blank line with no selection still gets a comment |
-| `shell_ide_error_click` | IDE: a click on the error line or on the pane header goes to the error's line, as Ctrl+E does; a click on a plain output line moves nothing |
+| `shell_ide_diag` | parsing toolchain errors (`file:line:col: error: message`, warnings, a Windows path) into `file:line:col message`, and the cursor index for a line and column |
+| `shell_ide_error_click` | IDE: a click on the error row or on the pane header goes to the error's line and column, as Ctrl+E does; a click on a plain output line moves nothing |
 | `shell_ide_input_paste` | IDE input: Ctrl+V adds the first line of the clipboard only, and with an empty clipboard it adds nothing |
 | `shell_ide_denied` | IDE: refused host calls beyond exit and writing: sleeping, removing, renaming and making folders, and opening a graphics window; a refused remove leaves the file, a refused make_dir makes nothing |
 | `shell_ide_module_saved` | IDE: a `use` of another file reads it as last saved; an unsaved edit in another window changes nothing until it is saved |
-| `shell_ide_syntax_jump` | IDE: Ctrl+E goes to a syntax error's line too, and after a good run, when there is no error, Ctrl+E moves nothing |
+| `shell_ide_jump` | IDE: a runtime error and a syntax error jump to the column, the error line is highlighted, a module error does not move the cursor, and clicking `[stop]` ends a waiting run while a click past it does not |
+| `shell_ide_syntax_jump` | IDE: Ctrl+E goes to a syntax error's column too, and after a good run, when there is no error, Ctrl+E moves nothing |
 | `shell_ide_module_error` | an error inside a module the program used shows that module's path and line, and Ctrl+E leaves the cursor where it was |
 | `shell_ide_page_pane` | Page Down moves by the editor rows above the output pane, and Page Up comes back |
 | `shell_ide_disk_keys` | Ctrl+R, F5, Ctrl+E, Ctrl+/ and a key typed while a run waits cancel the changed-on-disk warning; two Ctrl+S presses with nothing between them still overwrite |
@@ -325,7 +327,7 @@ Write `tests/shell_<topic>.relic`, run it, read its output, and save that as `te
 | `shell_ide_syntax_stop` | a syntax error is reported and the following line does not run |
 | `shell_ide_runtime_keep` | lines printed before a runtime error stay in the pane |
 | `shell_ide_hash_text` | a # inside a string is not a comment, and Ctrl+/ comments that whole line |
-| `shell_ide_error_top` | Ctrl+E on an error in line 1 puts the cursor at the start |
+| `shell_ide_error_top` | Ctrl+E on an error in line 1 puts the cursor on that column |
 | `shell_ide_math` | use std/math loads Relic's math and abs runs |
 | `shell_ide_input_home` | Home and End move the cursor in the input line |
 | `shell_ide_input_word` | Ctrl+Left in the input line moves to the start of the word |

@@ -10,7 +10,8 @@ Ctrl+R (or F5, or Ctrl+Return) runs the text in the buffer, saved or not. The pr
 
 - `print` and `eprint` lines go to the output pane. The pane shows the last 6 lines and keeps the last 200. Page Up and Page Down move by the program lines on show above that pane, not by the rows the pane takes.
 - The status becomes `ran`, `error`, `waiting for input` or `stopped`.
-- An error in the program shows as `line L: message`, and the pane's header says `ctrl+e: to line L`. Ctrl+E puts the cursor at the start of that line, and so does a click on the error or on that header. An error inside a module the program used shows that module's path and line instead, and Ctrl+E does nothing then.
+- A compile error (the text does not lex or parse) or a runtime error is one row of that pane, `file:line:col message`, the same place Relic's tools report (`file:line:col: error: message`). The header reads `ctrl+e: line L col C`. Ctrl+E puts the cursor on that column, and so does a click on the error row or on that header. The error's line is highlighted in the editor. An error inside a module the program used names that module's path, and Ctrl+E does nothing then. A click on a printed line that is not an error moves nothing.
+- While a run waits for input, the pane's header begins with `[stop]`. Clicking those six characters stops the run, as Escape and Ctrl+C do. The program itself runs between frames, so a loop that has not asked for input cannot be clicked until it stops or waits.
 - Ctrl+/ comments out the line the cursor is on, putting `# ` after its leading spaces, or takes a `#` (and the space after it) back off. It is one undo step, and the cursor stays on the same character, including a cursor still in the indent before the `#`. With a selection it does every line the selection is on (not one it only ends at the start of, as after Ctrl+L): if they are all comments already (blank lines aside) it takes the `#` off each, else it puts one on each, in one undo step, and the lines stay selected. A selection of only blank lines changes nothing and is not an undo step.
 
 ## Modules
@@ -19,7 +20,7 @@ Ctrl+R (or F5, or Ctrl+Return) runs the text in the buffer, saved or not. The pr
 
 ## Input
 
-`os.read_line` and `os.prompt` pause the run. The pane's header becomes `-- input (return: send, esc: stop) --` and its last line is the prompt and what you have typed. A line wider than the window scrolls to keep the cursor in view.
+`os.read_line` and `os.prompt` pause the run. The pane's header becomes `[stop] return: send, esc: stop` and its last line is the prompt and what you have typed. A line wider than the window scrolls to keep the cursor in view. Clicking `[stop]` stops the run.
 
 | Input | What it does |
 |---|---|
@@ -45,4 +46,4 @@ Ctrl+S saves the program and the run keeps waiting; the status reads `saved, wai
 
 ## In the code
 
-`ide` in `shell/wm.relic`, `_ide_*`, using the hooks Relic 1.0.44 and 1.0.45 added to `selfhost/interp` (`rt.out`, `rt.steps`, `rt.denied`, `rt.load`, `rt.input` and `interp.resume`). Design calls are in [the roadmap](../ROADMAP.md). Tests: the `shell_ide*` goldens, `shell_editor_clipboard_ide`, and the Editor's tests, since the IDE shares its keys.
+`ide` in `shell/wm.relic`, `_ide_*`, and `shell/ide_diag.relic` for the error list (`file:line:col message`), the jump to a column, and parsing the toolchain's `file:line:col: error: message` lines. The run uses the hooks Relic 1.0.44 and 1.0.45 added to `selfhost/interp` (`rt.out`, `rt.steps`, `rt.denied`, `rt.load`, `rt.input` and `interp.resume`). Design calls are in [the roadmap](../ROADMAP.md). Tests: `shell_ide_diag` for parsing and navigation, the other `shell_ide*` goldens, `shell_editor_clipboard_ide`, and the Editor's tests, since the IDE shares its keys.

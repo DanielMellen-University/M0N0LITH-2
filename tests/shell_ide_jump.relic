@@ -1,0 +1,94 @@
+# IDE: a compile error and a runtime error are a list of "file:line:col message".
+# Ctrl+E and a click put the cursor on that column. The error line is highlighted.
+# [stop] ends a run that is waiting; a click past it does not.
+use ../shell/wm
+use std/strings
+use std/vfs
+
+let d = wm.new_desktop(640, 480, wm.default_apps())
+let i = wm.launch(d, wm.ide)
+let s = i.state
+s.path = "/home/hello.relic"
+
+fun cursor()
+    return len(s.text) - s.back
+fun at(w, r, col)
+    return [w.x + wm.text_left + col * wm.char_width + 3, w.y + wm.title_height + wm.text_top + r * wm.line_height + 5]
+fun click_at(w, r, col)
+    let p = at(w, r, col)
+    wm.click(d, p[0], p[1])
+fun row_of(w, prefix)
+    let shown = wm.visible_lines(w)
+    for r in 0..len(shown)
+        if strings.starts_with(shown[r], prefix)
+            return r
+    return -1
+
+# runtime: the column is the operator, and the line is highlighted
+s.text = "print(\"first\")\nlet a = 1\nprint(a + \"x\")\nprint(\"after\")\n"
+wm.key(d, "ctrl+r")
+print("runtime", s.status, s.err_line, s.err_col)
+print(s.diags[0].file, s.diags[0].line, s.diags[0].col, [s.diags[0].msg])
+print(s.out)
+let lines = wm.visible_lines(i)
+let boxes = wm.error_boxes(i)
+print("highlight", len(boxes) > 0, len(s.err_marks))
+let before = cursor()
+wm.key(d, "ctrl+e")
+let pos = cursor()
+print("ctrl+e", pos, [slice(s.text, pos, pos + 1)], pos != before)
+wm.visible_lines(i)
+print("highlight after jump", len(wm.error_boxes(i)) > 0)
+# a click on the error row goes to the same column; a plain line does not
+wm.key(d, "ctrl+end")
+let endp = cursor()
+let err = "/home/hello.relic:{s.err_line}:{s.err_col} "
+let header = "-- output (ctrl+e: line {s.err_line} col {s.err_col}) --"
+click_at(i, row_of(i, err), 4)
+print("error click", cursor(), cursor() == pos)
+wm.key(d, "ctrl+end")
+click_at(i, row_of(i, header), 1)
+print("header click", cursor() == pos)
+wm.key(d, "ctrl+end")
+click_at(i, row_of(i, "first"), 0)
+print("plain click", cursor() == endp)
+
+# syntax: the following line does not run, and the cursor lands on the '('
+s.text = "print(\"ok\")\nprint(2\nprint(\"no\")\n"
+s.back = 0
+wm.key(d, "ctrl+r")
+print("syntax", s.status, s.out, s.err_line, s.err_col)
+wm.key(d, "ctrl+e")
+pos = cursor()
+print("syntax cursor", pos, [slice(s.text, pos, pos + 1)])
+wm.visible_lines(i)
+print("syntax highlight", len(wm.error_boxes(i)) > 0)
+
+# a module error is listed with that file, and the cursor stays
+vfs.write(s.fs, "/home/bad.relic", "fun hello(\n")
+s.path = "/home/main.relic"
+s.text = "use bad\n"
+s.back = 0
+wm.key(d, "ctrl+r")
+print("module", s.status, s.out, s.err_line)
+before = cursor()
+wm.key(d, "ctrl+e")
+print("module cursor", cursor() == before)
+wm.visible_lines(i)
+print("module highlight", len(wm.error_boxes(i)))
+
+# [stop] ends a waiting run; a click to the right of it does not
+s.path = "/home/hello.relic"
+s.text = "use std/os\nprint(os.read_line())\n"
+s.back = 0
+wm.key(d, "ctrl+r")
+lines = wm.visible_lines(i)
+let stop = -1
+for r in 0..len(lines)
+    if len(lines[r]) >= 6 and slice(lines[r], 0, 6) == "[stop]"
+        stop = r
+print("waiting", s.status, stop, lines[stop])
+click_at(i, stop, 10)
+print("miss", s.status, s.run != none)
+click_at(i, stop, 1)
+print("stop", s.status, s.run, s.out[len(s.out) - 1])

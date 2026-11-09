@@ -1,4 +1,4 @@
-# Ctrl+E on an error in line 1 puts the cursor at the start.
+# Ctrl+E on an error in line 1 puts the cursor on that column.
 use ../shell/wm
 let d = wm.new_desktop(640, 480, wm.default_apps())
 let i = wm.launch(d, wm.ide)

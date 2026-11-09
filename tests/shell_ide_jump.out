@@ -1,0 +1,18 @@
+runtime error 3 9
+/home/hello.relic 3 9 ["cannot add an int and a string"]
+["first", "/home/hello.relic:3:9 cannot add an int and a string"]
+highlight true 1
+ctrl+e 33 ["+"] true
+highlight after jump true
+error click 33 true
+header click true
+plain click true
+syntax error ["/home/hello.relic:2:6 unclosed '('"] 2 6
+syntax cursor 17 ["("]
+syntax highlight true
+module error ["/home/bad.relic:1:10 unclosed '('"] none
+module cursor true
+module highlight 0
+waiting waiting for input 4 [stop] return: send, esc: stop
+miss waiting for input true
+stop stopped none stopped

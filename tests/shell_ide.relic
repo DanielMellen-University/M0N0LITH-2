@@ -1,5 +1,5 @@
 # IDE: the Editor on a .relic file plus Ctrl+R to run it with an output pane,
-# errors as "line L: message", and Ctrl+E to put the cursor on the error line.
+# errors as "file:line:col message", and Ctrl+E to put the cursor on that column.
 use ../shell/wm
 use std/vfs
 let d = wm.new_desktop(640, 480, wm.default_apps())

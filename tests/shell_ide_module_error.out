@@ -1,2 +1,2 @@
-error ["/home/bad.relic line 1: unclosed '('"] none
+error ["/home/bad.relic:1:10 unclosed '('"] none
 cursor unchanged true 8 8
