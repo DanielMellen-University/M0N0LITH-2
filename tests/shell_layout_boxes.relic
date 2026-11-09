@@ -1,0 +1,14 @@
+# The close box, the minimize box and the resize grip sit on the window's corners and do not overlap.
+use ../shell/wm
+let d = wm.new_desktop(640, 480, wm.default_apps())
+let w = wm.launch(d, wm.notes)
+let c = wm.close_box(w)
+let m = wm.minimize_box(w)
+let g = wm.resize_box(w)
+print("close", c)
+print("min", m)
+print("grip", g)
+print("side by side", m[0] + m[2] == c[0] and m[1] == w.y and c[1] == w.y)
+print("close in corner", c[0] + c[2] == w.x + w.width and c[2] == wm.title_height)
+print("grip in corner", g[0] + g[2] == w.x + w.width and g[1] + g[3] == w.y + wm.title_height + w.height)
+print("grip size", g[2] == wm.grip and g[3] == wm.grip)
