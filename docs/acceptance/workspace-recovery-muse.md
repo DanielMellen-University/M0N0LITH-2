@@ -366,6 +366,40 @@ deleted until wm.workspace_release(). That release is an explicit
 call, not a menu item, so this case does not cover what happens
 after a release.
 
+## Case 9: A requested store that cannot be opened must not report saved (D0118-4)
+
+Status: UNRUN.
+
+Setup: Start the desktop with no saved workspace. Open the Editor on
+a file and write text. Request a workspace store at a path that cannot
+be opened: the path is a regular file where a directory is expected,
+or a directory that cannot be listed.
+
+Action: Attempt to open that store, then press Ctrl+S in the Editor
+and attempt a workspace save.
+
+Expected visible outcome: The desktop shows that the store could not
+be opened, the workspace is not enabled, and the Editor reports the
+save failed. It never says `saved` for a save into a store that did
+not open. The session keeps the text in memory and the desktop stays
+usable.
+
+Data-preservation assertions:
+
+- The text stays in the session exactly as typed.
+- Nothing is written to the unopenable path.
+- A later save to a store that opens still works, and a restart after
+  that save restores the saved state as in Case 1.
+- The failure is reported on screen instead of being silent.
+
+Fixture note: the requested store path cannot be opened (a regular
+file in place of the directory, or a directory that cannot be
+listed). Per the contract, the load leaves the vfs as it was, the
+workspace is not enabled, and the notice is `workspace: cannot open
+store`. This is distinct from opening with an empty path, which is a
+session-only opt-out and is not a failure; this case always uses a
+requested path that cannot be opened.
+
 ---
 
 ## Case list
@@ -382,8 +416,9 @@ after a release.
 | 6 | Corrupt committed generation, newer uncommitted not loaded | UNRUN |
 | 7 | Corrupted retry commit keeps prior committed generation | UNRUN |
 | 8 | Unsupported-version store held through normal writes | UNRUN |
+| 9 | Requested store that cannot be opened never reports saved | UNRUN |
 
-Specified cases: 10. Executed cases: 0. Fixture assets: none built in
+Specified cases: 11. Executed cases: 0. Fixture assets: none built in
 this batch. The contract is now on main (docs/workspace-recovery.md,
 PR #28 merged 2026-11-09); fixture notes for the earlier cases are
 still pending.
