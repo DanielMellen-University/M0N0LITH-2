@@ -1,0 +1,19 @@
+# Two Notes windows share the desktop clipboard and keep their own lines.
+use ../shell/wm
+let d = wm.new_desktop(640, 480, wm.default_apps())
+let a = wm.launch(d, wm.notes)
+for ch in "from-a"
+    wm.key(d, ch)
+wm.key(d, "ctrl+c")
+let b = wm.launch(d, wm.notes)
+for ch in "b:"
+    wm.key(d, ch)
+wm.key(d, "ctrl+v")
+print("a", a.state.text)
+print("b", b.state.text)
+wm.key(d, "ctrl+x")
+print("cut b", b.state.text)
+print("a untouched", a.state.text)
+wm.click(d, a.x + 8, a.y + wm.title_height + 4)
+wm.key(d, "ctrl+v")
+print("pasted back", a.state.text)
