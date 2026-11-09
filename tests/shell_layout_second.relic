@@ -1,0 +1,9 @@
+# The second window steps 24 across and 20 down from the first.
+use ../shell/wm
+let d = wm.new_desktop(640, 480, wm.default_apps())
+let a = wm.launch(d, wm.notes)
+let b = wm.launch(d, wm.clicker)
+print(a.x, a.y, b.x, b.y, b.id)
+print("step", b.x - a.x, b.y - a.y)
+print("size", b.width, b.height)
+print("top", wm.focused(d).id == b.id)
