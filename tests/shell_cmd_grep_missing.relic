@@ -1,0 +1,17 @@
+# grep of a folder or a missing file is an error and prints no line.
+use ../shell/wm
+use std/vfs
+let t = wm.terminal.init()
+fun run(line)
+    t.buf = []
+    for c in line
+        if c == " "
+            wm.terminal.on_key(t, "space")
+        else
+            wm.terminal.on_key(t, c)
+    wm.terminal.on_key(t, "return")
+    print(t.buf)
+run("grep x /tmp")
+run("grep x /tmp/")
+run("grep x /tmp/nope.txt")
+run("grep x welcome.txt/nope")
