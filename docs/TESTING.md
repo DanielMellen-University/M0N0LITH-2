@@ -223,6 +223,7 @@ Write `tests/shell_<topic>.relic`, run it, read its output, and save that as `te
 | `shell_files_page_ends` | Page Up on the first row and Page Down on the last row stay there |
 | `shell_files_jump_same` | the only name starting with a letter stays selected when that letter is pressed again |
 | `shell_files_sees_new` | a file written by another app shows up on the next draw, and the selection stays on its name |
+| `shell_files_sorted` | names are shown in order, with .. first |
 
 ### Editor
 
