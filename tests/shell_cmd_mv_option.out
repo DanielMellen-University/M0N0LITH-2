@@ -1,0 +1,4 @@
+["/home> touch /tmp/from.txt"]
+["/home> mv -f /tmp/from.txt /tmp/to.txt", "mv: no options, not even -f"]
+from true
+to false
