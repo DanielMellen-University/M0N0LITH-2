@@ -35,3 +35,9 @@ add_test(NAME workspace_restart
   COMMAND ${CMAKE_COMMAND} -DRELIC=${RELIC_EXE} -DROOT=${CMAKE_SOURCE_DIR}
     -DBUILD=${CMAKE_BINARY_DIR}
     -P ${CMAKE_SOURCE_DIR}/tools/run_workspace_restart.cmake)
+
+# A second process is killed after it writes a partial and before it publishes.
+add_test(NAME workspace_kill
+  COMMAND ${CMAKE_COMMAND} -DRELIC=${RELIC_EXE} -DROOT=${CMAKE_SOURCE_DIR}
+    -DBUILD=${CMAKE_BINARY_DIR}
+    -P ${CMAKE_SOURCE_DIR}/tools/run_workspace_kill.cmake)
