@@ -157,6 +157,7 @@ Write `tests/shell_<topic>.relic`, run it, read its output, and save that as `te
 | `shell_terminal_echo_words` | a > that is not the redirect is text, and echo refuses to write into a folder |
 | `shell_terminal_append_new` | echo >> creates a missing file and then appends another line |
 | `shell_terminal_mv_keep` | mv refuses to replace a file that is already there and leaves both unchanged |
+| `shell_terminal_cp_bytes` | cp copies the exact bytes, adds no newline, and will not write over that copy |
 
 ### Files
 
