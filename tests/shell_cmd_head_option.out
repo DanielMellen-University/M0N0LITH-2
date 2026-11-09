@@ -1,0 +1,3 @@
+["/home> head -n 1 /tmp/h.txt", "head: no options, not even -n"]
+["/home> head /tmp/h.txt -n", "head: no options, not even -n"]
+["/home> head /tmp/h.txt 1", "only"]
