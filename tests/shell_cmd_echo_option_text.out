@@ -1,0 +1,4 @@
+["/home> echo -n > /tmp/flag.txt"]
+bytes true
+["/home> echo -- -n", "-- -n"]
+["/home> cat /tmp/flag.txt", "-n"]
