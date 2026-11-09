@@ -322,6 +322,7 @@ Write `tests/shell_<topic>.relic`, run it, read its output, and save that as `te
 | `shell_ide_restart_wait` | Ctrl+R while waiting starts again and does not send the line being typed |
 | `shell_ide_input_blank` | Return with nothing typed sends an empty line, the pane keeps it, and the program sees length 0 |
 | `shell_ide_input_nofind` | Ctrl+F while a run waits does not open a find |
+| `shell_ide_syntax_stop` | a syntax error is reported and the following line does not run |
 
 ### Paint
 
