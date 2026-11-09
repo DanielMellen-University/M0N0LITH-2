@@ -1,0 +1,6 @@
+before Welcome to Relic.
+
+["/home> touch welcome.txt"]
+["/home> touch /home/welcome.txt"]
+after Welcome to Relic.
+
