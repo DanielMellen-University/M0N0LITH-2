@@ -1,0 +1,3 @@
+["/home> wc -l welcome.txt", "wc: no options, not even -l"]
+["/home> wc welcome.txt -c", "wc: no options, not even -c"]
+["/home> wc welcome.txt", "1 3 18 welcome.txt"]
