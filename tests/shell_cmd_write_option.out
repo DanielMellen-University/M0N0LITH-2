@@ -1,0 +1,5 @@
+["/home> write -- /tmp/nope hello", "write: no options, not even --"]
+made false
+nope false
+["/home> write /tmp/ok --"]
+text true
