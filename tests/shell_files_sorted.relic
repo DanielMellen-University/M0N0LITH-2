@@ -1,0 +1,13 @@
+# Names are shown in order, with .. first.
+use ../shell/wm
+use std/vfs
+let d = wm.new_desktop(640, 480, wm.default_apps())
+let f = wm.launch(d, wm.files_app)
+let fs = f.state.fs
+fun show() = wm.visible_lines(f)
+
+vfs.write(fs, "/tmp/c.txt", "c")
+vfs.write(fs, "/tmp/a.txt", "a")
+vfs.write(fs, "/tmp/b.txt", "b")
+f.state.path = "/tmp"
+print(show())

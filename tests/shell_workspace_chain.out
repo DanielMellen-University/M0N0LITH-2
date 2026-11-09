@@ -1,0 +1,31 @@
+not newer ["workspace: committed image truncated; recovered g1; ignored uncommitted g3"] ["old"] true
+retry files true false ["g3\n"]
+after corrupt ["workspace: committed image truncated; recovered g1"] ["one\n"] true
+uncommitted backup true false ["g3\n"]
+uncommitted corrupt ["workspace: committed image truncated; recovered g1"] ["one\n"]
+torn meta ["workspace: pointer invalid; recovered g1; ignored uncommitted g2"] ["old"]
+torn ambiguous ["workspace: pointer invalid; store held; using defaults; ignored uncommitted g2"] false
+torn kept true true false ["x"]
+version held ["workspace: committed image wrong version; store held; using defaults"]
+version files false ["g1\n"] ["M2WS9\n.\n"]
+version editor workspace: save failed; store held (wrong-version); not written
+version released ["g2\n"] true false
+too many ["workspace: too many generation files; store held; using defaults | workspace: save failed; store held (too-many); not written"] true false
+unavailable workspace: cannot open store workspace: cannot open store workspace: cannot open store
+opt out saved false
+ide save saved ["start\n!"]
+ide reload ["start\n!"]
+ide fault workspace: save failed (partial-generation); kept g2
+id reuse save ["workspace: committed image truncated; recovered g1 | workspace: save failed (full-uncommitted); kept g1"] ["M2WS1\n"] ["g2\n"]
+id reuse load ["workspace: committed image truncated; recovered g1; ignored uncommitted g3"] ["old"]
+meta ahead save ["workspace: save failed; cannot write store; kept g1"] ["g1\n"] ["committed g1\nprevious none\n"]
+meta ahead torn ["x"] ["committed g1\nprevious none\n"]
+meta ahead load ["workspace: pointer invalid; recovered g1; ignored uncommitted g2"] ["one\n"]
+stale meta ["old"] ["workspace: ignored uncommitted g2"]
+version torn ["workspace: committed image wrong version; store held; using defaults"] true
+version torn bytes ["M2WS9\n.\n"] false ["x"]
+meta degrade status saved
+meta degrade notice ["workspace: saved; metadata backup not updated"]
+meta degrade pointer ["g2\n"]
+meta degrade meta ["committed g1\nprevious none\n"]
+meta degrade reopen ["one\nx"] ["g2\n"]

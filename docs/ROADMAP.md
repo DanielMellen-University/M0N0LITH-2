@@ -68,4 +68,12 @@ Commands and keys not named here were not pressed in the window. The 183 tests s
 
 A documented workflow in the list above that fails, a file changed inside one session when nothing wrote it, or a loop that does not stop inside the step budget. A newer Relic, and the parked items, are not that list.
 
-Next work is maintenance of this list only.
+Next work is maintenance of this list, and the workspace store below. The parked items stay parked.
+
+## Workspace store
+
+The shared vfs can be committed to a directory. `shell/desktop.relic` does that. A new process that opens the same directory gets the last committed generation, including a file removed on purpose. Terminal, Files, the Editor, the IDE, Paint and Snake's best score are that vfs. Notes, Clicker, unsaved buffers and window positions are not.
+
+A torn or corrupt generation does not replace the last one that still parses. The notice says when a save failed or when the load recovered or ignored a file. There is no fsync in Relic 1.0.53, so a power loss is not covered. The rules, the file format and the fault stages are in [Workspace recovery](workspace-recovery.md).
+
+This does not reopen the Nov 7 acceptance. That pass saw the files disappear, which is still what happens when no workspace is opened.

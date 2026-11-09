@@ -1,0 +1,14 @@
+# Home and End move the cursor in the input line.
+use ../shell/wm
+let d = wm.new_desktop(640, 480, wm.default_apps())
+let i = wm.launch(d, wm.ide)
+let s = i.state
+fun pos() = len(s.text) - s.back
+
+s.text = "use std/os\nlet line = os.read_line()\n"
+wm.key(d, "ctrl+r")
+for k in ["a", "b", "c", "home"]
+    wm.key(d, k)
+print("home", s.in_left)
+wm.key(d, "end")
+print("end", s.in_left)

@@ -1,0 +1,21 @@
+# ls of a file prints its base name. A name with a space has to be quoted;
+# without the quotes it is two words and ls rejects it. A missing path is named.
+use ../shell/wm
+use std/vfs
+let t = wm.terminal.init()
+fun run(line)
+    t.buf = []
+    for c in line
+        if c == " "
+            wm.terminal.on_key(t, "space")
+        else
+            wm.terminal.on_key(t, c)
+    wm.terminal.on_key(t, "return")
+    return slice(t.buf, 1, len(t.buf))
+
+vfs.write(t.fs, "/tmp/plain.txt", "x")
+vfs.write(t.fs, "/tmp/my file.txt", "x")
+print(run("ls /tmp/plain.txt"))
+print(run("ls \"/tmp/my file.txt\""))
+print(run("ls /tmp/my file.txt"))
+print(run("ls /tmp/missing.txt"))

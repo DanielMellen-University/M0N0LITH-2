@@ -1,0 +1,22 @@
+editor opened /home/note.txt ["session-note\n"]
+editor saved saved ["session-note\n!"]
+notice [""]
+Terminal. Type help.
+/home> cat note.txt
+session-note
+!
+/home> cat docs/plan.txt
+alpha
+beta
+/home> cat hello.relic
+print("ide-out")
+/home> cat "my note.txt"
+hi
+/home> ls
+docs/  hello.relic  "my note.txt"
+note.txt  renamed.txt
+files ["Files: /home", "> ..", "  docs/", "  hello.relic", "  my note.txt", "  note.txt", "  renamed.txt"]
+editor again open ["session-note\n!"]
+ide ran ["ide-out"]
+notes ["Type something:", "_"]
+clicker Clicks: 0

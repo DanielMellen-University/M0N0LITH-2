@@ -1,0 +1,12 @@
+# Ctrl+J turns the next line's newline and its indent into one space.
+use ../shell/wm
+let d = wm.new_desktop(640, 480, wm.default_apps())
+let e = wm.launch(d, wm.editor)
+let s = e.state
+fun pos() = len(s.text) - s.back
+
+s.text = "foo\n  bar"
+s.back = len(s.text) - 3
+s.undo = []
+wm.key(d, "ctrl+j")
+print([s.text], len(s.undo))

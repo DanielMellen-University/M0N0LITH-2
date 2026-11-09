@@ -1,0 +1,21 @@
+# When Tab cannot add more, the list marks a folder with / and quotes a name
+# that has a space, the way ls shows them, so two names can be told apart.
+use ../shell/wm
+use std/vfs
+let t = wm.terminal.init()
+vfs.make_dir(t.fs, "/home/a b")
+vfs.make_dir(t.fs, "/home/a c")
+vfs.write(t.fs, "/home/q.txt", "q")
+fun tab(line)
+    t.input = ""
+    let before = len(t.buf)
+    for c in line
+        if c == " "
+            wm.terminal.on_key(t, "space")
+        else
+            wm.terminal.on_key(t, c)
+    wm.terminal.on_key(t, "tab")
+    print([t.input], slice(t.buf, before, len(t.buf)))
+tab("cd a")
+tab("ls ")
+tab("cat q")

@@ -1,0 +1,5 @@
+warned true [changed on disk: ctrl+s again] from disk
+click, warned again true [changed on disk: ctrl+s again] from disk
+second save overwrites false [saved] one\ntwo\n
+warned after the write true [changed on disk: ctrl+s again] again
+drag, warned again true [changed on disk: ctrl+s again] again

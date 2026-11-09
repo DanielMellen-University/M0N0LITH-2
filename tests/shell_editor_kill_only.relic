@@ -1,0 +1,14 @@
+# Ctrl+K removes the only line, and one Ctrl+Z puts it back.
+use ../shell/wm
+let d = wm.new_desktop(640, 480, wm.default_apps())
+let e = wm.launch(d, wm.editor)
+let s = e.state
+fun pos() = len(s.text) - s.back
+
+s.text = "hi"
+s.back = 0
+s.undo = []
+wm.key(d, "ctrl+k")
+print("cut", [s.text], len(s.undo))
+wm.key(d, "ctrl+z")
+print("back", [s.text], s.status)

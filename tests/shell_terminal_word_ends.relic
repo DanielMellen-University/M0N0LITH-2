@@ -1,0 +1,10 @@
+# Ctrl+Left at the start and Ctrl+Right at the end stay put.
+use ../shell/wm
+let t = wm.terminal.init()
+for c in "ab cd"
+    wm.terminal.on_key(t, c)
+wm.terminal.on_key(t, "ctrl+right")
+print("end", [t.input], t.left)
+wm.terminal.on_key(t, "home")
+wm.terminal.on_key(t, "ctrl+left")
+print("start", t.left, [t.input])

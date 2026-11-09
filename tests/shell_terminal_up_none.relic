@@ -1,0 +1,9 @@
+# Up with nothing remembered leaves the line being typed.
+use ../shell/wm
+let t = wm.terminal.init()
+for c in "echo hi"
+    wm.terminal.on_key(t, c)
+wm.terminal.on_key(t, "up")
+print([t.input], t.back)
+wm.terminal.on_key(t, "down")
+print([t.input])

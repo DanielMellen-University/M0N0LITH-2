@@ -1,0 +1,18 @@
+# A click on the title gives up a rename and does not open a row.
+use ../shell/wm
+use std/vfs
+let d = wm.new_desktop(640, 480, wm.default_apps())
+let f = wm.launch(d, wm.files_app)
+let fs = f.state.fs
+fun show() = wm.visible_lines(f)
+
+vfs.write(fs, "/tmp/a.txt", "a")
+f.state.path = "/tmp"
+show()
+for i in 0..len(f.state.names)
+    if f.state.names[i] == "a.txt"
+        f.state.sel = i
+wm.key(d, "f2")
+print("renaming", show()[0])
+f.app.on_click(f.state, 8, 0)
+print("after", f.state.path, f.state.renaming, show()[0])

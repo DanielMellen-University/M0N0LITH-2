@@ -1,0 +1,25 @@
+# Ctrl+C on a folder copies its path with no slash, and on .. it copies nothing.
+use ../shell/wm
+use std/vfs
+let d = wm.new_desktop(640, 480, wm.default_apps())
+let f = wm.launch(d, wm.files_app)
+let fs = f.state.fs
+fun show() = wm.visible_lines(f)
+
+vfs.make_dir(fs, "/tmp/docs")
+f.state.path = "/tmp"
+show()
+for i in 0..len(f.state.names)
+    if f.state.names[i] == "docs"
+        f.state.sel = i
+wm.key(d, "ctrl+c")
+let n = wm.launch(d, wm.notes)
+wm.key(d, "ctrl+v")
+print([n.state.text])
+wm.key(d, "ctrl+u")
+wm.close(d, n.id)
+f.state.sel = 0
+wm.key(d, "ctrl+c")
+let n2 = wm.launch(d, wm.notes)
+wm.key(d, "ctrl+v")
+print("after dotdot", [n2.state.text])

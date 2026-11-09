@@ -15,7 +15,7 @@ One test: `ctest --test-dir build -C Release -R golden_shell_ide`. Or run it str
 
 ## How they are checked
 
-CMake finds every `tests/*.relic` and adds it as `golden_<name>`. `tools/run_golden.cmake` runs it from `tests/`, and it passes when it exits with 0 and its standard output matches `<name>.out` exactly (Windows line endings are ignored). A test with no `.out` file must print nothing. One more test, `check_shell`, runs `relic check` on `wm.relic` and `desktop.relic`, which catches syntax errors and undefined names in the drawing code no test runs. That is 183 tests in all, and CI runs them on Linux, macOS and Windows.
+CMake finds every `tests/*.relic` and adds it as `golden_<name>`. `tools/run_golden.cmake` runs it from `tests/`, and it passes when it exits with 0 and its standard output matches `<name>.out` exactly (Windows line endings are ignored). A test with no `.out` file must print nothing. One more test, `check_shell`, runs `relic check` on `wm.relic`, `workspace.relic` and `desktop.relic`, which catches syntax errors and undefined names in the drawing code no test runs. That is 295 tests in all, and CI runs them on Linux, macOS and Windows. Four of the golden programs and `workspace_restart` cover the store. `workspace_restart` is not a golden file: it runs four relic processes against one directory.
 
 None of them opens the SDL window. A passing run does not prove what the desktop draws. The Linux GUI pass, and what it did not try, is in the [roadmap](ROADMAP.md#accepted-nov-7-2026).
 
@@ -149,7 +149,39 @@ Write `tests/shell_<topic>.relic`, run it, read its output, and save that as `te
 | `shell_terminal_multipath_errors` | rm, mkdir and touch with several paths keep going after an error for one |
 | `shell_terminal_sort_uniq_nl_errors` | sort, uniq and nl on a path ending in /, and nl on a missing file |
 | `shell_terminal_head_tail_counts` | head and tail counts: tail 0, leading zeros, over six digits, a letter, a dash count, and a bad count on a missing file |
+| `shell_terminal_head_end` | head of a short file prints the same lines as cat and tail, including a blank line in the file and a file that is only a newline, and no blank line after a final newline |
+| `shell_terminal_complete_list` | when Tab cannot add more, the list marks a folder with / and quotes a name that has a space |
 | `shell_terminal_wc_counts` | wc counts newlines, space-separated words and characters, including a last line with no newline |
+| `shell_terminal_cd_home` | cd with no path returns to /home, cd . stays, and cd .. from / stays at / |
+| `shell_terminal_ls_file` | ls of a file prints its base name, a quoted path keeps a space in the name, an unquoted space is an extra word, and a missing path is named |
+| `shell_terminal_echo_words` | a > that is not the redirect is text, and echo refuses to write into a folder |
+| `shell_terminal_append_new` | echo >> creates a missing file and then appends another line |
+| `shell_terminal_mv_keep` | mv refuses to replace a file that is already there and leaves both unchanged |
+| `shell_terminal_cp_bytes` | cp copies the exact bytes, adds no newline, and will not write over that copy |
+| `shell_terminal_rm_full` | rm refuses a folder that is not empty, then removes it once it is empty |
+| `shell_terminal_mkdir_deep` | mkdir creates missing parent folders, and a second time says the folder is already there |
+| `shell_terminal_grep_dot` | grep matches characters as written: a dot is not a pattern, and case counts |
+| `shell_terminal_find_own` | find matches an entry's own name, shows a folder with a slash, and does not match text only in a parent path |
+| `shell_terminal_history_keep` | history keeps the last 50 commands, the oldest falls off, and !1 runs whatever is now first |
+| `shell_terminal_bang_zero` | !0 is not in history, and !001 runs command 1 |
+| `shell_terminal_case_kept` | Echo is unknown, it is kept, and !! runs that same failure again without keeping it twice |
+| `shell_terminal_two` | two Terminals share the files and each keeps its own folder |
+| `shell_terminal_clear_past` | clear empties the screen and leaves the remembered commands, including clear itself |
+| `shell_terminal_cat_mix` | cat reports a folder and still prints a file named after it |
+| `shell_terminal_wc_tab` | wc treats a tab as a break between words |
+| `shell_terminal_sort_file` | sort orders by character, digits before letters, and does not change the file |
+| `shell_terminal_uniq_case` | uniq drops only a line equal to the one just before it, so A and a both stay |
+| `shell_terminal_nl_blank` | nl numbers a blank line |
+| `shell_terminal_cd_stay` | cd of a file says it is not a folder and stays put |
+| `shell_terminal_recall_dups` | a command repeated immediately is kept once, and the same command later is kept again |
+| `shell_terminal_up_none` | Up and Down with an empty history leave the line being typed |
+| `shell_terminal_delete_end` | Delete at the end of the Terminal line changes nothing, and in the middle removes the next character |
+| `shell_terminal_word_ends` | Ctrl+Right at the end of the line and Ctrl+Left at the start leave the cursor there |
+| `shell_terminal_quote_open` | a quote left open runs nothing and names the missing quote |
+| `shell_terminal_write_join` | write joins the words after the path, needs a path, and a path with no words writes a blank line |
+| `shell_terminal_paste_line` | Ctrl+V in the Terminal pastes only the first line of the clipboard |
+| `shell_terminal_ls_dot` | ls . lists the current folder and ls .. lists the parent |
+| `shell_terminal_root_ls` | cd / then pwd prints /, and ls shows home and tmp |
 
 ### Files
 
@@ -178,6 +210,24 @@ Write `tests/shell_<topic>.relic`, run it, read its output, and save that as `te
 | `shell_files_copy_file` | Ctrl+C copies a file's full path, to paste into Notes |
 | `shell_files_click_scrolled` | a click on a visible row of a scrolled list opens the row shown there |
 | `shell_files_jump_symbol` | jump-to-letter works for a name starting with a symbol, going round to the top |
+| `shell_files_delete_esc` | Escape gives up a Delete question without removing the file, and a second Escape is not taken |
+| `shell_files_empty_root` | an empty root has no rows, and letters, arrows, Delete, F2 and Return change nothing |
+| `shell_files_delete_gone` | a second Delete after the file is already gone does not remove the row that took its place |
+| `shell_files_two_windows` | two Files windows keep their own folders, and Down in one leaves the other alone |
+| `shell_files_copy_dir` | Ctrl+C on a folder copies its path with no slash, and on .. it copies nothing |
+| `shell_files_right_stay` | Right enters a folder and does nothing on a file or on .. |
+| `shell_files_left_root` | Left at / does not move |
+| `shell_files_f2_up` | F2 on .. does not start a rename |
+| `shell_files_rename_dir` | renaming a folder keeps what is inside it and leaves that folder selected |
+| `shell_files_delete_jump` | a letter gives up a Delete question and jumps to that name, and the file stays |
+| `shell_files_page_ends` | Page Up on the first row and Page Down on the last row stay there |
+| `shell_files_jump_same` | the only name starting with a letter stays selected when that letter is pressed again |
+| `shell_files_sees_new` | a file written by another app shows up on the next draw, and the selection stays on its name |
+| `shell_files_sorted` | names are shown in order, with .. first |
+| `shell_files_dotfile` | a name that starts with a dot is listed |
+| `shell_files_delete_last` | deleting the last row leaves the selection on the row before it |
+| `shell_files_rename_title_click` | a click on the title gives up a rename and does not open a row |
+| `shell_files_note_next` | the already-there note from a rename clears on the next key |
 
 ### Editor
 
@@ -200,6 +250,7 @@ Write `tests/shell_<topic>.relic`, run it, read its output, and save that as `te
 | `shell_editor_edges` | Editor empty buffers, line edges and failed saves |
 | `shell_editor_disk_changed` | Ctrl+S warns once when another app changed the file |
 | `shell_editor_disk_warn_keys` | Ctrl+S warns again when a cursor move or selection key comes between the warning and the next save |
+| `shell_editor_disk_click` | a click or a drag between the warning and the next Ctrl+S makes that save warn again, and a second Ctrl+S with nothing in between still overwrites |
 | `shell_editor_undo` | Ctrl+Z undoes edits one step at a time, up to 500, and Ctrl+Y redoes them until the next edit |
 | `shell_editor_save_status` | Editor status through save, undo and redo: saved again with nothing new, undone, redone, and nothing to undo or redo past the end |
 | `shell_editor_escape` | Esc drops a selection in the Editor and the IDE and is taken, with none it is not; the IDE stops a waiting run first |
@@ -220,6 +271,31 @@ Write `tests/shell_<topic>.relic`, run it, read its output, and save that as `te
 | `shell_big_file` | the Editor on a file of thousands of lines stays quick |
 | `shell_last_lines` | Editor line splitting at empty and trailing newline boundaries |
 | `shell_last_lines_long` | the Editor on a 200,000-character line stays quick |
+| `shell_editor_join_end` | Ctrl+J at the end of the file is not an edit |
+| `shell_editor_move_ends` | Ctrl+Up on the first line and Ctrl+Down on the last line are not edits |
+| `shell_editor_kill_only` | Ctrl+K removes the only line, and one Ctrl+Z puts it back |
+| `shell_editor_dup_twice` | Ctrl+D again copies the copy |
+| `shell_editor_home_twice` | Home goes to the first character after the indent, and Home again goes to the start |
+| `shell_editor_word_hyphen` | a hyphen is not part of a word, so Ctrl+Left stops on each side of it |
+| `shell_editor_word_unicode` | a character past ASCII is part of a word |
+| `shell_editor_tab_stops` | Tab inserts spaces to the next multiple of 4 |
+| `shell_editor_dedent_none` | Shift+Tab at column 0 is not an edit |
+| `shell_editor_indent_empty` | Ctrl+] on an empty line inserts four spaces |
+| `shell_editor_indent_blanks` | Ctrl+] with a selection skips empty lines and indents the others in one undo step |
+| `shell_editor_replace_empty` | replacing with nothing removes every match, in one undo step |
+| `shell_editor_f3_none` | F3 and Shift+F3 with no text found yet change nothing |
+| `shell_editor_escape_sel` | Escape drops a selection and is taken, and with no selection it is not taken |
+| `shell_editor_paste_all` | pasting in the Editor keeps every line of the clipboard |
+| `shell_editor_two_buffers` | two Editor windows undo on their own |
+| `shell_editor_save_fresh` | Ctrl+S creates a file that was not there |
+| `shell_editor_save_noparent` | Ctrl+S says the folder is missing and writes nothing |
+| `shell_editor_backspace_start` | Backspace at the start of the file is not an edit |
+| `shell_editor_delete_end` | Delete at the end of the file is not an edit |
+| `shell_editor_page_top` | Page Up on the first line stays at its start |
+| `shell_editor_line_grow` | Ctrl+L twice takes in the next line as well |
+| `shell_editor_word_start` | Ctrl+Backspace at the start of the file removes nothing |
+| `shell_editor_join_space` | Ctrl+J turns the next line's newline and indent into one space |
+| `shell_editor_move_undo` | Ctrl+Down moves the line and one Ctrl+Z puts it back |
 
 ### IDE
 
@@ -227,12 +303,42 @@ Write `tests/shell_<topic>.relic`, run it, read its output, and save that as `te
 |---|---|
 | `shell_ide` | IDE: run with Ctrl+R, output pane, error line and Ctrl+E, stopped loops, refused host calls, `use` of desktop files, input lines, Ctrl+Backspace there, Esc or Ctrl+C to stop, F5 like Ctrl+R; Ctrl+Return running like Ctrl+R; the input line's cursor (Left, Right, Home, End, Delete), Return sending the whole line, word keys and Ctrl+K, a wide line keeping the cursor in view |
 | `shell_ide_comment` | Ctrl+/ puts `# ` in after the leading spaces and takes it (or a bare `#`) out, the cursor staying on its character, one undo step each; the Editor ignores it; with a selection, every line it is on in one step, not the line after a Ctrl+L |
+| `shell_ide_comment_indent` | uncommenting keeps a cursor that is still in the indent on that space, and a cursor on a later character stays on it |
+| `shell_ide_comment_blank` | a selection of only blank lines is not an undo step and does not mark the buffer edited; a blank line with no selection still gets a comment |
 | `shell_ide_error_click` | IDE: a click on the error line or on the pane header goes to the error's line, as Ctrl+E does; a click on a plain output line moves nothing |
 | `shell_ide_input_paste` | IDE input: Ctrl+V adds the first line of the clipboard only, and with an empty clipboard it adds nothing |
 | `shell_ide_denied` | IDE: refused host calls beyond exit and writing: sleeping, removing, renaming and making folders, and opening a graphics window; a refused remove leaves the file, a refused make_dir makes nothing |
 | `shell_ide_module_saved` | IDE: a `use` of another file reads it as last saved; an unsaved edit in another window changes nothing until it is saved |
 | `shell_ide_syntax_jump` | IDE: Ctrl+E goes to a syntax error's line too, and after a good run, when there is no error, Ctrl+E moves nothing |
 | `shell_ide_module_error` | an error inside a module the program used shows that module's path and line, and Ctrl+E leaves the cursor where it was |
+| `shell_ide_page_pane` | Page Down moves by the editor rows above the output pane, and Page Up comes back |
+| `shell_ide_disk_keys` | Ctrl+R, F5, Ctrl+E, Ctrl+/ and a key typed while a run waits cancel the changed-on-disk warning; two Ctrl+S presses with nothing between them still overwrite |
+| `shell_ide_empty_run` | an empty buffer runs and prints nothing |
+| `shell_ide_rerun` | a second run replaces the output of the first |
+| `shell_ide_input_u` | Ctrl+U in the input line removes what is before the cursor and keeps the rest |
+| `shell_ide_input_k` | Ctrl+K in the input line removes what is after the cursor |
+| `shell_ide_stop_esc` | Escape stops a run that is waiting for input |
+| `shell_ide_stop_c` | Ctrl+C stops a run that is waiting for input |
+| `shell_ide_restart_wait` | Ctrl+R while waiting starts again and does not send the line being typed |
+| `shell_ide_input_blank` | Return with nothing typed sends an empty line, the pane keeps it, and the program sees length 0 |
+| `shell_ide_input_nofind` | Ctrl+F while a run waits does not open a find |
+| `shell_ide_syntax_stop` | a syntax error is reported and the following line does not run |
+| `shell_ide_runtime_keep` | lines printed before a runtime error stay in the pane |
+| `shell_ide_hash_text` | a # inside a string is not a comment, and Ctrl+/ comments that whole line |
+| `shell_ide_error_top` | Ctrl+E on an error in line 1 puts the cursor at the start |
+| `shell_ide_math` | use std/math loads Relic's math and abs runs |
+| `shell_ide_input_home` | Home and End move the cursor in the input line |
+| `shell_ide_input_word` | Ctrl+Left in the input line moves to the start of the word |
+| `shell_ide_click_out` | a click on a plain output line does not move the cursor |
+| `shell_ide_title` | a wide IDE title names Ctrl+R as well as Ctrl+S |
+| `shell_ide_fun_tight` | fun f()=1, with no spaces around =, still opens a block |
+| `shell_ide_comment_mix` | a selection that is not all comments gets a comment on every line, including one already commented |
+| `shell_ide_input_del` | Delete in the input line removes the character after the cursor |
+| `shell_ide_eprint` | print and eprint both show, in the order they ran |
+| `shell_ide_div_zero` | dividing by zero is an error and names its line |
+| `shell_ide_comment_undo` | commenting a line is one undo step |
+| `shell_ide_unsaved` | Ctrl+R runs the buffer, not the older text saved in the file |
+| `shell_ide_goto` | Ctrl+G in the IDE goes to that line of the program |
 
 ### Paint
 
@@ -259,6 +365,17 @@ Write `tests/shell_<topic>.relic`, run it, read its output, and save that as `te
 | `shell_snake_lowercase_wasd` | Snake: lowercase w, a, s, d turn like the arrows, and a turn straight back is ignored |
 | `shell_snake_best_empty` | Snake: an empty best-score file reads as 0, a padded number as that number |
 | `shell_snake_minimized` | Snake: a minimized window does not move, and the beat restarts on return instead of catching up |
+
+### Workspace
+
+| Test | What it covers |
+|---|---|
+| `shell_workspace_defaults` | no store means no host files; an empty directory is the first run; one save writes `g1.m2ws`; reopening drops a memory-only change; `workspace_open("")` stops committing |
+| `shell_workspace_roundtrip` | Terminal create, append and remove, a quoted name, Files rename, Editor save, IDE run, then a reopen; Notes and Clicker do not come back |
+| `shell_workspace_faults` | each fault stage keeps the previous generation and says so; the Editor does not say `saved` |
+| `shell_workspace_corrupt` | hand-written wrong version, truncated, extra, `..`, duplicate, missing parent, CR, bad escape, NUL, bad pointers, a number that is text, an empty image, an uncommitted generation, a partial, too many names, a too-long path |
+| `shell_workspace_chain` | a corrupt commit does not install a newer uncommitted file; partial or full-uncommitted then a retry keeps the previous commit through a later corruption; a torn pointer with `META` keeps that commit and ignores a newer file; a torn pointer with two files and no `META` holds; a wrong version and too many names are not overwritten; a failed open is not `saved`; an empty path is; IDE Ctrl+S persists and a fault does not say saved |
+| `workspace_restart` | the same session across two processes, then a torn pointer and a fourth process |
 
 ### Shared filesystem and fuzzing
 

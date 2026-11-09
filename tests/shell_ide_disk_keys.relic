@@ -1,0 +1,51 @@
+# Ctrl+R, F5, Ctrl+E, Ctrl+/ and a key typed into a waiting run cancel a
+# changed-on-disk warning. Two Ctrl+S presses with nothing between them still
+# overwrite.
+use ../shell/wm
+use std/vfs
+use std/strings
+let d = wm.new_desktop(640, 480, wm.default_apps())
+let fs = wm.launch(d, wm.files_app).state.fs
+vfs.write(fs, "/home/run.relic", "print(1)\n")
+let i = wm.launch(d, wm.ide)
+let s = i.state
+s.path = "/home/run.relic"
+s.text = "print(1)\n"
+s.disk = "print(1)\n"
+s.status = "open"
+fun arm()
+    vfs.write(fs, s.path, "from disk\n")
+    s.disk = "print(1)\n"
+    s.text = "print(1)\n"
+    s.overwrite = false
+    wm.key(d, "ctrl+s")
+fun saved() = strings.replace(vfs.read(fs, s.path), "\n", "\\n")
+arm()
+print("warned", s.overwrite, saved())
+wm.key(d, "ctrl+r")
+wm.key(d, "ctrl+s")
+print("after run", s.overwrite, s.status, saved())
+arm()
+wm.key(d, "f5")
+wm.key(d, "ctrl+s")
+print("after f5", s.status, saved())
+arm()
+wm.key(d, "ctrl+e")
+wm.key(d, "ctrl+s")
+print("after ctrl+e", s.status, saved())
+arm()
+wm.key(d, "ctrl+/")
+wm.key(d, "ctrl+s")
+print("after comment", s.status, saved(), strings.replace(s.text, "\n", "\\n"))
+arm()
+wm.key(d, "ctrl+s")
+print("second save", s.status, saved())
+s.text = "use std/os\nlet line = os.read_line()\nprint(line)\n"
+wm.key(d, "ctrl+r")
+vfs.write(fs, s.path, "while waiting\n")
+s.disk = "print(1)\n"
+wm.key(d, "ctrl+s")
+print("warned while waiting", s.overwrite, saved())
+wm.key(d, "a")
+wm.key(d, "ctrl+s")
+print("typed, warned again", s.overwrite, s.status, saved())

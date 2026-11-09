@@ -1,0 +1,8 @@
+warned true from disk\n
+after run true changed on disk: ctrl+s again from disk\n
+after f5 changed on disk: ctrl+s again from disk\n
+after ctrl+e changed on disk: ctrl+s again from disk\n
+after comment changed on disk: ctrl+s again from disk\n print(1)\n# 
+second save saved print(1)\n
+warned while waiting true while waiting\n
+typed, warned again true changed on disk: ctrl+s again while waiting\n

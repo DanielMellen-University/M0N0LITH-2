@@ -1,0 +1,14 @@
+# Pasting in the Editor keeps every line of the clipboard, not only the first.
+use ../shell/wm
+let d = wm.new_desktop(640, 480, wm.default_apps())
+let e = wm.launch(d, wm.editor)
+let s = e.state
+fun pos() = len(s.text) - s.back
+
+s.text = "a\nb"
+s.back = 0
+s.mark = len(s.text)
+wm.key(d, "ctrl+c")
+wm.key(d, "ctrl+end")
+wm.key(d, "ctrl+v")
+print([s.text])

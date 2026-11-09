@@ -1,0 +1,20 @@
+# The already-there note from a rename clears on the next key.
+use ../shell/wm
+use std/vfs
+let d = wm.new_desktop(640, 480, wm.default_apps())
+let f = wm.launch(d, wm.files_app)
+let fs = f.state.fs
+fun show() = wm.visible_lines(f)
+
+vfs.write(fs, "/tmp/a.txt", "a")
+vfs.write(fs, "/tmp/b.txt", "b")
+f.state.path = "/tmp"
+show()
+for i in 0..len(f.state.names)
+    if f.state.names[i] == "a.txt"
+        f.state.sel = i
+for k in ["f2", "ctrl+u", "b", ".", "t", "x", "t", "return"]
+    wm.key(d, k)
+print("note", show()[0])
+wm.key(d, "down")
+print("cleared", show()[0])

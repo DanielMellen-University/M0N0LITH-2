@@ -1,6 +1,6 @@
 # Editor
 
-A text editor for files in the desktop's in-memory filesystem. A new Editor window opens the file last opened in Files, or `/home/welcome.txt` if none was. Opening a file by a path typed in the Editor is parked with the Nov 7 2026 acceptance, not scheduled.
+A text editor for files in the desktop's filesystem. A new Editor window opens the file last opened in Files, or `/home/welcome.txt` if none was. Opening a file by a path typed in the Editor is parked with the Nov 7 2026 acceptance, not scheduled. Ctrl+S writes the vfs and, when a workspace is open, commits it. The status stays off `saved` when that commit fails. Text that was not saved is not in the store. See [Workspace recovery](../workspace-recovery.md).
 
 ## The title line
 
@@ -63,7 +63,7 @@ Each typed character, Backspace, Delete, new line, or replaced or removed select
 
 Ctrl+S writes the whole buffer to the file. If the save fails, the status says why and the buffer stays as it was, so you can try again.
 
-The Terminal, Files and the IDE can change the same file while the Editor has it open. The Editor remembers the file as it last read or saved it. If the file on disk is different when you press Ctrl+S, it writes nothing and shows `changed on disk: ctrl+s again`. A second Ctrl+S right after overwrites; any other key in between cancels that. A file removed meanwhile is simply written again.
+The Terminal, Files and the IDE can change the same file while the Editor has it open. The Editor remembers the file as it last read or saved it. If the file on disk is different when you press Ctrl+S, it writes nothing and shows `changed on disk: ctrl+s again`. A second Ctrl+S right after overwrites; any other key, or a click or a drag, in between cancels that. A file removed meanwhile is simply written again.
 
 ## Long text
 

@@ -25,5 +25,13 @@ endforeach()
 # Every shell file must pass relic check (no syntax errors or undefined names).
 # desktop.relic needs SDL to run, but check does not run it.
 add_test(NAME check_shell
-  COMMAND ${RELIC_EXE} check wm.relic desktop.relic
+  COMMAND ${RELIC_EXE} check wm.relic workspace.relic desktop.relic
   WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}/shell)
+
+# Two fresh relic processes share one workspace directory. The golden tests
+# reload inside one process; this one checks that a second process, with a
+# new vfs, reads what the first committed.
+add_test(NAME workspace_restart
+  COMMAND ${CMAKE_COMMAND} -DRELIC=${RELIC_EXE} -DROOT=${CMAKE_SOURCE_DIR}
+    -DBUILD=${CMAKE_BINARY_DIR}
+    -P ${CMAKE_SOURCE_DIR}/tools/run_workspace_restart.cmake)

@@ -1,0 +1,12 @@
+# Left at / does not move.
+use ../shell/wm
+use std/vfs
+let d = wm.new_desktop(640, 480, wm.default_apps())
+let f = wm.launch(d, wm.files_app)
+let fs = f.state.fs
+fun show() = wm.visible_lines(f)
+
+f.state.path = "/"
+show()
+wm.key(d, "left")
+print(f.state.path, f.state.sel)

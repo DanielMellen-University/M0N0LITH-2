@@ -21,7 +21,7 @@ Every key and click the desktop and its apps act on, checked against `shell/wm.r
 | Ctrl+W | closes the window with focus, as its x box does |
 | Ctrl+M | minimizes the window with focus, as its _ box does |
 | Ctrl+1 to Ctrl+9 | brings the window of that taskbar button (counting in the order opened) to the front, restoring it if minimized |
-| Escape | closes the Start menu or the +N list; else gives up what the window on top is asking for (a find, replace or line number in the Editor or the IDE, a name in Paint or Files), stops an IDE run that waits for input, or drops a selection in the Editor or the IDE; else quits the desktop (the in-memory files are lost). A held, repeating Escape does not quit |
+| Escape | closes the Start menu or the +N list; else gives up what the window on top is asking for (a find, replace or line number in the Editor or the IDE, a name in Paint or Files, a delete question in Files), stops an IDE run that waits for input, or drops a selection in the Editor or the IDE; else quits the desktop (the in-memory files are lost). A held, repeating Escape does not quit |
 
 ## Clicker
 
@@ -102,7 +102,7 @@ The commands are in [the Terminal doc](apps/TERMINAL.md).
 | Home, End | the first character after the leading spaces (Home again: the very start), or the end of the line |
 | Ctrl+Left, Ctrl+Right | the start of the word before, or the end of the word after |
 | Ctrl+Home, Ctrl+End | the start or end of the file |
-| Page Up, Page Down | a window of lines less one, up or down |
+| Page Up, Page Down | a window of lines less one, up or down. In the IDE that window is the program above the output pane |
 | Ctrl+Backspace, Ctrl+Delete | removes the selection, or the word before or after the cursor |
 | Shift with an arrow, Home, End, Page Up or Page Down | selects from the cursor |
 | Ctrl+Shift+Left, Ctrl+Shift+Right, Ctrl+Shift+Home, Ctrl+Shift+End | selects to the word before or after, or to the start or end of the file |
@@ -120,7 +120,7 @@ The commands are in [the Terminal doc](apps/TERMINAL.md).
 | Ctrl+V | pastes it, over any selection |
 | Ctrl+Z | undoes the last edit (a cut or a paste is one), up to 500 |
 | Ctrl+Y | redoes what Ctrl+Z undid, newest first; a new edit ends it |
-| Ctrl+S | saves. If another app changed the file since it was opened or saved, the first Ctrl+S warns and writes nothing, and a second one right after overwrites |
+| Ctrl+S | saves. If another app changed the file since it was opened or saved, the first Ctrl+S warns and writes nothing, and a second one right after overwrites. Any other key, or a click or a drag, cancels that |
 | Ctrl+F | find: type the text, Return selects the next match after the cursor (going round to the start); Esc, another key or a click stops. With a selection on one line it starts with that, and typing replaces it |
 | F3, Shift+F3 | finds the last text again, the next or the one before |
 | Ctrl+G | go to a line: type its number, Return |

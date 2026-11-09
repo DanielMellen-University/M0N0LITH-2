@@ -1,0 +1,13 @@
+# Shift+Tab at column 0 changes nothing and is not an undo step.
+use ../shell/wm
+let d = wm.new_desktop(640, 480, wm.default_apps())
+let e = wm.launch(d, wm.editor)
+let s = e.state
+fun pos() = len(s.text) - s.back
+
+s.text = "hi"
+s.back = len(s.text)
+s.undo = []
+s.status = "open"
+wm.key(d, "shift+tab")
+print([s.text], len(s.undo), s.status)

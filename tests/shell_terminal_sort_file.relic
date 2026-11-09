@@ -1,0 +1,17 @@
+# sort orders by character and does not change the file.
+use ../shell/wm
+use std/vfs
+let t = wm.terminal.init()
+fun run(line)
+    t.buf = []
+    for c in line
+        if c == " "
+            wm.terminal.on_key(t, "space")
+        else
+            wm.terminal.on_key(t, c)
+    wm.terminal.on_key(t, "return")
+    return slice(t.buf, 1, len(t.buf))
+
+vfs.write(t.fs, "/tmp/nums.txt", "10\n2\nb\n1\n")
+print(run("sort /tmp/nums.txt"))
+print("file", [vfs.read(t.fs, "/tmp/nums.txt")])

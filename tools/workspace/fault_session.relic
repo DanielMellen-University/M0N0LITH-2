@@ -1,0 +1,20 @@
+# Third process: arm a torn pointer and change a file. The save must fail.
+use ../../shell/wm
+use std/os
+
+fun type_line(t, line)
+    for ch in line
+        if ch == " "
+            wm.terminal.on_key(t, "space")
+        else
+            wm.terminal.on_key(t, ch)
+    wm.terminal.on_key(t, "return")
+
+let args = os.args()
+if len(args) != 1
+    fail("fault_session needs the workspace directory")
+wm.workspace_open(args[0])
+wm.workspace_fault("torn-pointer")
+let t = wm.terminal.init()
+type_line(t, "echo NEW > lost.txt")
+print("fault", [wm.workspace_notice()])

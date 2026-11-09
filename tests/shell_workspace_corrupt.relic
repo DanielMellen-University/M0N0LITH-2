@@ -1,0 +1,142 @@
+# Images written as files, not through the saver. A bad committed generation
+# falls back to the previous one, or to the defaults when there is none, and
+# the notice says which. A number in a file is text, not a length to allocate.
+use ../shell/wm
+use std/files
+use std/vfs
+
+fun wipe(path)
+    try
+        files.remove_tree(path)
+    catch e
+        none
+
+fun image(body)
+    return "M2WS1\n" + body + ".\n"
+
+fun open_case(dir)
+    wipe(dir)
+    files.make_dir(dir)
+
+let dir = "ws-corrupt"
+let kept = image("D /home\nF /home/a.txt kept\n")
+
+open_case(dir)
+files.write(dir + "/g1.m2ws", kept)
+files.write(dir + "/g2.m2ws", "M2WS9\nD /home\nF /home/a.txt new\n.\n")
+files.write(dir + "/COMMITTED", "g2\n")
+wm.workspace_open(dir)
+print("version", [wm.workspace_notice()], [vfs.read(wm.terminal.init().fs, "/home/a.txt")])
+
+open_case(dir)
+files.write(dir + "/g1.m2ws", kept)
+files.write(dir + "/g2.m2ws", "M2WS1\nD /home\n")
+files.write(dir + "/COMMITTED", "g2\n")
+wm.workspace_open(dir)
+print("truncated", [wm.workspace_notice()], [vfs.read(wm.terminal.init().fs, "/home/a.txt")])
+
+open_case(dir)
+files.write(dir + "/g1.m2ws", kept)
+files.write(dir + "/g2.m2ws", "M2WS1\n.\nEXTRA\n")
+files.write(dir + "/COMMITTED", "g2\n")
+wm.workspace_open(dir)
+print("extra", [wm.workspace_notice()], [vfs.read(wm.terminal.init().fs, "/home/a.txt")])
+
+open_case(dir)
+files.write(dir + "/g1.m2ws", "M2WS1\nF /../x hi\n.\n")
+files.write(dir + "/COMMITTED", "g1\n")
+wm.workspace_open(dir)
+let fs = wm.terminal.init().fs
+print("dotdot", [wm.workspace_notice()], vfs.exists(fs, "/home/welcome.txt"), vfs.exists(fs, "/../x"))
+
+open_case(dir)
+files.write(dir + "/g1.m2ws", image("D /home\nF /home/a.txt one\nF /home/a.txt two\n"))
+files.write(dir + "/COMMITTED", "g1\n")
+wm.workspace_open(dir)
+print("duplicate", [wm.workspace_notice()], vfs.read(wm.terminal.init().fs, "/home/welcome.txt") == "Welcome to Relic.\n")
+
+open_case(dir)
+files.write(dir + "/g1.m2ws", image("F /home/docs/a.txt x\n"))
+files.write(dir + "/COMMITTED", "g1\n")
+wm.workspace_open(dir)
+print("parent", [wm.workspace_notice()], vfs.exists(wm.terminal.init().fs, "/home/docs/a.txt"))
+
+open_case(dir)
+files.write(dir + "/g1.m2ws", "M2WS1" + chr(13) + "\n.\n")
+files.write(dir + "/COMMITTED", "g1\n")
+wm.workspace_open(dir)
+print("cr", [wm.workspace_notice()], vfs.exists(wm.terminal.init().fs, "/home/welcome.txt"))
+
+open_case(dir)
+files.write(dir + "/g1.m2ws", image("D /home\nF /home/a.txt \\q\n"))
+files.write(dir + "/COMMITTED", "g1\n")
+wm.workspace_open(dir)
+print("escape", [wm.workspace_notice()])
+
+open_case(dir)
+files.write(dir + "/g1.m2ws", image("D /home\nF /home/a\\u0000b.txt x\n"))
+files.write(dir + "/COMMITTED", "g1\n")
+wm.workspace_open(dir)
+print("nul", [wm.workspace_notice()], vfs.exists(wm.terminal.init().fs, "/home/welcome.txt"))
+
+open_case(dir)
+files.write(dir + "/g1.m2ws", kept)
+files.write(dir + "/COMMITTED", "g1")
+wm.workspace_open(dir)
+print("short pointer", [wm.workspace_notice()], [vfs.read(wm.terminal.init().fs, "/home/a.txt")])
+
+open_case(dir)
+files.write(dir + "/g1.m2ws", kept)
+files.write(dir + "/COMMITTED", "g0\n")
+wm.workspace_open(dir)
+print("zero", [wm.workspace_notice()], [vfs.read(wm.terminal.init().fs, "/home/a.txt")])
+
+open_case(dir)
+files.write(dir + "/g1.m2ws", kept)
+files.write(dir + "/COMMITTED", "g01\n")
+wm.workspace_open(dir)
+print("leading zero", [wm.workspace_notice()], [vfs.read(wm.terminal.init().fs, "/home/a.txt")])
+
+open_case(dir)
+files.write(dir + "/g1.m2ws", image("D /home\nF /home/a.txt 999999999\n"))
+files.write(dir + "/COMMITTED", "g1\n")
+wm.workspace_open(dir)
+let text = vfs.read(wm.terminal.init().fs, "/home/a.txt")
+print("length is text", [wm.workspace_notice()], len(text), text)
+
+open_case(dir)
+files.write(dir + "/g1.m2ws", image(""))
+files.write(dir + "/COMMITTED", "g1\n")
+wm.workspace_open(dir)
+print("empty image", [wm.workspace_notice()], vfs.exists(wm.terminal.init().fs, "/home"))
+
+open_case(dir)
+files.write(dir + "/g1.m2ws", kept)
+files.write(dir + "/g2.m2ws", image("D /home\nF /home/a.txt new\n"))
+files.write(dir + "/COMMITTED", "g1\n")
+wm.workspace_open(dir)
+print("uncommitted", [wm.workspace_notice()], [vfs.read(wm.terminal.init().fs, "/home/a.txt")])
+
+open_case(dir)
+files.write(dir + "/g1.m2ws", kept)
+files.write(dir + "/g2.m2ws.partial", "M2WS1\n")
+files.write(dir + "/COMMITTED", "g1\n")
+wm.workspace_open(dir)
+print("partial", [wm.workspace_notice()], [vfs.read(wm.terminal.init().fs, "/home/a.txt")])
+
+open_case(dir)
+for n in 1..34
+    files.write(dir + "/g" + str(n) + ".m2ws.partial", "M2WS1\n")
+wm.workspace_open(dir)
+print("too many", [wm.workspace_notice()], vfs.read(wm.terminal.init().fs, "/home/welcome.txt") == "Welcome to Relic.\n")
+
+let long = "/"
+for i in 0..240
+    long = long + "a"
+open_case(dir)
+files.write(dir + "/g1.m2ws", image("F " + long + " x\n"))
+files.write(dir + "/COMMITTED", "g1\n")
+wm.workspace_open(dir)
+print("long path", [wm.workspace_notice()], len(long))
+
+wipe(dir)

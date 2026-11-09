@@ -1,0 +1,15 @@
+# Replacing with nothing removes every match, in one undo step.
+use ../shell/wm
+let d = wm.new_desktop(640, 480, wm.default_apps())
+let e = wm.launch(d, wm.editor)
+let s = e.state
+fun pos() = len(s.text) - s.back
+
+s.text = "a-b-a"
+s.back = 0
+s.undo = []
+for k in ["ctrl+h", "a", "return", "return"]
+    wm.key(d, k)
+print([s.text], s.status, len(s.undo))
+wm.key(d, "ctrl+z")
+print("undo", [s.text])

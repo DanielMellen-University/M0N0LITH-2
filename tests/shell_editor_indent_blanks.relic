@@ -1,0 +1,13 @@
+# Ctrl+] with a selection skips empty lines and indents the others, in one undo step.
+use ../shell/wm
+let d = wm.new_desktop(640, 480, wm.default_apps())
+let e = wm.launch(d, wm.editor)
+let s = e.state
+fun pos() = len(s.text) - s.back
+
+s.text = "a\n\nb"
+s.back = 0
+s.mark = len(s.text)
+s.undo = []
+wm.key(d, "ctrl+]")
+print([s.text], len(s.undo))

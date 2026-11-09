@@ -1,0 +1,27 @@
+# Page Down in the IDE moves by the editor lines on show, not by the rows the
+# output pane takes. One editor line stays in view.
+use ../shell/wm
+let d = wm.new_desktop(640, 480, wm.default_apps())
+let i = wm.launch(d, wm.ide)
+let s = i.state
+s.text = "print(1)\nprint(2)\nprint(3)\n"
+for n in 1..30
+    s.text = s.text + "# line " + str(n) + "\n"
+s.back = len(s.text)
+wm.key(d, "ctrl+r")
+wm.visible_lines(i)
+let rows = s.edit_rows
+fun line_at()
+    let pos = len(s.text) - s.back
+    let n = 1
+    let i = 0
+    while i < pos and i < len(s.text)
+        if s.text[i] == "\n"
+            n = n + 1
+        i = i + 1
+    return n
+let start = line_at()
+wm.key(d, "pagedown")
+print("edit rows", rows, "from", start, "to", line_at(), "step", line_at() - start)
+wm.key(d, "pageup")
+print("back", line_at())

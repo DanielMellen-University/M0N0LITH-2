@@ -28,6 +28,7 @@
 use std/strings
 use std/time
 use std/vfs
+use workspace
 use std/paths
 use std/math
 use std/lists
@@ -52,10 +53,53 @@ let line_height = 14     # text rows are this far apart
 let text_left = 6        # text starts this far in from a window's left edge
 let text_top = 6         # and this far below the title bar
 
-# Shared in-memory VFS for Files, Editor and Terminal (not the host disk).
+# Shared VFS for Files, Editor, Terminal, the IDE, Paint and Snake's best score.
+# With no workspace open it lasts one process, as the tests leave it. desktop.relic
+# opens a workspace; a save there is a new generation of this same vfs.
 let _shell_fs = vfs.new()
 # The file Editor opens next. Files sets it when you open a file.
 let _shell_open = {path: "/home/welcome.txt"}
+
+# "" when the vfs change is durable, or when the caller asked for a session-only
+# workspace (empty path). A store that was requested and could not be opened,
+# or that is held, is a failure the app must show. It is not "saved".
+fun _fs_commit()
+    if not workspace.requested()
+        return ""
+    if not workspace.enabled()
+        let note = workspace.notice()
+        if note == ""
+            return "workspace: save failed; store unavailable; kept defaults"
+        return note
+    try
+        return workspace.save(_shell_fs)
+    catch err
+        let note = workspace.notice()
+        if note == ""
+            return "workspace: save failed; cannot write store; kept defaults"
+        return note
+
+fun workspace_open(path)
+    workspace.open(path)
+    if workspace.enabled()
+        workspace.load(_shell_fs)
+
+fun workspace_open_default()
+    workspace.open_default()
+    if workspace.enabled()
+        workspace.load(_shell_fs)
+
+fun workspace_fault(stage)
+    workspace.arm(stage)
+
+fun workspace_notice()
+    return workspace.notice()
+
+fun workspace_enabled()
+    return workspace.enabled()
+
+fun workspace_release()
+    workspace.release()
 
 # A file or folder renamed or moved by Files or the Terminal takes the file the
 # next Editor opens with it, so that file is not lost to a new empty one.
@@ -1165,6 +1209,10 @@ fun _term_mkdir(s, path)
         vfs.make_dir(s.fs, p)
     catch err
         _term_reply(s, "mkdir: " + err.message)
+        return
+    let saved = _fs_commit()
+    if saved != ""
+        _term_reply(s, saved)
 
 fun _term_touch(s, path)
     if _term_not_folder(s, "touch", path, true)
@@ -1180,6 +1228,10 @@ fun _term_touch(s, path)
         vfs.write(s.fs, p, "")
     catch err
         _term_reply(s, "touch: " + err.message)
+        return
+    let saved = _fs_commit()
+    if saved != ""
+        _term_reply(s, saved)
 
 # write and echo > replace the file; echo >> adds to the end. Each adds a newline.
 fun _term_write(s, cmd, path, text, add)
@@ -1201,6 +1253,10 @@ fun _term_write(s, cmd, path, text, add)
             vfs.write(s.fs, p, text + "\n")
     catch err
         _term_reply(s, cmd + ": " + err.message)
+        return
+    let saved = _fs_commit()
+    if saved != ""
+        _term_reply(s, saved)
 
 # A quoted > or >> is text to echo, not a redirect.
 fun _term_echo(s, parts)
@@ -1230,6 +1286,10 @@ fun _term_rm(s, path)
             vfs.remove(s.fs, p)
         catch err
             _term_reply(s, "rm: " + err.message)
+            return
+        let saved = _fs_commit()
+        if saved != ""
+            _term_reply(s, saved)
 
 # mv a b: rename a to b, or move a into b when b is a folder.
 fun _term_mv(s, a, b)
@@ -1259,6 +1319,10 @@ fun _term_mv(s, a, b)
                 s.cwd = dst + slice(s.cwd, len(src), len(s.cwd))
         catch err
             _term_reply(s, "mv: " + err.message)
+            return
+        let saved = _fs_commit()
+        if saved != ""
+            _term_reply(s, saved)
 
 # head: the first 10 lines of a file (or as many as asked), read only as far
 # as they go.
@@ -1294,7 +1358,15 @@ fun _term_head(s, path, count)
     let text = vfs.read(s.fs, p)
     if text == ""
         return
-    for line in first_lines(text, count)
+    # first_lines keeps the empty place after a final newline, where the Editor
+    # can put the cursor. Ask for one extra line and drop that place, so head
+    # agrees with cat and tail.
+    let lines = first_lines(text, count + 1)
+    if len(lines) > count
+        lines = slice(lines, 0, count)
+    else if strings.ends_with(text, "\n") and len(lines) > 0 and lines[len(lines) - 1] == ""
+        lines = slice(lines, 0, len(lines) - 1)
+    for line in lines
         _term_reply(s, line)
 
 # tail: the last 10 lines of a file (or as many as asked), the way cat finds
@@ -1430,6 +1502,10 @@ fun _term_cp(s, a, b)
             vfs.write(s.fs, dst, vfs.read(s.fs, src))
         catch err
             _term_reply(s, "cp: " + err.message)
+            return
+        let saved = _fs_commit()
+        if saved != ""
+            _term_reply(s, saved)
 
 # The words of a line; a run of spaces counts as one. A word in double or
 # single quotes keeps its spaces, so "my notes.txt" is one word, and the quotes
@@ -1698,8 +1774,15 @@ fun _term_complete(s)
             mark = "\""
         s.input = head + mark + folder + common
     else
+        # the same shape ls uses: a folder ends in /, a name with a space is quoted
+        let shown = []
+        for n in found
+            let name = n
+            if n in dirs
+                name = n + "/"
+            append(shown, _term_name(name))
         _term_reply(s, s.cwd + "> " + s.input)
-        _term_reply(s, strings.join(found, "  "))
+        _term_reply(s, strings.join(shown, "  "))
 
 # Ctrl+V: the clipboard's first line. A path with a space that is there (what
 # Files' Ctrl+C copies) goes in quotes, so it stays one word; not when a
@@ -1995,6 +2078,9 @@ fun _files_rename_key(s, k)
             s.note = err.message
             return
         _follow_rename(r.from, to)
+        let saved = _fs_commit()
+        if saved != ""
+            s.note = saved
         # the row keeps the selection under its new name
         for i in 0..len(s.names)
             if s.names[i] == old
@@ -2019,6 +2105,11 @@ fun _files_rename_key(s, k)
 fun _files_escape(s)
     if "renaming" in s and s.renaming != none
         s.renaming = none
+        return true
+    # Escape is not a key the file list sees, so the Delete question has to
+    # give up here or it would quit the desktop instead
+    if s.confirm != none
+        s.confirm = none
         return true
     return false
 
@@ -2049,6 +2140,9 @@ fun _files_key(s, k)
             s.note = "not empty: " + paths.base(full)
         else
             vfs.remove(s.fs, full)
+            let saved = _fs_commit()
+            if saved != ""
+                s.note = saved
             # the row goes from the list here too, so the next draw does not
             # take it for a file another app removed (that would select ..):
             # the selection stays on its line, now the next name
@@ -2336,12 +2430,16 @@ fun _editor_moved(s, k)
     if k == "ctrl+home"
         return 0
     if k == "pageup" or k == "pagedown"
-        # as many lines as show under the title, less one, so one stays in view
+        # as many lines as show under the title, less one, so one stays in view.
+        # In the IDE that is the editor area: the output pane is not part of it.
         let step = "up"
         if k == "pagedown"
             step = "down"
+        let window_rows = s.rows
+        if "edit_rows" in s and s.edit_rows > 0
+            window_rows = s.edit_rows
         let at = pos
-        for i in 0..math.max(1, s.rows - 2)
+        for i in 0..math.max(1, window_rows - 2)
             _editor_set_pos(s, at)
             at = _editor_moved(s, step)
         _editor_set_pos(s, pos)
@@ -2649,6 +2747,7 @@ fun _editor_relayout(s)
 # run waits for input.
 fun _editor_click(s, x, y)
     s.press = none
+    s.overwrite = false   # a click is not the second Ctrl+S, so the warning stands
     if "run" in s and s.run != none
         return none
     # a click gives up a find, replace or line number, as another key does
@@ -2707,6 +2806,7 @@ fun _editor_click(s, x, y)
 fun _editor_drag(s, x, y)
     if not "press" in s or s.press == none or ("run" in s and s.run != none)
         return
+    s.overwrite = false   # dragging a selection is not the second Ctrl+S
     _editor_relayout(s)
     let pos = _editor_point(s, x, y, true)
     if pos == none
@@ -2923,7 +3023,11 @@ fun _editor_key(s, k)
         s.overwrite = false
         try
             vfs.write(s.fs, s.path, s.text)
-            s.status = "saved"
+            let saved = _fs_commit()
+            if saved != ""
+                s.status = saved
+            else
+                s.status = "saved"
             s.disk = s.text
         catch err
             s.status = err.message
@@ -3312,6 +3416,8 @@ fun _ide_comment_lines(s, sel)
         else
             append(out, slice(line, 0, lead) + "# " + body)
     let block = strings.join(out, "\n")
+    if block == slice(s.text, from, to)
+        return   # blank lines alone are already "comments"; that is not an edit
     _editor_change(s, from, to - from, block)
     s.mark = len(s.text) - from
     _editor_set_pos(s, from + len(block))
@@ -3330,8 +3436,13 @@ fun _ide_toggle_comment(s)
         let n = 1
         if at + 1 < len(s.text) and s.text[at + 1] == " "
             n = 2
+        let keep = pos
         _editor_change(s, at, n, "")
-        _editor_set_pos(s, math.max(at, pos - n))
+        # a cursor sitting in the indent, before the "#", stays on that space
+        if keep <= at
+            _editor_set_pos(s, keep)
+        else
+            _editor_set_pos(s, math.max(at, keep - n))
     else
         _editor_change(s, at, 0, "# ")
         if pos >= at
@@ -3379,8 +3490,11 @@ fun _ide_lines(s)
                 line = _scroll_to(line, len(prompt) + at, s.cols)   # the cursor stays in view
             append(pane, line)
     let rows = s.rows
+    let editor_rows = rows
     if rows > 0
-        s.rows = math.max(2, rows - len(pane))
+        editor_rows = math.max(2, rows - len(pane))
+        s.rows = editor_rows
+    s.edit_rows = editor_rows   # Page Up and Page Down use the editor area, not the pane
     let out = _editor_lines(s)
     s.rows = rows
     out[0] = "IDE" + slice(out[0], 6, len(out[0]))   # "Editor [..." -> "IDE [..."
@@ -3393,6 +3507,10 @@ fun _ide_key(s, k)
     s.press = none
     if k == "f5" or k == "ctrl+return" or k == "ctrl+keypad enter"
         k = "ctrl+r"   # F5 and Ctrl+Return run too, as in most IDEs and notebooks
+    # Ctrl+R, Ctrl+E, Ctrl+/ and the input line are keys too: they cancel a
+    # changed-on-disk warning the way every Editor key but Ctrl+S does.
+    if k != "ctrl+s"
+        s.overwrite = false
     if s.run != none and k == "ctrl+s"
         # saving does not stop a run that waits for input (decided Oct 31)
         _editor_key(s, k)
@@ -3499,7 +3617,11 @@ fun _paint_save(s)
         return
     try
         vfs.write(s.fs, s.path, _paint_text(s))
-        s.status = "saved"
+        let saved = _fs_commit()
+        if saved != ""
+            s.status = saved
+        else
+            s.status = "saved"
     catch e
         s.status = e.message
 
@@ -3942,6 +4064,9 @@ fun _snake_step(s)
             s.best = s.score
             try
                 vfs.write(s.fs, _snake_best_path, "{s.best}\n")
+                let saved = _fs_commit()
+                if saved != ""
+                    s.save_note = saved
             catch e
                 none   # a best that cannot be saved still shows
         _snake_place_food(s)
@@ -3993,7 +4118,10 @@ fun _snake_click(s, x, y) = none
 
 fun _snake_lines(s)
     let help = {ready: "arrows or space to start", playing: "space to pause", paused: "paused: space to go on", over: "game over: r to play", won: "you won! r to play again"}
-    return ["Snake  score {s.score}  best {s.best}", help[s.state]]
+    let line = help[s.state]
+    if "save_note" in s and s.save_note != ""
+        line = s.save_note
+    return ["Snake  score {s.score}  best {s.best}", line]
 
 fun _snake_paint(s)
     let c = _snake_cell
