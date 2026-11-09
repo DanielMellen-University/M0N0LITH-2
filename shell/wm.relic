@@ -2035,6 +2035,11 @@ fun _files_escape(s)
     if "renaming" in s and s.renaming != none
         s.renaming = none
         return true
+    # Escape is not a key the file list sees, so the Delete question has to
+    # give up here or it would quit the desktop instead
+    if s.confirm != none
+        s.confirm = none
+        return true
     return false
 
 fun _files_key(s, k)

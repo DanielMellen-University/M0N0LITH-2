@@ -210,6 +210,7 @@ Write `tests/shell_<topic>.relic`, run it, read its output, and save that as `te
 | `shell_files_copy_file` | Ctrl+C copies a file's full path, to paste into Notes |
 | `shell_files_click_scrolled` | a click on a visible row of a scrolled list opens the row shown there |
 | `shell_files_jump_symbol` | jump-to-letter works for a name starting with a symbol, going round to the top |
+| `shell_files_delete_esc` | Escape gives up a Delete question without removing the file, and a second Escape is not taken |
 
 ### Editor
 

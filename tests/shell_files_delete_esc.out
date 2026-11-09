@@ -1,0 +1,4 @@
+asked Delete z.txt? Delete again
+escape true
+after Files: /tmp none true
+again false
