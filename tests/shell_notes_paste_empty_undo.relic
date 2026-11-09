@@ -1,0 +1,16 @@
+# Pasting an empty clipboard keeps both the cursor and the one-step undo.
+use ../shell/wm
+for moves in [["left", "left"], ["home"], ["end"]]
+    let n = wm.notes.init()
+    for ch in "abcd"
+        wm.notes.on_key(n, ch)
+    wm.notes.on_key(n, "ctrl+u")
+    wm.notes.on_key(n, "ctrl+z")
+    for k in moves
+        wm.notes.on_key(n, k)
+    wm.notes.on_key(n, "ctrl+v")
+    print("empty paste", wm.notes.lines(n)[1])
+    wm.notes.on_key(n, "ctrl+z")
+    print("undo", wm.notes.lines(n)[1])
+    wm.notes.on_key(n, "ctrl+z")
+    print("redo", wm.notes.lines(n)[1])

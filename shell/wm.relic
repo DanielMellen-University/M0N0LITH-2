@@ -854,6 +854,8 @@ fun _drop_word(text) = slice(text, 0, _word_left(text, len(text)))
 # Ctrl+U and Ctrl+V work on the part before it. Ctrl+C, Ctrl+X and Ctrl+Z
 # take the whole line and put the cursor at the end.
 fun _notes_key(s, k)
+    if k == "ctrl+v" and _clip_line() == ""
+        return
     let n = len(s.text)
     let left = _notes_left(s)
     if k == "left"
