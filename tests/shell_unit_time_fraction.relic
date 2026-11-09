@@ -1,0 +1,7 @@
+# format_time drops the fraction and treats a negative value as the epoch.
+use ../shell/wm
+print(wm.format_time(1.9))
+print(wm.format_time(59.9))
+print(wm.format_time(3600.2))
+print(wm.format_time(-0.4))
+print(wm.format_time(-100000))
