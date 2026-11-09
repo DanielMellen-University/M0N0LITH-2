@@ -1,0 +1,4 @@
+["/home> touch /tmp/x-name.txt"]
+["/home> cd /tmp"]
+["/tmp> find -name", "x-name.txt"]
+["/tmp> find -missing", "find: nothing named like -missing"]
