@@ -8,7 +8,7 @@ The title reads `IDE [status] path  (ctrl+s save, ctrl+r run)`. Every Editor key
 
 Ctrl+R (or F5, or Ctrl+Return) runs the text in the buffer, saved or not. The program runs in Relic's self-hosted interpreter (`selfhost/interp` from the pinned Relic), inside the desktop: there is no separate process.
 
-- `print` and `eprint` lines go to the output pane. The pane shows the last 6 lines and keeps the last 200.
+- `print` and `eprint` lines go to the output pane. The pane shows the last 6 lines and keeps the last 200. Page Up and Page Down move by the program lines on show above that pane, not by the rows the pane takes.
 - The status becomes `ran`, `error`, `waiting for input` or `stopped`.
 - An error in the program shows as `line L: message`, and the pane's header says `ctrl+e: to line L`. Ctrl+E puts the cursor at the start of that line, and so does a click on the error or on that header. An error inside a module the program used shows that module's path and line instead, and Ctrl+E does nothing then.
 - Ctrl+/ comments out the line the cursor is on, putting `# ` after its leading spaces, or takes a `#` (and the space after it) back off. It is one undo step, and the cursor stays on the same character. With a selection it does every line the selection is on (not one it only ends at the start of, as after Ctrl+L): if they are all comments already (blank lines aside) it takes the `#` off each, else it puts one on each, in one undo step, and the lines stay selected.

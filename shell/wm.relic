@@ -2351,12 +2351,16 @@ fun _editor_moved(s, k)
     if k == "ctrl+home"
         return 0
     if k == "pageup" or k == "pagedown"
-        # as many lines as show under the title, less one, so one stays in view
+        # as many lines as show under the title, less one, so one stays in view.
+        # In the IDE that is the editor area: the output pane is not part of it.
         let step = "up"
         if k == "pagedown"
             step = "down"
+        let window_rows = s.rows
+        if "edit_rows" in s and s.edit_rows > 0
+            window_rows = s.edit_rows
         let at = pos
-        for i in 0..math.max(1, s.rows - 2)
+        for i in 0..math.max(1, window_rows - 2)
             _editor_set_pos(s, at)
             at = _editor_moved(s, step)
         _editor_set_pos(s, pos)
@@ -3394,8 +3398,11 @@ fun _ide_lines(s)
                 line = _scroll_to(line, len(prompt) + at, s.cols)   # the cursor stays in view
             append(pane, line)
     let rows = s.rows
+    let editor_rows = rows
     if rows > 0
-        s.rows = math.max(2, rows - len(pane))
+        editor_rows = math.max(2, rows - len(pane))
+        s.rows = editor_rows
+    s.edit_rows = editor_rows   # Page Up and Page Down use the editor area, not the pane
     let out = _editor_lines(s)
     s.rows = rows
     out[0] = "IDE" + slice(out[0], 6, len(out[0]))   # "Editor [..." -> "IDE [..."

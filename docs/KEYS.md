@@ -102,7 +102,7 @@ The commands are in [the Terminal doc](apps/TERMINAL.md).
 | Home, End | the first character after the leading spaces (Home again: the very start), or the end of the line |
 | Ctrl+Left, Ctrl+Right | the start of the word before, or the end of the word after |
 | Ctrl+Home, Ctrl+End | the start or end of the file |
-| Page Up, Page Down | a window of lines less one, up or down |
+| Page Up, Page Down | a window of lines less one, up or down. In the IDE that window is the program above the output pane |
 | Ctrl+Backspace, Ctrl+Delete | removes the selection, or the word before or after the cursor |
 | Shift with an arrow, Home, End, Page Up or Page Down | selects from the cursor |
 | Ctrl+Shift+Left, Ctrl+Shift+Right, Ctrl+Shift+Home, Ctrl+Shift+End | selects to the word before or after, or to the start or end of the file |
