@@ -285,6 +285,7 @@ Write `tests/shell_<topic>.relic`, run it, read its output, and save that as `te
 | `shell_editor_replace_empty` | replacing with nothing removes every match, in one undo step |
 | `shell_editor_f3_none` | F3 and Shift+F3 with no text found yet change nothing |
 | `shell_editor_escape_sel` | Escape drops a selection and is taken, and with no selection it is not taken |
+| `shell_editor_paste_all` | pasting in the Editor keeps every line of the clipboard |
 
 ### IDE
 
