@@ -318,6 +318,7 @@ Write `tests/shell_<topic>.relic`, run it, read its output, and save that as `te
 | `shell_ide_input_u` | Ctrl+U in the input line removes what is before the cursor and keeps the rest |
 | `shell_ide_input_k` | Ctrl+K in the input line removes what is after the cursor |
 | `shell_ide_stop_esc` | Escape stops a run that is waiting for input |
+| `shell_ide_stop_c` | Ctrl+C stops a run that is waiting for input |
 
 ### Paint
 
