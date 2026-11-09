@@ -1,0 +1,12 @@
+# A minimized window is not hit, so the click falls through to the window under it.
+use ../shell/wm
+let d = wm.new_desktop(640, 480, wm.default_apps())
+let low = wm.launch(d, wm.clicker)
+let high = wm.launch(d, wm.notes)
+high.x = low.x
+high.y = low.y
+wm.minimize(d, high.id)
+print(wm.click(d, low.x + 8, low.y + wm.title_height + 4))
+print("count", low.state.count)
+print("focus", wm.focused(d).id == low.id)
+print("notes", high.state.text)
