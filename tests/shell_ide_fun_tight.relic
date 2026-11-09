@@ -1,0 +1,11 @@
+# fun f()=1, with no spaces around =, still opens a block.
+use ../shell/wm
+let d = wm.new_desktop(640, 480, wm.default_apps())
+let i = wm.launch(d, wm.ide)
+let s = i.state
+fun pos() = len(s.text) - s.back
+
+s.text = "fun f()=1"
+s.back = 0
+wm.key(d, "return")
+print([s.text])

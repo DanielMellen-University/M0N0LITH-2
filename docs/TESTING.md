@@ -331,6 +331,7 @@ Write `tests/shell_<topic>.relic`, run it, read its output, and save that as `te
 | `shell_ide_input_word` | Ctrl+Left in the input line moves to the start of the word |
 | `shell_ide_click_out` | a click on a plain output line does not move the cursor |
 | `shell_ide_title` | a wide IDE title names Ctrl+R as well as Ctrl+S |
+| `shell_ide_fun_tight` | fun f()=1, with no spaces around =, still opens a block |
 
 ### Paint
 
