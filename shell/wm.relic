@@ -3322,8 +3322,10 @@ let _ide_steps = 200000
 let _ide_pane = 6       # output lines shown at most, under a separator line
 let _ide_out_keep = 200 # output lines kept
 
-fun _ide_init()
-    let s = _editor_init()
+fun _ide_init() = _ide_state(_editor_init())
+
+# Both a new buffer and a restored one need all of the IDE's transient fields.
+fun _ide_state(s)
     s.out = []          # the last run's output, then its errors
     s.diags = []        # {file, line, col, msg}, in the order they were found
     s.err_line = none   # line of the error Ctrl+E jumps to, in this file
@@ -4425,13 +4427,21 @@ fun _restore_state(w)
     if w.app == "Editor"
         return _restore_editor(f)
     if w.app == "IDE"
-        let s = _restore_editor(f)
+        let s = _ide_state(_restore_editor(f))
         s.out = workspace.unpack_lines(f.out, 201)
-        s.err_line = none
+        for line in s.out
+            let diag = ide_diag.parse_line(line)
+            if diag != none
+                append(s.diags, diag)
         if f.err != "-"
             s.err_line = int(f.err)
-        s.run = none
-        s.input = ""
+            # Older snapshots may have only a line. Keep that jump at column 1
+            # unless the saved output also names its column in this buffer.
+            s.err_col = 1
+            for diag in s.diags
+                if diag.line == s.err_line and ide_diag.same_file(s.path, diag.file)
+                    s.err_col = math.max(1, diag.col)
+                    break
         return s
     if w.app == "Notes"
         return {text: f.text, before: none, left: int(f.left)}
