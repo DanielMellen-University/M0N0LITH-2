@@ -1,0 +1,5 @@
+["/home> pwd -P", "usage: pwd"]
+["/home> pwd", "/home"]
+["/home> cd /tmp"]
+["/tmp> pwd --", "usage: pwd"]
+["/tmp> pwd", "/tmp"]
