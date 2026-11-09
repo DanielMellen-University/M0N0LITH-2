@@ -1,0 +1,4 @@
+["/home> ls \"\"", "welcome.txt"]
+["/home> cd /tmp"]
+["/tmp> touch /tmp/a.txt"]
+["/tmp> ls ''", "a.txt"]
