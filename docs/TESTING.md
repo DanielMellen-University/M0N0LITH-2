@@ -176,6 +176,7 @@ Write `tests/shell_<topic>.relic`, run it, read its output, and save that as `te
 | `shell_terminal_recall_dups` | a command repeated immediately is kept once, and the same command later is kept again |
 | `shell_terminal_up_none` | Up and Down with an empty history leave the line being typed |
 | `shell_terminal_delete_end` | Delete at the end of the Terminal line changes nothing, and in the middle removes the next character |
+| `shell_terminal_word_ends` | Ctrl+Right at the end of the line and Ctrl+Left at the start leave the cursor there |
 
 ### Files
 
