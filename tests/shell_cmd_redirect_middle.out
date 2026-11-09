@@ -1,0 +1,3 @@
+["/home> echo hello > out.txt world", "hello > out.txt world"]
+out true
+world true
