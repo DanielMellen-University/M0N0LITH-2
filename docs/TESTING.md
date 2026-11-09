@@ -268,6 +268,7 @@ Write `tests/shell_<topic>.relic`, run it, read its output, and save that as `te
 | `shell_workspace_roundtrip` | Terminal create, append and remove, a quoted name, Files rename, Editor save, IDE run, then a reopen; Notes and Clicker do not come back |
 | `shell_workspace_faults` | each fault stage keeps the previous generation and says so; the Editor does not say `saved` |
 | `shell_workspace_corrupt` | hand-written wrong version, truncated, extra, `..`, duplicate, missing parent, CR, bad escape, NUL, bad pointers, a number that is text, an empty image, an uncommitted generation, a partial, too many names, a too-long path |
+| `shell_workspace_chain` | a corrupt commit does not install a newer uncommitted file; partial or full-uncommitted then a retry keeps the previous commit through a later corruption; a torn pointer with `META` keeps that commit and ignores a newer file; a torn pointer with two files and no `META` holds; a wrong version and too many names are not overwritten; a failed open is not `saved`; an empty path is; IDE Ctrl+S persists and a fault does not say saved |
 | `workspace_restart` | the same session across two processes, then a torn pointer and a fourth process |
 
 ### Shared filesystem and fuzzing

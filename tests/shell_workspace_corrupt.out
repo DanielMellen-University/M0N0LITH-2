@@ -1,4 +1,4 @@
-version ["workspace: committed image wrong version; recovered g1"] ["kept"]
+version ["workspace: committed image wrong version; store held; recovered g1"] ["kept"]
 truncated ["workspace: committed image truncated; recovered g1"] ["kept"]
 extra ["workspace: committed image truncated; recovered g1"] ["kept"]
 dotdot ["workspace: no valid generation; using defaults"] true false
@@ -14,5 +14,5 @@ length is text [""] 9 999999999
 empty image [""] false
 uncommitted ["workspace: ignored uncommitted g2"] ["kept"]
 partial ["workspace: ignored partial g2"] ["kept"]
-too many ["workspace: too many generation files; using defaults"] true
+too many ["workspace: too many generation files; store held; using defaults"] true
 long path ["workspace: no valid generation; using defaults"] 241

@@ -18,8 +18,24 @@ let _fault = none
 let _boot = ""
 let _save = ""
 let _committed = none   # the generation installed, or none when the session is the defaults
+let _hold = ""          # non-empty: do not write or delete the store until release()
+let _opt_out = false    # explicit session-only (empty path). Not a failed open.
+let _requested = false  # a store was asked for. Unset means the old one-run vfs.
 
 fun enabled() = _dir != none
+
+fun opt_out() = _opt_out
+
+fun requested() = _requested
+
+# Drops the read-only hold. The next successful save may then replace held files.
+# It does not delete anything by itself.
+fun release()
+    if _hold == ""
+        return
+    _hold = ""
+    _save = ""
+    _boot = "workspace: store hold released"
 
 fun notice()
     if _boot != "" and _save != ""
@@ -51,16 +67,21 @@ fun _strip_slash(path)
         p = slice(p, 0, len(p) - 1)
     return p
 
-# "" turns persistence off. A bad path leaves it off and sets the notice.
+# "" turns persistence off on purpose. A bad path leaves it off and sets the notice.
 fun open(path)
     _dir = none
     _committed = none
+    _hold = ""
+    _opt_out = false
+    _requested = false
     _boot = ""
     _save = ""
     if type(path) != "string"
         fail("workspace.open(): path must be a string, got " + type(path))
     if path == ""
+        _opt_out = true
         return
+    _requested = true
     let p = _strip_slash(path)
     if p == "" or p == "/" or len(p) > max_store_path or strings.contains(p, chr(0)) or strings.contains(p, "\n") or strings.contains(p, chr(13))
         _boot = "workspace: cannot open store"
@@ -86,6 +107,9 @@ fun open_default()
     if home == none or home == ""
         _dir = none
         _committed = none
+        _hold = ""
+        _opt_out = false
+        _requested = true
         _boot = "workspace: no store path; this run is not saved"
         _save = ""
         return
@@ -355,10 +379,70 @@ fun _highest(nums)
             best = n
     return best
 
+fun _highest_below(nums, limit)
+    let best = none
+    for n in nums
+        if n < limit and (best == none or n > best)
+            best = n
+    return best
+
+fun _highest_above(nums, limit)
+    let best = none
+    for n in nums
+        if n > limit and (best == none or n > best)
+            best = n
+    return best
+
+# "committed g3" or "previous none". none when the line is not that shape.
+fun _meta_line(line, label)
+    let pre = label + " "
+    if not strings.starts_with(line, pre)
+        return none
+    let rest = slice(line, len(pre), len(line))
+    if rest == "none"
+        return {set: true, n: none}
+    let n = _gen_of(rest + ".m2ws", ".m2ws")
+    if n == none
+        return none
+    return {set: true, n: n}
+
+# META names the last generation COMMITTED was meant to publish, and the one
+# before it. Used when the pointer file itself is missing or torn. A readable
+# COMMITTED still wins over META.
+fun _read_meta()
+    let path = _join("META")
+    if not files.exists(path) or files.is_dir(path)
+        return {ok: false}
+    try
+        if files.size(path) > 64
+            return {ok: false}
+        let text = files.read(path)
+        if strings.contains(text, chr(13)) or not strings.ends_with(text, "\n")
+            return {ok: false}
+        let lines = strings.split(text, "\n")
+        pop(lines)
+        if len(lines) != 2
+            return {ok: false}
+        let c = _meta_line(lines[0], "committed")
+        let p = _meta_line(lines[1], "previous")
+        if c == none or p == none
+            return {ok: false}
+        return {ok: true, committed: c.n, previous: p.n}
+    catch err
+        return {ok: false}
+
+fun _with_ignored(boot, newer, part)
+    if newer != none
+        boot = boot + "; ignored uncommitted g" + str(newer)
+    if part != none
+        boot = boot + "; ignored partial g" + str(part)
+    return boot
+
 fun load(fs)
     _boot = ""
     _save = ""
     _committed = none
+    _hold = ""
     if _dir == none
         return
     let names = []
@@ -366,6 +450,7 @@ fun load(fs)
         names = files.list(_dir)
     catch err
         _dir = none
+        _opt_out = false
         _boot = "workspace: cannot open store"
         return
     let gens = []
@@ -379,9 +464,11 @@ fun load(fs)
                 append(gens, {n: n, partial: false})
     if len(gens) > max_generation_files
         _reset_default(fs)
-        _boot = "workspace: too many generation files; using defaults"
+        _hold = "too-many"
+        _boot = "workspace: too many generation files; store held; using defaults"
         return
     let pointer = _read_pointer()
+    let meta = _read_meta()
     let valid = {}
     let reasons = {}
     let valid_nums = []
@@ -398,25 +485,68 @@ fun load(fs)
         if g.partial
             append(partial_nums, g.n)
     let part = _highest(partial_nums)
+    # A readable pointer that names a generation which parses is the commit.
+    # A newer complete file was not committed and is not installed.
     if pointer.state == "ok" and str(pointer.n) in valid
         _install(fs, valid[str(pointer.n)])
         _committed = pointer.n
-        # g(N-1) is the backup kept on purpose. Only a newer complete file is an
-        # uncommitted save that the pointer did not name.
-        let other = []
-        for n in valid_nums
-            if n > pointer.n
-                append(other, n)
-        let uncommitted = _highest(other)
-        if uncommitted != none and part != none
-            _boot = "workspace: ignored uncommitted g" + str(uncommitted) + "; ignored partial g" + str(part)
-        else if uncommitted != none
-            _boot = "workspace: ignored uncommitted g" + str(uncommitted)
-        else if part != none
-            _boot = "workspace: ignored partial g" + str(part)
+        _boot = _with_ignored("", _highest_above(valid_nums, pointer.n), part)
+        if _boot != ""
+            _boot = "workspace: " + slice(_boot, 2, len(_boot))
         return
-    let best = _highest(valid_nums)
-    if best == none
+    if pointer.state == "ok"
+        let reason = "invalid"
+        if str(pointer.n) in reasons
+            reason = reasons[str(pointer.n)]
+        else if not files.exists(_join("g" + str(pointer.n) + ".m2ws"))
+            reason = "missing"
+        let why = "committed image invalid"
+        if reason == "wrong-version"
+            why = "committed image wrong version"
+            _hold = "wrong-version"
+        else if reason == "truncated"
+            why = "committed image truncated"
+        # Older than the named generation only. A newer complete file is an
+        # uncommitted save and must not replace a corrupt commit.
+        let older = _highest_below(valid_nums, pointer.n)
+        let newer = _highest_above(valid_nums, pointer.n)
+        if older != none
+            _install(fs, valid[str(older)])
+            _committed = older
+            if _hold != ""
+                _boot = "workspace: " + why + "; store held; recovered g" + str(older)
+            else
+                _boot = "workspace: " + why + "; recovered g" + str(older)
+        else
+            _reset_default(fs)
+            if _hold != ""
+                _boot = "workspace: " + why + "; store held; using defaults"
+            else if reason == "missing" and len(valid_nums) == 0 and part == none
+                _boot = "workspace: no valid generation; using defaults"
+            else if len(valid_nums) == 0
+                _boot = "workspace: no valid generation; using defaults"
+            else
+                _boot = "workspace: " + why + "; using defaults"
+        _boot = _with_ignored(_boot, newer, part)
+        return
+    # Pointer file missing or torn. META names the last commit we published.
+    # Without that, a single valid generation is the only candidate. Two or
+    # more are ambiguous: do not promote the newest, and do not overwrite them.
+    let word = "missing"
+    if pointer.state == "invalid"
+        word = "invalid"
+    let chosen = none
+    if meta.ok and meta.committed != none and str(meta.committed) in valid
+        chosen = meta.committed
+    else if len(valid_nums) == 1
+        chosen = valid_nums[0]
+    else if len(valid_nums) > 1
+        _reset_default(fs)
+        _hold = "ambiguous"
+        _boot = "workspace: pointer " + word + "; store held; using defaults"
+        _boot = _with_ignored(_boot, _highest(valid_nums), part)
+        return
+    if chosen == none
         _reset_default(fs)
         if pointer.state == "missing" and len(gens) == 0
             _boot = ""
@@ -425,22 +555,10 @@ fun load(fs)
             if part != none
                 _boot = _boot + "; ignored partial g" + str(part)
         return
-    _install(fs, valid[str(best)])
-    _committed = best
-    let why = "pointer missing"
-    if pointer.state == "invalid"
-        why = "pointer invalid"
-    else if pointer.state == "ok"
-        let reason = "invalid"
-        if str(pointer.n) in reasons
-            reason = reasons[str(pointer.n)]
-        if reason == "wrong-version"
-            why = "committed image wrong version"
-        else if reason == "truncated"
-            why = "committed image truncated"
-        else
-            why = "committed image invalid"
-    _boot = "workspace: " + why + "; recovered g" + str(best)
+    _install(fs, valid[str(chosen)])
+    _committed = chosen
+    _boot = "workspace: pointer " + word + "; recovered g" + str(chosen)
+    _boot = _with_ignored(_boot, _highest_above(valid_nums, chosen), part)
 
 fun _walk(fs, path, rows, count)
     if count.too_many or count.too_big or count.bad_path
@@ -522,35 +640,53 @@ fun _write_exact(path, text)
         return "mismatch"
     return ""
 
+# The next slot is the installed commit plus one. Leftover partials and
+# uncommitted files at that number are replaced. Skipping them used to make
+# prune delete the real previous commit.
 fun _next_gen()
-    let n = 1
-    if _committed != none and _committed + 1 > n
-        n = _committed + 1
-    try
-        for name in files.list(_dir)
-            let a = _gen_of(name, ".m2ws.partial")
-            let b = _gen_of(name, ".m2ws")
-            if a != none and a + 1 > n
-                n = a + 1
-            if b != none and b + 1 > n
-                n = b + 1
-    catch err
+    if _committed == none
+        return 1
+    if _committed >= 999999999
         return none
-    if n > 999999999
-        return none
-    return n
+    return _committed + 1
 
-fun _prune(n)
+# Keep the new commit and the generation it replaced. Everything else that
+# parses as a generation name is not part of that chain.
+fun _prune(n, prev)
     try
         for name in files.list(_dir)
             if _gen_of(name, ".m2ws.partial") != none
                 _remove_quiet(_join(name))
             let g = _gen_of(name, ".m2ws")
-            if g != none and g < n - 1
+            if g != none and g != n and g != prev
                 _remove_quiet(_join(name))
     catch err
         none
     _remove_quiet(_join("COMMITTED.next"))
+    _remove_quiet(_join("META.next"))
+
+fun _meta_text(committed, previous)
+    let c = "none"
+    let p = "none"
+    if committed != none
+        c = "g" + str(committed)
+    if previous != none
+        p = "g" + str(previous)
+    return "committed " + c + "\nprevious " + p + "\n"
+
+# Published before COMMITTED. If the pointer file is then torn, load still
+# knows which generation was committed. A readable COMMITTED wins over this.
+fun _publish_meta(committed, previous)
+    let text = _meta_text(committed, previous)
+    let nextp = _join("META.next")
+    if not _wrote(nextp, text)
+        return false
+    if not _rename_over(nextp, _join("META"))
+        return false
+    try
+        return files.read(_join("META")) == text
+    catch err
+        return false
 
 fun _publish(n)
     let ptr = "g" + str(n) + "\n"
@@ -578,9 +714,17 @@ fun _wrote(path, text)
     return false
 
 fun save(fs)
-    if _dir == none
+    if not _requested or _opt_out
         return ""
+    if _dir == none
+        if _boot != ""
+            return _boot
+        return "workspace: save failed; store unavailable; kept defaults"
+    if _hold != ""
+        _save = "workspace: save failed; store held (" + _hold + "); not written"
+        return _save
     _save = ""
+    let prev = _committed
     if _fault == "torn-pointer"
         let stage = _fault
         _fault = none
@@ -628,6 +772,10 @@ fun save(fs)
         _fault = none
         if not _wrote(final, "M2WS1\n")
             return _save
+        if not _publish_meta(n, prev)
+            if _save == ""
+                return _fail("cannot write store")
+            return _save
         if not _publish(n)
             if _save == ""
                 return _fail("cannot write store")
@@ -639,11 +787,17 @@ fun save(fs)
         if not _wrote(_join("COMMITTED.next"), "g" + str(n) + "\n")
             return _save
         return _fail_fault(stage)
+    # META first, then COMMITTED. The commit is durable once COMMITTED reads
+    # back as gN, which is before prune and before this function returns.
+    if not _publish_meta(n, prev)
+        if _save == ""
+            return _fail("cannot write store")
+        return _save
     if not _publish(n)
         if _save == ""
             return _fail("cannot write store")
         return _save
     _committed = n
-    _prune(n)
+    _prune(n, prev)
     _fault = none
     return ""

@@ -60,12 +60,17 @@ let _shell_fs = vfs.new()
 # The file Editor opens next. Files sets it when you open a file.
 let _shell_open = {path: "/home/welcome.txt"}
 
-# "" when the store has the vfs (or no workspace is open). Otherwise the failure,
-# which the app shows. The vfs is not put back: the notice is what says the
-# save did not land. See docs/workspace-recovery.md.
+# "" when the vfs change is durable, or when the caller asked for a session-only
+# workspace (empty path). A store that was requested and could not be opened,
+# or that is held, is a failure the app must show. It is not "saved".
 fun _fs_commit()
-    if not workspace.enabled()
+    if not workspace.requested()
         return ""
+    if not workspace.enabled()
+        let note = workspace.notice()
+        if note == ""
+            return "workspace: save failed; store unavailable; kept defaults"
+        return note
     try
         return workspace.save(_shell_fs)
     catch err
@@ -92,6 +97,9 @@ fun workspace_notice()
 
 fun workspace_enabled()
     return workspace.enabled()
+
+fun workspace_release()
+    workspace.release()
 
 # A file or folder renamed or moved by Files or the Terminal takes the file the
 # next Editor opens with it, so that file is not lost to a new empty one.

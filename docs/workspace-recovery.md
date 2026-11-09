@@ -30,6 +30,7 @@ No `HOME` and no `USERPROFILE`, and the variable unset: persistence stays off an
 | `wm.workspace_enabled()` | true after a directory was opened |
 | `wm.workspace_notice()` | `""` when there is nothing to report, otherwise the text below |
 | `wm.workspace_fault(stage)` | the next save stops at `stage` and then the arm is cleared. `""` clears it. Any other string fails as `workspace: unknown fault {stage}` |
+| `wm.workspace_release()` | drop a hold. Does not delete files. The next successful save may replace them |
 
 `workspace_fault` is how a test produces a torn save without killing the process. A fixture can instead be written as files; the loader does not care which writer made them.
 
@@ -39,10 +40,11 @@ Flat directory. Unknown names are ignored and are not deleted.
 
 | Name | Meaning |
 |---|---|
-| `COMMITTED` | the committed generation. Exactly `g` + decimal + `\n`, such as `g3\n`. No leading zeros, no other bytes. Longer than 16 bytes is invalid |
+| `COMMITTED` | the committed generation. Exactly `g` + decimal + `\n`, such as `g3\n`. No leading zeros, no other bytes. Longer than 16 bytes is invalid. This file, once it reads back as that text, is the process-level commit |
+| `META` | two lines, `committed gN` or `committed none`, then `previous gP` or `previous none`, each ending in `\n`. At most 64 bytes. Written before `COMMITTED`. Used when the pointer file is missing or torn. A readable `COMMITTED` wins over it |
 | `gN.m2ws` | generation N, N from 1 to 9 digits, no leading zeros |
 | `gN.m2ws.partial` | a write that did not finish. Never installed |
-| `COMMITTED.next` | the pointer staged for the next commit. Never installed |
+| `COMMITTED.next`, `META.next` | staged pointer and metadata. Never installed |
 
 At most 32 names matching the two generation patterns are accepted. More than that: nothing is installed, and the notice is `workspace: too many generation files; using defaults`.
 
@@ -140,15 +142,16 @@ The vfs is replaced only after a generation has fully parsed.
 | valid, and that generation parses | a newer complete `gM.m2ws` | the named generation | `workspace: ignored uncommitted gM` (highest such M) |
 | valid, and that generation parses | a `gM.m2ws.partial` | the named generation | `workspace: ignored partial gM` (highest such M) |
 | both of those leftovers | | the named generation | `workspace: ignored uncommitted gM; ignored partial gK` |
-| valid, generation truncated | an older valid generation | the older one, the highest that parses | `workspace: committed image truncated; recovered gN` |
-| valid, generation `M2WS` but not `M2WS1` | an older valid generation | that older one | `workspace: committed image wrong version; recovered gN` |
-| valid, generation otherwise bad or missing | an older valid generation | that older one | `workspace: committed image invalid; recovered gN` |
-| missing | at least one valid generation | the highest valid generation | `workspace: pointer missing; recovered gN` |
-| invalid | at least one valid generation | the highest valid generation | `workspace: pointer invalid; recovered gN` |
-| unusable, and nothing valid | a partial may exist | defaults | `workspace: no valid generation; using defaults` or the same plus `; ignored partial gN` |
-| the directory cannot be listed | | the vfs is left as it was, and the workspace is not enabled | `workspace: cannot open store` |
+| valid, generation truncated or otherwise bad | an older valid generation, and maybe a newer complete file | the newest valid generation **older than the named one** | `workspace: committed image truncated; recovered gN` (or `invalid`). A newer file is `ignored uncommitted`, not installed |
+| valid, generation `M2WS` but not `M2WS1` | | defaults, or an older generation this desktop can parse | `workspace: committed image wrong version; store held; ...` The store is not written or deleted until `wm.workspace_release()` |
+| named generation missing or bad, and nothing older parses | | defaults | `workspace: no valid generation; using defaults` |
+| missing or invalid | `META` names a generation that parses | that generation, not a newer one | `workspace: pointer missing; recovered gN` or `pointer invalid` |
+| missing or invalid | exactly one valid generation and no `META` | that generation | the same recovered notice |
+| missing or invalid | two or more valid generations and no usable `META` | defaults, store held | `workspace: pointer invalid; store held; using defaults; ignored uncommitted gN` |
+| more than 32 generation names | | defaults, store held | `workspace: too many generation files; store held; using defaults` |
+| the directory cannot be listed, or the path cannot be opened | | the vfs is left as it was, and the workspace is not enabled | `workspace: cannot open store` |
 
-A valid pointer wins over a newer complete generation. That newer file is an uncommitted save, and the notice names it. The previous generation, kept so a bad newer file can fall back, is not announced. A missing or invalid pointer cannot say which generation was committed, so the highest file that fully parses is installed and the notice says the pointer was the problem. Partials and files that do not parse are never installed. Corrupt files are left in the directory.
+A readable pointer that names a generation which parses wins. A newer complete file is an uncommitted save and is not installed, including when the named generation is truncated or otherwise bad: the fallback is an **older** generation, never a newer one. Partials do not install. A wrong version, too many generation names, or a torn pointer with more than one valid generation and no usable `META` holds the store. Saves then fail and do not say they were saved, and nothing in the directory is replaced or deleted until `wm.workspace_release()`. That call does not delete files. The next successful save may. An empty `workspace_open("")` is a session-only opt-out and is not a failure. A path that was requested and could not be opened is a failure, and Ctrl+S says so.
 
 The boot notice stays for the rest of the process, including after a later successful save. A failed save is appended after ` | ` until a save succeeds.
 
@@ -170,19 +173,26 @@ One shot, then the arm clears. The save returns the notice and does not say it s
 
 Other save failures use `workspace: save failed; {reason}; kept gK` with reason `image too large`, `store readback mismatch`, or `cannot write store`.
 
+The next generation number is the installed commit plus one. A partial or uncommitted file at that number is replaced. It is not skipped. After `COMMITTED` reads back, prune deletes generation files other than the new commit and the generation it replaced (the previous installed commit). A gap left by a failed save does not cause that previous commit to be deleted.
+
+`wm.workspace_release()` is not a menu item. It is the explicit release of a hold.
+
 ## Guarantees
 
-- After `workspace.save` returns `""`, a new process that opens the same directory installs that generation, or a newer one that a later successful save committed.
-- A crash before that return does not replace `COMMITTED`. The previous generation file is still the one a valid pointer names, except in the Windows remove-then-rename gap, where the pointer may be missing and the highest valid generation is installed and named in the notice.
-- A truncated, wrong-version, or otherwise invalid committed generation is not installed. An older generation that still parses is installed and the notice says recovery. With none, the defaults are installed and the notice says there was no valid generation. The bad bytes stay on disk.
-- The first successful commit has no older generation. Losing that only file, with the pointer aimed at it, falls back to defaults. From the second successful commit on, the previous generation is kept until the one after next succeeds.
+- The process-level commit point is the `COMMITTED` file reading back as `gN\n`. That happens after the generation file and `META` have been published, and **before** prune and before `save` returns. A crash after that read-back and before `save` returns still leaves `COMMITTED` naming the new generation. A crash before that read-back leaves the previous `COMMITTED` in place, except the Windows gap below.
+- On Windows, replacing `COMMITTED` is remove-then-rename. A crash in that gap can leave no pointer. `META` was published first and names the generation that was about to be committed, so the load uses that when it parses, and says the pointer was missing. It does not install some other newer file.
+- A torn or missing pointer with a usable `META` installs the generation `META` calls committed. A newer complete file is ignored and named in the notice. It is not treated as the commit.
+- A torn or missing pointer with no usable `META` and exactly one valid generation installs that one. With two or more, it installs none, holds the store, and does not delete those files.
+- A truncated or otherwise unreadable committed generation is not installed. The newest **older** generation that parses is installed. A newer complete generation is not. With no older generation, the defaults are installed and the notice says so. The bad bytes stay on disk.
+- A wrong-version committed file, more than 32 generation names, or an ambiguous torn pointer holds the store. Continued use does not overwrite or delete it. `workspace_release` then a later successful save may.
+- The first successful commit has no older generation. From the second on, the generation that was installed when the save started is kept until the save after next replaces it as the backup.
 - Two processes must not write one store. The format has no lock.
 - Unsaved Editor, IDE, and Paint buffers, Notes, Clicker, and window layout are not in the store.
 - A program run in the IDE still cannot write the host disk. The store is written by the desktop, not by that program.
+- There is no fsync. This is not a promise about power loss.
 
 ## Not promised
 
-- Power-loss durability. There is no fsync in Relic 1.0.53.
+- Power-loss durability. There is no fsync in Relic 1.0.53. A commit that `save` has not yet published in `COMMITTED` is not durable across a kill, and a commit that has been published is still only as durable as the kernel's write-back.
 - A bound on host memory beyond refusing to install a generation `files.size` says is over the cap, and refusing one that parses over the caps.
-- That a missing pointer can tell an uncommitted complete generation from one whose pointer rename did not finish.
 - Host mounts, extra apps, or a general operating system.
