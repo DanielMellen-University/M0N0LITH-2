@@ -1,0 +1,14 @@
+# F2 on .. does not start a rename.
+use ../shell/wm
+use std/vfs
+let d = wm.new_desktop(640, 480, wm.default_apps())
+let f = wm.launch(d, wm.files_app)
+let fs = f.state.fs
+fun show() = wm.visible_lines(f)
+
+f.state.path = "/tmp"
+show()
+f.state.sel = 0
+wm.key(d, "f2")
+print(show()[0])
+print("renaming" in f.state and f.state.renaming != none)

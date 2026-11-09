@@ -217,6 +217,7 @@ Write `tests/shell_<topic>.relic`, run it, read its output, and save that as `te
 | `shell_files_copy_dir` | Ctrl+C on a folder copies its path with no slash, and on .. it copies nothing |
 | `shell_files_right_stay` | Right enters a folder and does nothing on a file or on .. |
 | `shell_files_left_root` | Left at / does not move |
+| `shell_files_f2_up` | F2 on .. does not start a rename |
 
 ### Editor
 
