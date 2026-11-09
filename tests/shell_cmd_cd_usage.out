@@ -1,0 +1,4 @@
+["/home> cd /tmp /home", "usage: cd [path]"]
+["/home> pwd", "/home"]
+["/home> cd /tmp extra", "usage: cd [path]"]
+["/home> pwd", "/home"]
