@@ -1,0 +1,16 @@
+# Two Files windows keep their own folders and selections.
+use ../shell/wm
+use std/vfs
+let d = wm.new_desktop(640, 480, wm.default_apps())
+let f = wm.launch(d, wm.files_app)
+let fs = f.state.fs
+fun show() = wm.visible_lines(f)
+
+let g = wm.launch(d, wm.files_app)
+f.state.path = "/tmp"
+show()
+wm.visible_lines(g)
+print(f.state.path, g.state.path)
+let before = f.state.sel
+wm.key(d, "down")
+print(before, f.state.sel, g.state.sel, g.state.path)
