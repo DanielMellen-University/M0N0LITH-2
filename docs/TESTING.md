@@ -166,6 +166,7 @@ Write `tests/shell_<topic>.relic`, run it, read its output, and save that as `te
 | `shell_terminal_bang_zero` | !0 is not in history, and !001 runs command 1 |
 | `shell_terminal_case_kept` | Echo is unknown, it is kept, and !! runs that same failure again without keeping it twice |
 | `shell_terminal_two` | two Terminals share the files and each keeps its own folder |
+| `shell_terminal_clear_past` | clear empties the screen and leaves the remembered commands, including clear itself |
 
 ### Files
 
