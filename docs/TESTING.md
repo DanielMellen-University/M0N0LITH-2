@@ -181,6 +181,7 @@ Write `tests/shell_<topic>.relic`, run it, read its output, and save that as `te
 | `shell_terminal_write_join` | write joins the words after the path, needs a path, and a path with no words writes a blank line |
 | `shell_terminal_paste_line` | Ctrl+V in the Terminal pastes only the first line of the clipboard |
 | `shell_terminal_ls_dot` | ls . lists the current folder and ls .. lists the parent |
+| `shell_terminal_root_ls` | cd / then pwd prints /, and ls shows home and tmp |
 
 ### Files
 
