@@ -1,8 +1,8 @@
 # Terminal
 
-A command line over the desktop's in-memory filesystem (`std/vfs` from Relic), written in Relic. It starts no host processes and never touches the real disk. Files, the Editor and the IDE work on the same filesystem, so a change made here shows there.
+A command line over the desktop's filesystem (`std/vfs` from Relic), written in Relic. It starts no host processes. A path in a command is a vfs path, not a host path. Files, the Editor and the IDE work on the same filesystem, so a change made here shows there.
 
-The filesystem starts with `/home`, `/tmp` and `/home/welcome.txt` (`vfs.new()` in Relic). It lives only while the desktop runs: quitting loses it.
+The filesystem starts with `/home`, `/tmp` and `/home/welcome.txt` (`vfs.new()` in Relic). The desktop commits it to the workspace after each command that changes a file or folder, and a later process reads that back. With no workspace open (the tests, unless one opens one), quitting still drops it. See [Workspace recovery](../workspace-recovery.md).
 
 ## Using it
 

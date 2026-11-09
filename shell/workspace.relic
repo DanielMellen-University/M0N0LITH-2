@@ -1,0 +1,868 @@
+# shell/workspace.relic: the session vfs written to a directory so a new process
+# can read it back. Not a mount of the host disk. The format, the fault stages
+# and what a crash can and cannot keep are in docs/workspace-recovery.md.
+use std/files
+use std/os
+use std/strings
+use std/vfs
+
+let max_generation_bytes = 1500000
+let max_entries = 2000
+let max_path = 240
+let max_file = 262144
+let max_generation_files = 32
+let max_store_path = 1024
+
+let _dir = none
+let _fault = none
+let _boot = ""
+let _save = ""
+let _committed = none   # the generation installed, or none when the session is the defaults
+let _hold = ""          # non-empty: do not write or delete the store until release()
+let _opt_out = false    # explicit session-only (empty path). Not a failed open.
+let _requested = false  # a store was asked for. Unset means the old one-run vfs.
+
+fun enabled() = _dir != none
+
+fun opt_out() = _opt_out
+
+fun requested() = _requested
+
+# Drops the read-only hold. The next successful save may then replace held files.
+# It does not delete anything by itself.
+fun release()
+    if _hold == ""
+        return
+    _hold = ""
+    _save = ""
+    _boot = "workspace: store hold released"
+
+fun notice()
+    if _boot != "" and _save != ""
+        return _boot + " | " + _save
+    if _boot != ""
+        return _boot
+    return _save
+
+fun _known_fault(stage)
+    return stage == "partial-generation" or stage == "full-uncommitted" or stage == "staged-pointer" or stage == "torn-pointer" or stage == "corrupt-committed"
+
+fun arm(stage)
+    if stage == none or stage == ""
+        _fault = none
+        return
+    if type(stage) != "string" or not _known_fault(stage)
+        let got = stage
+        if type(stage) != "string"
+            got = type(stage)
+        fail("workspace: unknown fault " + got)
+    _fault = stage
+
+fun _join(name)
+    return _dir + "/" + name
+
+fun _strip_slash(path)
+    let p = path
+    while len(p) > 1 and (strings.ends_with(p, "/") or strings.ends_with(p, "\\"))
+        p = slice(p, 0, len(p) - 1)
+    return p
+
+# "" turns persistence off on purpose. A bad path leaves it off and sets the notice.
+fun open(path)
+    _dir = none
+    _committed = none
+    _hold = ""
+    _opt_out = false
+    _requested = false
+    _boot = ""
+    _save = ""
+    if type(path) != "string"
+        fail("workspace.open(): path must be a string, got " + type(path))
+    if path == ""
+        _opt_out = true
+        return
+    _requested = true
+    let p = _strip_slash(path)
+    if p == "" or p == "/" or len(p) > max_store_path or strings.contains(p, chr(0)) or strings.contains(p, "\n") or strings.contains(p, chr(13))
+        _boot = "workspace: cannot open store"
+        return
+    try
+        files.make_dir(p)
+    catch err
+        _boot = "workspace: cannot open store"
+        return
+    if not files.is_dir(p)
+        _boot = "workspace: cannot open store"
+        return
+    _dir = p
+
+fun open_default()
+    let env = os.env("M0N0LITH_WORKSPACE")
+    if env != none
+        open(env)
+        return
+    let home = os.env("HOME")
+    if home == none or home == ""
+        home = os.env("USERPROFILE")
+    if home == none or home == ""
+        _dir = none
+        _committed = none
+        _hold = ""
+        _opt_out = false
+        _requested = true
+        _boot = "workspace: no store path; this run is not saved"
+        _save = ""
+        return
+    let p = home
+    if not strings.ends_with(p, "/") and not strings.ends_with(p, "\\")
+        p = p + "/"
+    open(p + ".m0n0lith2/workspace")
+
+fun _kept()
+    if _committed == none
+        return "defaults"
+    return "g" + str(_committed)
+
+fun _fail(why)
+    _save = "workspace: save failed; " + why + "; kept " + _kept()
+    return _save
+
+# The rename may already have published. Do not name an old generation as kept.
+fun _uncertain()
+    _save = "workspace: save failed; pointer publish uncertain"
+    return _save
+
+fun _fail_fault(stage)
+    _save = "workspace: save failed (" + stage + "); kept " + _kept()
+    return _save
+
+fun _hex4(n)
+    let digits = "0123456789abcdef"
+    let out = ""
+    let k = n
+    for i in 0..4
+        out = digits[k % 16] + out
+        k = int(k / 16)
+    return out
+
+fun _esc(s)
+    let out = ""
+    for c in s
+        let k = ord(c)
+        if c == "\\"
+            out = out + "\\\\"
+        else if c == "\n"
+            out = out + "\\n"
+        else if c == chr(13)
+            out = out + "\\r"
+        else if c == "\t"
+            out = out + "\\t"
+        else if c == " "
+            out = out + "\\s"
+        else if k < 32
+            out = out + "\\u" + _hex4(k)
+        else
+            out = out + c
+    return out
+
+fun _unhex(s, i)
+    if i + 4 > len(s)
+        return none
+    let v = 0
+    for j in 0..4
+        let c = s[i + j]
+        let d = -1
+        if c >= "0" and c <= "9"
+            d = ord(c) - 48
+        else if c >= "a" and c <= "f"
+            d = ord(c) - 87
+        if d < 0
+            return none
+        v = v * 16 + d
+    return v
+
+# none when the escape is not one this format writes.
+fun _unesc(s)
+    let out = ""
+    let i = 0
+    while i < len(s)
+        let c = s[i]
+        if c != "\\"
+            out = out + c
+            i = i + 1
+        else
+            if i + 1 >= len(s)
+                return none
+            let e = s[i + 1]
+            if e == "\\"
+                out = out + "\\"
+                i = i + 2
+            else if e == "n"
+                out = out + "\n"
+                i = i + 2
+            else if e == "r"
+                out = out + chr(13)
+                i = i + 2
+            else if e == "t"
+                out = out + "\t"
+                i = i + 2
+            else if e == "s"
+                out = out + " "
+                i = i + 2
+            else if e == "u"
+                let v = _unhex(s, i + 2)
+                if v == none or v > 31
+                    return none
+                try
+                    out = out + chr(v)
+                catch err
+                    return none
+                i = i + 6
+            else
+                return none
+        if len(out) > max_file
+            return none
+    return out
+
+fun _valid_path(p)
+    if p == none or len(p) < 2 or len(p) > max_path or p[0] != "/" or strings.ends_with(p, "/")
+        return false
+    if strings.contains(p, "\\")
+        return false
+    let parts = strings.split(p, "/")
+    if len(parts) < 2
+        return false
+    for i in 1..len(parts)
+        let name = parts[i]
+        if name == "" or name == "." or name == ".." or len(name) > max_path
+            return false
+        for c in name
+            if ord(c) < 32
+                return false
+    return true
+
+fun _parent(p)
+    let i = len(p) - 1
+    while i > 0 and p[i] != "/"
+        i = i - 1
+    if i == 0
+        return "/"
+    return slice(p, 0, i)
+
+fun _bad(reason)
+    return {ok: false, reason: reason}
+
+fun _parse(text)
+    # A CR byte is corruption (a text-mode rewrite), not a short write.
+    if strings.contains(text, chr(13))
+        return _bad("invalid")
+    if not strings.ends_with(text, "\n")
+        return _bad("truncated")
+    let lines = strings.split(text, "\n")
+    pop(lines)
+    if len(lines) < 2
+        return _bad("truncated")
+    if lines[0] != "M2WS1"
+        if strings.starts_with(lines[0], "M2WS") and len(lines[0]) > 4
+            let rest = slice(lines[0], 4, len(lines[0]))
+            let digits = rest != "" and rest != "1"
+            for c in rest
+                if c < "0" or c > "9"
+                    digits = false
+            if digits
+                return _bad("wrong-version")
+        return _bad("invalid")
+    if lines[len(lines) - 1] != "."
+        return _bad("truncated")
+    let dirs = []
+    let files = []
+    let seen = {}
+    for i in 1..len(lines) - 1
+        let line = lines[i]
+        if len(dirs) + len(files) >= max_entries
+            return _bad("invalid")
+        if strings.starts_with(line, "D ")
+            let path = _unesc(slice(line, 2, len(line)))
+            if not _valid_path(path) or path in seen
+                return _bad("invalid")
+            seen[path] = "D"
+            append(dirs, path)
+        else if strings.starts_with(line, "F ")
+            let rest = slice(line, 2, len(line))
+            let at = strings.find(rest, " ")
+            let path = rest
+            let body = ""
+            if at >= 0
+                path = slice(rest, 0, at)
+                body = slice(rest, at + 1, len(rest))
+            path = _unesc(path)
+            body = _unesc(body)
+            if body == none or not _valid_path(path) or path in seen or len(body) > max_file
+                return _bad("invalid")
+            seen[path] = "F"
+            append(files, [path, body])
+        else
+            return _bad("invalid")
+    for path in dirs
+        let up = _parent(path)
+        if up != "/" and (not up in seen or seen[up] != "D")
+            return _bad("invalid")
+    for row in files
+        let up = _parent(row[0])
+        if up != "/" and (not up in seen or seen[up] != "D")
+            return _bad("invalid")
+    return {ok: true, dirs: dirs, files: files}
+
+fun _gen_of(name, suffix)
+    if not strings.ends_with(name, suffix)
+        return none
+    let stem = slice(name, 0, len(name) - len(suffix))
+    if len(stem) < 2 or stem[0] != "g"
+        return none
+    let digits = slice(stem, 1, len(stem))
+    if digits == "" or len(digits) > 9 or digits[0] == "0"
+        return none
+    for c in digits
+        if c < "0" or c > "9"
+            return none
+    return int(digits)
+
+fun _parse_token(text)
+    if len(text) < 3 or len(text) > 16 or text[0] != "g" or text[len(text) - 1] != "\n"
+        return none
+    return _gen_of(slice(text, 0, len(text) - 1) + ".m2ws", ".m2ws")
+
+fun _read_pointer()
+    let path = _join("COMMITTED")
+    if not files.exists(path) or files.is_dir(path)
+        if files.exists(path)
+            return {state: "invalid", n: none}
+        return {state: "missing", n: none}
+    try
+        if files.size(path) > 16
+            return {state: "invalid", n: none}
+        let n = _parse_token(files.read(path))
+        if n == none
+            return {state: "invalid", n: none}
+        return {state: "ok", n: n}
+    catch err
+        return {state: "invalid", n: none}
+
+fun _read_generation(n)
+    let path = _join("g" + str(n) + ".m2ws")
+    try
+        if files.is_dir(path) or files.size(path) > max_generation_bytes
+            return _bad("invalid")
+        let text = files.read(path)
+        if len(text) > max_generation_bytes
+            return _bad("invalid")
+        return _parse(text)
+    catch err
+        return _bad("invalid")
+
+fun _clear(fs)
+    for name in vfs.list(fs, "/")
+        vfs.remove_tree(fs, "/" + name)
+
+fun _reset_default(fs)
+    _clear(fs)
+    vfs.make_dir(fs, "/home")
+    vfs.make_dir(fs, "/tmp")
+    vfs.write(fs, "/home/welcome.txt", "Welcome to Relic.\n")
+
+fun _install(fs, parsed)
+    _clear(fs)
+    for path in host_sort(parsed.dirs)
+        vfs.make_dir(fs, path)
+    for row in parsed.files
+        vfs.write(fs, row[0], row[1])
+
+fun _highest(nums)
+    let best = none
+    for n in nums
+        if best == none or n > best
+            best = n
+    return best
+
+fun _highest_below(nums, limit)
+    let best = none
+    for n in nums
+        if n < limit and (best == none or n > best)
+            best = n
+    return best
+
+fun _highest_above(nums, limit)
+    let best = none
+    for n in nums
+        if n > limit and (best == none or n > best)
+            best = n
+    return best
+
+# "committed g3" or "previous none". none when the line is not that shape.
+fun _meta_line(line, label)
+    let pre = label + " "
+    if not strings.starts_with(line, pre)
+        return none
+    let rest = slice(line, len(pre), len(line))
+    if rest == "none"
+        return {set: true, n: none}
+    let n = _gen_of(rest + ".m2ws", ".m2ws")
+    if n == none
+        return none
+    return {set: true, n: n}
+
+# META names the last generation COMMITTED was meant to publish, and the one
+# before it. Used when the pointer file itself is missing or torn. A readable
+# COMMITTED still wins over META.
+fun _read_meta()
+    let path = _join("META")
+    if not files.exists(path) or files.is_dir(path)
+        return {ok: false}
+    try
+        if files.size(path) > 64
+            return {ok: false}
+        let text = files.read(path)
+        if strings.contains(text, chr(13)) or not strings.ends_with(text, "\n")
+            return {ok: false}
+        let lines = strings.split(text, "\n")
+        pop(lines)
+        if len(lines) != 2
+            return {ok: false}
+        let c = _meta_line(lines[0], "committed")
+        let p = _meta_line(lines[1], "previous")
+        if c == none or p == none
+            return {ok: false}
+        return {ok: true, committed: c.n, previous: p.n}
+    catch err
+        return {ok: false}
+
+fun _with_ignored(boot, newer, part)
+    if newer != none
+        boot = boot + "; ignored uncommitted g" + str(newer)
+    if part != none
+        boot = boot + "; ignored partial g" + str(part)
+    return boot
+
+fun load(fs)
+    _boot = ""
+    _save = ""
+    _committed = none
+    _hold = ""
+    if _dir == none
+        return
+    let names = []
+    try
+        names = files.list(_dir)
+    catch err
+        _dir = none
+        _opt_out = false
+        _boot = "workspace: cannot open store"
+        return
+    let gens = []
+    for name in names
+        let partial = _gen_of(name, ".m2ws.partial")
+        if partial != none
+            append(gens, {n: partial, partial: true})
+        else
+            let n = _gen_of(name, ".m2ws")
+            if n != none
+                append(gens, {n: n, partial: false})
+    if len(gens) > max_generation_files
+        _reset_default(fs)
+        _hold = "too-many"
+        _boot = "workspace: too many generation files; store held; using defaults"
+        return
+    let pointer = _read_pointer()
+    let meta = _read_meta()
+    let valid = {}
+    let reasons = {}
+    let valid_nums = []
+    for g in gens
+        if not g.partial
+            let parsed = _read_generation(g.n)
+            if parsed.ok
+                valid[str(g.n)] = parsed
+                append(valid_nums, g.n)
+            else
+                reasons[str(g.n)] = parsed.reason
+    let partial_nums = []
+    for g in gens
+        if g.partial
+            append(partial_nums, g.n)
+    let part = _highest(partial_nums)
+    # A wrong-version file is not usable on any path, including a torn pointer
+    # whose META still names it. Hold before any install so a later save cannot
+    # overwrite or prune those bytes.
+    for g in gens
+        if not g.partial and str(g.n) in reasons and reasons[str(g.n)] == "wrong-version"
+            _hold = "wrong-version"
+    if _hold == "wrong-version" and not (pointer.state == "ok" and str(pointer.n) in valid)
+        _reset_default(fs)
+        _committed = none
+        _boot = "workspace: committed image wrong version; store held; using defaults"
+        if pointer.state == "ok"
+            let older = _highest_below(valid_nums, pointer.n)
+            if older != none
+                _install(fs, valid[str(older)])
+                _committed = older
+                _boot = "workspace: committed image wrong version; store held; recovered g" + str(older)
+            _boot = _with_ignored(_boot, _highest_above(valid_nums, pointer.n), part)
+        else if len(valid_nums) > 0
+            _boot = _with_ignored(_boot, _highest(valid_nums), part)
+        return
+    # A readable pointer that names a generation which parses is the commit.
+    # A newer complete file was not committed and is not installed.
+    if pointer.state == "ok" and str(pointer.n) in valid
+        _install(fs, valid[str(pointer.n)])
+        _committed = pointer.n
+        if _hold == "wrong-version"
+            _boot = "workspace: wrong version file present; store held"
+            _boot = _with_ignored(_boot, _highest_above(valid_nums, pointer.n), part)
+        else
+            _boot = _with_ignored("", _highest_above(valid_nums, pointer.n), part)
+            if _boot != ""
+                _boot = "workspace: " + slice(_boot, 2, len(_boot))
+        return
+    if pointer.state == "ok"
+        let reason = "invalid"
+        if str(pointer.n) in reasons
+            reason = reasons[str(pointer.n)]
+        else if not files.exists(_join("g" + str(pointer.n) + ".m2ws"))
+            reason = "missing"
+        let why = "committed image invalid"
+        if reason == "wrong-version"
+            why = "committed image wrong version"
+            _hold = "wrong-version"
+        else if reason == "truncated"
+            why = "committed image truncated"
+        # Older than the named generation only. A newer complete file is an
+        # uncommitted save and must not replace a corrupt commit.
+        let older = _highest_below(valid_nums, pointer.n)
+        let newer = _highest_above(valid_nums, pointer.n)
+        if older != none
+            _install(fs, valid[str(older)])
+            _committed = older
+            if _hold != ""
+                _boot = "workspace: " + why + "; store held; recovered g" + str(older)
+            else
+                _boot = "workspace: " + why + "; recovered g" + str(older)
+        else
+            _reset_default(fs)
+            if _hold != ""
+                _boot = "workspace: " + why + "; store held; using defaults"
+            else if reason == "missing" and len(valid_nums) == 0 and part == none
+                _boot = "workspace: no valid generation; using defaults"
+            else if len(valid_nums) == 0
+                _boot = "workspace: no valid generation; using defaults"
+            else
+                _boot = "workspace: " + why + "; using defaults"
+        _boot = _with_ignored(_boot, newer, part)
+        return
+    # Pointer file missing or torn. META names the last commit we published.
+    # Without that, a single valid generation is the only candidate. Two or
+    # more are ambiguous: do not promote the newest, and do not overwrite them.
+    let word = "missing"
+    if pointer.state == "invalid"
+        word = "invalid"
+    let chosen = none
+    if meta.ok and meta.committed != none and str(meta.committed) in valid
+        chosen = meta.committed
+    else if len(valid_nums) == 1
+        chosen = valid_nums[0]
+    else if len(valid_nums) > 1
+        _reset_default(fs)
+        _hold = "ambiguous"
+        _boot = "workspace: pointer " + word + "; store held; using defaults"
+        _boot = _with_ignored(_boot, _highest(valid_nums), part)
+        return
+    if chosen == none
+        _reset_default(fs)
+        if pointer.state == "missing" and len(gens) == 0
+            _boot = ""
+        else
+            _boot = "workspace: no valid generation; using defaults"
+            if part != none
+                _boot = _boot + "; ignored partial g" + str(part)
+        return
+    _install(fs, valid[str(chosen)])
+    _committed = chosen
+    _boot = "workspace: pointer " + word + "; recovered g" + str(chosen)
+    _boot = _with_ignored(_boot, _highest_above(valid_nums, chosen), part)
+
+fun _walk(fs, path, rows, count)
+    if count.too_many or count.too_big or count.bad_path
+        return
+    for e in vfs.entries(fs, path)
+        if count.too_many or count.too_big or count.bad_path
+            return
+        let child = "/" + e[0]
+        if path != "/"
+            child = path + "/" + e[0]
+        count.n = count.n + 1
+        if count.n > max_entries
+            count.too_many = true
+            return
+        if not _valid_path(child)
+            count.bad_path = true
+            return
+        if e[1]
+            append(rows, {kind: "D", path: child})
+            _walk(fs, child, rows, count)
+        else
+            let text = vfs.read(fs, child)
+            if len(text) > max_file
+                count.too_big = true
+                return
+            append(rows, {kind: "F", path: child, text: text})
+
+fun _encode(rows)
+    let by = {}
+    let paths = []
+    for r in rows
+        by[r.path] = r
+        append(paths, r.path)
+    let lines = ["M2WS1"]
+    for path in host_sort(paths)
+        let r = by[path]
+        if r.kind == "D"
+            append(lines, "D " + _esc(r.path))
+        else
+            append(lines, "F " + _esc(r.path) + " " + _esc(r.text))
+    append(lines, ".")
+    return strings.join(lines, "\n") + "\n"
+
+fun _remove_quiet(path)
+    if files.exists(path) and not files.is_dir(path)
+        try
+            files.remove(path)
+        catch err
+            none
+
+fun _rename_over(from, to)
+    try
+        files.rename(from, to)
+        return true
+    catch err
+        none
+    if files.exists(to)
+        try
+            files.remove(to)
+        catch err
+            return false
+    try
+        files.rename(from, to)
+        return true
+    catch err
+        return false
+
+# "" when the file reads back as text, "write" when it could not be written,
+# "mismatch" when the bytes that came back are not the bytes that were sent.
+fun _write_exact(path, text)
+    try
+        files.write(path, text)
+    catch err
+        return "write"
+    try
+        if files.read(path) != text
+            return "mismatch"
+    catch err
+        return "mismatch"
+    return ""
+
+# A new id is one past every id already on disk or named by COMMITTED or META.
+# An existing generation is never rewritten, so a truncated or failed image
+# cannot be replaced by a later save that reuses its number.
+fun _note_id(seen, n)
+    if n != none and n > seen
+        return n
+    return seen
+
+fun _next_gen()
+    let seen = 0
+    seen = _note_id(seen, _committed)
+    try
+        for name in files.list(_dir)
+            seen = _note_id(seen, _gen_of(name, ".m2ws.partial"))
+            seen = _note_id(seen, _gen_of(name, ".m2ws"))
+    catch err
+        return none
+    let pointer = _read_pointer()
+    if pointer.state == "ok"
+        seen = _note_id(seen, pointer.n)
+    let meta = _read_meta()
+    if meta.ok
+        seen = _note_id(seen, meta.committed)
+        seen = _note_id(seen, meta.previous)
+    if seen >= 999999999
+        return none
+    return seen + 1
+
+# Keep the new commit and the generation it replaced. Everything else that
+# parses as a generation name is not part of that chain.
+fun _prune(n, prev)
+    try
+        for name in files.list(_dir)
+            if _gen_of(name, ".m2ws.partial") != none
+                _remove_quiet(_join(name))
+            let g = _gen_of(name, ".m2ws")
+            if g != none and g != n and g != prev
+                _remove_quiet(_join(name))
+    catch err
+        none
+    _remove_quiet(_join("COMMITTED.next"))
+    _remove_quiet(_join("META.next"))
+
+fun _meta_text(committed, previous)
+    let c = "none"
+    let p = "none"
+    if committed != none
+        c = "g" + str(committed)
+    if previous != none
+        p = "g" + str(previous)
+    return "committed " + c + "\nprevious " + p + "\n"
+
+# Written only after COMMITTED has been renamed into place and read back.
+# A META file that names a generation is not evidence that generation committed.
+fun _publish_meta(committed, previous)
+    let text = _meta_text(committed, previous)
+    let nextp = _join("META.next")
+    if not _wrote(nextp, text)
+        return false
+    if not _rename_over(nextp, _join("META"))
+        return false
+    try
+        return files.read(_join("META")) == text
+    catch err
+        return false
+
+# "ok" after the rename and a matching readback. "uncertain" if the rename
+# returned and the readback did not match: the rename may already have
+# published. "fail" if the new pointer was not renamed into place.
+fun _publish(n)
+    let ptr = "g" + str(n) + "\n"
+    let nextp = _join("COMMITTED.next")
+    if not _wrote(nextp, ptr)
+        return "fail"
+    let dest = _join("COMMITTED")
+    if not _rename_over(nextp, dest)
+        return "fail"
+    try
+        if files.read(dest) == ptr
+            return "ok"
+    catch err
+        return "uncertain"
+    return "uncertain"
+
+# "" when the store now names the vfs. Otherwise the notice, also stored for
+# workspace.notice(). The session vfs is not rolled back.
+fun _wrote(path, text)
+    let how = _write_exact(path, text)
+    if how == ""
+        return true
+    if how == "mismatch"
+        _fail("store readback mismatch")
+    else
+        _fail("cannot write store")
+    return false
+
+fun save(fs)
+    if not _requested or _opt_out
+        return ""
+    if _dir == none
+        if _boot != ""
+            return _boot
+        return "workspace: save failed; store unavailable; kept defaults"
+    if _hold != ""
+        _save = "workspace: save failed; store held (" + _hold + "); not written"
+        return _save
+    _save = ""
+    let prev = _committed
+    if _fault == "torn-pointer"
+        let stage = _fault
+        _fault = none
+        if not _wrote(_join("COMMITTED"), "x")
+            return _save
+        return _fail_fault(stage)
+    let rows = []
+    let count = {n: 0, too_many: false, too_big: false, bad_path: false}
+    try
+        _walk(fs, "/", rows, count)
+    catch err
+        return _fail("cannot write store")
+    if count.bad_path
+        return _fail("path cannot be stored")
+    if count.too_many or count.too_big
+        return _fail("image too large")
+    let image = ""
+    try
+        image = _encode(rows)
+    catch err
+        return _fail("cannot write store")
+    if len(image) > max_generation_bytes
+        return _fail("image too large")
+    let n = _next_gen()
+    if n == none
+        return _fail("cannot write store")
+    let partial = _join("g" + str(n) + ".m2ws.partial")
+    let final = _join("g" + str(n) + ".m2ws")
+    # Never rewrite a generation file. A new id must not already exist.
+    if files.exists(final)
+        return _fail("would overwrite generation")
+    if _fault == "partial-generation"
+        let stage = _fault
+        _fault = none
+        if not _wrote(partial, "M2WS1\n")
+            return _save
+        return _fail_fault(stage)
+    if not _wrote(partial, image)
+        return _save
+    if not _rename_over(partial, final)
+        return _fail("cannot write store")
+    if _fault == "full-uncommitted"
+        let stage = _fault
+        _fault = none
+        return _fail_fault(stage)
+    if _fault == "corrupt-committed"
+        let stage = _fault
+        _fault = none
+        # This file was created above. Replacing it with a short image does
+        # not alias an older generation. META stays on the last success.
+        if not _wrote(final, "M2WS1\n")
+            return _save
+        let published = _publish(n)
+        if published == "fail"
+            if _save == ""
+                return _fail("cannot write store")
+            return _save
+        if published == "uncertain"
+            return _uncertain()
+        return _fail_fault(stage)
+    if _fault == "staged-pointer"
+        let stage = _fault
+        _fault = none
+        if not _wrote(_join("COMMITTED.next"), "g" + str(n) + "\n")
+            return _save
+        return _fail_fault(stage)
+    # The rename of COMMITTED.next onto COMMITTED is the publication. META is
+    # written only after that rename reads back, so a failed publish cannot
+    # leave META naming a generation the pointer never committed.
+    let published = _publish(n)
+    if published == "fail"
+        if _save == ""
+            return _fail("cannot write store")
+        return _save
+    if published == "uncertain"
+        return _uncertain()
+    # The pointer read back as gN. A META write can still fail. That is a
+    # committed save with a degraded backup, not a failed commit, and it must
+    # not leave _wrote's "save failed; kept" notice in place.
+    if not _publish_meta(n, prev)
+        _committed = n
+        _prune(n, prev)
+        _save = "workspace: saved; metadata backup not updated"
+        _fault = none
+        return ""
+    _committed = n
+    _prune(n, prev)
+    _fault = none
+    return ""
