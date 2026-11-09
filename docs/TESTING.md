@@ -173,6 +173,7 @@ Write `tests/shell_<topic>.relic`, run it, read its output, and save that as `te
 | `shell_terminal_uniq_case` | uniq drops only a line equal to the one just before it, so A and a both stay |
 | `shell_terminal_nl_blank` | nl numbers a blank line |
 | `shell_terminal_cd_stay` | cd of a file says it is not a folder and stays put |
+| `shell_terminal_recall_dups` | a command repeated immediately is kept once, and the same command later is kept again |
 
 ### Files
 
