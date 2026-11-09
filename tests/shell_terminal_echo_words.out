@@ -1,0 +1,6 @@
+["a > b c"]
+no b true
+["echo: is a folder: /tmp"]
+tmp still folder true
+[]
+["one\n"]

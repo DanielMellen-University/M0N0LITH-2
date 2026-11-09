@@ -1,0 +1,10 @@
+# Dividing by zero is an error and names its line.
+use ../shell/wm
+let d = wm.new_desktop(640, 480, wm.default_apps())
+let i = wm.launch(d, wm.ide)
+let s = i.state
+fun pos() = len(s.text) - s.back
+
+s.text = "print(1 / 0)\n"
+wm.key(d, "ctrl+r")
+print(s.status, s.err_line, s.out)

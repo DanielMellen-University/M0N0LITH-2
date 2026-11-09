@@ -1,0 +1,12 @@
+# Ctrl+G in the IDE goes to that line of the program.
+use ../shell/wm
+let d = wm.new_desktop(640, 480, wm.default_apps())
+let i = wm.launch(d, wm.ide)
+let s = i.state
+fun pos() = len(s.text) - s.back
+
+s.text = "a\nb\nc\n"
+s.back = len(s.text)
+for k in ["ctrl+g", "2", "return"]
+    wm.key(d, k)
+print(pos(), s.status)

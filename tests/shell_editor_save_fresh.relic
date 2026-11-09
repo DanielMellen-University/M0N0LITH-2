@@ -1,0 +1,13 @@
+# Ctrl+S creates a file that was not there.
+use ../shell/wm
+let d = wm.new_desktop(640, 480, wm.default_apps())
+let e = wm.launch(d, wm.editor)
+let s = e.state
+fun pos() = len(s.text) - s.back
+
+use std/vfs
+s.path = "/tmp/fresh.txt"
+s.text = "hello\n"
+s.disk = none
+wm.key(d, "ctrl+s")
+print(s.status, [vfs.read(s.fs, "/tmp/fresh.txt")])

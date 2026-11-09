@@ -1,0 +1,20 @@
+# A second Delete after the file is already gone does not remove the row that took its place.
+use ../shell/wm
+use std/vfs
+let d = wm.new_desktop(640, 480, wm.default_apps())
+let f = wm.launch(d, wm.files_app)
+let fs = f.state.fs
+fun show() = wm.visible_lines(f)
+
+vfs.write(fs, "/tmp/a.txt", "a")
+vfs.write(fs, "/tmp/b.txt", "b")
+f.state.path = "/tmp"
+show()
+for i in 0..len(f.state.names)
+    if f.state.names[i] == "a.txt"
+        f.state.sel = i
+wm.key(d, "delete")
+vfs.remove(fs, "/tmp/a.txt")
+wm.key(d, "delete")
+print("b", vfs.exists(fs, "/tmp/b.txt"))
+print(show())

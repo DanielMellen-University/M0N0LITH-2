@@ -1,0 +1,21 @@
+# rm of a folder that still has something in it refuses and leaves the contents.
+use ../shell/wm
+use std/vfs
+let t = wm.terminal.init()
+fun run(line)
+    t.buf = []
+    for c in line
+        if c == " "
+            wm.terminal.on_key(t, "space")
+        else
+            wm.terminal.on_key(t, c)
+    wm.terminal.on_key(t, "return")
+    return slice(t.buf, 1, len(t.buf))
+
+vfs.make_dir(t.fs, "/tmp/full")
+vfs.write(t.fs, "/tmp/full/a.txt", "x")
+print(run("rm /tmp/full"))
+print("kept", vfs.read(t.fs, "/tmp/full/a.txt"))
+print(run("rm /tmp/full/a.txt"))
+print(run("rm /tmp/full"))
+print("gone", not vfs.exists(t.fs, "/tmp/full"))

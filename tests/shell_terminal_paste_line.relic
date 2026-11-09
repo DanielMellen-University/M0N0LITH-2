@@ -1,0 +1,14 @@
+# Ctrl+V in the Terminal pastes only the first line of the clipboard.
+use ../shell/wm
+let d = wm.new_desktop(640, 480, wm.default_apps())
+let e = wm.launch(d, wm.editor)
+e.state.text = "one\ntwo\nthree"
+e.state.back = 0
+e.state.mark = len(e.state.text)
+wm.key(d, "ctrl+c")
+let t = wm.launch(d, wm.terminal)
+for c in "echo "
+    wm.key(d, c)
+wm.key(d, "ctrl+v")
+wm.key(d, "return")
+print(t.state.buf[len(t.state.buf) - 1])

@@ -1,0 +1,16 @@
+# An empty root has no rows. Letters, arrows, Delete, F2 and Return change nothing.
+use ../shell/wm
+use std/vfs
+let d = wm.new_desktop(640, 480, wm.default_apps())
+let f = wm.launch(d, wm.files_app)
+let fs = f.state.fs
+fun show() = wm.visible_lines(f)
+
+vfs.remove(fs, "/home/welcome.txt")
+vfs.remove(fs, "/home")
+vfs.remove(fs, "/tmp")
+f.state.path = "/"
+print(show())
+for k in ["a", "up", "down", "delete", "f2", "return", "right", "left"]
+    wm.key(d, k)
+print(f.state.path, f.state.sel, show())

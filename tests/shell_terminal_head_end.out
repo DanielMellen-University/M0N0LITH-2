@@ -1,0 +1,6 @@
+short ["a", "b"] ["a", "b"] ["a", "b"]
+blanks ["a", "", "b"] ["a", "", "b"]
+onlynl [""] [""] [""]
+bare ["hello"]
+one ["a"]
+two blanks ["a", ""]

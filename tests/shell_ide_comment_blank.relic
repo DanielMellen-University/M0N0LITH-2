@@ -1,0 +1,21 @@
+# A selection of only blank lines is already treated as comments, so Ctrl+/
+# does not record an undo step or mark the buffer edited. A blank line with
+# no selection still gets a comment.
+use ../shell/wm
+let d = wm.new_desktop(640, 480, wm.default_apps())
+let i = wm.launch(d, wm.ide)
+let s = i.state
+s.text = "\n\n"
+s.back = 0
+s.mark = len(s.text)
+s.undo = []
+s.status = "open"
+wm.key(d, "ctrl+/")
+print("selection", [s.text], len(s.undo), s.status, s.mark)
+s.text = ""
+s.back = 0
+s.mark = none
+s.undo = []
+s.status = "open"
+wm.key(d, "ctrl+/")
+print("cursor", [s.text], len(s.undo), s.status)

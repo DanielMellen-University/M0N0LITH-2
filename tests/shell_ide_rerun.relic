@@ -1,0 +1,12 @@
+# A second run replaces the output of the first.
+use ../shell/wm
+let d = wm.new_desktop(640, 480, wm.default_apps())
+let i = wm.launch(d, wm.ide)
+let s = i.state
+fun pos() = len(s.text) - s.back
+
+s.text = "print(1)\n"
+wm.key(d, "ctrl+r")
+s.text = "print(2)\n"
+wm.key(d, "ctrl+r")
+print(s.status, s.out)

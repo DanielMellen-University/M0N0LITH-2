@@ -1,0 +1,11 @@
+# Escape stops a run that is waiting for input.
+use ../shell/wm
+let d = wm.new_desktop(640, 480, wm.default_apps())
+let i = wm.launch(d, wm.ide)
+let s = i.state
+fun pos() = len(s.text) - s.back
+
+s.text = "use std/os\nlet line = os.read_line()\n"
+wm.key(d, "ctrl+r")
+print("waiting", s.status, wm.dismiss(d))
+print(s.status, s.out[len(s.out) - 1])

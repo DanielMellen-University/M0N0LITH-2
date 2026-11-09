@@ -1,0 +1,12 @@
+# A selection that is not all comments gets a comment on every line, including one that was already commented.
+use ../shell/wm
+let d = wm.new_desktop(640, 480, wm.default_apps())
+let i = wm.launch(d, wm.ide)
+let s = i.state
+fun pos() = len(s.text) - s.back
+
+s.text = "# a\nb"
+s.back = 0
+s.mark = len(s.text)
+wm.key(d, "ctrl+/")
+print([s.text])

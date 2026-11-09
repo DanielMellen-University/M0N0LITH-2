@@ -1,0 +1,4 @@
+["plain.txt"]
+["\"my file.txt\""]
+["usage: ls [path]"]
+["ls: not found: /tmp/missing.txt"]

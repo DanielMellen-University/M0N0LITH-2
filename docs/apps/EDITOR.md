@@ -63,7 +63,7 @@ Each typed character, Backspace, Delete, new line, or replaced or removed select
 
 Ctrl+S writes the whole buffer to the file. If the save fails, the status says why and the buffer stays as it was, so you can try again.
 
-The Terminal, Files and the IDE can change the same file while the Editor has it open. The Editor remembers the file as it last read or saved it. If the file on disk is different when you press Ctrl+S, it writes nothing and shows `changed on disk: ctrl+s again`. A second Ctrl+S right after overwrites; any other key in between cancels that. A file removed meanwhile is simply written again.
+The Terminal, Files and the IDE can change the same file while the Editor has it open. The Editor remembers the file as it last read or saved it. If the file on disk is different when you press Ctrl+S, it writes nothing and shows `changed on disk: ctrl+s again`. A second Ctrl+S right after overwrites; any other key, or a click or a drag, in between cancels that. A file removed meanwhile is simply written again.
 
 ## Long text
 

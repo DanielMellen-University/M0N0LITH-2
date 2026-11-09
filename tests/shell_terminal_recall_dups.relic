@@ -1,0 +1,19 @@
+# The same command twice in a row is kept once. The same command later is kept again.
+use ../shell/wm
+use std/vfs
+let t = wm.terminal.init()
+fun run(line)
+    t.buf = []
+    for c in line
+        if c == " "
+            wm.terminal.on_key(t, "space")
+        else
+            wm.terminal.on_key(t, c)
+    wm.terminal.on_key(t, "return")
+    return slice(t.buf, 1, len(t.buf))
+
+run("echo same")
+run("echo same")
+run("echo other")
+run("echo same")
+print(t.past)

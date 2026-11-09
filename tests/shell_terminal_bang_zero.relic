@@ -1,0 +1,18 @@
+# !0 is not a command, and !001 is command 1.
+use ../shell/wm
+use std/vfs
+let t = wm.terminal.init()
+fun run(line)
+    t.buf = []
+    for c in line
+        if c == " "
+            wm.terminal.on_key(t, "space")
+        else
+            wm.terminal.on_key(t, c)
+    wm.terminal.on_key(t, "return")
+    return slice(t.buf, 1, len(t.buf))
+
+run("echo first")
+run("echo second")
+print(run("!0"))
+print(run("!001"))

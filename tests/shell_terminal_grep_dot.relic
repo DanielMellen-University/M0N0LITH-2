@@ -1,0 +1,18 @@
+# grep looks for the characters, so a dot is not a pattern, and case counts.
+use ../shell/wm
+use std/vfs
+let t = wm.terminal.init()
+fun run(line)
+    t.buf = []
+    for c in line
+        if c == " "
+            wm.terminal.on_key(t, "space")
+        else
+            wm.terminal.on_key(t, c)
+    wm.terminal.on_key(t, "return")
+    return slice(t.buf, 1, len(t.buf))
+
+vfs.write(t.fs, "/tmp/g.txt", "a.b\naxb\nA.B\n")
+print(run("grep a.b /tmp/g.txt"))
+print(run("grep A.B /tmp/g.txt"))
+print(run("grep axb /tmp/g.txt"))

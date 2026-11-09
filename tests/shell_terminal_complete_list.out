@@ -1,0 +1,3 @@
+["cd \"a "] []
+["ls "] ["/home> ls ", "\"a b/\"  \"a c/\"  q.txt  welcome.txt"]
+["cat q.txt "] []

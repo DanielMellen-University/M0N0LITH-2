@@ -1,0 +1,18 @@
+# A letter gives up a Delete question and jumps to that name. The file stays.
+use ../shell/wm
+use std/vfs
+let d = wm.new_desktop(640, 480, wm.default_apps())
+let f = wm.launch(d, wm.files_app)
+let fs = f.state.fs
+fun show() = wm.visible_lines(f)
+
+vfs.write(fs, "/tmp/apple.txt", "a")
+vfs.write(fs, "/tmp/banana.txt", "b")
+f.state.path = "/tmp"
+show()
+for i in 0..len(f.state.names)
+    if f.state.names[i] == "apple.txt"
+        f.state.sel = i
+wm.key(d, "delete")
+wm.key(d, "b")
+print(vfs.exists(fs, "/tmp/apple.txt"), f.state.names[f.state.sel])

@@ -1,0 +1,12 @@
+# Return with nothing typed sends an empty line. The pane keeps that empty
+# line, and the program sees a line of length 0.
+use ../shell/wm
+let d = wm.new_desktop(640, 480, wm.default_apps())
+let i = wm.launch(d, wm.ide)
+let s = i.state
+fun pos() = len(s.text) - s.back
+
+s.text = "use std/os\nlet line = os.read_line()\nprint(len(line))\n"
+wm.key(d, "ctrl+r")
+wm.key(d, "return")
+print(s.status, s.out)

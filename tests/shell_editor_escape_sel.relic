@@ -1,0 +1,12 @@
+# Escape drops a selection and is taken. With no selection it is not taken.
+use ../shell/wm
+let d = wm.new_desktop(640, 480, wm.default_apps())
+let e = wm.launch(d, wm.editor)
+let s = e.state
+fun pos() = len(s.text) - s.back
+
+s.text = "abcd"
+s.mark = len(s.text)
+s.back = 0
+print("drop", wm.dismiss(d), s.mark)
+print("none", wm.dismiss(d))

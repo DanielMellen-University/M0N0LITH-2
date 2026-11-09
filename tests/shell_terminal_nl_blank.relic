@@ -1,0 +1,16 @@
+# nl numbers a blank line.
+use ../shell/wm
+use std/vfs
+let t = wm.terminal.init()
+fun run(line)
+    t.buf = []
+    for c in line
+        if c == " "
+            wm.terminal.on_key(t, "space")
+        else
+            wm.terminal.on_key(t, c)
+    wm.terminal.on_key(t, "return")
+    return slice(t.buf, 1, len(t.buf))
+
+vfs.write(t.fs, "/tmp/n.txt", "a\n\nb\n")
+print(run("nl /tmp/n.txt"))

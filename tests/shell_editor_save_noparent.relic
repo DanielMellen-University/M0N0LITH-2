@@ -1,0 +1,12 @@
+# Ctrl+S says why when the folder to write in is missing, and writes nothing.
+use ../shell/wm
+let d = wm.new_desktop(640, 480, wm.default_apps())
+let e = wm.launch(d, wm.editor)
+let s = e.state
+fun pos() = len(s.text) - s.back
+
+use std/vfs
+s.path = "/tmp/missing/x.txt"
+s.text = "hello"
+wm.key(d, "ctrl+s")
+print(s.status, vfs.exists(s.fs, "/tmp/missing"))

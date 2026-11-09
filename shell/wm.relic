@@ -1358,7 +1358,15 @@ fun _term_head(s, path, count)
     let text = vfs.read(s.fs, p)
     if text == ""
         return
-    for line in first_lines(text, count)
+    # first_lines keeps the empty place after a final newline, where the Editor
+    # can put the cursor. Ask for one extra line and drop that place, so head
+    # agrees with cat and tail.
+    let lines = first_lines(text, count + 1)
+    if len(lines) > count
+        lines = slice(lines, 0, count)
+    else if strings.ends_with(text, "\n") and len(lines) > 0 and lines[len(lines) - 1] == ""
+        lines = slice(lines, 0, len(lines) - 1)
+    for line in lines
         _term_reply(s, line)
 
 # tail: the last 10 lines of a file (or as many as asked), the way cat finds
@@ -1766,8 +1774,15 @@ fun _term_complete(s)
             mark = "\""
         s.input = head + mark + folder + common
     else
+        # the same shape ls uses: a folder ends in /, a name with a space is quoted
+        let shown = []
+        for n in found
+            let name = n
+            if n in dirs
+                name = n + "/"
+            append(shown, _term_name(name))
         _term_reply(s, s.cwd + "> " + s.input)
-        _term_reply(s, strings.join(found, "  "))
+        _term_reply(s, strings.join(shown, "  "))
 
 # Ctrl+V: the clipboard's first line. A path with a space that is there (what
 # Files' Ctrl+C copies) goes in quotes, so it stays one word; not when a
@@ -2091,6 +2106,11 @@ fun _files_escape(s)
     if "renaming" in s and s.renaming != none
         s.renaming = none
         return true
+    # Escape is not a key the file list sees, so the Delete question has to
+    # give up here or it would quit the desktop instead
+    if s.confirm != none
+        s.confirm = none
+        return true
     return false
 
 fun _files_key(s, k)
@@ -2410,12 +2430,16 @@ fun _editor_moved(s, k)
     if k == "ctrl+home"
         return 0
     if k == "pageup" or k == "pagedown"
-        # as many lines as show under the title, less one, so one stays in view
+        # as many lines as show under the title, less one, so one stays in view.
+        # In the IDE that is the editor area: the output pane is not part of it.
         let step = "up"
         if k == "pagedown"
             step = "down"
+        let window_rows = s.rows
+        if "edit_rows" in s and s.edit_rows > 0
+            window_rows = s.edit_rows
         let at = pos
-        for i in 0..math.max(1, s.rows - 2)
+        for i in 0..math.max(1, window_rows - 2)
             _editor_set_pos(s, at)
             at = _editor_moved(s, step)
         _editor_set_pos(s, pos)
@@ -2723,6 +2747,7 @@ fun _editor_relayout(s)
 # run waits for input.
 fun _editor_click(s, x, y)
     s.press = none
+    s.overwrite = false   # a click is not the second Ctrl+S, so the warning stands
     if "run" in s and s.run != none
         return none
     # a click gives up a find, replace or line number, as another key does
@@ -2781,6 +2806,7 @@ fun _editor_click(s, x, y)
 fun _editor_drag(s, x, y)
     if not "press" in s or s.press == none or ("run" in s and s.run != none)
         return
+    s.overwrite = false   # dragging a selection is not the second Ctrl+S
     _editor_relayout(s)
     let pos = _editor_point(s, x, y, true)
     if pos == none
@@ -3390,6 +3416,8 @@ fun _ide_comment_lines(s, sel)
         else
             append(out, slice(line, 0, lead) + "# " + body)
     let block = strings.join(out, "\n")
+    if block == slice(s.text, from, to)
+        return   # blank lines alone are already "comments"; that is not an edit
     _editor_change(s, from, to - from, block)
     s.mark = len(s.text) - from
     _editor_set_pos(s, from + len(block))
@@ -3408,8 +3436,13 @@ fun _ide_toggle_comment(s)
         let n = 1
         if at + 1 < len(s.text) and s.text[at + 1] == " "
             n = 2
+        let keep = pos
         _editor_change(s, at, n, "")
-        _editor_set_pos(s, math.max(at, pos - n))
+        # a cursor sitting in the indent, before the "#", stays on that space
+        if keep <= at
+            _editor_set_pos(s, keep)
+        else
+            _editor_set_pos(s, math.max(at, keep - n))
     else
         _editor_change(s, at, 0, "# ")
         if pos >= at
@@ -3457,8 +3490,11 @@ fun _ide_lines(s)
                 line = _scroll_to(line, len(prompt) + at, s.cols)   # the cursor stays in view
             append(pane, line)
     let rows = s.rows
+    let editor_rows = rows
     if rows > 0
-        s.rows = math.max(2, rows - len(pane))
+        editor_rows = math.max(2, rows - len(pane))
+        s.rows = editor_rows
+    s.edit_rows = editor_rows   # Page Up and Page Down use the editor area, not the pane
     let out = _editor_lines(s)
     s.rows = rows
     out[0] = "IDE" + slice(out[0], 6, len(out[0]))   # "Editor [..." -> "IDE [..."
@@ -3471,6 +3507,10 @@ fun _ide_key(s, k)
     s.press = none
     if k == "f5" or k == "ctrl+return" or k == "ctrl+keypad enter"
         k = "ctrl+r"   # F5 and Ctrl+Return run too, as in most IDEs and notebooks
+    # Ctrl+R, Ctrl+E, Ctrl+/ and the input line are keys too: they cancel a
+    # changed-on-disk warning the way every Editor key but Ctrl+S does.
+    if k != "ctrl+s"
+        s.overwrite = false
     if s.run != none and k == "ctrl+s"
         # saving does not stop a run that waits for input (decided Oct 31)
         _editor_key(s, k)

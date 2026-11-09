@@ -1,0 +1,24 @@
+# head prints only the lines the file has. A final newline is not an extra
+# blank line, while a blank line in the file still counts. cat and tail agree.
+use ../shell/wm
+use std/vfs
+let t = wm.terminal.init()
+fun run(line)
+    t.buf = []
+    for c in line
+        if c == " "
+            wm.terminal.on_key(t, "space")
+        else
+            wm.terminal.on_key(t, c)
+    wm.terminal.on_key(t, "return")
+    return slice(t.buf, 1, len(t.buf))
+vfs.write(t.fs, "/tmp/short.txt", "a\nb\n")
+vfs.write(t.fs, "/tmp/blanks.txt", "a\n\nb\n")
+vfs.write(t.fs, "/tmp/onlynl.txt", "\n")
+vfs.write(t.fs, "/tmp/bare.txt", "hello")
+print("short", run("head /tmp/short.txt"), run("cat /tmp/short.txt"), run("tail /tmp/short.txt"))
+print("blanks", run("head /tmp/blanks.txt"), run("tail /tmp/blanks.txt"))
+print("onlynl", run("head /tmp/onlynl.txt"), run("cat /tmp/onlynl.txt"), run("tail /tmp/onlynl.txt"))
+print("bare", run("head /tmp/bare.txt"))
+print("one", run("head /tmp/short.txt 1"))
+print("two blanks", run("head /tmp/blanks.txt 2"))

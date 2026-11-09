@@ -1,0 +1,18 @@
+# Page Up on the first row and Page Down on the last row stay there.
+use ../shell/wm
+use std/vfs
+let d = wm.new_desktop(640, 480, wm.default_apps())
+let f = wm.launch(d, wm.files_app)
+let fs = f.state.fs
+fun show() = wm.visible_lines(f)
+
+vfs.write(fs, "/tmp/a.txt", "a")
+vfs.write(fs, "/tmp/b.txt", "b")
+f.state.path = "/tmp"
+show()
+f.state.sel = 0
+wm.key(d, "pageup")
+print("top", f.state.sel)
+f.state.sel = len(f.state.names) - 1
+wm.key(d, "pagedown")
+print("bottom", f.state.sel, len(f.state.names) - 1)

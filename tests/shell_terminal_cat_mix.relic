@@ -1,0 +1,16 @@
+# cat of a folder is an error, and a file named after it still prints.
+use ../shell/wm
+use std/vfs
+let t = wm.terminal.init()
+fun run(line)
+    t.buf = []
+    for c in line
+        if c == " "
+            wm.terminal.on_key(t, "space")
+        else
+            wm.terminal.on_key(t, c)
+    wm.terminal.on_key(t, "return")
+    return slice(t.buf, 1, len(t.buf))
+
+vfs.write(t.fs, "/tmp/after.txt", "after\n")
+print(run("cat /tmp /tmp/after.txt"))

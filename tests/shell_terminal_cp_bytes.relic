@@ -1,0 +1,19 @@
+# cp copies the file's bytes exactly, with no newline added.
+use ../shell/wm
+use std/vfs
+let t = wm.terminal.init()
+fun run(line)
+    t.buf = []
+    for c in line
+        if c == " "
+            wm.terminal.on_key(t, "space")
+        else
+            wm.terminal.on_key(t, c)
+    wm.terminal.on_key(t, "return")
+    return slice(t.buf, 1, len(t.buf))
+
+vfs.write(t.fs, "/tmp/src.bin", "no newline")
+print(run("cp /tmp/src.bin /tmp/dst.bin"))
+print([vfs.read(t.fs, "/tmp/dst.bin")])
+print(run("cp /tmp/src.bin /tmp/dst.bin"))
+print("still", [vfs.read(t.fs, "/tmp/dst.bin")])

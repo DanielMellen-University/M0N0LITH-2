@@ -1,0 +1,24 @@
+# Tab inserts spaces to the next multiple of 4: 4, 3, 1, then 4 again.
+use ../shell/wm
+let d = wm.new_desktop(640, 480, wm.default_apps())
+let e = wm.launch(d, wm.editor)
+let s = e.state
+fun pos() = len(s.text) - s.back
+
+s.text = ""
+s.back = 0
+wm.key(d, "tab")
+print("0", [s.text])
+s.text = "x"
+s.back = 0
+s.undo = []
+wm.key(d, "tab")
+print("1", [s.text])
+s.text = "xxx"
+s.back = 0
+wm.key(d, "tab")
+print("3", [s.text])
+s.text = "xxxx"
+s.back = 0
+wm.key(d, "tab")
+print("4", [s.text])

@@ -1,0 +1,15 @@
+# Ctrl+Up on the first line and Ctrl+Down on the last line are not edits.
+use ../shell/wm
+let d = wm.new_desktop(640, 480, wm.default_apps())
+let e = wm.launch(d, wm.editor)
+let s = e.state
+fun pos() = len(s.text) - s.back
+
+s.text = "a\nb"
+s.back = len(s.text)
+s.undo = []
+wm.key(d, "ctrl+up")
+print("up", [s.text], len(s.undo))
+s.back = 0
+wm.key(d, "ctrl+down")
+print("down", [s.text], len(s.undo))

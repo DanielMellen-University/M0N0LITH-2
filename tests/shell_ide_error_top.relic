@@ -1,0 +1,13 @@
+# Ctrl+E on an error in line 1 puts the cursor at the start.
+use ../shell/wm
+let d = wm.new_desktop(640, 480, wm.default_apps())
+let i = wm.launch(d, wm.ide)
+let s = i.state
+fun pos() = len(s.text) - s.back
+
+s.text = "print(1+)\n"
+s.back = 0
+wm.key(d, "ctrl+r")
+print(s.err_line, s.out)
+wm.key(d, "ctrl+e")
+print(pos())
