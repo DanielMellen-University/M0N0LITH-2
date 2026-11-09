@@ -180,6 +180,7 @@ Write `tests/shell_<topic>.relic`, run it, read its output, and save that as `te
 | `shell_terminal_quote_open` | a quote left open runs nothing and names the missing quote |
 | `shell_terminal_write_join` | write joins the words after the path, needs a path, and a path with no words writes a blank line |
 | `shell_terminal_paste_line` | Ctrl+V in the Terminal pastes only the first line of the clipboard |
+| `shell_terminal_ls_dot` | ls . lists the current folder and ls .. lists the parent |
 
 ### Files
 
