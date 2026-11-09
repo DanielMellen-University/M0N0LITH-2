@@ -1,0 +1,13 @@
+# Commenting a line is one undo step.
+use ../shell/wm
+let d = wm.new_desktop(640, 480, wm.default_apps())
+let i = wm.launch(d, wm.ide)
+let s = i.state
+fun pos() = len(s.text) - s.back
+
+s.text = "a"
+s.back = 0
+wm.key(d, "ctrl+/")
+print([s.text])
+wm.key(d, "ctrl+z")
+print([s.text], s.status)
