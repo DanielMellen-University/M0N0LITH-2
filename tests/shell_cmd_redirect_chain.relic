@@ -1,0 +1,17 @@
+# When two redirects are written, only the last one is the destination.
+use ../shell/wm
+use std/vfs
+let t = wm.terminal.init()
+fun run(line)
+    t.buf = []
+    for c in line
+        if c == " "
+            wm.terminal.on_key(t, "space")
+        else
+            wm.terminal.on_key(t, c)
+    wm.terminal.on_key(t, "return")
+    print(t.buf)
+run("echo a > b > /tmp/c.txt")
+print("bytes", vfs.read(t.fs, "/tmp/c.txt") == "a > b\n")
+print("no b", not vfs.exists(t.fs, "/home/b"))
+run("cat /tmp/c.txt")
