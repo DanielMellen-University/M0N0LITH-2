@@ -218,6 +218,7 @@ Write `tests/shell_<topic>.relic`, run it, read its output, and save that as `te
 | `shell_files_right_stay` | Right enters a folder and does nothing on a file or on .. |
 | `shell_files_left_root` | Left at / does not move |
 | `shell_files_f2_up` | F2 on .. does not start a rename |
+| `shell_files_rename_dir` | renaming a folder keeps what is inside it and leaves that folder selected |
 
 ### Editor
 
