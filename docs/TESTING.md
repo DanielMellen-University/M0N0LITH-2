@@ -225,6 +225,7 @@ Write `tests/shell_<topic>.relic`, run it, read its output, and save that as `te
 | `shell_files_sees_new` | a file written by another app shows up on the next draw, and the selection stays on its name |
 | `shell_files_sorted` | names are shown in order, with .. first |
 | `shell_files_dotfile` | a name that starts with a dot is listed |
+| `shell_files_delete_last` | deleting the last row leaves the selection on the row before it |
 
 ### Editor
 
