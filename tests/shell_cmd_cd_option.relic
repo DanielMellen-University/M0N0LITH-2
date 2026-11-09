@@ -1,0 +1,19 @@
+# cd refuses a word that starts with -, and stays in the folder it was in.
+use ../shell/wm
+use std/vfs
+let t = wm.terminal.init()
+fun run(line)
+    t.buf = []
+    for c in line
+        if c == " "
+            wm.terminal.on_key(t, "space")
+        else
+            wm.terminal.on_key(t, c)
+    wm.terminal.on_key(t, "return")
+    print(t.buf)
+run("cd -P /tmp")
+run("pwd")
+run("cd -- /tmp")
+run("pwd")
+run("cd /tmp")
+run("pwd")
