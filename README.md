@@ -3,14 +3,14 @@ M0N0LITH written in [Relic](https://github.com/DanielMellen-University/Relic).
 
 This repo is the MONOLITH 2 desktop environment: the window manager, taskbar, Start menu and the apps, all written in [Relic](https://github.com/DanielMellen-University/Relic). The language itself (host, std, self-host) lives in the Relic repo. Language changes go there, desktop and app changes go here.
 
-> Status: a 640 by 480 SDL demo, accepted on Linux on Nov 7 2026 for the behavior the walkthrough showed on all eight apps. For Snake that shown slice is launch, the board, clock-driven movement, one turn, a wall (`game over`, score 0, best 0), and `r` starting again. Pause, eating, hitting itself, and a win were not exercised in the window. Not a bootable OS or a sandbox. The shell started inside the Relic repo during its M11 milestone and moved here with its history in Relic 1.0.1. It has a window model with drag, resize and minimize, a taskbar with a +N button for windows that do not fit, a Start menu, and eight apps: Clicker, Notes, Terminal, Files, Editor, IDE, Paint and Snake. Those file apps share one in-memory filesystem (`std/vfs` from Relic), and Snake keeps its best score there. The desktop commits that filesystem to a workspace directory so a new process sees the saved files; the crash rules are in [Workspace recovery](docs/workspace-recovery.md). Notes, Clicker and unsaved editor text are not in it. The IDE is the Editor plus Ctrl+R to run a Relic program in an output pane, with input, `use` of your own files and Ctrl+E to jump to an error. The Relic pin stays at 1.0.53 (`f97ad87`). What is accepted, and what is parked, is in the [roadmap](docs/ROADMAP.md).
+> Status: a 640 by 480 SDL demo, accepted on Linux on Nov 7 2026 for the behavior the walkthrough showed on all eight apps. For Snake that shown slice is launch, the board, clock-driven movement, one turn, a wall (`game over`, score 0, best 0), and `r` starting again. Pause, eating, hitting itself, and a win were not exercised in the window. Not a bootable OS or a sandbox. The shell started inside the Relic repo during its M11 milestone and moved here with its history in Relic 1.0.1. It has a window model with drag, resize and minimize, a taskbar with a +N button for windows that do not fit, a Start menu, and eight apps: Clicker, Notes, Terminal, Files, Editor, IDE, Paint and Snake. Those file apps share one in-memory filesystem (`std/vfs` from Relic), and Snake keeps its best score there. The desktop commits that filesystem, and the open windows, to a workspace directory so a new process sees them again; the crash rules and the limits are in [Workspace recovery](docs/workspace-recovery.md). The IDE is the Editor plus Ctrl+R to run a Relic program in an output pane, with input, `use` of your own files and Ctrl+E to jump to an error. The Relic pin stays at 1.0.53 (`f97ad87`). What is accepted, and what is parked, is in the [roadmap](docs/ROADMAP.md).
 
 ## Layout
 
 ```
   shell/
   wm.relic        desktop model: windows, taskbar, Start menu, the apps. No drawing, runs without SDL
-  workspace.relic commits the shared vfs to a directory of generations
+  workspace.relic commits the shared vfs and the open windows to a directory of generations
   desktop.relic   draws the model with std/graphics and runs the event loop
 tests/
   shell_*.relic   182 programs that drive wm.relic with fake clicks and keys; each one's output must match its .out file
@@ -50,7 +50,7 @@ Already cloned without submodules? Run `git submodule update --init`.
 
 `-DRELIC_BUILD_HOST=ON` matters. Since Relic 1.0.7 the default Relic build is C only and makes `relicc` (the compiler to C), not the `relic` program the tests and `relic check` use. The flag builds the C++ host that provides `relic`.
 
-CMake discovers every `tests/*.relic` program and compares its standard output with the matching `.out` file (or empty output if there is no `.out`). It also runs `relic check` on the three shell files, 456 tests in all. CI runs the same steps on Linux, macOS and Windows. More in [Building](docs/BUILDING.md) and [Tests](docs/TESTING.md).
+CMake discovers every `tests/*.relic` program and compares its standard output with the matching `.out` file (or empty output if there is no `.out`). It also runs `relic check` on the three shell files, 458 tests in all. CI runs the same steps on Linux, macOS and Windows. More in [Building](docs/BUILDING.md) and [Tests](docs/TESTING.md).
 
 ## Run the desktop
 
@@ -78,7 +78,17 @@ Checked on Nov 7 2026 on Linux with SDL 2.30, on a real display, with the mouse 
 - **Snake:** arrows or W A S D start and turn, Space pauses, R plays again; it moves only while its window is focused, and the best score is saved in `/home/snake-best.txt`. See [Snake](docs/apps/SNAKE.md).
 - **Clicker and Notes:** a click counter (Space or Return counts, Backspace takes one off, Delete starts again and Ctrl+Z right after brings the count back) and a one-line note with a cursor (Ctrl+C, Ctrl+X and Ctrl+V with the desktop clipboard, Ctrl+Z for the last clear). See [Clicker and Notes](docs/apps/SMALL_APPS.md).
 
-On macOS, Cmd with a letter works as Ctrl with it. Escape closes the Start menu or the +N list, gives up a find or a name being typed, stops an IDE run that waits for input, drops a selection, and otherwise quits. Saved files are in the workspace directory (`$HOME/.m0n0lith2/workspace`, or `M0N0LITH_WORKSPACE` when that is set; an empty value turns the store off). Unsaved editor text is not. All the keys are in [Keyboard and mouse](docs/KEYS.md).
+On macOS, Cmd with a letter works as Ctrl with it. Escape closes the Start menu or the +N list, gives up a find or a name being typed, stops an IDE run that waits for input, drops a selection, and otherwise quits. All the keys are in [Keyboard and mouse](docs/KEYS.md).
+
+## Workspace
+
+Quitting writes the shared files and the open windows to `$HOME/.m0n0lith2/workspace` (or `$USERPROFILE/.m0n0lith2/workspace` when `HOME` is unset). Set `M0N0LITH_WORKSPACE` to another directory, or to an empty value to keep nothing between runs.
+
+The next start opens the same windows in the same places. That includes Terminal's folder, output, and command history; the folder Files was in; Editor and IDE text, including text not yet saved with Ctrl+S; Notes' line; Clicker's count; Paint's picture, including a stroke not yet saved; and Snake's best score. Snake itself starts a new game.
+
+A save that is cut off keeps the previous snapshot. A workspace file that is cut short, no longer matches its checksum, or is a newer version than this desktop understands is not opened as if it were whole. The screen says so. A newer version is left on disk until you release it. When an older snapshot still reads, that one comes back. When nothing does, you get the first-run files, which are `/home`, `/tmp`, and `/home/welcome.txt`, and no windows.
+
+Not kept: undo, the clipboard, an IDE program that was still running, and where Snake was on the board. Letters you typed after the last snapshot are written when you quit, and also when a file is saved, a Terminal command finishes, or a window is moved or closed. A kill before that keeps the last snapshot, not those letters. There is no fsync, so pulling the power is not covered. The rules are in [Workspace recovery](docs/workspace-recovery.md).
 
 ## Docs
 
