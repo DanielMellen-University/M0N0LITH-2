@@ -1,0 +1,10 @@
+# The IDE title names Ctrl+R as well as Ctrl+S.
+use ../shell/wm
+let d = wm.new_desktop(640, 480, wm.default_apps())
+let i = wm.launch(d, wm.ide)
+let s = i.state
+fun pos() = len(s.text) - s.back
+
+s.text = "print(1)\n"
+i.width = 800
+print(wm.visible_lines(i)[0])

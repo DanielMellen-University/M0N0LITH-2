@@ -330,6 +330,7 @@ Write `tests/shell_<topic>.relic`, run it, read its output, and save that as `te
 | `shell_ide_input_home` | Home and End move the cursor in the input line |
 | `shell_ide_input_word` | Ctrl+Left in the input line moves to the start of the word |
 | `shell_ide_click_out` | a click on a plain output line does not move the cursor |
+| `shell_ide_title` | a wide IDE title names Ctrl+R as well as Ctrl+S |
 
 ### Paint
 
