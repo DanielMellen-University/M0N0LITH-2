@@ -294,6 +294,7 @@ Write `tests/shell_<topic>.relic`, run it, read its output, and save that as `te
 | `shell_editor_page_top` | Page Up on the first line stays at its start |
 | `shell_editor_line_grow` | Ctrl+L twice takes in the next line as well |
 | `shell_editor_word_start` | Ctrl+Backspace at the start of the file removes nothing |
+| `shell_editor_join_space` | Ctrl+J turns the next line's newline and indent into one space |
 
 ### IDE
 
