@@ -1,0 +1,10 @@
+# A new Notes state is an empty line, cursor at the end, with nothing to undo.
+use ../shell/wm
+let n = wm.notes.init()
+print(n.text == "")
+print(n.left == 0)
+print(n.before == none)
+print(wm.notes.lines(n))
+wm.notes.on_key(n, "ctrl+z")
+print(n.text == "")
+print(wm.notes.lines(n)[1])

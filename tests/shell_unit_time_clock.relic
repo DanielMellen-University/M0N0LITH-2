@@ -1,0 +1,7 @@
+# format_time rolls the clock from seconds to minutes to hours on the epoch day.
+use ../shell/wm
+print(wm.format_time(1))
+print(wm.format_time(59))
+print(wm.format_time(60))
+print(wm.format_time(3599))
+print(wm.format_time(3600))

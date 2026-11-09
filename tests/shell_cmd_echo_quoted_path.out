@@ -1,0 +1,4 @@
+["/home> echo hi > \"/tmp/my file.txt\""]
+bytes true
+["/home> ls /tmp", "\"my file.txt\""]
+["/home> cat \"/tmp/my file.txt\"", "hi"]

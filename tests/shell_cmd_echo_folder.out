@@ -1,0 +1,5 @@
+["/home> echo hi > /tmp", "echo: is a folder: /tmp"]
+["/home> echo hi >> /tmp", "echo: is a folder: /tmp"]
+dir true
+["/home> echo hi > /tmp/line.txt"]
+file true

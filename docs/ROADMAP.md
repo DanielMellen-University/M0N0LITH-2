@@ -72,7 +72,7 @@ Next work is maintenance of this list, and the workspace store below. The parked
 
 ## Workspace store
 
-The shared vfs can be committed to a directory. `shell/desktop.relic` does that. A new process that opens the same directory gets the last committed generation, including a file removed on purpose. Terminal, Files, the Editor, the IDE, Paint and Snake's best score are that vfs. Notes, Clicker, unsaved buffers and window positions are not.
+The shared vfs can be committed to a directory. `shell/desktop.relic` does that, and the same generation records the open windows: place, Terminal folder and history, Editor and IDE text including unsaved text, Notes, Clicker's count, and Paint's cells. A new process that opens the same directory gets the last committed generation, including a file removed on purpose. Undo, the clipboard, a running IDE program, and Snake's board are not in it. A kill before the next snapshot or quit drops keystrokes since the last one.
 
 A torn or corrupt generation does not replace the last one that still parses. The notice says when a save failed or when the load recovered or ignored a file. There is no fsync in Relic 1.0.53, so a power loss is not covered. The rules, the file format and the fault stages are in [Workspace recovery](workspace-recovery.md).
 

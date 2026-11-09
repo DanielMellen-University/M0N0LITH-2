@@ -1,0 +1,9 @@
+# The last pixel of the desktop is inside it, and the next pixel is not.
+use ../shell/wm
+let d = wm.new_desktop(640, 480, wm.default_apps())
+print(wm.click(d, 639, 470))
+print(wm.click(d, 640, 470))
+print(wm.click(d, 10, 479))
+print(wm.click(d, 10, 480))
+print(wm.click(d, -1, 479))
+print(wm.click(d, 639, -1))

@@ -1,0 +1,4 @@
+["/home> mkdir welcome.txt", "mkdir: already there: /home/welcome.txt"]
+["/home> mkdir /home/welcome.txt", "mkdir: already there: /home/welcome.txt"]
+still file true
+bytes true

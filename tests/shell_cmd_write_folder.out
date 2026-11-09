@@ -1,0 +1,6 @@
+["/home> write /tmp hello", "write: is a folder: /tmp"]
+tmp dir true
+["/home> write /tmp/no/out.txt hello", "write: no folder: /tmp/no"]
+no true
+["/home> write /tmp/out.txt hello there"]
+bytes true

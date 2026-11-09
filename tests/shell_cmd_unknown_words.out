@@ -1,0 +1,4 @@
+["/home> foo bar baz", "unknown: foo"]
+["/home> Foo", "unknown: Foo"]
+no foo true
+["/home> Foo", "unknown: Foo"]

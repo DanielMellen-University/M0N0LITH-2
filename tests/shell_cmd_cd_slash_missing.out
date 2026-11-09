@@ -1,0 +1,4 @@
+["/home> cd /tmp/nope/", "cd: not found: /tmp/nope"]
+["/home> pwd", "/home"]
+["/home> cd missing/", "cd: not found: /home/missing"]
+["/home> pwd", "/home"]

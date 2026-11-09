@@ -1,0 +1,17 @@
+# A long Notes line scrolls so the cursor stays in view when it sits in the middle.
+use ../shell/wm
+use std/strings
+let d = wm.new_desktop(640, 480, wm.default_apps())
+let w = wm.launch(d, wm.notes)
+let cols = wm.cols_fit(w)
+for ch in "abcdefghijklmnopqrstuvwxyz0123456789ABCD"
+    wm.key(d, ch)
+wm.key(d, "home")
+for i in 0..15
+    wm.key(d, "right")
+let shown = wm.visible_lines(w)[1]
+print("cols", cols)
+print("shown", shown)
+print("fits", len(shown) <= cols)
+print("cursor", strings.contains(shown, "_"))
+print("full", w.state.text)

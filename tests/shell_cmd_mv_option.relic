@@ -1,0 +1,17 @@
+# mv -f is refused, so the file stays under its old name.
+use ../shell/wm
+use std/vfs
+let t = wm.terminal.init()
+fun run(line)
+    t.buf = []
+    for c in line
+        if c == " "
+            wm.terminal.on_key(t, "space")
+        else
+            wm.terminal.on_key(t, c)
+    wm.terminal.on_key(t, "return")
+    print(t.buf)
+run("touch /tmp/from.txt")
+run("mv -f /tmp/from.txt /tmp/to.txt")
+print("from", vfs.exists(t.fs, "/tmp/from.txt"))
+print("to", vfs.exists(t.fs, "/tmp/to.txt"))

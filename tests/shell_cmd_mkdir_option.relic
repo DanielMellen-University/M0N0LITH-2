@@ -1,0 +1,18 @@
+# mkdir -p is refused, and neither folder is created.
+use ../shell/wm
+use std/vfs
+let t = wm.terminal.init()
+fun run(line)
+    t.buf = []
+    for c in line
+        if c == " "
+            wm.terminal.on_key(t, "space")
+        else
+            wm.terminal.on_key(t, c)
+    wm.terminal.on_key(t, "return")
+    print(t.buf)
+run("mkdir -p /tmp/new/deep")
+print("new", vfs.exists(t.fs, "/tmp/new"))
+print("deep", vfs.exists(t.fs, "/tmp/new/deep"))
+run("mkdir /tmp/real")
+print("real", vfs.is_dir(t.fs, "/tmp/real"))

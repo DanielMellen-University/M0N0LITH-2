@@ -1,0 +1,9 @@
+# Ctrl+W with the Start menu open closes the focused window and leaves the menu open.
+use ../shell/wm
+let d = wm.new_desktop(640, 480, wm.default_apps())
+wm.launch(d, wm.notes)
+wm.click(d, 10, 470)
+wm.key(d, "ctrl+w")
+print("windows", len(d.windows))
+print("menu", d.menu_open)
+print("focus", wm.focused(d) == none)

@@ -1,0 +1,17 @@
+# head with a count of 1, including leading zeros, prints only the first line.
+use ../shell/wm
+use std/vfs
+let t = wm.terminal.init()
+fun run(line)
+    t.buf = []
+    for c in line
+        if c == " "
+            wm.terminal.on_key(t, "space")
+        else
+            wm.terminal.on_key(t, c)
+    wm.terminal.on_key(t, "return")
+    print(t.buf)
+vfs.write(t.fs, "/tmp/h.txt", "one\ntwo\nthree\n")
+run("head /tmp/h.txt 1")
+run("head /tmp/h.txt 000001")
+run("head /tmp/h.txt 01")

@@ -1,0 +1,5 @@
+a from-a
+b b:from-a
+cut b 
+a untouched from-a
+pasted back from-ab:from-a

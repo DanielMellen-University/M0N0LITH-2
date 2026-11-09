@@ -1,0 +1,21 @@
+# Ctrl+K removes the rest of the line, and Ctrl+Z brings the whole line back.
+use ../shell/wm
+let n = wm.notes.init()
+fun key(k)
+    wm.notes.on_key(n, k)
+fun type(text)
+    for ch in text
+        if ch == " "
+            key("space")
+        else
+            key(ch)
+fun line()
+    print(wm.notes.lines(n)[1])
+type("abcdef")
+key("left")
+key("left")
+key("left")
+key("ctrl+k")
+line()
+key("ctrl+z")
+line()

@@ -1,0 +1,17 @@
+# grep matches a piece in the middle of a line, and the case has to agree.
+use ../shell/wm
+use std/vfs
+let t = wm.terminal.init()
+fun run(line)
+    t.buf = []
+    for c in line
+        if c == " "
+            wm.terminal.on_key(t, "space")
+        else
+            wm.terminal.on_key(t, c)
+    wm.terminal.on_key(t, "return")
+    print(t.buf)
+vfs.write(t.fs, "/tmp/g.txt", "Welcome to Relic.\nwelcome\n")
+run("grep elc /tmp/g.txt")
+run("grep ELC /tmp/g.txt")
+run("grep to /tmp/g.txt")

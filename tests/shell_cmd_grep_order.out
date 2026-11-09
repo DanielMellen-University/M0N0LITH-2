@@ -1,0 +1,2 @@
+["/home> grep red /tmp/g.txt", "red", "reddish", "red"]
+["/home> grep blue /tmp/g.txt", "blue"]

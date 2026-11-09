@@ -1,0 +1,10 @@
+# After ten cascade steps are full, the next window uses the first step again.
+use ../shell/wm
+let d = wm.new_desktop(640, 480, wm.default_apps())
+let first = wm.launch(d, wm.notes)
+let eleventh = none
+for i in 1..11
+    eleventh = wm.launch(d, wm.notes)
+print("count", len(d.windows))
+print("same slot", eleventh.x == first.x and eleventh.y == first.y)
+print("id", eleventh.id)

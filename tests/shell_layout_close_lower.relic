@@ -1,0 +1,8 @@
+# Closing a window that is not on top leaves focus on the one that is.
+use ../shell/wm
+let d = wm.new_desktop(640, 480, wm.default_apps())
+let low = wm.launch(d, wm.notes)
+let top = wm.launch(d, wm.clicker)
+wm.close(d, low.id)
+print("focus", wm.focused(d).id == top.id)
+print("left", len(d.windows))

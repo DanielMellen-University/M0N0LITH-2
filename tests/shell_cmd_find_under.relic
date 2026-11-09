@@ -1,0 +1,22 @@
+# find looks only under the current folder, not at a sibling of it.
+use ../shell/wm
+use std/vfs
+let t = wm.terminal.init()
+fun run(line)
+    t.buf = []
+    for c in line
+        if c == " "
+            wm.terminal.on_key(t, "space")
+        else
+            wm.terminal.on_key(t, c)
+    wm.terminal.on_key(t, "return")
+    print(t.buf)
+run("mkdir /tmp/side")
+run("touch /tmp/side/other.txt")
+run("mkdir /home/sub")
+run("touch /home/sub/here.txt")
+run("cd /home/sub")
+run("find other")
+run("find here")
+run("cd /")
+run("find here")

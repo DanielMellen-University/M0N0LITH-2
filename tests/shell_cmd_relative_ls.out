@@ -1,0 +1,5 @@
+["/home> touch /tmp/seen.txt"]
+["/home> ls ../tmp/seen.txt", "seen.txt"]
+["/home> ls /tmp/seen.txt", "seen.txt"]
+["/home> cd /tmp"]
+["/tmp> ls ../home", "welcome.txt"]

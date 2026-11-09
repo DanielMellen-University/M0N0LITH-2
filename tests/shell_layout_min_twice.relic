@@ -1,0 +1,9 @@
+# Minimizing a window that is already minimized leaves it minimized.
+use ../shell/wm
+let d = wm.new_desktop(640, 480, wm.default_apps())
+let w = wm.launch(d, wm.notes)
+wm.minimize(d, w.id)
+wm.minimize(d, w.id)
+print(w.minimized, wm.focused(d) == none)
+wm.restore(d, w.id)
+print("back", not w.minimized and wm.focused(d).id == w.id)

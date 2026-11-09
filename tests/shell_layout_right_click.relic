@@ -1,0 +1,9 @@
+# The right button does not raise a window or start a drag.
+use ../shell/wm
+let d = wm.new_desktop(640, 480, wm.default_apps())
+let low = wm.launch(d, wm.notes)
+let top = wm.launch(d, wm.clicker)
+print(wm.handle(d, {type: "mouse_down", button: 3, x: low.x + 4, y: low.y + 4, clicks: 1}))
+print("focus", wm.focused(d).id == top.id)
+print("drag", d.drag == none)
+print("stack", d.windows[len(d.windows) - 1].id == top.id)

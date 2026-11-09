@@ -1,0 +1,3 @@
+["/home> write /tmp/w.txt \"a  b\" c"]
+bytes true
+["/home> cat /tmp/w.txt", "a  b c"]

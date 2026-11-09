@@ -1,0 +1,18 @@
+# ls of a relative path from /home sees a file made in /tmp.
+use ../shell/wm
+use std/vfs
+let t = wm.terminal.init()
+fun run(line)
+    t.buf = []
+    for c in line
+        if c == " "
+            wm.terminal.on_key(t, "space")
+        else
+            wm.terminal.on_key(t, c)
+    wm.terminal.on_key(t, "return")
+    print(t.buf)
+run("touch /tmp/seen.txt")
+run("ls ../tmp/seen.txt")
+run("ls /tmp/seen.txt")
+run("cd /tmp")
+run("ls ../home")

@@ -1,0 +1,7 @@
+# A click on empty taskbar is the bar, and it does not change which window is focused.
+use ../shell/wm
+let d = wm.new_desktop(640, 480, wm.default_apps())
+let w = wm.launch(d, wm.notes)
+print(wm.click(d, 400, 470))
+print("focus", wm.focused(d).id == w.id)
+print("menu", d.menu_open)

@@ -1,0 +1,5 @@
+["/home> mkdir /home/box"]
+["/home> touch /home/box/a.txt"]
+["/home> find \"\"", "box/", "box/a.txt", "welcome.txt"]
+["/home> cd /home/box"]
+["/home/box> find ''", "a.txt"]

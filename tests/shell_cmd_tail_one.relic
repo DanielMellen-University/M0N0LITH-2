@@ -1,0 +1,18 @@
+# tail with a count of 1 prints only the last line, with or without a final newline.
+use ../shell/wm
+use std/vfs
+let t = wm.terminal.init()
+fun run(line)
+    t.buf = []
+    for c in line
+        if c == " "
+            wm.terminal.on_key(t, "space")
+        else
+            wm.terminal.on_key(t, c)
+    wm.terminal.on_key(t, "return")
+    print(t.buf)
+vfs.write(t.fs, "/tmp/nl.txt", "one\ntwo\n")
+vfs.write(t.fs, "/tmp/bare.txt", "one\ntwo")
+run("tail /tmp/nl.txt 1")
+run("tail /tmp/bare.txt 1")
+run("tail /tmp/bare.txt 0001")

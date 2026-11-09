@@ -1,0 +1,2 @@
+["/home> echo kept", "kept", "/home> history -c", "usage: history"]
+["/home> history", "  1  echo kept", "  2  history -c", "  3  history"]

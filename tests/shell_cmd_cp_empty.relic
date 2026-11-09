@@ -1,0 +1,18 @@
+# cp copies an empty file as empty, and does not copy a folder.
+use ../shell/wm
+use std/vfs
+let t = wm.terminal.init()
+fun run(line)
+    t.buf = []
+    for c in line
+        if c == " "
+            wm.terminal.on_key(t, "space")
+        else
+            wm.terminal.on_key(t, c)
+    wm.terminal.on_key(t, "return")
+    print(t.buf)
+run("touch /tmp/empty.txt")
+run("cp /tmp/empty.txt /tmp/empty2.txt")
+print("empty", vfs.exists(t.fs, "/tmp/empty2.txt") and vfs.read(t.fs, "/tmp/empty2.txt") == "")
+run("cp /tmp /tmp/tmp2")
+print("no dir copy", not vfs.exists(t.fs, "/tmp/tmp2"))

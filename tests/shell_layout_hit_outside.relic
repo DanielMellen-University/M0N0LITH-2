@@ -1,0 +1,10 @@
+# The pixel just outside a window is the desktop, and the pixel on its edge is the window.
+use ../shell/wm
+let d = wm.new_desktop(640, 480, wm.default_apps())
+let w = wm.launch(d, wm.notes)
+let bottom = w.y + wm.title_height + w.height
+print("right", wm.click(d, w.x + w.width, w.y + 20))
+print("below", wm.click(d, w.x + 10, bottom))
+print("left edge", wm.click(d, w.x, w.y + wm.title_height + 4))
+print("bottom edge", wm.click(d, w.x + 10, bottom - 1))
+print("text", w.state.text)

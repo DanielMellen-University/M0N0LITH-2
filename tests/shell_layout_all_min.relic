@@ -1,0 +1,14 @@
+# With every window minimized, nothing is focused and window keys do nothing.
+use ../shell/wm
+let d = wm.new_desktop(640, 480, wm.default_apps())
+let a = wm.launch(d, wm.notes)
+let b = wm.launch(d, wm.clicker)
+wm.minimize(d, a.id)
+wm.minimize(d, b.id)
+print("focus", wm.focused(d) == none)
+wm.key(d, "ctrl+tab")
+wm.key(d, "ctrl+shift+tab")
+wm.key(d, "ctrl+w")
+wm.key(d, "ctrl+m")
+wm.key(d, "z")
+print("still", wm.focused(d) == none, a.minimized, b.minimized, len(d.windows))

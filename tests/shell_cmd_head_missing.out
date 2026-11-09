@@ -1,0 +1,4 @@
+["/home> head /tmp/no-such.txt", "head: not found: /tmp/no-such.txt"]
+["/home> tail /tmp/no-such.txt", "tail: not found: /tmp/no-such.txt"]
+["/home> head welcome.txt/x", "head: not a folder: /home/welcome.txt"]
+["/home> tail welcome.txt/x 3", "tail: not a folder: /home/welcome.txt"]

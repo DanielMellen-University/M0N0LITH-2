@@ -1,0 +1,9 @@
+# The close box is half-open on the right: that edge pixel is not the close box.
+use ../shell/wm
+let d = wm.new_desktop(640, 480, wm.default_apps())
+let w = wm.launch(d, wm.notes)
+let b = wm.close_box(w)
+print("out", wm.click(d, b[0] + b[2], b[1] + 2))
+print("still", len(d.windows))
+print("in", wm.click(d, b[0] + b[2] - 1, b[1]))
+print("gone", len(d.windows))

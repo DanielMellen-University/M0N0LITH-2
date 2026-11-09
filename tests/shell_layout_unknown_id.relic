@@ -1,0 +1,11 @@
+# close, minimize and restore of an id that is not open do nothing.
+use ../shell/wm
+let d = wm.new_desktop(640, 480, wm.default_apps())
+let w = wm.launch(d, wm.notes)
+wm.close(d, 999)
+wm.minimize(d, 999)
+wm.restore(d, 999)
+print(len(d.windows), w.minimized, wm.focused(d).id == w.id)
+wm.close(d, w.id)
+wm.close(d, w.id)
+print(len(d.windows), wm.focused(d) == none)

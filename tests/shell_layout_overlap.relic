@@ -1,0 +1,9 @@
+# A click on the overlap hits the window on top, not the one under it.
+use ../shell/wm
+let d = wm.new_desktop(640, 480, wm.default_apps())
+let low = wm.launch(d, wm.clicker)
+let top = wm.launch(d, wm.clicker)
+print(wm.click(d, top.x + 4, top.y + wm.title_height + 4))
+print("top count", top.state.count)
+print("low count", low.state.count)
+print("focus", wm.focused(d).id == top.id)

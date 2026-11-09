@@ -1,0 +1,9 @@
+empty paste ab_cd
+undo _
+redo abcd_
+empty paste _abcd
+undo _
+redo abcd_
+empty paste abcd_
+undo _
+redo abcd_

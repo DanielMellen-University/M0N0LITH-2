@@ -1,0 +1,3 @@
+["/home> grep elc /tmp/g.txt", "Welcome to Relic.", "welcome"]
+["/home> grep ELC /tmp/g.txt"]
+["/home> grep to /tmp/g.txt", "Welcome to Relic."]

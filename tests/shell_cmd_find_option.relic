@@ -1,0 +1,17 @@
+# find has no option flags: a word starting with - is text to look for in names.
+use ../shell/wm
+use std/vfs
+let t = wm.terminal.init()
+fun run(line)
+    t.buf = []
+    for c in line
+        if c == " "
+            wm.terminal.on_key(t, "space")
+        else
+            wm.terminal.on_key(t, c)
+    wm.terminal.on_key(t, "return")
+    print(t.buf)
+run("touch /tmp/x-name.txt")
+run("cd /tmp")
+run("find -name")
+run("find -missing")

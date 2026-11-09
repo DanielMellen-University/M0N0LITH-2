@@ -1,0 +1,19 @@
+# Removing nothing keeps the previous undo step, on empty and nonempty lines.
+use ../shell/wm
+for k in ["ctrl+u", "ctrl+backspace", "ctrl+delete", "ctrl+k", "ctrl+x"]
+    for text in ["xy", ""]
+        if k != "ctrl+x" or text == ""
+            let n = wm.notes.init()
+            for ch in "hello"
+                wm.notes.on_key(n, ch)
+            wm.notes.on_key(n, "ctrl+u")
+            for ch in text
+                wm.notes.on_key(n, ch)
+            if k in ["ctrl+u", "ctrl+backspace"]
+                wm.notes.on_key(n, "home")
+            wm.notes.on_key(n, k)
+            print(k, "no-op", wm.notes.lines(n)[1])
+            wm.notes.on_key(n, "ctrl+z")
+            print("undo", wm.notes.lines(n)[1])
+            wm.notes.on_key(n, "ctrl+z")
+            print("redo", wm.notes.lines(n)[1])

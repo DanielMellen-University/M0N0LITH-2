@@ -15,7 +15,7 @@ One test: `ctest --test-dir build -C Release -R golden_shell_ide`. Or run it str
 
 ## How they are checked
 
-CMake finds every `tests/*.relic` and adds it as `golden_<name>`. `tools/run_golden.cmake` runs it from `tests/`, and it passes when it exits with 0 and its standard output matches `<name>.out` exactly (Windows line endings are ignored). A test with no `.out` file must print nothing. One more test, `check_shell`, runs `relic check` on `wm.relic`, `workspace.relic`, `desktop.relic` and `ide_diag.relic`, which catches syntax errors and undefined names in the drawing code no test runs. That is 297 tests in all, and CI runs them on Linux, macOS and Windows. Four of the golden programs and `workspace_restart` cover the store. `workspace_restart` is not a golden file: it runs four relic processes against one directory.
+CMake finds every `tests/*.relic` and adds it as `golden_<name>`. `tools/run_golden.cmake` runs it from `tests/`, and it passes when it exits with 0 and its standard output matches `<name>.out` exactly (Windows line endings are ignored). A test with no `.out` file must print nothing. One more test, `check_shell`, runs `relic check` on `wm.relic`, `workspace.relic`, `desktop.relic` and `ide_diag.relic`, which catches syntax errors and undefined names in the drawing code no test runs. That is 464 tests in all, and CI runs them on Linux, macOS and Windows. Seven of the golden programs, `workspace_restart`, and `workspace_kill` cover the store. `workspace_restart` runs four relic processes against one directory. `workspace_kill` kills a process after it has written a partial and before it publishes.
 
 None of them opens the SDL window. A passing run does not prove what the desktop draws. The Linux GUI pass, and what it did not try, is in the [roadmap](ROADMAP.md#accepted-nov-7-2026).
 
@@ -99,6 +99,8 @@ Write `tests/shell_<topic>.relic`, run it, read its output, and save that as `te
 | `shell_notes_input_edges` | single-line input and reopening Notes; Ctrl+Z bringing a cleared line back, or taking a paste back, one step |
 | `shell_notes_two_windows` | Notes: two windows keep their own lines; typing in one leaves the other alone |
 | `shell_notes_empty_clipboard` | Notes: Ctrl+X or Ctrl+C on an empty line leaves the clipboard as it was |
+| `shell_notes_paste_empty_undo` | Notes: pasting an empty clipboard at the start, middle or end keeps the cursor and one-step undo |
+| `shell_notes_noop_delete_undo` | Notes: Ctrl+U, Ctrl+Backspace, Ctrl+Delete, Ctrl+K and Ctrl+X removing nothing preserve the one-step undo |
 | `shell_clicker_two_windows` | Clicker: two windows count on their own, and undoing one leaves the other alone |
 | `shell_clicker_title_click` | Clicker: a click on its title bar or on the empty desktop counts nothing; only a click inside the window does |
 
@@ -149,6 +151,7 @@ Write `tests/shell_<topic>.relic`, run it, read its output, and save that as `te
 | `shell_terminal_multipath_errors` | rm, mkdir and touch with several paths keep going after an error for one |
 | `shell_terminal_sort_uniq_nl_errors` | sort, uniq and nl on a path ending in /, and nl on a missing file |
 | `shell_terminal_head_tail_counts` | head and tail counts: tail 0, leading zeros, over six digits, a letter, a dash count, and a bad count on a missing file |
+| `shell_terminal_head_tail_zero_paths` | head and tail with count 0 report missing files, paths through files, trailing slashes on files and folders, and print nothing from an existing file |
 | `shell_terminal_head_end` | head of a short file prints the same lines as cat and tail, including a blank line in the file and a file that is only a newline, and no blank line after a final newline |
 | `shell_terminal_complete_list` | when Tab cannot add more, the list marks a folder with / and quotes a name that has a space |
 | `shell_terminal_wc_counts` | wc counts newlines, space-separated words and characters, including a last line with no newline |
@@ -378,6 +381,9 @@ Write `tests/shell_<topic>.relic`, run it, read its output, and save that as `te
 | `shell_workspace_corrupt` | hand-written wrong version, truncated, extra, `..`, duplicate, missing parent, CR, bad escape, NUL, bad pointers, a number that is text, an empty image, an uncommitted generation, a partial, too many names, a too-long path |
 | `shell_workspace_chain` | a corrupt commit does not install a newer uncommitted file; partial or full-uncommitted then a retry keeps the previous commit through a later corruption; a torn pointer with `META` keeps that commit and ignores a newer file; a torn pointer with two files and no `META` holds; a wrong version and too many names are not overwritten; a failed open is not `saved`; an empty path is; IDE Ctrl+S persists and a fault does not say saved |
 | `workspace_restart` | the same session across two processes, then a torn pointer and a fourth process |
+| `shell_workspace_checksum` | a bound desktop saves and reloads a 20,000-emoji vfs file into a fresh desktop; compensating two-character edits and a swap are invalid and recover the older files and window with a visible notice |
+| `shell_workspace_session` | a bound desktop restores windows, places, Terminal cwd and history, unsaved Editor text, Notes, Clicker, Paint cells, and an IDE buffer; a partial fault keeps the previous snapshot; a changed byte and a wrong version are not installed; a truncated commit falls back to the older one |
+| `workspace_kill` | a second process is killed after writing a partial; the third process still has the committed file and window |
 
 ### Shared filesystem and fuzzing
 

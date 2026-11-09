@@ -1,0 +1,3 @@
+["/home> find", "usage: find <text>"]
+["/home> find one two", "usage: find <text>"]
+["/home> find welcome", "welcome.txt"]

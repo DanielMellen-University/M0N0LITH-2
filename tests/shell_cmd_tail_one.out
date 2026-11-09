@@ -1,0 +1,3 @@
+["/home> tail /tmp/nl.txt 1", "two"]
+["/home> tail /tmp/bare.txt 1", "two"]
+["/home> tail /tmp/bare.txt 0001", "two"]

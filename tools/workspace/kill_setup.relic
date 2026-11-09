@@ -1,0 +1,25 @@
+# First process. Commits one file, then exits. The next process is killed
+# after it has written a partial and before it publishes a pointer.
+use ../../shell/wm
+use std/os
+use std/vfs
+
+fun key_text(d, text)
+    for ch in text
+        if ch == " "
+            wm.key(d, "space")
+        else if ch == "\n"
+            wm.key(d, "return")
+        else
+            wm.key(d, ch)
+
+let args = os.args()
+if len(args) != 1
+    fail("kill_setup needs the workspace directory")
+let d = wm.new_desktop(640, 480, wm.default_apps())
+wm.workspace_open(args[0])
+wm.workspace_bind(d)
+wm.launch(d, wm.terminal)
+key_text(d, "echo kept > a.txt\n")
+wm.workspace_flush()
+print("setup", [vfs.read(wm.terminal.init().fs, "/home/a.txt")], [wm.workspace_notice()])

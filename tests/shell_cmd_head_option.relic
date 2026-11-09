@@ -1,0 +1,17 @@
+# head -n is refused, so the first line is not printed.
+use ../shell/wm
+use std/vfs
+let t = wm.terminal.init()
+fun run(line)
+    t.buf = []
+    for c in line
+        if c == " "
+            wm.terminal.on_key(t, "space")
+        else
+            wm.terminal.on_key(t, c)
+    wm.terminal.on_key(t, "return")
+    print(t.buf)
+vfs.write(t.fs, "/tmp/h.txt", "only")
+run("head -n 1 /tmp/h.txt")
+run("head /tmp/h.txt -n")
+run("head /tmp/h.txt 1")

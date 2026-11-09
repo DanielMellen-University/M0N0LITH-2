@@ -1,0 +1,4 @@
+["/home> mv welcome.txt ./welcome.txt", "mv: already there: /home/welcome.txt"]
+["/home> mv welcome.txt welcome.txt", "mv: already there: /home/welcome.txt"]
+["/home> mv /home/welcome.txt /home/../home/welcome.txt", "mv: already there: /home/welcome.txt"]
+bytes true

@@ -1,0 +1,4 @@
+["/home> touch /tmp/src.txt"]
+["/home> cp -r /tmp/src.txt /tmp/dst.txt", "cp: no options, not even -r"]
+dst false
+src true

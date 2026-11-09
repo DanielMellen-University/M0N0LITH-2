@@ -1,0 +1,15 @@
+# Up from the first Start row wraps to the last, and Down from the last wraps to the first.
+use ../shell/wm
+let d = wm.new_desktop(640, 480, wm.default_apps())
+wm.click(d, 10, 470)
+print("open", d.menu_open, d.menu_sel)
+wm.key(d, "up")
+print("up", d.menu_sel, d.menu_open)
+wm.key(d, "down")
+print("down", d.menu_sel)
+wm.key(d, "down")
+print("second", d.menu_sel)
+let n = len(d.apps)
+for i in 0..n
+    wm.key(d, "down")
+print("round", d.menu_sel)

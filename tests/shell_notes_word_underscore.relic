@@ -1,0 +1,18 @@
+# An underscore is part of a word, so foo_bar is one word.
+use ../shell/wm
+let n = wm.notes.init()
+fun key(k)
+    wm.notes.on_key(n, k)
+fun type(text)
+    for ch in text
+        if ch == " "
+            key("space")
+        else
+            key(ch)
+fun line()
+    print(wm.notes.lines(n)[1])
+type("foo_bar baz")
+key("ctrl+left")
+line()
+key("ctrl+left")
+line()

@@ -1,0 +1,14 @@
+# A drag keeps the title on screen: y stops at 0 and just above the taskbar, x keeps 40 pixels.
+use ../shell/wm
+let d = wm.new_desktop(640, 480, wm.default_apps())
+let w = wm.launch(d, wm.notes)
+print(wm.click(d, w.x + 4, w.y + 4))
+wm.motion(d, -500, -500)
+print("top", w.y == 0)
+print("left", w.x == 40 + 2 * wm.title_height - w.width)
+wm.motion(d, 5000, 5000)
+print("bottom", w.y == wm.bar_top(d) - wm.title_height)
+print("right", w.x == d.width - 40)
+wm.release(d)
+wm.motion(d, 0, 0)
+print("stays", w.y == wm.bar_top(d) - wm.title_height)

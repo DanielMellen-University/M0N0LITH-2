@@ -1,0 +1,2 @@
+["/home> uniq -c /tmp/rep.txt", "uniq: no options, not even -c"]
+same true

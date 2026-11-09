@@ -1,0 +1,12 @@
+# Where a window hangs over the taskbar, the taskbar takes the click.
+use ../shell/wm
+let d = wm.new_desktop(640, 480, wm.default_apps())
+let w = wm.launch(d, wm.notes)
+wm.handle(d, {type: "text", text: "keep"})
+wm.click(d, w.x + 4, w.y + 4)
+wm.motion(d, 5000, 5000)
+wm.release(d)
+print("y", w.y)
+print("click", wm.click(d, w.x + 10, wm.bar_top(d)))
+print("text", w.state.text)
+print("focus", wm.focused(d).id == w.id)

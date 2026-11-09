@@ -1,0 +1,5 @@
+["/home> echo > /tmp/blank.txt"]
+bytes true
+["/home> wc /tmp/blank.txt", "1 0 1 /tmp/blank.txt"]
+["/home> echo >> /tmp/blank.txt"]
+two true

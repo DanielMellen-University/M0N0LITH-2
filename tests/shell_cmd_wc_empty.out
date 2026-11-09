@@ -1,0 +1,4 @@
+["/home> touch /tmp/empty.txt"]
+["/home> wc /tmp/empty.txt", "0 0 0 /tmp/empty.txt"]
+["/home> wc /tmp/nl.txt", "1 0 1 /tmp/nl.txt"]
+["/home> wc /tmp/sp.txt", "0 0 3 /tmp/sp.txt"]

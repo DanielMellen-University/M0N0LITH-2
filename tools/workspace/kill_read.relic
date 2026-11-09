@@ -1,0 +1,16 @@
+# After the killed process. The committed file is still there. The partial is not.
+use ../../shell/wm
+use std/files
+use std/os
+use std/vfs
+
+let args = os.args()
+if len(args) != 1
+    fail("kill_read needs the workspace directory")
+wm.workspace_open(args[0])
+let d = wm.new_desktop(640, 480, wm.default_apps())
+wm.workspace_bind(d)
+print("notice", [wm.workspace_notice()])
+print("file", [vfs.read(wm.terminal.init().fs, "/home/a.txt")])
+print("partial", files.exists(args[0] + "/g99.m2ws.partial"))
+print("windows", len(d.windows))

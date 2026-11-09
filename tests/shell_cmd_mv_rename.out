@@ -1,0 +1,4 @@
+["/home> mv /tmp/old.txt /tmp/new.txt"]
+old true
+new true
+["/home> ls /tmp", "new.txt"]

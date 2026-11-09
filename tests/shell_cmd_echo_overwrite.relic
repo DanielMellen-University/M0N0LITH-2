@@ -1,0 +1,20 @@
+# echo > replaces the whole file, and echo >> adds one line after what is there.
+use ../shell/wm
+use std/vfs
+let t = wm.terminal.init()
+fun run(line)
+    t.buf = []
+    for c in line
+        if c == " "
+            wm.terminal.on_key(t, "space")
+        else
+            wm.terminal.on_key(t, c)
+    wm.terminal.on_key(t, "return")
+    print(t.buf)
+run("echo one > /tmp/log.txt")
+run("echo two >> /tmp/log.txt")
+run("echo three >> /tmp/log.txt")
+print("added", vfs.read(t.fs, "/tmp/log.txt") == "one\ntwo\nthree\n")
+run("echo only > /tmp/log.txt")
+print("replaced", vfs.read(t.fs, "/tmp/log.txt") == "only\n")
+run("cat /tmp/log.txt")

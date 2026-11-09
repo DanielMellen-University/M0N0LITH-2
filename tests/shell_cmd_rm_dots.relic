@@ -1,0 +1,18 @@
+# rm will not remove . or .. or /, and the tree stays.
+use ../shell/wm
+use std/vfs
+let t = wm.terminal.init()
+fun run(line)
+    t.buf = []
+    for c in line
+        if c == " "
+            wm.terminal.on_key(t, "space")
+        else
+            wm.terminal.on_key(t, c)
+    wm.terminal.on_key(t, "return")
+    print(t.buf)
+run("rm .")
+run("rm ..")
+run("rm /")
+run("ls /")
+print("welcome", vfs.exists(t.fs, "/home/welcome.txt"))

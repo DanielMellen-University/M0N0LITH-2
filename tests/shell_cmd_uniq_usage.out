@@ -1,0 +1,3 @@
+["/home> uniq", "usage: uniq <path>"]
+["/home> uniq /tmp/u.txt /tmp/other.txt", "usage: uniq <path>"]
+same true

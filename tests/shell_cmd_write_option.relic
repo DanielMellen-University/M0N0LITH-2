@@ -1,0 +1,18 @@
+# write refuses a path that starts with -, so -- is not a file name.
+use ../shell/wm
+use std/vfs
+let t = wm.terminal.init()
+fun run(line)
+    t.buf = []
+    for c in line
+        if c == " "
+            wm.terminal.on_key(t, "space")
+        else
+            wm.terminal.on_key(t, c)
+    wm.terminal.on_key(t, "return")
+    print(t.buf)
+run("write -- /tmp/nope hello")
+print("made", vfs.exists(t.fs, "/tmp/--"))
+print("nope", vfs.exists(t.fs, "/tmp/nope"))
+run("write /tmp/ok --")
+print("text", vfs.read(t.fs, "/tmp/ok") == "--\n")

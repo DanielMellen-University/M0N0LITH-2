@@ -1,0 +1,18 @@
+# touch of a folder that is already there leaves it a folder.
+use ../shell/wm
+use std/vfs
+let t = wm.terminal.init()
+fun run(line)
+    t.buf = []
+    for c in line
+        if c == " "
+            wm.terminal.on_key(t, "space")
+        else
+            wm.terminal.on_key(t, c)
+    wm.terminal.on_key(t, "return")
+    print(t.buf)
+run("touch /tmp")
+run("touch /home")
+print("tmp dir", vfs.is_dir(t.fs, "/tmp"))
+print("home dir", vfs.is_dir(t.fs, "/home"))
+run("ls /tmp")

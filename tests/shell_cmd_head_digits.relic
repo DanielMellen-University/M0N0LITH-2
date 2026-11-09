@@ -1,0 +1,19 @@
+# A head count of six digits is a number; seven digits is not.
+use ../shell/wm
+use std/vfs
+let t = wm.terminal.init()
+fun run(line)
+    t.buf = []
+    for c in line
+        if c == " "
+            wm.terminal.on_key(t, "space")
+        else
+            wm.terminal.on_key(t, c)
+    wm.terminal.on_key(t, "return")
+    print(t.buf)
+vfs.write(t.fs, "/tmp/h.txt", "only")
+run("head /tmp/h.txt 000001")
+run("head /tmp/h.txt 100000")
+run("head /tmp/h.txt 1000000")
+run("tail /tmp/h.txt 000000")
+run("tail /tmp/missing.txt 1000000")

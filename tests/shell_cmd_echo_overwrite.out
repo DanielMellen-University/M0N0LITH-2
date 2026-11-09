@@ -1,0 +1,7 @@
+["/home> echo one > /tmp/log.txt"]
+["/home> echo two >> /tmp/log.txt"]
+["/home> echo three >> /tmp/log.txt"]
+added true
+["/home> echo only > /tmp/log.txt"]
+replaced true
+["/home> cat /tmp/log.txt", "only"]

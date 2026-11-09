@@ -1,0 +1,9 @@
+# The Start button is the pixels before start_width, and the next pixel is empty bar.
+use ../shell/wm
+let d = wm.new_desktop(640, 480, wm.default_apps())
+print("width", wm.start_width)
+print("inside", wm.click(d, wm.start_width - 1, 470))
+print("open", d.menu_open)
+d.menu_open = false
+print("outside", wm.click(d, wm.start_width, 470))
+print("closed", d.menu_open)
