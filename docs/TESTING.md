@@ -159,6 +159,7 @@ Write `tests/shell_<topic>.relic`, run it, read its output, and save that as `te
 | `shell_terminal_mv_keep` | mv refuses to replace a file that is already there and leaves both unchanged |
 | `shell_terminal_cp_bytes` | cp copies the exact bytes, adds no newline, and will not write over that copy |
 | `shell_terminal_rm_full` | rm refuses a folder that is not empty, then removes it once it is empty |
+| `shell_terminal_mkdir_deep` | mkdir creates missing parent folders, and a second time says the folder is already there |
 
 ### Files
 
