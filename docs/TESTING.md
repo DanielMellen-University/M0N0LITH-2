@@ -320,6 +320,7 @@ Write `tests/shell_<topic>.relic`, run it, read its output, and save that as `te
 | `shell_ide_stop_esc` | Escape stops a run that is waiting for input |
 | `shell_ide_stop_c` | Ctrl+C stops a run that is waiting for input |
 | `shell_ide_restart_wait` | Ctrl+R while waiting starts again and does not send the line being typed |
+| `shell_ide_input_blank` | Return with nothing typed sends an empty line, the pane keeps it, and the program sees length 0 |
 
 ### Paint
 
