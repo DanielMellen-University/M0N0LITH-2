@@ -291,6 +291,7 @@ Write `tests/shell_<topic>.relic`, run it, read its output, and save that as `te
 | `shell_editor_save_noparent` | Ctrl+S says the folder is missing and writes nothing |
 | `shell_editor_backspace_start` | Backspace at the start of the file is not an edit |
 | `shell_editor_delete_end` | Delete at the end of the file is not an edit |
+| `shell_editor_page_top` | Page Up on the first line stays at its start |
 
 ### IDE
 

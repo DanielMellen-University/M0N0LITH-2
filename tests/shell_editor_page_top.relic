@@ -1,0 +1,14 @@
+# Page Up on the first line goes to its start and stays there.
+use ../shell/wm
+let d = wm.new_desktop(640, 480, wm.default_apps())
+let e = wm.launch(d, wm.editor)
+let s = e.state
+fun pos() = len(s.text) - s.back
+
+s.text = "a\nb\nc\nd\ne\nf\ng"
+s.back = len(s.text)
+wm.visible_lines(e)
+wm.key(d, "pageup")
+print(pos())
+wm.key(d, "pageup")
+print(pos())
