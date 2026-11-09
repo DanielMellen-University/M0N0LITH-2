@@ -1,0 +1,7 @@
+line 2 col 3 [6, "o"] line 2:3
+past the line [7, "\n"] line 2:99
+no column [0, "o"] line 1
+zeros [9, "h"] line 3:2
+colon alone [4, "t"] line 2:1
+colon first is not taken Editor [line: 2_] /home/welcome.txt
+esc line 2:1

@@ -1,0 +1,47 @@
+# Alt+Return replaces the next match and is one undo step. Return still
+# replaces every match in one undo step. With case off, both follow that.
+use ../shell/wm
+let d = wm.new_desktop(640, 480, wm.default_apps())
+let e = wm.launch(d, wm.editor)
+let s = e.state
+fun keys(list)
+    for k in list
+        wm.key(d, k)
+fun go(what, with, how)
+    keys(["ctrl+h"])
+    for ch in what
+        wm.key(d, ch)
+    keys(["return"])
+    for ch in with
+        wm.key(d, ch)
+    keys([how])
+s.text = "cat sat on the cat"
+s.back = 0
+s.undo = []
+go("cat", "dog", "alt+return")
+print("one", [s.text], s.status, len(s.undo))
+keys(["alt+return"])
+print("next", [s.text], s.status, len(s.undo))
+keys(["ctrl+z"])
+print("undo one", [s.text], len(s.undo))
+keys(["ctrl+z"])
+print("undo both", [s.text], len(s.undo))
+s.undo = []
+go("cat", "dog", "return")
+print("all", [s.text], s.status, len(s.undo))
+keys(["ctrl+z"])
+print("undo all", [s.text], len(s.undo))
+# the replacement contains the text it replaces, and is not replaced again
+s.text = "a b a"
+s.back = 0
+s.undo = []
+go("a", "aa", "return")
+print("grows once", [s.text], s.status, len(s.undo))
+keys(["ctrl+i"])
+s.text = "Cat and cat"
+s.back = 0
+s.undo = []
+go("cat", "dog", "return")
+print("any case", [s.text], s.status, len(s.undo))
+keys(["ctrl+z"])
+print("undo any", [s.text], len(s.undo))

@@ -20,10 +20,10 @@ long line ["short", "cdefghijabcdefghijabcdefghijabcdefghij_"]
 click row 2 col 0: app
 pos 28
 first shown character ["short", "abcdefghijabcdefghijab_cdefghijabcdefgh"]
-["IDE [ran] /home/welcome.txt", "print(1)", "print(2)_", "-- output --", "1", "2"]
+["IDE [ran] /home/welcome.txt", "print(1)", "print(2)_", "-- output --", "-- run exit 0 0ms --", "1", "2"]
 click row 1 col 3: app
 ide pos 3
-click row 5 col 0: app
+click row 6 col 0: app
 pane click pos 3
 click row 1 col 2: app
 waiting run pos 32 waiting for input
@@ -39,11 +39,11 @@ clicks 2 at col 15: [14, 16] ["é1"]
 clicks 2 at col 12: [12, 12] [""]
 clicks 3 at col 3: [0, 21] ["let foo_bar = é1 + x\n"]
 clicks 3 at col 1: [21, 30] ["next line"]
-["IDE [error] /home/welcome.txt", "print(1)", "print(2)", "print(nope)", "print(4)_", "-- output (ctrl+e: line 3 col 7) --", "1", "2", "/home/welcome.txt:3:7 'nope' is not def"]
-click row 8 col 3: app
+["IDE [error] /home/welcome.txt", "print(1)", "print(2)", "print(nope)", "print(4)_", "-- output (ctrl+e: line 3 col 7) --", "-- stop exit 1 0ms --", "1", "2", "/home/welcome.txt:3:7 'nope' is not def"]
+click row 9 col 3: app
 error clicked: pos 24
 click row 5 col 0: app
 header clicked: pos 24
-click row 7 col 0: app
+click row 8 col 0: app
 output line clicked: pos 38 38
 key during a drag 0 none 0

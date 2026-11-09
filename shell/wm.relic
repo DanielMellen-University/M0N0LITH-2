@@ -648,7 +648,7 @@ fun _key_do(d, k)
 
 # Keys that are not typed text; the apps handle these by name. Letters, digits,
 # punctuation and space come as text events, which carry shift, layout and Unicode.
-let _named_keys = ["return", "backspace", "tab", "up", "down", "left", "right", "delete", "home", "end", "pageup", "pagedown", "f2", "f3", "f5"]
+let _named_keys = ["return", "backspace", "tab", "up", "down", "left", "right", "delete", "home", "end", "pageup", "pagedown", "f2", "f3", "f5", "f6"]
 let _shift_keys = ["left", "right", "up", "down", "home", "end", "tab", "pageup", "pagedown", "f3"]   # shift+left and so on select in the Editor; shift+tab takes out an indent
 let _ctrl_shift_keys = ["left", "right", "home", "end", "tab"]
 let _modifier_keys = ["left ctrl", "right ctrl", "left shift", "right shift", "left alt", "right alt", "left gui", "right gui"]
@@ -671,6 +671,13 @@ fun key_of_event(e)
     # there: Cmd+S saves, Cmd+Z undoes, Cmd+A selects all.
     if "gui" in e and e.gui and len(e.key) == 1
         return "ctrl+" + e.key
+    # Alt+Return replaces one match, Alt+Up and Alt+Down move through IDE errors.
+    # A letter with Alt is left to the text event, so it is not stolen here.
+    if "alt" in e and e.alt and not e.ctrl and not ("shift" in e and e.shift) and not e.key in _modifier_keys
+        if e.key == "return" or e.key == "keypad enter"
+            return "alt+return"
+        if e.key == "up" or e.key == "down"
+            return "alt+" + e.key
     if "shift" in e and e.shift and e.key in _shift_keys
         return "shift+" + e.key
     if e.key == "keypad enter"
@@ -2359,6 +2366,7 @@ fun _editor_change(s, at, count, added)
     s.redo = []   # a new edit ends what Ctrl+Y could bring back
     _editor_set_pos(s, at + len(added))
     s.mark = none
+    s.hl = none   # a find's highlights belonged to the text before this edit
     s.status = "edited"
 
 # Typing replaces the selection, if there is one; else it goes in at the cursor.
@@ -2776,6 +2784,7 @@ fun _editor_lines(s)
                 b = math.min(b, cols)
             if b > a
                 append(s.marks, [i + 1, a, b])
+    _editor_highlight(s, out, starts, shift, cursor_line, cols, pos)
     return out
 
 fun _editor_marks(s)
@@ -2869,6 +2878,7 @@ fun _editor_click(s, x, y)
             if li > len(s.starts) and li < len(lines)
                 let d = ide_diag.parse_line(lines[li])
                 if d != none
+                    _ide_select_diag(s, d)
                     _ide_jump(s, d)
                     return none
                 if strings.starts_with(lines[li], "-- output (ctrl+e")
@@ -2924,22 +2934,90 @@ fun _editor_drag(s, x, y)
 
 # Ctrl+F: find. The title reads "find: text_" while it is typed; Return
 # selects the next place the text is after the cursor (going round to the
-# start), and again the one after; Backspace, Ctrl+Backspace, Ctrl+U and
-# Ctrl+V edit the text; Esc or any other key ends finding (that key then
-# does what it always does). Case counts, as in grep.
+# start), and again the one after; F3 and Shift+F3 do the same after the
+# prompt closes. Backspace, Ctrl+Backspace, Ctrl+U and Ctrl+V edit the text;
+# Esc or any other key ends finding (that key then does what it always does).
+# Case counts until Ctrl+I, which toggles it (the title then says "any").
+# Every match on screen is highlighted, not only the one selected.
+# True when case counts. A window that has never toggled still counts case.
+fun _editor_case(s)
+    if not "find_case" in s
+        return true
+    return s.find_case
+
+# "find: ", "replace: " or "with: ", with " (any)" when case is off.
+fun _editor_ask(s, kind)
+    let label = kind
+    if not _editor_case(s)
+        label = label + " (any)"
+    return label + ": "
+
+fun _editor_ask_kind(s)
+    if "replacing" in s and s.replacing != none
+        if s.replacing != ""
+            return "with"
+        return "replace"
+    return "find"
+
+fun _editor_toggle_case(s)
+    s.find_case = not _editor_case(s)
+    if "find" in s and s.find != none
+        s.status = _editor_ask(s, _editor_ask_kind(s)) + s.find + "_"
+        return
+    if "goto" in s and s.goto != none
+        return
+    if s.find_case
+        s.status = "case: exact"
+    else
+        s.status = "case: any"
+
+# The text whose matches are drawn. The prompt wins; after it closes, the
+# last text searched stays highlighted until the next edit.
+fun _editor_hl_text(s)
+    if "replacing" in s and s.replacing != none and s.replacing != ""
+        return s.replacing
+    if "find" in s and s.find != none and s.find != ""
+        return s.find
+    if "hl" in s and s.hl != none
+        return s.hl
+    return ""
+
+fun _editor_folded(s, text)
+    if _editor_case(s)
+        return text
+    return strings.lower(text)
+
+fun _editor_same(s, got, what)
+    if _editor_case(s)
+        return got == what
+    return strings.lower(got) == strings.lower(what)
+
+# Where `what` next sits in `text` at or after `from`, or -1. Case follows
+# the editor's toggle. Positions are in the original text: lower keeps length.
+fun _editor_at(s, text, what, from)
+    if what == "" or from > len(text)
+        return -1
+    let src = _editor_folded(s, slice(text, from, len(text)))
+    let at = strings.find(src, _editor_folded(s, what))
+    if at < 0
+        return -1
+    return from + at
+
+fun _editor_select_match(s, at, n)
+    s.mark = len(s.text) - at
+    _editor_set_pos(s, at + n)
+    s.hl = slice(s.text, at, at + n)
+
 fun _editor_find_next(s, what)
     if what == ""
         return false
     let from = _editor_pos(s)
-    let at = strings.find(slice(s.text, from, len(s.text)), what)
-    if at >= 0
-        at = at + from
-    else
-        at = strings.find(s.text, what)
+    let at = _editor_at(s, s.text, what, from)
+    if at < 0
+        at = _editor_at(s, s.text, what, 0)
     if at < 0
         return false
-    s.mark = len(s.text) - at
-    _editor_set_pos(s, at + len(what))
+    _editor_select_match(s, at, len(what))
     return true
 
 # The place before the cursor's selection (or the cursor) where it is last,
@@ -2951,30 +3029,116 @@ fun _editor_find_prev(s, what)
     let sel = _editor_selection(s)
     if sel != none
         upto = sel[0]
-    let at = strings.find_last(slice(s.text, 0, upto), what)
+    let folded = _editor_folded(s, s.text)
+    let w = _editor_folded(s, what)
+    let at = strings.find_last(slice(folded, 0, upto), w)
     if at < 0
-        at = strings.find_last(s.text, what)
+        at = strings.find_last(folded, w)
     if at < 0
         return false
     s.mark = len(s.text) - (at + len(what))
     _editor_set_pos(s, at)
+    s.hl = slice(s.text, at, at + len(what))
     return true
 
-# Ctrl+H: replace every place a text is with another, in one undo step. The
-# title asks "replace: text_", Return goes on to "with: text_", and Return
-# again replaces them all and says how many; Esc or another key gives up.
+# Highlight every match of the find text on the lines just built. The
+# selected match is already a mark; the others are the same kind of box.
+fun _editor_highlight(s, out, starts, shift, cursor_line, cols, pos)
+    let what = _editor_hl_text(s)
+    if what == ""
+        return
+    for i in 0..len(starts)
+        let ls = starts[i]
+        let le = _line_end(s.text, ls)
+        let line = slice(s.text, ls, le)
+        let from = 0
+        let guard = 0
+        while guard < 80
+            guard = guard + 1
+            let at = _editor_at(s, line, what, from)
+            if at < 0
+                break
+            let a0 = ls + at
+            let b0 = a0 + len(what)
+            let a = at
+            let b = at + len(what)
+            if i == cursor_line
+                if a0 >= pos
+                    a = a + 1
+                if b0 > pos
+                    b = b + 1
+            a = math.max(0, a - shift[i])
+            b = b - shift[i]
+            if cols > 0
+                a = math.max(0, a)
+                b = math.min(b, cols)
+            if b > a
+                let box = [i + 1, a, b]
+                let seen = false
+                for m in s.marks
+                    if m[0] == box[0] and m[1] == box[1] and m[2] == box[2]
+                        seen = true
+                if not seen
+                    append(s.marks, box)
+            from = at + len(what)
+            if from > len(line)
+                break
+
+# Ctrl+H: replace. The title asks "replace: text_", Return goes on to
+# "with: text_". Return again replaces every place, in one undo step, and
+# says how many. Alt+Return replaces only the next place, also one undo
+# step, and stays there so the next Alt+Return does the one after.
+# Esc or another key gives up.
 fun _editor_replace_all(s, what, with)
-    let parts = strings.split(s.text, what)
-    let n = len(parts) - 1
+    if what == ""
+        return 0
+    let out = ""
+    let from = 0
+    let n = 0
+    let total = len(s.text)
+    while from <= total
+        let at = _editor_at(s, s.text, what, from)
+        if at < 0
+            out = out + slice(s.text, from, total)
+            break
+        out = out + slice(s.text, from, at) + with
+        from = at + len(what)
+        n = n + 1
     if n == 0
         return 0
-    _editor_change(s, 0, len(s.text), strings.join(parts, with))
+    _editor_change(s, 0, len(s.text), out)
     _editor_set_pos(s, 0)
+    s.hl = what
     return n
+
+# The next match, or the one already selected, replaced by `with`. One undo.
+fun _editor_replace_one(s, what, with)
+    if what == ""
+        return false
+    let sel = _editor_selection(s)
+    let at = -1
+    if sel != none and sel[1] - sel[0] == len(what) and _editor_same(s, slice(s.text, sel[0], sel[1]), what)
+        at = sel[0]
+    else
+        if not _editor_find_next(s, what)
+            return false
+        sel = _editor_selection(s)
+        at = sel[0]
+    _editor_change(s, at, len(what), with)
+    s.hl = what
+    return true
 
 fun _editor_find_key(s, k)
     let fresh = "find_new" in s and s.find_new
     s.find_new = false
+    if k == "alt+return" and "replacing" in s and s.replacing != none and s.replacing != ""
+        let what = s.replacing
+        let with = s.find
+        if _editor_replace_one(s, what, with)
+            s.status = "replaced 1"
+        else
+            s.status = "not found: " + what
+        return true
     if (k == "return" or k == "enter") and "replacing" in s and s.replacing != none
         if s.replacing == ""
             # the first Return: that is the text; now what goes in its place
@@ -2982,7 +3146,7 @@ fun _editor_find_key(s, k)
                 return true
             s.replacing = s.find
             s.find = ""
-            s.status = "with: _"
+            s.status = _editor_ask(s, "with") + "_"
             return true
         let what = s.replacing
         let with = s.find
@@ -2996,11 +3160,15 @@ fun _editor_find_key(s, k)
     if (k == "return" or k == "enter") and s.find == ""
         return true   # nothing to find yet: it waits for the text, as Ctrl+H does
     if k == "return" or k == "enter"
+        let prefix = "find: "
+        if not _editor_case(s)
+            prefix = "find (any): "
         if _editor_find_next(s, s.find)
-            s.status = "find: " + s.find
+            s.status = prefix + s.find
         else
-            s.status = "find: " + s.find + " (not found)"
+            s.status = prefix + s.find + " (not found)"
         s.last_find = s.find
+        s.hl = s.find
         return true
     if fresh and (k == "space" or k == "ctrl+v" or len(k) == 1)
         s.find = ""
@@ -3019,22 +3187,29 @@ fun _editor_find_key(s, k)
     else
         _editor_find_end(s)
         return false
-    let label = "find: "
-    if "replacing" in s and s.replacing != none
-        label = "replace: "
-        if s.replacing != ""
-            label = "with: "
-    s.status = label + s.find + "_"
+    s.status = _editor_ask(s, _editor_ask_kind(s)) + s.find + "_"
     return true
 
 fun _editor_find_end(s)
+    if "replacing" in s and s.replacing != none and s.replacing != ""
+        s.hl = s.replacing
+    else if s.find != none and s.find != ""
+        s.hl = s.find
     s.find = none
     s.replacing = none
     s.status = s.find_was
 
-# Ctrl+G: go to a line. The title asks "line: N_" (digits only); Return
-# puts the cursor at the start of that line (the last one when past the
-# end) and says which; Esc or another key gives up.
+# Ctrl+G: go to a line. The title asks "line: N_" (digits only, or N:C for
+# a column). Return puts the cursor there (the last line when past the end,
+# the end of the line when the column is past it) and says which. Esc or
+# another key gives up. At most 7 digits in the line and 7 in the column.
+fun _goto_room(typed)
+    let cut = strings.find(typed, ":")
+    let part = typed
+    if cut >= 0
+        part = slice(typed, cut + 1, len(typed))
+    return len(part) < 7
+
 fun _editor_goto_key(s, k)
     if k == "return" or k == "enter"
         let want = s.goto
@@ -3042,7 +3217,19 @@ fun _editor_goto_key(s, k)
         if want == ""
             s.status = s.find_was
             return true
-        let line = math.max(1, int(want))
+        let cut = strings.find(want, ":")
+        let line_s = want
+        let col = 1
+        let named = false
+        if cut >= 0
+            line_s = slice(want, 0, cut)
+            let col_s = slice(want, cut + 1, len(want))
+            named = true
+            if col_s != ""
+                col = math.max(1, int(col_s))
+        if line_s == ""
+            line_s = "1"
+        let line = math.max(1, int(line_s))
         let pos = 0
         let at = 1
         while at < line
@@ -3051,13 +3238,21 @@ fun _editor_goto_key(s, k)
                 break
             pos = e + 1
             at = at + 1
+        let end = _line_end(s.text, pos)
+        let c = col - 1
+        if pos + c > end
+            c = end - pos
         s.mark = none
-        _editor_set_pos(s, pos)
+        _editor_set_pos(s, pos + c)
         s.status = "line {at}"
+        if named
+            s.status = "line {at}:{col}"
         return true
     if k == "backspace"
         s.goto = slice(s.goto, 0, math.max(0, len(s.goto) - 1))
-    else if len(k) == 1 and k >= "0" and k <= "9" and len(s.goto) < 7
+    else if k == ":" and s.goto != "" and strings.find(s.goto, ":") < 0
+        s.goto = s.goto + ":"
+    else if len(k) == 1 and k >= "0" and k <= "9" and _goto_room(s.goto)
         s.goto = s.goto + k
     else if len(k) != 1
         s.goto = none
@@ -3068,6 +3263,10 @@ fun _editor_goto_key(s, k)
 
 fun _editor_key(s, k)
     s.press = none   # a key ends a drag: the text or the cursor may have moved under it
+    if k == "ctrl+i"
+        s.overwrite = false
+        _editor_toggle_case(s)
+        return
     if "goto" in s and s.goto != none
         if _editor_goto_key(s, k)
             return
@@ -3315,12 +3514,23 @@ fun _editor_key(s, k)
 # input line: typing goes there, Return sends it, Esc stops the run. Between
 # inputs it may take _ide_steps steps, so a loop that never ends cannot hang
 # the desktop. An error is one line of the pane, "file:line:col message", the
-# same place the toolchain reports. Ctrl+E, or a click on that line, puts the
-# cursor on that column, and the line is highlighted. A run that waits for
-# input shows [stop]; clicking it stops the run, as Esc does.
+# same place the toolchain reports. Several syntax errors are listed. Ctrl+E,
+# a click, or Alt+Up and Alt+Down put the cursor on that column, and the line
+# is highlighted. The pane ends with the exit code and the milliseconds. A run
+# that waits for input shows [stop]; clicking it stops the run, as Esc does.
 let _ide_steps = 200000
 let _ide_pane = 6       # output lines shown at most, under a separator line
 let _ide_out_keep = 200 # output lines kept
+let _ide_clock = none   # a test's function of milliseconds; else time.clock
+
+# Tests pass a function that returns milliseconds. none uses the steady clock.
+fun ide_clock(fn)
+    _ide_clock = fn
+
+fun _ide_ms()
+    if _ide_clock != none
+        return int(_ide_clock())
+    return int(time.clock() * 1000)
 
 fun _ide_init() = _ide_state(_editor_init())
 
@@ -3328,11 +3538,17 @@ fun _ide_init() = _ide_state(_editor_init())
 fun _ide_state(s)
     s.out = []          # the last run's output, then its errors
     s.diags = []        # {file, line, col, msg}, in the order they were found
+    s.errors = []       # the same entries, plus which output row they sit on
+    s.err_at = 0        # which of those Alt+Up, Alt+Down and Enter jump to
+    s.err_focus = false # F6: Up and Down move the list, Enter jumps
+    s.err_by_row = {}
     s.err_line = none   # line of the error Ctrl+E jumps to, in this file
     s.err_col = none    # its column, 1-based, counting characters
     s.err_marks = []    # the highlighted error line, for error_boxes
     s.run = none        # a run waiting for a line of input, or none
     s.input = ""        # the line typed so far for it
+    s.exit_code = none
+    s.elapsed_ms = none
     return s
 
 # host_* names a program in the IDE may not call.
@@ -3343,68 +3559,139 @@ fun _ide_denied()
             out[b[0]] = true
     return out
 
+fun _ide_mark_time(s, t0)
+    let ms = _ide_ms() - t0
+    if ms < 0
+        ms = 0
+    s.elapsed_ms = ms
+
+# The first syntax error, then the file after that line, so a later broken
+# line is listed too. An indent error in a cut-off tail is the cut, not a
+# second error, and is left out.
+fun _ide_syntax_one(text)
+    let lexed = lexer.lex(text)
+    if lexed.err != none
+        return lexed.err
+    return parser.parse(lexed.tokens).err
+
+fun _ide_syntax_list(text)
+    let out = []
+    let rest = text
+    let base = 1
+    while len(out) < 8 and rest != ""
+        let err = _ide_syntax_one(rest)
+        if err == none
+            break
+        let line = err.line
+        if line < 1
+            line = 1
+        line = line + base - 1
+        let col = 1
+        if "col" in err and err.col > 1
+            col = err.col
+        let msg = err.msg
+        if len(out) > 0 and (strings.contains(msg, "indent") or strings.contains(msg, "dedent"))
+            break
+        append(out, {line: line, col: col, msg: msg, file: ""})
+        let skip = err.line
+        if skip < 1
+            skip = 1
+        let at = 0
+        let i = 0
+        let n = len(rest)
+        while i < skip and at < n
+            let e = _line_end(rest, at)
+            if e >= n
+                at = n
+                break
+            at = e + 1
+            i = i + 1
+        if at <= 0 or at >= n
+            break
+        let tail = slice(rest, at, n)
+        if tail == rest
+            break
+        rest = tail
+        base = line + 1
+    return out
+
+fun _ide_remember(s, err)
+    let d = ide_diag.from_err(err, s.path)
+    if d == none
+        return
+    append(s.diags, d)
+    append(s.out, ide_diag.format(d))
+    append(s.errors, {line: d.line, col: d.col, msg: d.msg, file: d.file, at: len(s.out) - 1})
+    if s.err_line == none and ide_diag.same_file(s.path, d.file)
+        s.err_line = d.line
+        s.err_col = d.col
+
 fun _ide_run(s)
     s.out = []
     s.diags = []
+    s.errors = []
+    s.err_at = 0
+    s.err_focus = false
     s.err_line = none
     s.err_col = none
     s.run = none
     s.input = ""
+    s.exit_code = none
+    s.elapsed_ms = none
+    let t0 = _ide_ms()
+    s.run_t0 = t0
+    let errs = _ide_syntax_list(s.text)
+    if len(errs) > 0
+        s.status = "error"
+        s.exit_code = 1
+        for e in errs
+            _ide_remember(s, e)
+        _ide_mark_time(s, t0)
+        return
     let lexed = lexer.lex(s.text)
-    let err = lexed.err
-    if err == none
-        let parsed = parser.parse(lexed.tokens)
-        err = parsed.err
-        if err == none
-            let rt = interp.new_runtime()
-            rt.out = s.out
-            rt.steps = _ide_steps
-            rt.denied = _ide_denied()
-            rt.input = []
-            let fs = s.fs
-            fun load(path)
-                if vfs.exists(fs, path) and not vfs.is_dir(fs, path)
-                    return vfs.read(fs, path)
-                return none
-            rt.load = load
-            interp.set_main(rt, s.path)
-            interp.run(rt, parsed.tree)
-            _ide_after(s, rt)
-            return
-    s.status = "error"
-    _ide_error(s, err)
+    let parsed = parser.parse(lexed.tokens)
+    let rt = interp.new_runtime()
+    rt.out = s.out
+    rt.steps = _ide_steps
+    rt.denied = _ide_denied()
+    rt.input = []
+    let fs = s.fs
+    fun load(path)
+        if vfs.exists(fs, path) and not vfs.is_dir(fs, path)
+            return vfs.read(fs, path)
+        return none
+    rt.load = load
+    interp.set_main(rt, s.path)
+    interp.run(rt, parsed.tree)
+    _ide_after(s, rt)
 
 # After a run stopped or paused: keep the last lines, then the error if any.
 fun _ide_after(s, rt)
+    _ide_mark_time(s, s.run_t0)
     if len(rt.out) > _ide_out_keep
         s.out = slice(rt.out, len(rt.out) - _ide_out_keep, len(rt.out))
         rt.out = s.out
     if rt.waiting != none
         s.run = rt
         s.status = "waiting for input"
+        s.exit_code = none
         return
     s.run = none
     if rt.err == none
         s.status = "ran"
+        s.exit_code = 0
+        s.errors = []
+        s.diags = []
+        s.err_at = 0
+        s.err_line = none
+        s.err_col = none
         return
     s.status = "error"
+    s.exit_code = 1
     if rt.stopped
         append(s.out, rt.err.msg + " ({_ide_steps} steps)")
         return
-    _ide_error(s, rt.err)
-
-# One compile or runtime error, appended to the list. The first one in this
-# file is the one Ctrl+E and the highlight follow. An error in a module stays
-# in the list and names that file, and a jump leaves the cursor here.
-fun _ide_error(s, err)
-    let d = ide_diag.from_err(err, s.path)
-    if d == none
-        return
-    append(s.diags, d)
-    append(s.out, ide_diag.format(d))
-    if s.err_line == none and ide_diag.same_file(s.path, d.file)
-        s.err_line = d.line
-        s.err_col = d.col
+    _ide_remember(s, rt.err)
 
 # Keys while a run waits for a line: typing, Backspace, Return sends it.
 # Left, Right, Home and End move a cursor in it, s.in_left characters
@@ -3493,13 +3780,19 @@ fun _editor_escape(s)
 # Esc: stops a run that waits for input, or else drops a selection. True when
 # it did either.
 fun _ide_escape(s)
-    if s.run == none
-        return _editor_escape(s)
-    s.run = none
-    s.input = ""
-    s.status = "stopped"
-    append(s.out, "stopped")
-    return true
+    if s.run != none
+        s.run = none
+        s.input = ""
+        s.status = "stopped"
+        s.exit_code = 130
+        if "run_t0" in s
+            _ide_mark_time(s, s.run_t0)
+        append(s.out, "stopped")
+        return true
+    if "err_focus" in s and s.err_focus
+        s.err_focus = false
+        return true
+    return _editor_escape(s)
 
 # Ctrl+/: comments the cursor's line out with "# " after its leading spaces,
 # or takes a "#" (and one space after it) back off; one undo step.
@@ -3572,6 +3865,18 @@ fun _ide_toggle_comment(s)
         else
             _editor_set_pos(s, pos)
 
+# A click on a listed diagnostic selects it, so Alt+Up and Alt+Down continue
+# from that row.
+fun _ide_select_diag(s, d)
+    if not ("errors" in s)
+        return
+    for i in 0..len(s.errors)
+        let e = s.errors[i]
+        if e.line == d.line and e.col == d.col and e.file == d.file
+            s.err_at = i
+            s.err_focus = false
+            return
+
 # The cursor to a diagnostic's line and column, and that line becomes the one
 # the highlight follows. A diagnostic in another file does nothing.
 fun _ide_jump(s, d)
@@ -3582,8 +3887,20 @@ fun _ide_jump(s, d)
     s.mark = none
     _editor_set_pos(s, ide_diag.cursor_at(s.text, d.line, d.col))
 
-# Ctrl+E: the cursor to the column of the error Ctrl+E follows.
+# Ctrl+E, Enter, or Alt+Up and Alt+Down: the cursor to the selected error.
 fun _ide_to_error(s)
+    if "errors" in s and len(s.errors) > 0
+        let i = 0
+        if "err_at" in s
+            i = math.max(0, math.min(s.err_at, len(s.errors) - 1))
+        let e = s.errors[i]
+        if e.file != "" and not ide_diag.same_file(s.path, e.file)
+            return
+        s.err_line = e.line
+        s.err_col = e.col
+        s.mark = none
+        _editor_set_pos(s, ide_diag.cursor_at(s.text, e.line, e.col))
+        return
     if s.err_line == none
         return
     let col = 1
@@ -3607,27 +3924,54 @@ fun _ide_mark_error(s, out)
             append(s.err_marks, [i + 1, 0, n])
             return
 
+fun _ide_banner(s)
+    if not "elapsed_ms" in s or s.elapsed_ms == none
+        return none
+    if "exit_code" in s and s.exit_code != none
+        let word = "run"
+        if s.exit_code != 0
+            word = "stop"
+        return "-- {word} exit {s.exit_code} {s.elapsed_ms}ms --"
+    return "-- run {s.elapsed_ms}ms --"
+
 # The Editor's lines over the rows left above the pane, then the pane.
 fun _ide_lines(s)
     let pane = []
+    let pane_err = []
     if len(s.out) > 0
-        pane = ["-- output --"]
+        append(pane, "-- output --")
+        append(pane_err, -1)
         if s.err_line != none
-            pane = ["-- output (ctrl+e: line {s.err_line} col {s.err_col}) --"]
+            pane[0] = "-- output (ctrl+e: line {s.err_line} col {s.err_col}) --"
     if s.run != none
         pane = ["[stop] return: send, esc: stop"]
+        pane_err = [-1]
+    # The run line sits under the header. The input line, when there is one,
+    # stays last, which is where a waiting run is typed.
+    let banner = _ide_banner(s)
+    if banner != none
+        append(pane, banner)
+        append(pane_err, -1)
     if len(pane) > 0
         let shown = _ide_pane
         if s.run != none
             shown = shown - 1
         let n = math.min(len(s.out), shown)
-        for line in slice(s.out, len(s.out) - n, len(s.out))
+        let first = len(s.out) - n
+        for i in first..len(s.out)
+            let line = s.out[i]
             # An error is often the last row, and the window keeps the end of
             # that row. Cut it here so file:line:col stays on screen. The list
             # itself (s.out) keeps the whole message.
             if ide_diag.parse_line(line) != none and "cols" in s and s.cols > 0 and len(line) > s.cols
                 line = slice(line, 0, s.cols)
             append(pane, line)
+            let which = -1
+            if "errors" in s
+                for e in 0..len(s.errors)
+                    if s.errors[e].at == i
+                        which = e
+            append(pane_err, which)
         if s.run != none
             let at = len(s.input) - _ide_in_left(s)
             let prompt = str(s.run.waiting)
@@ -3635,6 +3979,7 @@ fun _ide_lines(s)
             if "cols" in s
                 line = _scroll_to(line, len(prompt) + at, s.cols)   # the cursor stays in view
             append(pane, line)
+            append(pane_err, -1)
     let rows = s.rows
     let editor_rows = rows
     if rows > 0
@@ -3646,13 +3991,22 @@ fun _ide_lines(s)
     _ide_mark_error(s, out)
     out[0] = "IDE" + slice(out[0], 6, len(out[0]))   # "Editor [..." -> "IDE [..."
     out[0] = strings.replace(out[0], "(ctrl+s save)", "(ctrl+s save, ctrl+r run)")
-    for line in pane
-        append(out, line)
+    s.err_by_row = {}
+    let base = len(out)
+    for i in 0..len(pane)
+        append(out, pane[i])
+        if pane_err[i] >= 0
+            s.err_by_row[str(base + i)] = pane_err[i]
+            if "err_at" in s and pane_err[i] == s.err_at
+                append(s.marks, [base + i, 0, len(pane[i])])
     return out
+
+fun _ide_asking(s)
+    return ("find" in s and s.find != none) or ("goto" in s and s.goto != none)
 
 fun _ide_key(s, k)
     s.press = none
-    if k == "f5" or k == "ctrl+return" or k == "ctrl+keypad enter"
+    if not _ide_asking(s) and (k == "f5" or k == "ctrl+return" or k == "ctrl+keypad enter")
         k = "ctrl+r"   # F5 and Ctrl+Return run too, as in most IDEs and notebooks
     # Ctrl+R, Ctrl+E, Ctrl+/ and the input line are keys too: they cancel a
     # changed-on-disk warning the way every Editor key but Ctrl+S does.
@@ -3667,11 +4021,29 @@ fun _ide_key(s, k)
         _ide_input_key(s, k)
     else if k == "ctrl+r"
         _ide_run(s)
+    else if not _ide_asking(s) and k == "f6" and len(s.errors) > 0
+        s.err_focus = not s.err_focus
+    else if not _ide_asking(s) and "err_focus" in s and s.err_focus and len(s.errors) > 0 and (k == "up" or k == "down" or k == "return" or k == "enter")
+        if k == "up"
+            s.err_at = math.max(0, s.err_at - 1)
+        else if k == "down"
+            s.err_at = math.min(len(s.errors) - 1, s.err_at + 1)
+        else
+            _ide_to_error(s)
+            s.err_focus = false
+    else if not _ide_asking(s) and (k == "alt+up" or k == "alt+down") and len(s.errors) > 0
+        if k == "alt+up"
+            s.err_at = math.max(0, s.err_at - 1)
+        else
+            s.err_at = math.min(len(s.errors) - 1, s.err_at + 1)
+        _ide_to_error(s)
     else if k == "ctrl+e"
         _ide_to_error(s)
     else if k == "ctrl+/"
         _ide_toggle_comment(s)
     else
+        if "err_focus" in s and s.err_focus and k != "up" and k != "down"
+            s.err_focus = false
         _editor_key(s, k)
 
 # ---- Paint ----

@@ -1,0 +1,35 @@
+# Find highlights every match on screen. Ctrl+I toggles case, and the next
+# and previous match (Return, F3, Shift+F3) follow that. Highlights go when
+# the text is edited.
+use ../shell/wm
+let d = wm.new_desktop(640, 480, wm.default_apps())
+let e = wm.launch(d, wm.editor)
+let s = e.state
+s.text = "one two one\nTwo one\n"
+s.back = 0
+fun keys(list)
+    for k in list
+        wm.key(d, k)
+fun show(label)
+    print(label, wm.visible_lines(e)[0])
+    print(s.marks)
+keys(["ctrl+f", "o", "n", "e", "return"])
+show("exact")
+keys(["return"])
+show("next")
+keys(["f3"])
+show("f3")
+keys(["shift+f3"])
+show("shift+f3")
+wm.dismiss(d)
+keys(["ctrl+i"])
+print("toggled", s.status)
+keys(["ctrl+f", "t", "w", "o", "return"])
+show("any case finds Two")
+keys(["ctrl+i"])
+keys(["return"])
+show("exact skips Two")
+wm.dismiss(d)
+keys(["x"])
+show("edit clears highlights")
+print([s.text])

@@ -1,0 +1,18 @@
+compile error 1 40 1
+err 1 10 unexpected character '@'
+err 3 10 unexpected character '@'
+banner -- stop exit 1 40ms --
+click 1 [9, "@"]
+click 2 [29, "@"]
+alt+down [29, "@"] 1
+alt+up [9, "@"] 0
+focused, not jumped [9, "@"] 1
+enter jumps [29, "@"] true false
+enter types false
+runtime error 1 40 1 9 ["/home/bad.relic:1:9 cannot add an int and a string"]
+ctrl+e [8, "+"]
+ran ran 0 40 none 0
+ran banner -- run exit 0 40ms --
+waiting waiting for input none -- run 40ms --
+stopped stopped 130 80 stopped
+stop banner -- stop exit 130 80ms --

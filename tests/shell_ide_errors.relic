@@ -1,0 +1,82 @@
+# A failed compile lists every syntax error. A click, Ctrl+E, or Enter on
+# the focused row jumps to that line and column. Alt+Down moves to the next
+# error and jumps. The pane ends with the exit code and the elapsed
+# milliseconds. A clean run exits 0. Escape while waiting exits 130.
+use ../shell/wm
+use std/strings
+let tick = 0
+fun clock()
+    tick = tick + 40
+    return tick
+wm.ide_clock(clock)
+let d = wm.new_desktop(640, 480, wm.default_apps())
+let i = wm.launch(d, wm.ide)
+let s = i.state
+s.path = "/home/bad.relic"
+s.text = "print(1) @\nprint(2)\nprint(3) @\n"
+s.back = 0
+fun pos() = len(s.text) - s.back
+fun row_of(prefix)
+    let shown = wm.visible_lines(i)
+    for r in 0..len(shown)
+        if strings.starts_with(shown[r], prefix)
+            return r
+    return -1
+fun click_row(r)
+    wm.click(d, i.x + 10, i.y + 16 + 6 + r * 14 + 7)
+fun banner_line()
+    let shown = wm.visible_lines(i)
+    for line in shown
+        if strings.starts_with(line, "-- run") or strings.starts_with(line, "-- stop")
+            return line
+    return "missing"
+fun place()
+    let p = pos()
+    let ch = ""
+    if p < len(s.text)
+        ch = s.text[p]
+    return [p, ch]
+wm.key(d, "ctrl+r")
+print("compile", s.status, s.exit_code, s.elapsed_ms, s.err_line)
+for e in s.errors
+    print("err", e.line, e.col, e.msg)
+print("banner", banner_line())
+click_row(row_of(s.path + ":{s.errors[0].line}:{s.errors[0].col} "))
+print("click 1", place())
+click_row(row_of(s.path + ":{s.errors[1].line}:{s.errors[1].col} "))
+print("click 2", place())
+wm.key(d, "ctrl+end")
+wm.key(d, "alt+down")
+print("alt+down", place(), s.err_at)
+wm.key(d, "alt+up")
+print("alt+up", place(), s.err_at)
+wm.key(d, "f6")
+wm.key(d, "down")
+print("focused, not jumped", place(), s.err_at)
+let before = s.text
+wm.key(d, "return")
+print("enter jumps", place(), s.text == before, s.err_focus)
+# Enter with the list closed inserts a newline
+wm.key(d, "return")
+print("enter types", s.text == before)
+s.text = before
+s.back = len(s.text)
+# a runtime error names its column; a following good run clears the list
+s.text = "print(1 + \"x\")\n"
+s.back = 0
+wm.key(d, "ctrl+r")
+print("runtime", s.status, s.exit_code, s.elapsed_ms, s.errors[0].line, s.errors[0].col, s.out)
+wm.key(d, "ctrl+e")
+print("ctrl+e", place())
+s.text = "print(1)\n"
+s.back = 0
+wm.key(d, "ctrl+r")
+print("ran", s.status, s.exit_code, s.elapsed_ms, s.err_line, len(s.errors))
+print("ran banner", banner_line())
+s.text = "use std/os\nprint(os.read_line())\n"
+s.back = 0
+wm.key(d, "ctrl+r")
+print("waiting", s.status, s.exit_code, banner_line())
+wm.dismiss(d)
+print("stopped", s.status, s.exit_code, s.elapsed_ms, s.out[len(s.out) - 1])
+print("stop banner", banner_line())
