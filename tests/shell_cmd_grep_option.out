@@ -1,0 +1,3 @@
+["/home> grep -i apple /tmp/g.txt", "grep: no options, not even -i"]
+["/home> grep -n apple /tmp/g.txt", "grep: no options, not even -n"]
+["/home> grep apple /tmp/g.txt", "apple"]
