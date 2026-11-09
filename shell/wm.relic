@@ -3333,6 +3333,8 @@ fun _ide_comment_lines(s, sel)
         else
             append(out, slice(line, 0, lead) + "# " + body)
     let block = strings.join(out, "\n")
+    if block == slice(s.text, from, to)
+        return   # blank lines alone are already "comments"; that is not an edit
     _editor_change(s, from, to - from, block)
     s.mark = len(s.text) - from
     _editor_set_pos(s, from + len(block))
