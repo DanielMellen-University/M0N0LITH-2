@@ -1,0 +1,17 @@
+# head and tail of a missing file say it is not found, before any line.
+use ../shell/wm
+use std/vfs
+let t = wm.terminal.init()
+fun run(line)
+    t.buf = []
+    for c in line
+        if c == " "
+            wm.terminal.on_key(t, "space")
+        else
+            wm.terminal.on_key(t, c)
+    wm.terminal.on_key(t, "return")
+    print(t.buf)
+run("head /tmp/no-such.txt")
+run("tail /tmp/no-such.txt")
+run("head welcome.txt/x")
+run("tail welcome.txt/x 3")
