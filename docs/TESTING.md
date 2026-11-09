@@ -275,6 +275,7 @@ Write `tests/shell_<topic>.relic`, run it, read its output, and save that as `te
 | `shell_editor_move_ends` | Ctrl+Up on the first line and Ctrl+Down on the last line are not edits |
 | `shell_editor_kill_only` | Ctrl+K removes the only line, and one Ctrl+Z puts it back |
 | `shell_editor_dup_twice` | Ctrl+D again copies the copy |
+| `shell_editor_home_twice` | Home goes to the first character after the indent, and Home again goes to the start |
 
 ### IDE
 
