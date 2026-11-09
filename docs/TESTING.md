@@ -15,7 +15,7 @@ One test: `ctest --test-dir build -C Release -R golden_shell_ide`. Or run it str
 
 ## How they are checked
 
-CMake finds every `tests/*.relic` and adds it as `golden_<name>`. `tools/run_golden.cmake` runs it from `tests/`, and it passes when it exits with 0 and its standard output matches `<name>.out` exactly (Windows line endings are ignored). A test with no `.out` file must print nothing. One more test, `check_shell`, runs `relic check` on `wm.relic`, `workspace.relic`, `desktop.relic` and `ide_diag.relic`, which catches syntax errors and undefined names in the drawing code no test runs. That is 464 tests in all, and CI runs them on Linux, macOS and Windows. Seven of the golden programs, `workspace_restart`, and `workspace_kill` cover the store. `workspace_restart` runs four relic processes against one directory. `workspace_kill` kills a process after it has written a partial and before it publishes.
+CMake finds every `tests/*.relic` and adds it as `golden_<name>`. `tools/run_golden.cmake` runs it from `tests/`, and it passes when it exits with 0 and its standard output matches `<name>.out` exactly (Windows line endings are ignored). A test with no `.out` file must print nothing. One more test, `check_shell`, runs `relic check` on `wm.relic`, `workspace.relic`, `desktop.relic` and `ide_diag.relic`, which catches syntax errors and undefined names in the drawing code no test runs. That is 465 tests in all, and CI runs them on Linux, macOS and Windows. Eight of the golden programs, `workspace_restart`, and `workspace_kill` cover the store. `workspace_restart` runs four relic processes against one directory. `workspace_kill` kills a process after it has written a partial and before it publishes.
 
 None of them opens the SDL window. A passing run does not prove what the desktop draws. The Linux GUI pass, and what it did not try, is in the [roadmap](ROADMAP.md#accepted-nov-7-2026).
 
@@ -383,6 +383,7 @@ Write `tests/shell_<topic>.relic`, run it, read its output, and save that as `te
 | `workspace_restart` | the same session across two processes, then a torn pointer and a fourth process |
 | `shell_workspace_checksum` | a bound desktop saves and reloads a 20,000-emoji vfs file into a fresh desktop; compensating two-character edits and a swap are invalid and recover the older files and window with a visible notice |
 | `shell_workspace_session` | a bound desktop restores windows, places, Terminal cwd and history, unsaved Editor text, Notes, Clicker, Paint cells, and an IDE buffer; a partial fault keeps the previous snapshot; a changed byte and a wrong version are not installed; a truncated commit falls back to the older one |
+| `shell_workspace_ide_restore` | first restored IDE frame renders; every app has its init fields; diagnostics, Ctrl+E column, error-row click and highlight return; ordinary output, module errors and older line-only snapshots restore safely |
 | `workspace_kill` | a second process is killed after writing a partial; the third process still has the committed file and window |
 
 ### Shared filesystem and fuzzing
