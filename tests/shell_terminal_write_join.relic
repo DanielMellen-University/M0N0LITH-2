@@ -1,0 +1,20 @@
+# write joins the words after the path with one space and adds a newline.
+# With no path it says how to use it. With a path and no words it writes a blank line.
+use ../shell/wm
+use std/vfs
+let t = wm.terminal.init()
+fun run(line)
+    t.buf = []
+    for c in line
+        if c == " "
+            wm.terminal.on_key(t, "space")
+        else
+            wm.terminal.on_key(t, c)
+    wm.terminal.on_key(t, "return")
+    return slice(t.buf, 1, len(t.buf))
+
+print(run("write /tmp/w.txt one   two three"))
+print([vfs.read(t.fs, "/tmp/w.txt")])
+print(run("write"))
+print(run("write /tmp/blank.txt"))
+print([vfs.read(t.fs, "/tmp/blank.txt")])
