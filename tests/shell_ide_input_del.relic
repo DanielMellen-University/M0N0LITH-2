@@ -1,0 +1,12 @@
+# Delete in the input line removes the character after the cursor.
+use ../shell/wm
+let d = wm.new_desktop(640, 480, wm.default_apps())
+let i = wm.launch(d, wm.ide)
+let s = i.state
+fun pos() = len(s.text) - s.back
+
+s.text = "use std/os\nlet line = os.read_line()\n"
+wm.key(d, "ctrl+r")
+for k in ["a", "b", "c", "d", "left", "left", "delete"]
+    wm.key(d, k)
+print([s.input])
