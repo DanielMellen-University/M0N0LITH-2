@@ -325,6 +325,7 @@ Write `tests/shell_<topic>.relic`, run it, read its output, and save that as `te
 | `shell_ide_syntax_stop` | a syntax error is reported and the following line does not run |
 | `shell_ide_runtime_keep` | lines printed before a runtime error stay in the pane |
 | `shell_ide_hash_text` | a # inside a string is not a comment, and Ctrl+/ comments that whole line |
+| `shell_ide_error_top` | Ctrl+E on an error in line 1 puts the cursor at the start |
 
 ### Paint
 
