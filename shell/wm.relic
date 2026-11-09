@@ -3424,6 +3424,10 @@ fun _ide_key(s, k)
     s.press = none
     if k == "f5" or k == "ctrl+return" or k == "ctrl+keypad enter"
         k = "ctrl+r"   # F5 and Ctrl+Return run too, as in most IDEs and notebooks
+    # Ctrl+R, Ctrl+E, Ctrl+/ and the input line are keys too: they cancel a
+    # changed-on-disk warning the way every Editor key but Ctrl+S does.
+    if k != "ctrl+s"
+        s.overwrite = false
     if s.run != none and k == "ctrl+s"
         # saving does not stop a run that waits for input (decided Oct 31)
         _editor_key(s, k)

@@ -2,7 +2,7 @@
 
 The Editor on a Relic program, plus a way to run it inside the desktop. Its window is 320 by 200, with the program on top and an output pane under it. It opens the same file a new Editor would (the last file opened in Files).
 
-The title reads `IDE [status] path  (ctrl+s save, ctrl+r run)`. Every Editor key works the same way, including undo, selection and the changed-on-disk warning on Ctrl+S (see [the Editor](EDITOR.md)).
+The title reads `IDE [status] path  (ctrl+s save, ctrl+r run)`. Every Editor key works the same way, including undo, selection and the changed-on-disk warning on Ctrl+S (see [the Editor](EDITOR.md)). Ctrl+R, F5, Ctrl+E, Ctrl+/ and a key typed while a run waits for input cancel that warning too; only a second Ctrl+S with nothing in between overwrites.
 
 ## Running
 

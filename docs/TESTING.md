@@ -239,6 +239,7 @@ Write `tests/shell_<topic>.relic`, run it, read its output, and save that as `te
 | `shell_ide_syntax_jump` | IDE: Ctrl+E goes to a syntax error's line too, and after a good run, when there is no error, Ctrl+E moves nothing |
 | `shell_ide_module_error` | an error inside a module the program used shows that module's path and line, and Ctrl+E leaves the cursor where it was |
 | `shell_ide_page_pane` | Page Down moves by the editor rows above the output pane, and Page Up comes back |
+| `shell_ide_disk_keys` | Ctrl+R, F5, Ctrl+E, Ctrl+/ and a key typed while a run waits cancel the changed-on-disk warning; two Ctrl+S presses with nothing between them still overwrite |
 
 ### Paint
 
