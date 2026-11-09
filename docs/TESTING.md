@@ -277,6 +277,7 @@ Write `tests/shell_<topic>.relic`, run it, read its output, and save that as `te
 | `shell_editor_dup_twice` | Ctrl+D again copies the copy |
 | `shell_editor_home_twice` | Home goes to the first character after the indent, and Home again goes to the start |
 | `shell_editor_word_hyphen` | a hyphen is not part of a word, so Ctrl+Left stops on each side of it |
+| `shell_editor_word_unicode` | a character past ASCII is part of a word |
 
 ### IDE
 
