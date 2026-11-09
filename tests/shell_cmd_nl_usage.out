@@ -1,0 +1,4 @@
+["/home> nl", "usage: nl <path>"]
+["/home> nl /tmp/n.txt /tmp/n.txt", "usage: nl <path>"]
+same true
+["/home> nl /tmp/n.txt", "  1  a", "  2  b"]
