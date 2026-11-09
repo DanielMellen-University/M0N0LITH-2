@@ -1,0 +1,11 @@
+# Minimizing the window on top gives focus to the one under it.
+use ../shell/wm
+let d = wm.new_desktop(640, 480, wm.default_apps())
+let low = wm.launch(d, wm.notes)
+let top = wm.launch(d, wm.clicker)
+wm.minimize(d, top.id)
+print("focus", wm.focused(d).id == low.id)
+print("min", top.minimized)
+wm.key(d, "z")
+print("typed", low.state.text)
+print("count", top.state.count)
