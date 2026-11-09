@@ -1,0 +1,5 @@
+["/home> rm .", "rm: folder not empty: /home"]
+["/home> rm ..", "rm: folder not empty: /"]
+["/home> rm /", "rm: folder not empty: /"]
+["/home> ls /", "home/  tmp/"]
+welcome true
