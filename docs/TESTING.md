@@ -289,6 +289,7 @@ Write `tests/shell_<topic>.relic`, run it, read its output, and save that as `te
 | `shell_editor_two_buffers` | two Editor windows undo on their own |
 | `shell_editor_save_fresh` | Ctrl+S creates a file that was not there |
 | `shell_editor_save_noparent` | Ctrl+S says the folder is missing and writes nothing |
+| `shell_editor_backspace_start` | Backspace at the start of the file is not an edit |
 
 ### IDE
 
