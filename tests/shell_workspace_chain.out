@@ -24,3 +24,8 @@ meta ahead load ["workspace: pointer invalid; recovered g1; ignored uncommitted 
 stale meta ["old"] ["workspace: ignored uncommitted g2"]
 version torn ["workspace: committed image wrong version; store held; using defaults"] true
 version torn bytes ["M2WS9\n.\n"] false ["x"]
+meta degrade status saved
+meta degrade notice ["workspace: saved; metadata backup not updated"]
+meta degrade pointer ["g2\n"]
+meta degrade meta ["committed g1\nprevious none\n"]
+meta degrade reopen ["one\nx"] ["g2\n"]

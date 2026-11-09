@@ -40,8 +40,8 @@ Flat directory. Unknown names are ignored and are not deleted.
 
 | Name | Meaning |
 |---|---|
-| `COMMITTED` | the committed generation. Exactly `g` + decimal + `\n`, such as `g3\n`. No leading zeros, no other bytes. Longer than 16 bytes is invalid. This file, once it reads back as that text, is the process-level commit |
-| `META` | two lines, `committed gN` or `committed none`, then `previous gP` or `previous none`, each ending in `\n`. At most 64 bytes. Written before `COMMITTED`. Used when the pointer file is missing or torn. A readable `COMMITTED` wins over it |
+| `COMMITTED` | the committed generation. Exactly `g` + decimal + `\n`, such as `g3\n`. No leading zeros, no other bytes. Longer than 16 bytes is invalid. The publication is the successful rename of `COMMITTED.next` onto this file. A later readback confirms the bytes for this process; it does not define the commit. If that readback fails, the result is uncertain |
+| `META` | two lines, `committed gN` or `committed none`, then `previous gP` or `previous none`, each ending in `\n`. At most 64 bytes. Written only after `COMMITTED` has been renamed and read back as the new id. It is a backup, not a commit. A readable `COMMITTED` wins over it. If this write fails after that readback, the save still committed |
 | `gN.m2ws` | generation N, N from 1 to 9 digits, no leading zeros |
 | `gN.m2ws.partial` | a write that did not finish. Never installed |
 | `COMMITTED.next`, `META.next` | staged pointer and metadata. Never installed |
@@ -126,8 +126,9 @@ Each change made by Terminal, Files, the Editor, the IDE's Ctrl+S, Paint's save,
 2. Rename that partial to `gN.m2ws`. This creates the image. It does not commit it. If that rename fails, stop. `COMMITTED` is unchanged.
 3. Write `COMMITTED.next` as `gN\n` and read it back. If this file cannot be written (it is a directory, for example), stop. `META` is unchanged. The new `gN.m2ws` is an uncommitted leftover.
 4. Rename `COMMITTED.next` onto `COMMITTED`. On Linux this replace is the publication: after `rename` returns, the new id is the commit even if this process has not read it back yet. On Windows, `std::filesystem::rename` will not replace, so the publisher removes `COMMITTED` and then renames. A crash in that gap leaves no pointer. `META` is still the previous success, so the load keeps that generation and does not install the leftover.
-5. Read `COMMITTED` back. If it is `gN\n`, write `META` (`committed gN`, `previous` the generation that was installed when the save started) and then prune. Prune removes partials and generation files other than gN and that previous generation. If the readback does not match, the result is uncertain: the rename may already have published, `META` is not updated, and the save does not report success.
-6. `save` returns only after that readback matches. A crash after the rename and before the return can still leave `COMMITTED` naming gN.
+5. Read `COMMITTED` back. If it is `gN\n`, write `META` (`committed gN`, `previous` the generation that was installed when the save started) and then prune. Prune removes partials and generation files other than gN and that previous generation. If that `META` write fails, the commit still stands: `save` returns success, the Editor says `saved`, and the notice is `workspace: saved; metadata backup not updated`. It does not say the save failed and it does not say the previous generation was kept. The next open follows `COMMITTED`.
+6. If the readback does not match, the notice is `workspace: save failed; pointer publish uncertain` with no `kept` generation. The rename may already have published, so the previous id is not known to be what a new process will install. `META` is not updated.
+7. `save` returns success only when the readback matches. A crash after the rename and before the return can still leave `COMMITTED` naming gN.
 
 `host_write_file` does not report a short write and does not fsync. A power loss before the operating system flushes is outside what Relic 1.0.53 can promise. `META` is a backup written after the pointer rename. It is not a commit. A readable `COMMITTED` wins over it. A torn pointer uses `META` only for a generation this desktop can parse; a wrong-version file named there holds the store and is not overwritten.
 
@@ -170,7 +171,7 @@ One shot, then the arm clears. The save returns the notice and does not say it s
 
 `gK` is the generation a load would have installed before this save, or `defaults` when there was none. `kept` means the recoverable store, not that the session vfs was rolled back.
 
-`full-uncommitted` on a store that already has a valid pointer leaves that pointer, so the next load ignores the new file. On a store with no pointer, a later load sees a missing pointer and a complete generation and installs it, with `workspace: pointer missing; recovered gN`. That is the same rule as the Windows gap between removing `COMMITTED` and renaming `COMMITTED.next`. To fixture "ignore this complete file", `COMMITTED` must still name an older valid generation.
+`full-uncommitted` on a store that already has a valid pointer leaves that pointer, so the next load ignores the new file. A missing pointer does not install that leftover. `META` still names the last confirmed commit, and that generation loads when it parses. That is the Windows gap after `COMMITTED` is removed and the replacement rename has not finished. The in-flight generation is not the commit. A missing pointer installs a generation `META` does not name only when there is no usable `META` and exactly one valid generation.
 
 Other save failures use `workspace: save failed; {reason}; kept gK` with reason `image too large`, `store readback mismatch`, or `cannot write store`.
 

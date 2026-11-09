@@ -127,6 +127,11 @@ fun _fail(why)
     _save = "workspace: save failed; " + why + "; kept " + _kept()
     return _save
 
+# The rename may already have published. Do not name an old generation as kept.
+fun _uncertain()
+    _save = "workspace: save failed; pointer publish uncertain"
+    return _save
+
 fun _fail_fault(stage)
     _save = "workspace: save failed (" + stage + "); kept " + _kept()
     return _save
@@ -830,7 +835,7 @@ fun save(fs)
                 return _fail("cannot write store")
             return _save
         if published == "uncertain"
-            return _fail("pointer publish uncertain")
+            return _uncertain()
         return _fail_fault(stage)
     if _fault == "staged-pointer"
         let stage = _fault
@@ -847,12 +852,14 @@ fun save(fs)
             return _fail("cannot write store")
         return _save
     if published == "uncertain"
-        return _fail("pointer publish uncertain")
+        return _uncertain()
+    # The pointer read back as gN. A META write can still fail. That is a
+    # committed save with a degraded backup, not a failed commit, and it must
+    # not leave _wrote's "save failed; kept" notice in place.
     if not _publish_meta(n, prev)
         _committed = n
         _prune(n, prev)
-        if _boot == ""
-            _boot = "workspace: metadata backup not updated"
+        _save = "workspace: saved; metadata backup not updated"
         _fault = none
         return ""
     _committed = n
