@@ -282,6 +282,7 @@ Write `tests/shell_<topic>.relic`, run it, read its output, and save that as `te
 | `shell_editor_dedent_none` | Shift+Tab at column 0 is not an edit |
 | `shell_editor_indent_empty` | Ctrl+] on an empty line inserts four spaces |
 | `shell_editor_indent_blanks` | Ctrl+] with a selection skips empty lines and indents the others in one undo step |
+| `shell_editor_replace_empty` | replacing with nothing removes every match, in one undo step |
 
 ### IDE
 
