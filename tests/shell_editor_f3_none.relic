@@ -1,0 +1,14 @@
+# F3 and Shift+F3 with no text found yet change nothing.
+use ../shell/wm
+let d = wm.new_desktop(640, 480, wm.default_apps())
+let e = wm.launch(d, wm.editor)
+let s = e.state
+fun pos() = len(s.text) - s.back
+
+s.text = "abc"
+s.back = 0
+let status = s.status
+wm.key(d, "f3")
+print([s.text], pos(), s.status == status)
+wm.key(d, "shift+f3")
+print([s.text], pos(), s.status == status)
