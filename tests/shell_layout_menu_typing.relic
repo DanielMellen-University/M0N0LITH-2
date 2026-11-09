@@ -1,0 +1,9 @@
+# A letter with the Start menu open types into the focused app and leaves the menu open.
+use ../shell/wm
+let d = wm.new_desktop(640, 480, wm.default_apps())
+let w = wm.launch(d, wm.notes)
+wm.click(d, 10, 470)
+wm.key(d, "q")
+print("menu", d.menu_open)
+print("text", w.state.text)
+print("sel", d.menu_sel)
