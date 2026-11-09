@@ -120,15 +120,16 @@ D /tmp
 
 ## What a save does
 
-Each successful change made by Terminal, Files, the Editor, the IDE's Ctrl+S, Paint's save, or Snake writing its best score builds a new generation from the whole vfs and then:
+Each change made by Terminal, Files, the Editor, the IDE's Ctrl+S, Paint's save, or Snake writing its best score builds a new generation from the whole vfs. N is one past every generation id already in the directory and every id named by `COMMITTED` or `META`. An existing `gN.m2ws` is never rewritten.
 
-1. Write `gN.m2ws.partial` and read it back. A mismatch stops here. `COMMITTED` is unchanged.
-2. Rename that file to `gN.m2ws`. N is one past the committed generation and past any generation name already in the directory.
-3. Write `COMMITTED.next` as `gN\n` and read it back.
-4. Rename `COMMITTED.next` onto `COMMITTED`. On POSIX that replace is one rename. On Windows, `std::filesystem::rename` will not replace, so the publisher removes `COMMITTED` and then renames. A crash in that gap leaves no pointer; it does not delete the generation files.
-5. Delete `gM.m2ws` for M < N-1, every `gM.m2ws.partial`, and a leftover `COMMITTED.next`. Invalid names and the newest two generations stay.
+1. Write `gN.m2ws.partial` and read it back. A mismatch stops here. `COMMITTED` and `META` are unchanged.
+2. Rename that partial to `gN.m2ws`. This creates the image. It does not commit it. If that rename fails, stop. `COMMITTED` is unchanged.
+3. Write `COMMITTED.next` as `gN\n` and read it back. If this file cannot be written (it is a directory, for example), stop. `META` is unchanged. The new `gN.m2ws` is an uncommitted leftover.
+4. Rename `COMMITTED.next` onto `COMMITTED`. On Linux this replace is the publication: after `rename` returns, the new id is the commit even if this process has not read it back yet. On Windows, `std::filesystem::rename` will not replace, so the publisher removes `COMMITTED` and then renames. A crash in that gap leaves no pointer. `META` is still the previous success, so the load keeps that generation and does not install the leftover.
+5. Read `COMMITTED` back. If it is `gN\n`, write `META` (`committed gN`, `previous` the generation that was installed when the save started) and then prune. Prune removes partials and generation files other than gN and that previous generation. If the readback does not match, the result is uncertain: the rename may already have published, `META` is not updated, and the save does not report success.
+6. `save` returns only after that readback matches. A crash after the rename and before the return can still leave `COMMITTED` naming gN.
 
-`host_write_file` does not report a short write and does not fsync. The read-back is the check we have. A kill after it returns, and before the pointer names the new file, keeps the previous commit. A power loss before the operating system flushes is outside what Relic 1.0.53 can promise.
+`host_write_file` does not report a short write and does not fsync. A power loss before the operating system flushes is outside what Relic 1.0.53 can promise. `META` is a backup written after the pointer rename. It is not a commit. A readable `COMMITTED` wins over it. A torn pointer uses `META` only for a generation this desktop can parse; a wrong-version file named there holds the store and is not overwritten.
 
 The session vfs keeps the change even when the save fails. The notice says the save failed. The next process installs the store, not that unsaved session. Editor, IDE, and Paint do not say `saved` when the store did not commit. Terminal prints the notice. Files puts it in the title line until the next key. The desktop draws `wm.workspace_notice()` under the title when it is not empty.
 
@@ -173,15 +174,16 @@ One shot, then the arm clears. The save returns the notice and does not say it s
 
 Other save failures use `workspace: save failed; {reason}; kept gK` with reason `image too large`, `store readback mismatch`, or `cannot write store`.
 
-The next generation number is the installed commit plus one. A partial or uncommitted file at that number is replaced. It is not skipped. After `COMMITTED` reads back, prune deletes generation files other than the new commit and the generation it replaced (the previous installed commit). A gap left by a failed save does not cause that previous commit to be deleted.
+The next generation number is one past every id already stored or named. A failed save does not reuse the id of a truncated, wrong-version, or uncommitted file. After a confirmed pointer readback, prune keeps the new commit and the generation that was installed when the save started.
 
 `wm.workspace_release()` is not a menu item. It is the explicit release of a hold.
 
 ## Guarantees
 
-- The process-level commit point is the `COMMITTED` file reading back as `gN\n`. That happens after the generation file and `META` have been published, and **before** prune and before `save` returns. A crash after that read-back and before `save` returns still leaves `COMMITTED` naming the new generation. A crash before that read-back leaves the previous `COMMITTED` in place, except the Windows gap below.
-- On Windows, replacing `COMMITTED` is remove-then-rename. A crash in that gap can leave no pointer. `META` was published first and names the generation that was about to be committed, so the load uses that when it parses, and says the pointer was missing. It does not install some other newer file.
-- A torn or missing pointer with a usable `META` installs the generation `META` calls committed. A newer complete file is ignored and named in the notice. It is not treated as the commit.
+- On Linux the publication is `rename` of `COMMITTED.next` onto `COMMITTED`. After that call returns, the new id is committed even if this process is killed before it reads the pointer back. A readback that then fails is an uncertain result: `save` does not report success, and `META` is not moved to the new id. The next open trusts whatever `COMMITTED` actually contains.
+- `META` is written only after that readback matches. A failed pointer publish does not update `META`. A later torn pointer therefore still names the last confirmed commit, not the failed generation.
+- On Windows, replacing `COMMITTED` is remove-then-rename. A crash in that gap can leave no pointer. `META` still names the previous confirmed commit, so that generation is what loads. The generation file written for the interrupted save is not installed.
+- A torn or missing pointer with a `META` whose committed id parses as this version installs that generation. A newer complete file is ignored and named in the notice. It is not treated as the commit. If that id is a wrong version, the store is held and the bytes stay.
 - A torn or missing pointer with no usable `META` and exactly one valid generation installs that one. With two or more, it installs none, holds the store, and does not delete those files.
 - A truncated or otherwise unreadable committed generation is not installed. The newest **older** generation that parses is installed. A newer complete generation is not. With no older generation, the defaults are installed and the notice says so. The bad bytes stay on disk.
 - A wrong-version committed file, more than 32 generation names, or an ambiguous torn pointer holds the store. Continued use does not overwrite or delete it. `workspace_release` then a later successful save may.

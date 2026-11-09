@@ -485,14 +485,38 @@ fun load(fs)
         if g.partial
             append(partial_nums, g.n)
     let part = _highest(partial_nums)
+    # A wrong-version file is not usable on any path, including a torn pointer
+    # whose META still names it. Hold before any install so a later save cannot
+    # overwrite or prune those bytes.
+    for g in gens
+        if not g.partial and str(g.n) in reasons and reasons[str(g.n)] == "wrong-version"
+            _hold = "wrong-version"
+    if _hold == "wrong-version" and not (pointer.state == "ok" and str(pointer.n) in valid)
+        _reset_default(fs)
+        _committed = none
+        _boot = "workspace: committed image wrong version; store held; using defaults"
+        if pointer.state == "ok"
+            let older = _highest_below(valid_nums, pointer.n)
+            if older != none
+                _install(fs, valid[str(older)])
+                _committed = older
+                _boot = "workspace: committed image wrong version; store held; recovered g" + str(older)
+            _boot = _with_ignored(_boot, _highest_above(valid_nums, pointer.n), part)
+        else if len(valid_nums) > 0
+            _boot = _with_ignored(_boot, _highest(valid_nums), part)
+        return
     # A readable pointer that names a generation which parses is the commit.
     # A newer complete file was not committed and is not installed.
     if pointer.state == "ok" and str(pointer.n) in valid
         _install(fs, valid[str(pointer.n)])
         _committed = pointer.n
-        _boot = _with_ignored("", _highest_above(valid_nums, pointer.n), part)
-        if _boot != ""
-            _boot = "workspace: " + slice(_boot, 2, len(_boot))
+        if _hold == "wrong-version"
+            _boot = "workspace: wrong version file present; store held"
+            _boot = _with_ignored(_boot, _highest_above(valid_nums, pointer.n), part)
+        else
+            _boot = _with_ignored("", _highest_above(valid_nums, pointer.n), part)
+            if _boot != ""
+                _boot = "workspace: " + slice(_boot, 2, len(_boot))
         return
     if pointer.state == "ok"
         let reason = "invalid"
@@ -640,15 +664,33 @@ fun _write_exact(path, text)
         return "mismatch"
     return ""
 
-# The next slot is the installed commit plus one. Leftover partials and
-# uncommitted files at that number are replaced. Skipping them used to make
-# prune delete the real previous commit.
+# A new id is one past every id already on disk or named by COMMITTED or META.
+# An existing generation is never rewritten, so a truncated or failed image
+# cannot be replaced by a later save that reuses its number.
+fun _note_id(seen, n)
+    if n != none and n > seen
+        return n
+    return seen
+
 fun _next_gen()
-    if _committed == none
-        return 1
-    if _committed >= 999999999
+    let seen = 0
+    seen = _note_id(seen, _committed)
+    try
+        for name in files.list(_dir)
+            seen = _note_id(seen, _gen_of(name, ".m2ws.partial"))
+            seen = _note_id(seen, _gen_of(name, ".m2ws"))
+    catch err
         return none
-    return _committed + 1
+    let pointer = _read_pointer()
+    if pointer.state == "ok"
+        seen = _note_id(seen, pointer.n)
+    let meta = _read_meta()
+    if meta.ok
+        seen = _note_id(seen, meta.committed)
+        seen = _note_id(seen, meta.previous)
+    if seen >= 999999999
+        return none
+    return seen + 1
 
 # Keep the new commit and the generation it replaced. Everything else that
 # parses as a generation name is not part of that chain.
@@ -674,8 +716,8 @@ fun _meta_text(committed, previous)
         p = "g" + str(previous)
     return "committed " + c + "\nprevious " + p + "\n"
 
-# Published before COMMITTED. If the pointer file is then torn, load still
-# knows which generation was committed. A readable COMMITTED wins over this.
+# Written only after COMMITTED has been renamed into place and read back.
+# A META file that names a generation is not evidence that generation committed.
 fun _publish_meta(committed, previous)
     let text = _meta_text(committed, previous)
     let nextp = _join("META.next")
@@ -688,18 +730,23 @@ fun _publish_meta(committed, previous)
     catch err
         return false
 
+# "ok" after the rename and a matching readback. "uncertain" if the rename
+# returned and the readback did not match: the rename may already have
+# published. "fail" if the new pointer was not renamed into place.
 fun _publish(n)
     let ptr = "g" + str(n) + "\n"
     let nextp = _join("COMMITTED.next")
     if not _wrote(nextp, ptr)
-        return false
+        return "fail"
     let dest = _join("COMMITTED")
     if not _rename_over(nextp, dest)
-        return false
+        return "fail"
     try
-        return files.read(dest) == ptr
+        if files.read(dest) == ptr
+            return "ok"
     catch err
-        return false
+        return "uncertain"
+    return "uncertain"
 
 # "" when the store now names the vfs. Otherwise the notice, also stored for
 # workspace.notice(). The session vfs is not rolled back.
@@ -753,6 +800,9 @@ fun save(fs)
         return _fail("cannot write store")
     let partial = _join("g" + str(n) + ".m2ws.partial")
     let final = _join("g" + str(n) + ".m2ws")
+    # Never rewrite a generation file. A new id must not already exist.
+    if files.exists(final)
+        return _fail("would overwrite generation")
     if _fault == "partial-generation"
         let stage = _fault
         _fault = none
@@ -770,16 +820,17 @@ fun save(fs)
     if _fault == "corrupt-committed"
         let stage = _fault
         _fault = none
+        # This file was created above. Replacing it with a short image does
+        # not alias an older generation. META stays on the last success.
         if not _wrote(final, "M2WS1\n")
             return _save
-        if not _publish_meta(n, prev)
+        let published = _publish(n)
+        if published == "fail"
             if _save == ""
                 return _fail("cannot write store")
             return _save
-        if not _publish(n)
-            if _save == ""
-                return _fail("cannot write store")
-            return _save
+        if published == "uncertain"
+            return _fail("pointer publish uncertain")
         return _fail_fault(stage)
     if _fault == "staged-pointer"
         let stage = _fault
@@ -787,16 +838,23 @@ fun save(fs)
         if not _wrote(_join("COMMITTED.next"), "g" + str(n) + "\n")
             return _save
         return _fail_fault(stage)
-    # META first, then COMMITTED. The commit is durable once COMMITTED reads
-    # back as gN, which is before prune and before this function returns.
+    # The rename of COMMITTED.next onto COMMITTED is the publication. META is
+    # written only after that rename reads back, so a failed publish cannot
+    # leave META naming a generation the pointer never committed.
+    let published = _publish(n)
+    if published == "fail"
+        if _save == ""
+            return _fail("cannot write store")
+        return _save
+    if published == "uncertain"
+        return _fail("pointer publish uncertain")
     if not _publish_meta(n, prev)
-        if _save == ""
-            return _fail("cannot write store")
-        return _save
-    if not _publish(n)
-        if _save == ""
-            return _fail("cannot write store")
-        return _save
+        _committed = n
+        _prune(n, prev)
+        if _boot == ""
+            _boot = "workspace: metadata backup not updated"
+        _fault = none
+        return ""
     _committed = n
     _prune(n, prev)
     _fault = none
