@@ -1,0 +1,13 @@
+# A hyphen is not part of a word, so Ctrl+Left stops on each side of it.
+use ../shell/wm
+let d = wm.new_desktop(640, 480, wm.default_apps())
+let e = wm.launch(d, wm.editor)
+let s = e.state
+fun pos() = len(s.text) - s.back
+
+s.text = "ab-cd"
+s.back = 0
+wm.key(d, "ctrl+left")
+print(pos(), s.text[pos()])
+wm.key(d, "ctrl+left")
+print(pos())
