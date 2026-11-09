@@ -1,0 +1,13 @@
+# Ctrl+Down moves the line, and one Ctrl+Z puts it back.
+use ../shell/wm
+let d = wm.new_desktop(640, 480, wm.default_apps())
+let e = wm.launch(d, wm.editor)
+let s = e.state
+fun pos() = len(s.text) - s.back
+
+s.text = "a\nb"
+s.back = len(s.text)
+wm.key(d, "ctrl+down")
+print("moved", [s.text])
+wm.key(d, "ctrl+z")
+print("back", [s.text])
