@@ -287,6 +287,7 @@ Write `tests/shell_<topic>.relic`, run it, read its output, and save that as `te
 | `shell_editor_escape_sel` | Escape drops a selection and is taken, and with no selection it is not taken |
 | `shell_editor_paste_all` | pasting in the Editor keeps every line of the clipboard |
 | `shell_editor_two_buffers` | two Editor windows undo on their own |
+| `shell_editor_save_fresh` | Ctrl+S creates a file that was not there |
 
 ### IDE
 
