@@ -1,0 +1,17 @@
+# A quoted redirect path keeps its space and is one file.
+use ../shell/wm
+use std/vfs
+let t = wm.terminal.init()
+fun run(line)
+    t.buf = []
+    for c in line
+        if c == " "
+            wm.terminal.on_key(t, "space")
+        else
+            wm.terminal.on_key(t, c)
+    wm.terminal.on_key(t, "return")
+    print(t.buf)
+run("echo hi > \"/tmp/my file.txt\"")
+print("bytes", vfs.read(t.fs, "/tmp/my file.txt") == "hi\n")
+run("ls /tmp")
+run("cat \"/tmp/my file.txt\"")
