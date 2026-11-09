@@ -1,0 +1,13 @@
+# Ctrl+R runs the buffer, not the older text saved in the file.
+use ../shell/wm
+let d = wm.new_desktop(640, 480, wm.default_apps())
+let i = wm.launch(d, wm.ide)
+let s = i.state
+fun pos() = len(s.text) - s.back
+
+use std/vfs
+s.path = "/home/run.relic"
+vfs.write(s.fs, s.path, "print(1)\n")
+s.text = "print(9)\n"
+wm.key(d, "ctrl+r")
+print(s.status, s.out, [vfs.read(s.fs, s.path)])
