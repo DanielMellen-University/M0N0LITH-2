@@ -1,0 +1,12 @@
+# Ctrl+R while waiting starts again and does not send the line being typed.
+use ../shell/wm
+let d = wm.new_desktop(640, 480, wm.default_apps())
+let i = wm.launch(d, wm.ide)
+let s = i.state
+fun pos() = len(s.text) - s.back
+
+s.text = "print(\"go\")\nuse std/os\nlet line = os.read_line()\nprint(line)\n"
+wm.key(d, "ctrl+r")
+wm.key(d, "z")
+wm.key(d, "ctrl+r")
+print(s.status, s.out, [s.input])
