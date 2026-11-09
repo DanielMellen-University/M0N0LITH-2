@@ -280,6 +280,7 @@ Write `tests/shell_<topic>.relic`, run it, read its output, and save that as `te
 | `shell_editor_word_unicode` | a character past ASCII is part of a word |
 | `shell_editor_tab_stops` | Tab inserts spaces to the next multiple of 4 |
 | `shell_editor_dedent_none` | Shift+Tab at column 0 is not an edit |
+| `shell_editor_indent_empty` | Ctrl+] on an empty line inserts four spaces |
 
 ### IDE
 
