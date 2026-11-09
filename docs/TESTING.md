@@ -273,6 +273,7 @@ Write `tests/shell_<topic>.relic`, run it, read its output, and save that as `te
 | `shell_last_lines_long` | the Editor on a 200,000-character line stays quick |
 | `shell_editor_join_end` | Ctrl+J at the end of the file is not an edit |
 | `shell_editor_move_ends` | Ctrl+Up on the first line and Ctrl+Down on the last line are not edits |
+| `shell_editor_kill_only` | Ctrl+K removes the only line, and one Ctrl+Z puts it back |
 
 ### IDE
 
