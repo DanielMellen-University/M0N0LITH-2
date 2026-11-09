@@ -1,0 +1,19 @@
+# history keeps 50 commands. The oldest falls off, and !1 is the new oldest.
+use ../shell/wm
+use std/vfs
+let t = wm.terminal.init()
+fun run(line)
+    t.buf = []
+    for c in line
+        if c == " "
+            wm.terminal.on_key(t, "space")
+        else
+            wm.terminal.on_key(t, c)
+    wm.terminal.on_key(t, "return")
+    return slice(t.buf, 1, len(t.buf))
+
+for n in 1..52
+    run("echo " + str(n))
+print("kept", len(t.past), t.past[0], t.past[len(t.past) - 1])
+print(run("history")[0])
+print(run("!1"))
