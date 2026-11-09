@@ -1706,8 +1706,15 @@ fun _term_complete(s)
             mark = "\""
         s.input = head + mark + folder + common
     else
+        # the same shape ls uses: a folder ends in /, a name with a space is quoted
+        let shown = []
+        for n in found
+            let name = n
+            if n in dirs
+                name = n + "/"
+            append(shown, _term_name(name))
         _term_reply(s, s.cwd + "> " + s.input)
-        _term_reply(s, strings.join(found, "  "))
+        _term_reply(s, strings.join(shown, "  "))
 
 # Ctrl+V: the clipboard's first line. A path with a space that is there (what
 # Files' Ctrl+C copies) goes in quotes, so it stays one word; not when a
