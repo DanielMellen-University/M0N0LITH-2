@@ -1,0 +1,5 @@
+["/home> echo hi > /home/welcome.txt/nope", "echo: not a folder: /home/welcome.txt"]
+["/home> write /home/welcome.txt/nope hi", "write: not a folder: /home/welcome.txt"]
+["/home> cp welcome.txt /home/welcome.txt/copy", "cp: not a folder: /home/welcome.txt"]
+nope true
+still true

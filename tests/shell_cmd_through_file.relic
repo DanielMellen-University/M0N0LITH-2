@@ -1,0 +1,18 @@
+# write, echo and cp will not go through a path whose middle is a file.
+use ../shell/wm
+use std/vfs
+let t = wm.terminal.init()
+fun run(line)
+    t.buf = []
+    for c in line
+        if c == " "
+            wm.terminal.on_key(t, "space")
+        else
+            wm.terminal.on_key(t, c)
+    wm.terminal.on_key(t, "return")
+    print(t.buf)
+run("echo hi > /home/welcome.txt/nope")
+run("write /home/welcome.txt/nope hi")
+run("cp welcome.txt /home/welcome.txt/copy")
+print("nope", not vfs.exists(t.fs, "/home/welcome.txt/nope"))
+print("still", vfs.read(t.fs, "/home/welcome.txt") == "Welcome to Relic.\n")
