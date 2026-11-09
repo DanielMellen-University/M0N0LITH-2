@@ -1,0 +1,9 @@
+emoji save [""]
+emoji reload [""] 20000 true
+emoji desktop 1 ["Unicode snapshot"]
+older save [""]
+newer save [""]
+reject bb ["workspace: committed image invalid; recovered g2"]
+recovered kept ["older snapshot"]
+reject ca ["workspace: committed image invalid; recovered g2"]
+recovered kept ["older snapshot"]

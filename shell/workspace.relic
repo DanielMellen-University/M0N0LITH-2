@@ -611,9 +611,19 @@ fun _parse(text)
         return _bad("invalid")
     return {ok: true, dirs: dirs, files: files, session: session}
 
-# Sum of code points of every character before the Z line. A one-character
-# change no longer matches, so a still-shaped file is not installed as if it
-# were the saved one. A generation with no session line has no Z line.
+# Position-weighted code points, reduced modulo a prime below _parse_int's cap.
+# The running sum makes each character's weight its distance from the end.
+# Detects single-character edits, swaps and compensating two-character edits
+# within the generation size limit. Not a cryptographic checksum.
+fun _checksum(prefix)
+    let running = 0
+    let weighted = 0
+    for c in prefix
+        running = (running + ord(c)) % 1000000007
+        weighted = (weighted + running) % 1000000007
+    return weighted
+
+# A generation with no session line has no Z line.
 fun _checksum_ok(lines, z_text)
     let want = _parse_int(z_text, 0, 2000000000)
     if want == none
@@ -622,10 +632,7 @@ fun _checksum_ok(lines, z_text)
     for i in 0..len(lines) - 2
         append(head, lines[i])
     let prefix = strings.join(head, "\n") + "\n"
-    let sum = 0
-    for c in prefix
-        sum = sum + ord(c)
-    return sum == want
+    return _checksum(prefix) == want
 
 fun _gen_of(name, suffix)
     if not strings.ends_with(name, suffix)
@@ -952,10 +959,7 @@ fun _encode(rows, extra)
             for line in extra
                 append(lines, "S " + line)
         let prefix = strings.join(lines, "\n") + "\n"
-        let sum = 0
-        for c in prefix
-            sum = sum + ord(c)
-        append(lines, "Z " + str(sum))
+        append(lines, "Z " + str(_checksum(prefix)))
     append(lines, ".")
     return strings.join(lines, "\n") + "\n"
 
