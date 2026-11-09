@@ -163,6 +163,7 @@ Write `tests/shell_<topic>.relic`, run it, read its output, and save that as `te
 | `shell_terminal_grep_dot` | grep matches characters as written: a dot is not a pattern, and case counts |
 | `shell_terminal_find_own` | find matches an entry's own name, shows a folder with a slash, and does not match text only in a parent path |
 | `shell_terminal_history_keep` | history keeps the last 50 commands, the oldest falls off, and !1 runs whatever is now first |
+| `shell_terminal_bang_zero` | !0 is not in history, and !001 runs command 1 |
 
 ### Files
 
