@@ -1,0 +1,4 @@
+["/home> sort -n /tmp/nums.txt", "sort: no options, not even -n"]
+same true
+["/home> sort /tmp/nums.txt", "1", "10", "2"]
+still true
