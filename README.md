@@ -13,7 +13,7 @@ This repo is the MONOLITH 2 desktop environment: the window manager, taskbar, St
   workspace.relic commits the shared vfs and the open windows to a directory of generations
   desktop.relic   draws the model with std/graphics and runs the event loop
 tests/
-  shell_*.relic   182 programs that drive wm.relic with fake clicks and keys; each one's output must match its .out file
+  shell_*.relic   programs that drive wm.relic with fake clicks and keys; each one's output must match its .out file
 tools/
   run_golden.cmake  golden test runner (Relic's, cut down to what these tests use)
 relic/            Relic, pinned as a git submodule
@@ -50,7 +50,7 @@ Already cloned without submodules? Run `git submodule update --init`.
 
 `-DRELIC_BUILD_HOST=ON` matters. Since Relic 1.0.7 the default Relic build is C only and makes `relicc` (the compiler to C), not the `relic` program the tests and `relic check` use. The flag builds the C++ host that provides `relic`.
 
-CMake discovers every `tests/*.relic` program and compares its standard output with the matching `.out` file (or empty output if there is no `.out`). It also runs `relic check` on the four shell files, 465 tests in all. CI runs the same steps on Linux, macOS and Windows. More in [Building](docs/BUILDING.md) and [Tests](docs/TESTING.md).
+CMake discovers every `tests/*.relic` program and compares its standard output with the matching `.out` file (or empty output if there is no `.out`). It also runs `relic check` on the four shell files, 469 tests in all. CI runs the same steps on Linux, macOS and Windows. More in [Building](docs/BUILDING.md) and [Tests](docs/TESTING.md).
 
 ## Run the desktop
 
@@ -72,8 +72,8 @@ Checked on Nov 7 2026 on Linux with SDL 2.30, on a real display, with the mouse 
 - **Taskbar:** a button brings its window to the front, or minimizes it if it is already there. Buttons shrink as windows open; from the 14th window on the 640 pixel bar, the extra ones go behind a +N button with a list. See [Taskbar](docs/apps/TASKBAR.md).
 - **Terminal:** `help`, `clear`, `history`, `echo`, `apps`, `date`, `pwd`, `cd`, `ls`, `cat`, `head`, `tail`, `wc`, `grep`, `find`, `sort`, `uniq`, `nl`, `mkdir`, `touch`, `write`, `rm`, `mv` and `cp` on the shared files (`head` and `tail` take a count of lines), plus `echo text > path` and `>>`, and `!!` for the command before. Quotes keep the spaces in a path (`cat "my notes.txt"`), and the line has a cursor (Left, Right, Home, End, or a click). See [Terminal](docs/apps/TERMINAL.md).
 - **Files:** click a row, or use Up, Down and Return; Backspace or Left goes up a folder and Right goes into one; a letter jumps to the next name starting with it; Ctrl+C copies the selected path, F2 renames, and Delete pressed twice removes a file or empty folder. Opening a file picks it for the next Editor or IDE window, or Paint for a `.paint` file. See [Files](docs/apps/FILES.md).
-- **Editor:** a click, arrows, Home, End and Ctrl+arrow move; Shift or a drag selects, a double-click selects a word, Ctrl+A selects all; Ctrl+F finds and F3 finds again, Ctrl+H replaces and Ctrl+G goes to a line; Ctrl+D copies a line, Ctrl+K removes it and Ctrl+J joins the next one on, Ctrl+Up and Ctrl+Down move it, and Ctrl+] and Ctrl+[ indent it (or every selected line); Ctrl+Z undoes up to 500 edits; Ctrl+S saves and warns once if another app changed the file. See [Editor](docs/apps/EDITOR.md).
-- **IDE:** the Editor plus Ctrl+R (or F5, or Ctrl+Return) to run the program in an output pane, Ctrl+E (or a click on the error) to jump to it, and an input line when the program reads one (Return sends, Escape stops). Runs stop after 200,000 steps between inputs and cannot change files on the real disk. See [IDE](docs/apps/IDE.md).
+- **Editor:** a click, arrows, Home, End and Ctrl+arrow move; Shift or a drag selects, a double-click selects a word, Ctrl+A selects all; Ctrl+F finds (every match highlighted, F3 and Shift+F3 again, Ctrl+I toggles case), Ctrl+H replaces one match or all of them, and Ctrl+G goes to a line or a column; Ctrl+D copies a line, Ctrl+K removes it and Ctrl+J joins the next one on, Ctrl+Up and Ctrl+Down move it, and Ctrl+] and Ctrl+[ indent it (or every selected line); Ctrl+Z undoes up to 500 edits; Ctrl+S saves and warns once if another app changed the file. See [Editor](docs/apps/EDITOR.md).
+- **IDE:** the Editor plus Ctrl+R (or F5, or Ctrl+Return) to run the program in an output pane. Compile errors and runtime errors are a list: a click, Ctrl+E, or Enter on the focused row jumps to that line and column. The pane says whether the run finished or stopped, the exit code, and how many milliseconds it took. An input line appears when the program reads one (Return sends, Escape stops). Runs stop after 200,000 steps between inputs and cannot change files on the real disk. See [IDE](docs/apps/IDE.md).
 - **Paint:** drag on the canvas to draw; swatches or `1` to `8` pick a color, `e` the eraser, `+` and `-` the brush size, `f` fills, `l`, `r` and `o` draw lines, rectangles and ellipses (`R` and `O` filled), `i` picks a color from the canvas, `c` clears, Ctrl+Z undoes, Ctrl+S saves a `.paint` file and `n` saves it as a name you type. See [Paint](docs/apps/PAINT.md).
 - **Snake:** arrows or W A S D start and turn, Space pauses, R plays again; it moves only while its window is focused, and the best score is saved in `/home/snake-best.txt`. See [Snake](docs/apps/SNAKE.md).
 - **Clicker and Notes:** a click counter (Space or Return counts, Backspace takes one off, Delete starts again and Ctrl+Z right after brings the count back) and a one-line note with a cursor (Ctrl+C, Ctrl+X and Ctrl+V with the desktop clipboard, Ctrl+Z for the last clear). See [Clicker and Notes](docs/apps/SMALL_APPS.md).
@@ -89,6 +89,20 @@ The next start opens the same windows in the same places. That includes Terminal
 A save that is cut off keeps the previous snapshot. A workspace file that is cut short, no longer matches its checksum, or is a newer version than this desktop understands is not opened as if it were whole. The screen says so. A newer version is left on disk until you release it. When an older snapshot still reads, that one comes back. When nothing does, you get the first-run files, which are `/home`, `/tmp`, and `/home/welcome.txt`, and no windows.
 
 Not kept: undo, the clipboard, an IDE program that was still running, and where Snake was on the board. Letters you typed after the last snapshot are written when you quit, and also when a file is saved, a Terminal command finishes, or a window is moved or closed. A kill before that keeps the last snapshot, not those letters. There is no fsync, so pulling the power is not covered. The rules are in [Workspace recovery](docs/workspace-recovery.md).
+
+## Find, replace, and errors
+
+Ctrl+F highlights every match on screen. Ctrl+I toggles case, so `two` also marks `Two`. F3 and Shift+F3 move to the next and previous match. The shots below were taken on Linux (SDL 2.30) under Xvfb, from the same drawing the desktop uses.
+
+![Find highlights every match, with case off](docs/images/editor-find.png)
+
+Ctrl+H asks for the text and what replaces it. Alt+Return replaces the next match and is one undo step; the matches still left stay highlighted. Return replaces every match, also one undo step.
+
+![One match replaced, the next still highlighted](docs/images/editor-replace.png)
+
+Ctrl+G still goes to a line, and `12:4` goes to that column. When a program fails to compile, or errors while it runs, the IDE lists the errors. The selected row is highlighted. A click, Ctrl+E, or Enter after F6 jumps to that line and column. Alt+Down and Alt+Up move through the list. The line under the header is the exit code and the milliseconds since Ctrl+R.
+
+![Two compile errors and the stop line](docs/images/ide-errors.png)
 
 ## Docs
 

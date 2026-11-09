@@ -121,10 +121,11 @@ The commands are in [the Terminal doc](apps/TERMINAL.md).
 | Ctrl+Z | undoes the last edit (a cut or a paste is one), up to 500 |
 | Ctrl+Y | redoes what Ctrl+Z undid, newest first; a new edit ends it |
 | Ctrl+S | saves. If another app changed the file since it was opened or saved, the first Ctrl+S warns and writes nothing, and a second one right after overwrites. Any other key, or a click or a drag, cancels that |
-| Ctrl+F | find: type the text, Return selects the next match after the cursor (going round to the start); Esc, another key or a click stops. With a selection on one line it starts with that, and typing replaces it |
+| Ctrl+F | find: type the text, Return selects the next match after the cursor (going round to the start); every match on screen is highlighted. Esc, another key or a click stops. With a selection on one line it starts with that, and typing replaces it |
+| Ctrl+I | toggles case for find and replace (`case: any` or `case: exact`; during the prompt the title says `(any)`) |
 | F3, Shift+F3 | finds the last text again, the next or the one before |
-| Ctrl+G | go to a line: type its number, Return |
-| Ctrl+H | replace: the text, Return, what goes in its place, Return replaces every one (one undo step); starts with a selection on one line, as Ctrl+F does |
+| Ctrl+G | go to a line, or `line:column` after a colon |
+| Ctrl+H | replace: the text, Return, what goes in its place. Return replaces every one, Alt+Return the next one; each is one undo step. Starts with a selection on one line, as Ctrl+F does |
 
 ## IDE
 
@@ -133,7 +134,7 @@ Every Editor key, plus:
 | Input | What it does |
 |---|---|
 | Ctrl+R, F5, Ctrl+Return | runs the program in the buffer, saved or not. While a run waits for input, it starts the run again |
-| Ctrl+E, or a click on an error row or the header that names it | puts the cursor on that error's line and column. The error line stays highlighted. An error in another file does not move the cursor |
+| Ctrl+E, a click on an error row or the header, or Enter on the focused error | puts the cursor on that error's line and column. The error line stays highlighted. F6 focuses the list (Up and Down move, Enter jumps). Alt+Down and Alt+Up move to the next or previous error and jump. An error in another file does not move the cursor |
 | Click `[stop]` | while a run waits for input, stops it. A click past those six characters does not |
 | Ctrl+/ | comments the line out with `# ` after its leading spaces, or takes the `#` back off; with a selection, every line it is on |
 

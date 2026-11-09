@@ -15,7 +15,7 @@ One test: `ctest --test-dir build -C Release -R golden_shell_ide`. Or run it str
 
 ## How they are checked
 
-CMake finds every `tests/*.relic` and adds it as `golden_<name>`. `tools/run_golden.cmake` runs it from `tests/`, and it passes when it exits with 0 and its standard output matches `<name>.out` exactly (Windows line endings are ignored). A test with no `.out` file must print nothing. One more test, `check_shell`, runs `relic check` on `wm.relic`, `workspace.relic`, `desktop.relic` and `ide_diag.relic`, which catches syntax errors and undefined names in the drawing code no test runs. That is 465 tests in all, and CI runs them on Linux, macOS and Windows. Eight of the golden programs, `workspace_restart`, and `workspace_kill` cover the store. `workspace_restart` runs four relic processes against one directory. `workspace_kill` kills a process after it has written a partial and before it publishes.
+CMake finds every `tests/*.relic` and adds it as `golden_<name>`. `tools/run_golden.cmake` runs it from `tests/`, and it passes when it exits with 0 and its standard output matches `<name>.out` exactly (Windows line endings are ignored). A test with no `.out` file must print nothing. One more test, `check_shell`, runs `relic check` on `wm.relic`, `workspace.relic`, `desktop.relic` and `ide_diag.relic`, which catches syntax errors and undefined names in the drawing code no test runs. That is 469 tests in all, and CI runs them on Linux, macOS and Windows. Eight of the golden programs, `workspace_restart`, and `workspace_kill` cover the store. `workspace_restart` runs four relic processes against one directory. `workspace_kill` kills a process after it has written a partial and before it publishes.
 
 None of them opens the SDL window. A passing run does not prove what the desktop draws. The Linux GUI pass, and what it did not try, is in the [roadmap](ROADMAP.md#accepted-nov-7-2026).
 
@@ -243,7 +243,9 @@ Write `tests/shell_<topic>.relic`, run it, read its output, and save that as `te
 | `shell_editor_redo_after_save` | Saving does not clear undo or redo: a save writes the undone text and Ctrl+Y still redoes it |
 | `shell_editor_save_newfile_warn` | A new file saved once is then guarded like any other file against changes by another app |
 | `shell_editor_find` | Ctrl+F and Return select the next match after the cursor and go round, case counts, not found, Esc and other keys stop finding, in the IDE too; F3 and Shift+F3 again, both ways round; a selection on one line as the text to find, replaced by typing; Ctrl+H replacing every match in one undo step, with nothing, not found, Esc halfway, and starting with a selection; Return with no text waits; a long text showing its end; a click giving up a find or a line number |
+| `shell_editor_find_marks` | every match is highlighted; Ctrl+I toggles case so `two` finds `Two`, and an edit clears the highlights |
 | `shell_editor_goto` | Ctrl+G and a number go to the start of that line, the last past the end, 0 as 1; digits only, Esc and other keys give up, a selection goes |
+| `shell_editor_goto_col` | Ctrl+G with `line:column` lands on that character, clamps a column past the end, and a bare line number stays on column 1 |
 | `shell_editor_indent` | Return keeps leading spaces up to the cursor, the IDE adds a level after a block line but not after `fun f() = ...`, undo |
 | `shell_editor_word_keys` | Ctrl+Home and Ctrl+End go to the start and end of the file and drop the selection; Ctrl+Backspace and Ctrl+Delete remove a word, the selection, or nothing at the ends; Home stops after the leading spaces, then goes to the very start; Page Up and Page Down by the shown lines less one, Shift selecting; Ctrl+L selecting lines, from a selection made upwards too; Ctrl+D copying a line or the selected lines, and Ctrl+K removing them, each one undo, and only the selected line after Ctrl+L, the copy staying selected; Ctrl+J joining lines, or all the selected ones; Ctrl+] and Ctrl+[ indenting and taking it off, on the selected lines too; Ctrl+Up and Ctrl+Down moving a line or the selected lines |
 | `shell_editor_tab` | Tab types spaces to the next multiple of 4, over a selection, one undo step, in the IDE too; Shift+Tab takes an indent off and keeps the cursor on its character; Backspace in leading spaces goes back one indent, elsewhere one character |
@@ -286,6 +288,7 @@ Write `tests/shell_<topic>.relic`, run it, read its output, and save that as `te
 | `shell_editor_indent_empty` | Ctrl+] on an empty line inserts four spaces |
 | `shell_editor_indent_blanks` | Ctrl+] with a selection skips empty lines and indents the others in one undo step |
 | `shell_editor_replace_empty` | replacing with nothing removes every match, in one undo step |
+| `shell_editor_replace_one` | Alt+Return replaces the next match, one undo step each, and Return still replaces every match in one step; with case off both kinds of case are replaced, and a replacement that contains the text is not replaced again |
 | `shell_editor_f3_none` | F3 and Shift+F3 with no text found yet change nothing |
 | `shell_editor_escape_sel` | Escape drops a selection and is taken, and with no selection it is not taken |
 | `shell_editor_paste_all` | pasting in the Editor keeps every line of the clipboard |
@@ -310,6 +313,7 @@ Write `tests/shell_<topic>.relic`, run it, read its output, and save that as `te
 | `shell_ide_comment_blank` | a selection of only blank lines is not an undo step and does not mark the buffer edited; a blank line with no selection still gets a comment |
 | `shell_ide_diag` | parsing toolchain errors (`file:line:col: error: message`, warnings, a Windows path) into `file:line:col message`, and the cursor index for a line and column |
 | `shell_ide_error_click` | IDE: a click on the error row or on the pane header goes to the error's line and column, as Ctrl+E does; a click on a plain output line moves nothing |
+| `shell_ide_errors` | two syntax errors are listed as `file:line:col message`; a click, Alt+Down, or F6 then Enter jumps to that line and column; the run line shows exit 1, exit 0, and exit 130 with the elapsed milliseconds |
 | `shell_ide_input_paste` | IDE input: Ctrl+V adds the first line of the clipboard only, and with an empty clipboard it adds nothing |
 | `shell_ide_denied` | IDE: refused host calls beyond exit and writing: sleeping, removing, renaming and making folders, and opening a graphics window; a refused remove leaves the file, a refused make_dir makes nothing |
 | `shell_ide_module_saved` | IDE: a `use` of another file reads it as last saved; an unsaved edit in another window changes nothing until it is saved |
