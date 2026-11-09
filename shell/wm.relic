@@ -3351,8 +3351,13 @@ fun _ide_toggle_comment(s)
         let n = 1
         if at + 1 < len(s.text) and s.text[at + 1] == " "
             n = 2
+        let keep = pos
         _editor_change(s, at, n, "")
-        _editor_set_pos(s, math.max(at, pos - n))
+        # a cursor sitting in the indent, before the "#", stays on that space
+        if keep <= at
+            _editor_set_pos(s, keep)
+        else
+            _editor_set_pos(s, math.max(at, keep - n))
     else
         _editor_change(s, at, 0, "# ")
         if pos >= at

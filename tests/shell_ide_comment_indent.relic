@@ -1,0 +1,24 @@
+# Uncommenting keeps a cursor that sits in the indent on that same space, and
+# a cursor on a later character stays on it.
+use ../shell/wm
+let d = wm.new_desktop(640, 480, wm.default_apps())
+let i = wm.launch(d, wm.ide)
+let s = i.state
+fun pos() = len(s.text) - s.back
+s.text = "    # hello"
+s.mark = none
+s.back = len(s.text) - 1
+let before = pos()
+wm.key(d, "ctrl+/")
+print("indent", [s.text], before, pos())
+s.text = "    # hello"
+s.mark = none
+s.back = len(s.text) - 7
+before = pos()
+let ch = s.text[before]
+wm.key(d, "ctrl+/")
+print("on letter", [s.text], ch, s.text[pos()])
+s.text = "#x"
+s.back = 0
+wm.key(d, "ctrl+/")
+print("end", [s.text], pos())
