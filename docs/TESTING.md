@@ -279,6 +279,7 @@ Write `tests/shell_<topic>.relic`, run it, read its output, and save that as `te
 | `shell_editor_word_hyphen` | a hyphen is not part of a word, so Ctrl+Left stops on each side of it |
 | `shell_editor_word_unicode` | a character past ASCII is part of a word |
 | `shell_editor_tab_stops` | Tab inserts spaces to the next multiple of 4 |
+| `shell_editor_dedent_none` | Shift+Tab at column 0 is not an edit |
 
 ### IDE
 
