@@ -169,6 +169,7 @@ Write `tests/shell_<topic>.relic`, run it, read its output, and save that as `te
 | `shell_terminal_clear_past` | clear empties the screen and leaves the remembered commands, including clear itself |
 | `shell_terminal_cat_mix` | cat reports a folder and still prints a file named after it |
 | `shell_terminal_wc_tab` | wc treats a tab as a break between words |
+| `shell_terminal_sort_file` | sort orders by character, digits before letters, and does not change the file |
 
 ### Files
 
