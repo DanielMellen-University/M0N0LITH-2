@@ -215,6 +215,7 @@ Write `tests/shell_<topic>.relic`, run it, read its output, and save that as `te
 | `shell_files_delete_gone` | a second Delete after the file is already gone does not remove the row that took its place |
 | `shell_files_two_windows` | two Files windows keep their own folders, and Down in one leaves the other alone |
 | `shell_files_copy_dir` | Ctrl+C on a folder copies its path with no slash, and on .. it copies nothing |
+| `shell_files_right_stay` | Right enters a folder and does nothing on a file or on .. |
 
 ### Editor
 
