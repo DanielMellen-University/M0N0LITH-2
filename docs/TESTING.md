@@ -224,6 +224,7 @@ Write `tests/shell_<topic>.relic`, run it, read its output, and save that as `te
 | `shell_files_jump_same` | the only name starting with a letter stays selected when that letter is pressed again |
 | `shell_files_sees_new` | a file written by another app shows up on the next draw, and the selection stays on its name |
 | `shell_files_sorted` | names are shown in order, with .. first |
+| `shell_files_dotfile` | a name that starts with a dot is listed |
 
 ### Editor
 
