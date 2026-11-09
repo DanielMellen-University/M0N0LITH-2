@@ -155,6 +155,7 @@ Write `tests/shell_<topic>.relic`, run it, read its output, and save that as `te
 | `shell_terminal_cd_home` | cd with no path returns to /home, cd . stays, and cd .. from / stays at / |
 | `shell_terminal_ls_file` | ls of a file prints its base name, a quoted path keeps a space in the name, an unquoted space is an extra word, and a missing path is named |
 | `shell_terminal_echo_words` | a > that is not the redirect is text, and echo refuses to write into a folder |
+| `shell_terminal_append_new` | echo >> creates a missing file and then appends another line |
 
 ### Files
 
