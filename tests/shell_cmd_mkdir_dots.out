@@ -1,0 +1,6 @@
+["/home> mkdir .", "mkdir: already there: /home"]
+["/home> mkdir ..", "mkdir: already there: /"]
+["/home> mkdir /", "mkdir: already there: /"]
+["/home> mkdir /tmp/.", "mkdir: already there: /tmp"]
+tmp true
+home true

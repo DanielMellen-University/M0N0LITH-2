@@ -1,0 +1,18 @@
+# touch -t is refused, so the file is not created.
+use ../shell/wm
+use std/vfs
+let t = wm.terminal.init()
+fun run(line)
+    t.buf = []
+    for c in line
+        if c == " "
+            wm.terminal.on_key(t, "space")
+        else
+            wm.terminal.on_key(t, c)
+    wm.terminal.on_key(t, "return")
+    print(t.buf)
+run("touch -t /tmp/stamped.txt")
+print("made", vfs.exists(t.fs, "/tmp/stamped.txt"))
+run("touch /tmp/stamped.txt")
+print("made now", vfs.exists(t.fs, "/tmp/stamped.txt"))
+print("bytes", vfs.read(t.fs, "/tmp/stamped.txt") == "")

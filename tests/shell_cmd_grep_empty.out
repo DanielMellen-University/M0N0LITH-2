@@ -1,0 +1,2 @@
+["/home> grep \"\" /tmp/g.txt", "one", "", "two"]
+["/home> grep '' /tmp/g.txt", "one", "", "two"]

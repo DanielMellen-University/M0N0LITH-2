@@ -1,0 +1,4 @@
+["/home> grep x /tmp", "grep: is a folder: /tmp"]
+["/home> grep x /tmp/", "grep: is a folder: /tmp"]
+["/home> grep x /tmp/nope.txt", "grep: not found: /tmp/nope.txt"]
+["/home> grep x welcome.txt/nope", "grep: not a folder: /home/welcome.txt"]

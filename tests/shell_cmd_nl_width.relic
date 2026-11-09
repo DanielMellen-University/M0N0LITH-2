@@ -1,0 +1,18 @@
+# nl pads the number to three columns, so line 10 is wider than line 9.
+use ../shell/wm
+use std/vfs
+let t = wm.terminal.init()
+fun run(line)
+    t.buf = []
+    for c in line
+        if c == " "
+            wm.terminal.on_key(t, "space")
+        else
+            wm.terminal.on_key(t, c)
+    wm.terminal.on_key(t, "return")
+    print(t.buf)
+let text = ""
+for i in 1..13
+    text = text + "L{i}\n"
+vfs.write(t.fs, "/tmp/n.txt", text)
+run("nl /tmp/n.txt")

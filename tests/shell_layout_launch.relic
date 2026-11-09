@@ -1,0 +1,7 @@
+# The first window opens at the first cascade step, at the app's own size.
+use ../shell/wm
+let d = wm.new_desktop(640, 480, wm.default_apps())
+let w = wm.launch(d, wm.notes)
+print(w.id, w.x, w.y, w.width, w.height, w.minimized)
+print("title", wm.title_text(w))
+print("focused", wm.focused(d).id == w.id)

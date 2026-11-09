@@ -1,0 +1,3 @@
+["/home> ls welcome.txt/", "ls: not a folder: /home/welcome.txt"]
+["/home> ls /home/welcome.txt/", "ls: not a folder: /home/welcome.txt"]
+["/home> ls /tmp/nope/", "ls: not found: /tmp/nope"]

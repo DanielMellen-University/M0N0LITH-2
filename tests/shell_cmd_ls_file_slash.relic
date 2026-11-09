@@ -1,0 +1,16 @@
+# ls of a file with a trailing slash says it is not a folder.
+use ../shell/wm
+use std/vfs
+let t = wm.terminal.init()
+fun run(line)
+    t.buf = []
+    for c in line
+        if c == " "
+            wm.terminal.on_key(t, "space")
+        else
+            wm.terminal.on_key(t, c)
+    wm.terminal.on_key(t, "return")
+    print(t.buf)
+run("ls welcome.txt/")
+run("ls /home/welcome.txt/")
+run("ls /tmp/nope/")

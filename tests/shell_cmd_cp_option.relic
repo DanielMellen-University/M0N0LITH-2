@@ -1,0 +1,18 @@
+# cp -r is refused, so nothing is copied.
+use ../shell/wm
+use std/vfs
+let t = wm.terminal.init()
+fun run(line)
+    t.buf = []
+    for c in line
+        if c == " "
+            wm.terminal.on_key(t, "space")
+        else
+            wm.terminal.on_key(t, c)
+    wm.terminal.on_key(t, "return")
+    print(t.buf)
+run("touch /tmp/src.txt")
+vfs.write(t.fs, "/tmp/src.txt", "byte")
+run("cp -r /tmp/src.txt /tmp/dst.txt")
+print("dst", vfs.exists(t.fs, "/tmp/dst.txt"))
+print("src", vfs.read(t.fs, "/tmp/src.txt") == "byte")

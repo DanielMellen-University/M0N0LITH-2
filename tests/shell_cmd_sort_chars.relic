@@ -1,0 +1,16 @@
+# sort orders by character, so a blank line comes first, then a space, then digits, then capitals.
+use ../shell/wm
+use std/vfs
+let t = wm.terminal.init()
+fun run(line)
+    t.buf = []
+    for c in line
+        if c == " "
+            wm.terminal.on_key(t, "space")
+        else
+            wm.terminal.on_key(t, c)
+    wm.terminal.on_key(t, "return")
+    print(t.buf)
+vfs.write(t.fs, "/tmp/s.txt", "b\nA\na\n10\n2\n\n \n")
+run("sort /tmp/s.txt")
+print("file", vfs.read(t.fs, "/tmp/s.txt") == "b\nA\na\n10\n2\n\n \n")

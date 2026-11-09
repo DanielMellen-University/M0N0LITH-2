@@ -1,0 +1,18 @@
+# echo will not redirect onto a folder, and the folder stays a folder.
+use ../shell/wm
+use std/vfs
+let t = wm.terminal.init()
+fun run(line)
+    t.buf = []
+    for c in line
+        if c == " "
+            wm.terminal.on_key(t, "space")
+        else
+            wm.terminal.on_key(t, c)
+    wm.terminal.on_key(t, "return")
+    print(t.buf)
+run("echo hi > /tmp")
+run("echo hi >> /tmp")
+print("dir", vfs.is_dir(t.fs, "/tmp"))
+run("echo hi > /tmp/line.txt")
+print("file", vfs.read(t.fs, "/tmp/line.txt") == "hi\n")

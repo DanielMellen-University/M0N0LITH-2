@@ -1,0 +1,5 @@
+["/home> cp welcome.txt /tmp/no/such.txt", "cp: no folder: /tmp/no"]
+no true
+src true
+["/home> cp /tmp/missing.txt /tmp/out.txt", "cp: not found: /tmp/missing.txt"]
+out true

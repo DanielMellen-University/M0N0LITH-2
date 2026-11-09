@@ -1,0 +1,9 @@
+# With no windows, Ctrl+W, Ctrl+M, Ctrl+Tab and a letter do nothing.
+use ../shell/wm
+let d = wm.new_desktop(640, 480, wm.default_apps())
+wm.key(d, "ctrl+w")
+wm.key(d, "ctrl+m")
+wm.key(d, "ctrl+tab")
+wm.key(d, "ctrl+shift+tab")
+wm.key(d, "a")
+print(len(d.windows), wm.focused(d) == none)

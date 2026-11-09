@@ -1,0 +1,6 @@
+# The taskbar starts at bar_top. The pixel above it is the desktop when no window is there.
+use ../shell/wm
+let d = wm.new_desktop(640, 480, wm.default_apps())
+print("bar", wm.bar_top(d))
+print("on", wm.click(d, 300, wm.bar_top(d)))
+print("above", wm.click(d, 300, wm.bar_top(d) - 1))

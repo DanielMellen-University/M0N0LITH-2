@@ -1,0 +1,5 @@
+["/home> mkdir -p /tmp/new/deep", "mkdir: no options, not even -p"]
+new false
+deep false
+["/home> mkdir /tmp/real"]
+real true

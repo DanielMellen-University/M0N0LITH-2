@@ -1,0 +1,4 @@
+["/home> touch /tmp/only.txt"]
+["/home> mv /tmp/only.txt", "usage: mv <from> <to>"]
+still true
+["/home> mv", "usage: mv <from> <to>"]

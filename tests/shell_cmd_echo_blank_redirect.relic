@@ -1,0 +1,18 @@
+# echo with no text, redirected, writes a file of one newline.
+use ../shell/wm
+use std/vfs
+let t = wm.terminal.init()
+fun run(line)
+    t.buf = []
+    for c in line
+        if c == " "
+            wm.terminal.on_key(t, "space")
+        else
+            wm.terminal.on_key(t, c)
+    wm.terminal.on_key(t, "return")
+    print(t.buf)
+run("echo > /tmp/blank.txt")
+print("bytes", vfs.read(t.fs, "/tmp/blank.txt") == "\n")
+run("wc /tmp/blank.txt")
+run("echo >> /tmp/blank.txt")
+print("two", vfs.read(t.fs, "/tmp/blank.txt") == "\n\n")

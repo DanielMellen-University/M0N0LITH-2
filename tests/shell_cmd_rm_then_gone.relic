@@ -1,0 +1,19 @@
+# After rm, cat and ls no longer see the file.
+use ../shell/wm
+use std/vfs
+let t = wm.terminal.init()
+fun run(line)
+    t.buf = []
+    for c in line
+        if c == " "
+            wm.terminal.on_key(t, "space")
+        else
+            wm.terminal.on_key(t, c)
+    wm.terminal.on_key(t, "return")
+    print(t.buf)
+run("touch /tmp/gone.txt")
+vfs.write(t.fs, "/tmp/gone.txt", "x")
+run("rm /tmp/gone.txt")
+run("cat /tmp/gone.txt")
+run("ls /tmp/gone.txt")
+print("gone", not vfs.exists(t.fs, "/tmp/gone.txt"))

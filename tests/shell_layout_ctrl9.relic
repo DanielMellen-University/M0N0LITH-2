@@ -1,0 +1,12 @@
+# Ctrl+9 does nothing when fewer than nine windows are open. Ctrl+1 raises the first.
+use ../shell/wm
+let d = wm.new_desktop(640, 480, wm.default_apps())
+let a = wm.launch(d, wm.notes)
+let b = wm.launch(d, wm.clicker)
+wm.key(d, "ctrl+9")
+print("stays", wm.focused(d).id == b.id)
+wm.key(d, "ctrl+1")
+print("first", wm.focused(d).id == a.id)
+wm.minimize(d, a.id)
+wm.key(d, "ctrl+1")
+print("restored", not a.minimized and wm.focused(d).id == a.id)

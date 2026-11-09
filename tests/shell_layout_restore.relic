@@ -1,0 +1,9 @@
+# restore brings a minimized window to the front, even if another is already showing.
+use ../shell/wm
+let d = wm.new_desktop(640, 480, wm.default_apps())
+let a = wm.launch(d, wm.notes)
+let b = wm.launch(d, wm.clicker)
+wm.minimize(d, a.id)
+wm.restore(d, a.id)
+print("top", wm.focused(d).id == a.id, not a.minimized)
+print("other", not b.minimized)

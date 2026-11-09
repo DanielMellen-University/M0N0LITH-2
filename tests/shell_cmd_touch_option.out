@@ -1,0 +1,5 @@
+["/home> touch -t /tmp/stamped.txt", "touch: no options, not even -t"]
+made false
+["/home> touch /tmp/stamped.txt"]
+made now true
+bytes true

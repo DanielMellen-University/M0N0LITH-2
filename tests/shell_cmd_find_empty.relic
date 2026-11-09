@@ -1,0 +1,18 @@
+# An empty find text matches every name under the current folder.
+use ../shell/wm
+use std/vfs
+let t = wm.terminal.init()
+fun run(line)
+    t.buf = []
+    for c in line
+        if c == " "
+            wm.terminal.on_key(t, "space")
+        else
+            wm.terminal.on_key(t, c)
+    wm.terminal.on_key(t, "return")
+    print(t.buf)
+run("mkdir /home/box")
+run("touch /home/box/a.txt")
+run("find \"\"")
+run("cd /home/box")
+run("find ''")

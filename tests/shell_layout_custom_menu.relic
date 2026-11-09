@@ -1,0 +1,7 @@
+# A desktop whose app list is only Notes launches that, and only that, from the menu.
+use ../shell/wm
+let d = wm.new_desktop(640, 480, [wm.notes])
+print(wm.click(d, 10, 470))
+print("rows", len(d.apps), d.menu_sel)
+wm.key(d, "return")
+print("open", len(d.windows), d.windows[0].app.name, d.menu_open)

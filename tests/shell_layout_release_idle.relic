@@ -1,0 +1,7 @@
+# release and motion with no drag in progress leave the desktop alone.
+use ../shell/wm
+let d = wm.new_desktop(640, 480, wm.default_apps())
+let w = wm.launch(d, wm.notes)
+wm.release(d)
+wm.motion(d, 10, 10)
+print(d.drag == none, w.x, w.y)

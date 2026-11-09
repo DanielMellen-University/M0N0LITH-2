@@ -1,0 +1,16 @@
+# cp of a file onto itself is refused, and the bytes stay.
+use ../shell/wm
+use std/vfs
+let t = wm.terminal.init()
+fun run(line)
+    t.buf = []
+    for c in line
+        if c == " "
+            wm.terminal.on_key(t, "space")
+        else
+            wm.terminal.on_key(t, c)
+    wm.terminal.on_key(t, "return")
+    print(t.buf)
+run("cp welcome.txt welcome.txt")
+run("cp welcome.txt ./welcome.txt")
+print("bytes", vfs.read(t.fs, "/home/welcome.txt") == "Welcome to Relic.\n")

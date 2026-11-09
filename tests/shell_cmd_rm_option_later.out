@@ -1,0 +1,5 @@
+["/home> touch /tmp/keep.txt"]
+["/home> rm /tmp/keep.txt -f", "rm: no options, not even -f"]
+kept true
+["/home> rm /tmp/keep.txt"]
+gone true

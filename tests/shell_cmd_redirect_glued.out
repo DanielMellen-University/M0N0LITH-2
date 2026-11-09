@@ -1,0 +1,5 @@
+["/home> echo hi>file", "hi>file"]
+["/home> echo hi >file", "hi >file"]
+glued true
+word true
+file true

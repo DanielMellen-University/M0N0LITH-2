@@ -1,0 +1,3 @@
+["/home> wc ./welcome.txt", "1 3 18 ./welcome.txt"]
+["/home> wc welcome.txt/../welcome.txt", "1 3 18 welcome.txt/../welcome.txt"]
+["/home> wc /home/../home/welcome.txt", "1 3 18 /home/../home/welcome.txt"]

@@ -1,0 +1,6 @@
+["/home> cd -P /tmp", "cd: no options, not even -P"]
+["/home> pwd", "/home"]
+["/home> cd -- /tmp", "cd: no options, not even --"]
+["/home> pwd", "/home"]
+["/home> cd /tmp"]
+["/tmp> pwd", "/tmp"]

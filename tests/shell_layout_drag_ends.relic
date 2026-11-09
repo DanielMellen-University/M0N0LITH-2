@@ -1,0 +1,10 @@
+# A new press ends the drag that was in progress, so later motion leaves the window.
+use ../shell/wm
+let d = wm.new_desktop(640, 480, wm.default_apps())
+let w = wm.launch(d, wm.notes)
+wm.click(d, w.x + 4, w.y + 4)
+let x = w.x
+wm.click(d, 300, 200)
+wm.motion(d, 10, 10)
+print("stayed", w.x == x)
+print("drag", d.drag == none)

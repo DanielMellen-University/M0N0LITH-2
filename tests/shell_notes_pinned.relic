@@ -1,0 +1,8 @@
+# The label stays on the first row, and the line with the cursor is the second.
+use ../shell/wm
+let d = wm.new_desktop(640, 480, wm.default_apps())
+let w = wm.launch(d, wm.notes)
+print(wm.visible_lines(w))
+wm.handle(d, {type: "text", text: "Hi"})
+print(wm.visible_lines(w))
+print("rows", wm.rows_fit(w))

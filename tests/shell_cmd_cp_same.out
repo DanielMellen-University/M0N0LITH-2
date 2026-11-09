@@ -1,0 +1,3 @@
+["/home> cp welcome.txt welcome.txt", "cp: already there: /home/welcome.txt"]
+["/home> cp welcome.txt ./welcome.txt", "cp: already there: /home/welcome.txt"]
+bytes true

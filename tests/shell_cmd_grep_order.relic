@@ -1,0 +1,16 @@
+# grep prints matching lines in the order they appear, and skips the others.
+use ../shell/wm
+use std/vfs
+let t = wm.terminal.init()
+fun run(line)
+    t.buf = []
+    for c in line
+        if c == " "
+            wm.terminal.on_key(t, "space")
+        else
+            wm.terminal.on_key(t, c)
+    wm.terminal.on_key(t, "return")
+    print(t.buf)
+vfs.write(t.fs, "/tmp/g.txt", "red\nblue\nreddish\ngreen\nred")
+run("grep red /tmp/g.txt")
+run("grep blue /tmp/g.txt")

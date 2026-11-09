@@ -1,0 +1,14 @@
+# Resizing changes the width and height and leaves the top-left corner where it was.
+use ../shell/wm
+let d = wm.new_desktop(640, 480, wm.default_apps())
+let w = wm.launch(d, wm.notes)
+let ox = w.x
+let oy = w.y
+print(wm.click(d, w.x + w.width - 2, w.y + wm.title_height + w.height - 2))
+wm.motion(d, w.x + 300, w.y + wm.title_height + 150)
+print("origin", w.x == ox and w.y == oy)
+print("grew", w.width > 220 and w.height > 60)
+wm.motion(d, 0, 0)
+print("min", w.width, w.height, w.x == ox and w.y == oy)
+wm.release(d)
+print("drag", d.drag == none)

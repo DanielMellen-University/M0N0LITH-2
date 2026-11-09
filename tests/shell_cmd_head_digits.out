@@ -1,0 +1,5 @@
+["/home> head /tmp/h.txt 000001", "only"]
+["/home> head /tmp/h.txt 100000", "only"]
+["/home> head /tmp/h.txt 1000000", "head: not a count of lines: 1000000"]
+["/home> tail /tmp/h.txt 000000"]
+["/home> tail /tmp/missing.txt 1000000", "tail: not a count of lines: 1000000"]

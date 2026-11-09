@@ -1,0 +1,4 @@
+["/home> echo a > b > /tmp/c.txt"]
+bytes true
+no b true
+["/home> cat /tmp/c.txt", "a > b"]

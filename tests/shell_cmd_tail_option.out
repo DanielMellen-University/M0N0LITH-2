@@ -1,0 +1,3 @@
+["/home> tail -f /tmp/t.txt", "tail: no options, not even -f"]
+["/home> tail /tmp/t.txt -n", "tail: no options, not even -n"]
+["/home> tail /tmp/t.txt 1", "two"]

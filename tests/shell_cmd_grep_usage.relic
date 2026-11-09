@@ -1,0 +1,18 @@
+# grep needs both the text and a path.
+use ../shell/wm
+use std/vfs
+let t = wm.terminal.init()
+fun run(line)
+    t.buf = []
+    for c in line
+        if c == " "
+            wm.terminal.on_key(t, "space")
+        else
+            wm.terminal.on_key(t, c)
+    wm.terminal.on_key(t, "return")
+    print(t.buf)
+run("grep")
+run("grep hello")
+vfs.write(t.fs, "/tmp/g.txt", "hello")
+run("grep hello /tmp/g.txt extra")
+print("file", vfs.read(t.fs, "/tmp/g.txt") == "hello")

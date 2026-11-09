@@ -1,0 +1,13 @@
+# A click in Notes does not change the line. The title bar starts a move instead.
+use ../shell/wm
+let d = wm.new_desktop(640, 480, wm.default_apps())
+let w = wm.launch(d, wm.notes)
+for ch in "hello"
+    wm.key(d, ch)
+print("before", w.state.text)
+print("content", wm.click(d, w.x + 12, w.y + wm.title_height + 8))
+print("after", w.state.text, wm.visible_lines(w)[1])
+wm.release(d)
+print("title", wm.click(d, w.x + 8, w.y + 4))
+print("still", w.state.text)
+wm.release(d)

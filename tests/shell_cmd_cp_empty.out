@@ -1,0 +1,5 @@
+["/home> touch /tmp/empty.txt"]
+["/home> cp /tmp/empty.txt /tmp/empty2.txt"]
+empty true
+["/home> cp /tmp /tmp/tmp2", "cp: is a folder: /tmp"]
+no dir copy true

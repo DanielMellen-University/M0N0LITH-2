@@ -1,0 +1,2 @@
+["/home> grep hi /tmp/g.txt/", "grep: not a folder: /tmp/g.txt"]
+["/home> grep hi /tmp/nope.txt/", "grep: not found: /tmp/nope.txt"]

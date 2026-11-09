@@ -1,0 +1,6 @@
+# format_time rolls 31-day January and 28-day February 1970 into the next month.
+use ../shell/wm
+print(wm.format_time(2592000))
+print(wm.format_time(2678400))
+print(wm.format_time(5011200))
+print(wm.format_time(5097600))

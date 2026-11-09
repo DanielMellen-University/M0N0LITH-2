@@ -1,0 +1,16 @@
+# wc -l is refused and does not print counts.
+use ../shell/wm
+use std/vfs
+let t = wm.terminal.init()
+fun run(line)
+    t.buf = []
+    for c in line
+        if c == " "
+            wm.terminal.on_key(t, "space")
+        else
+            wm.terminal.on_key(t, c)
+    wm.terminal.on_key(t, "return")
+    print(t.buf)
+run("wc -l welcome.txt")
+run("wc welcome.txt -c")
+run("wc welcome.txt")

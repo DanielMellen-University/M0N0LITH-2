@@ -1,0 +1,5 @@
+["/home> mv /tmp/missing.txt /tmp/out.txt", "mv: not found: /tmp/missing.txt"]
+out true
+["/home> mv welcome.txt /tmp/no/out.txt", "mv: no folder: /tmp/no"]
+welcome true
+no true

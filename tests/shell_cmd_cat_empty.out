@@ -1,0 +1,3 @@
+["/home> touch /tmp/empty.txt"]
+["/home> cat /tmp/empty.txt"]
+["/home> cat /tmp/blank.txt", ""]

@@ -1,0 +1,4 @@
+["/home> cd welcome.txt/", "cd: not a folder: /home/welcome.txt"]
+["/home> pwd", "/home"]
+["/home> cd /home/welcome.txt/", "cd: not a folder: /home/welcome.txt"]
+["/home> pwd", "/home"]
