@@ -15,7 +15,7 @@ One test: `ctest --test-dir build -C Release -R golden_shell_ide`. Or run it str
 
 ## How they are checked
 
-CMake finds every `tests/*.relic` and adds it as `golden_<name>`. `tools/run_golden.cmake` runs it from `tests/`, and it passes when it exits with 0 and its standard output matches `<name>.out` exactly (Windows line endings are ignored). A test with no `.out` file must print nothing. One more test, `check_shell`, runs `relic check` on `wm.relic`, `workspace.relic` and `desktop.relic`, which catches syntax errors and undefined names in the drawing code no test runs. That is 295 tests in all, and CI runs them on Linux, macOS and Windows. Four of the golden programs and `workspace_restart` cover the store. `workspace_restart` is not a golden file: it runs four relic processes against one directory.
+CMake finds every `tests/*.relic` and adds it as `golden_<name>`. `tools/run_golden.cmake` runs it from `tests/`, and it passes when it exits with 0 and its standard output matches `<name>.out` exactly (Windows line endings are ignored). A test with no `.out` file must print nothing. One more test, `check_shell`, runs `relic check` on `wm.relic`, `workspace.relic` and `desktop.relic`, which catches syntax errors and undefined names in the drawing code no test runs. That is 456 tests in all, and CI runs them on Linux, macOS and Windows. Four of the golden programs and `workspace_restart` cover the store. `workspace_restart` is not a golden file: it runs four relic processes against one directory.
 
 None of them opens the SDL window. A passing run does not prove what the desktop draws. The Linux GUI pass, and what it did not try, is in the [roadmap](ROADMAP.md#accepted-nov-7-2026).
 
