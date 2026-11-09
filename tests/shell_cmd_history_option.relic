@@ -1,0 +1,27 @@
+# history -c is usage, not a request to drop the commands already kept.
+use ../shell/wm
+use std/vfs
+let t = wm.terminal.init()
+fun run(line)
+    t.buf = []
+    for c in line
+        if c == " "
+            wm.terminal.on_key(t, "space")
+        else
+            wm.terminal.on_key(t, c)
+    wm.terminal.on_key(t, "return")
+    print(t.buf)
+fun type(line)
+    for c in line
+        if c == " "
+            wm.terminal.on_key(t, "space")
+        else
+            wm.terminal.on_key(t, c)
+    wm.terminal.on_key(t, "return")
+t.buf = []
+type("echo kept")
+type("history -c")
+print(t.buf)
+t.buf = []
+type("history")
+print(t.buf)
