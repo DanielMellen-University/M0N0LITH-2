@@ -1,0 +1,3 @@
+["/home> \"pwd\"", "/home"]
+["/home> 'ls'", "welcome.txt"]
+["/home> \"echo\" quoted name", "quoted name"]
