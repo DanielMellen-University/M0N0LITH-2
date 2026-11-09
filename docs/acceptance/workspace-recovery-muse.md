@@ -327,6 +327,45 @@ contract load rule for a truncated committed generation, the fallback
 is the newest valid generation older than the named one, which is g1.
 A newer complete file would be ignored uncommitted, not installed.
 
+## Case 8: Unsupported-version store stays held through normal writes (D0118-3)
+
+Status: UNRUN.
+
+Setup: As in Case 3c, the store holds a committed generation written
+in a newer version than this desktop understands. Start the desktop.
+It shows that the saved workspace is from a version it cannot use, it
+holds the store, and it falls back to first-run defaults or to an
+older generation it can parse.
+
+Action: Then use the desktop normally. Open the Editor, write text,
+and save it with Ctrl+S. Attempt a workspace save. Repeat the save
+attempt after making another edit.
+
+Expected visible outcome: Every save reports failure visibly at the
+time it happens. The Editor never says `saved` for a save into the
+held store. The desktop shows the store is held, or that the save
+failed; it does not report any of these saves as successful. The
+desktop does not close, hang, or lose the open windows, and the
+session keeps the edited text in memory.
+
+Data-preservation assertions:
+
+- The unsupported-version bytes stay exactly as they were: not
+  overwritten, not deleted, and not pruned.
+- The pointer still names the unsupported generation after the write
+  attempts.
+- No file is removed from the store by the failed writes.
+- The failure is reported on screen instead of being silent.
+
+Fixture note: COMMITTED names a generation whose first line is M2WS9,
+well-formed but a version this desktop does not understand; an older
+M2WS1 generation may also be present. Per the contract, a
+wrong-version committed image holds the store: saves fail and do not
+say they were saved, and nothing in the directory is replaced or
+deleted until wm.workspace_release(). That release is an explicit
+call, not a menu item, so this case does not cover what happens
+after a release.
+
 ---
 
 ## Case list
@@ -342,8 +381,9 @@ A newer complete file would be ignored uncommitted, not installed.
 | 5 | First-run defaults | UNRUN |
 | 6 | Corrupt committed generation, newer uncommitted not loaded | UNRUN |
 | 7 | Corrupted retry commit keeps prior committed generation | UNRUN |
+| 8 | Unsupported-version store held through normal writes | UNRUN |
 
-Specified cases: 9. Executed cases: 0. Fixture assets: none built in
+Specified cases: 10. Executed cases: 0. Fixture assets: none built in
 this batch. The contract is now on main (docs/workspace-recovery.md,
 PR #28 merged 2026-11-09); fixture notes for the earlier cases are
 still pending.
