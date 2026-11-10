@@ -1,9 +1,10 @@
 # Persistent workspace recovery: acceptance cases
 
-Status: run on Nov 9 2026 against PR #33 (window session snapshot). All
-seven cases pass; see "Results" at the end for how each was run and what
-was not tried. Cases 3a, 3b, 3c and 5 were reworded on that date, before
-the results were recorded; the reasons are in "Wording changes".
+Status: cases 1 to 5 were run on Nov 9 2026 against the window session
+snapshot and pass. Cases 6 to 9 are UNRUN. See "Results" for how cases
+1 to 5 were run and what was not tried. Cases 3a, 3b, 3c and 5 were
+reworded on that date, before the results were recorded; the reasons
+are in "Wording changes".
 
 ## What this document is
 
@@ -22,6 +23,14 @@ any of those.
 No fixture assets were added. Faults were made the way the Results table
 says: by the store's own fault hooks in the golden tests, by killing a
 process, and by editing the saved files by hand between two processes.
+
+### Update: cases 6 to 9 (D0120, 2026-11-09)
+
+Cases 6 to 9 are specified against `docs/workspace-recovery.md` and
+are UNRUN. No fixture assets were added for them. A desktop generation
+carries a checksum and quitting writes another snapshot, so those cases
+say to damage the generation `COMMITTED` names after the process has
+exited, and not to treat a later quit as a no-op.
 
 ## How to read a case
 
@@ -233,6 +242,175 @@ Data-preservation assertions:
 - Closing and starting the desktop again, still with no save, shows
   the same defaults.
 
+## Case 6: Corrupt committed generation must not load a newer uncommitted generation (D0118-1)
+
+Status: UNRUN.
+
+Setup: Start the desktop, open the Editor on a file with saved text,
+and save the workspace twice, so the store holds an older generation
+from the first save and a committed generation from the second save,
+with newer text. Quit the desktop. Then damage the committed
+generation so it no longer parses, and add a newer complete generation
+that was never committed, holding yet newer text.
+
+Action: Start the desktop again.
+
+Expected visible outcome: The desktop starts, it does not hang, and it
+shows that the committed image could not be used and that it recovered
+the older generation. It restores the older generation's content, the
+text from the first save. It does not load the newer uncommitted
+generation, and it does not show that generation's text as if it were
+the saved state.
+
+Data-preservation assertions:
+
+- The file shows exactly the older generation's text, the text from
+  the first save.
+- No content from the newer uncommitted generation appears anywhere.
+- No content from the damaged generation appears anywhere.
+- The failure is reported on screen instead of being silent.
+
+Fixture note: after the process has exited, COMMITTED names a
+generation the parser rejects (truncated, a bad record, a raw CR, or
+a checksum that no longer matches). An older generation is complete
+and valid. A newer complete generation is named by neither COMMITTED
+nor META. A desktop generation includes a checksum, so editing its
+file text without updating that checksum does not parse and uses this
+fallback. A files-only generation with no `S` line has no checksum; a
+change that still parses as M2WS1 is installed. A first line other
+than M2WS1 is a wrong version, which holds the store (case 8) instead
+of this fallback. The fallback is the newest valid generation older
+than the named one. A newer complete file is ignored uncommitted and
+is not installed. Quitting writes a snapshot, so damage the generation
+COMMITTED names after that write, not before it.
+
+## Case 7: Corrupted retry commit keeps the actual prior committed generation (D0118-2)
+
+Status: UNRUN.
+
+Setup: Start the desktop with no saved workspace. Open the Editor on
+a file, write a first version, and save the workspace, so the first
+version is committed. Edit the file to a second version. Start a
+workspace save and cut it off partway, with the fault stage
+partial-generation or full-uncommitted, so the second version is never
+committed. The fault arm is one-shot, so the next save runs with no
+fault armed: save the workspace again, so the second version commits
+as a new generation. That retry is the last successful save. Do not
+quit afterwards: quitting writes another snapshot, and the backup of
+that snapshot would be the second version. Then damage the generation
+the retry committed so the parser rejects it.
+
+Action: Start the desktop again.
+
+Expected visible outcome: The desktop starts, it does not hang, and it
+shows that the committed image could not be used and that it recovered
+the first version. It restores exactly the first version's text. It
+does not show the second version, does not show a mix of the two
+versions, and does not replace that file with the shipped first-run
+image.
+
+Data-preservation assertions:
+
+- The file shows exactly the first version. The retry did commit the
+  second version, and that generation was then damaged, so the last
+  completed save is not what comes back. The backup kept beside that
+  commit is the first version.
+- No content from the interrupted save appears anywhere.
+- No content from the damaged generation appears anywhere.
+- The failure is reported on screen instead of being silent.
+
+Fixture note: COMMITTED names g3; g3.m2ws is rejected by the parser
+(truncated, a bad record, a raw CR, or a checksum that no longer
+matches), not a generation that still parses; g1.m2ws is complete and
+valid; META names committed
+g3, previous g1. The uncommitted g2 leftover (g2.m2ws, or
+g2.m2ws.partial for the partial-generation variant) was pruned by the
+successful g3 commit, which keeps only the new commit and the
+generation installed when that save started, which is g1. Per the
+contract load rule for a truncated or otherwise invalid committed
+generation, the fallback is the newest valid generation older than
+the named one, which is g1. A newer complete file would be ignored
+uncommitted, not installed. A wrong-version header is case 8, not
+this fallback.
+
+## Case 8: Unsupported-version store stays held through normal writes (D0118-3)
+
+Status: UNRUN.
+
+Setup: The store holds a committed generation written in a newer
+version than this desktop understands. Start the desktop. It shows
+that the saved workspace is from a version it cannot use, and it
+holds the store. It restores the newest generation older than the
+named one that still parses as M2WS1. When there is none, it uses the
+shipped first-run image: no windows, and `/home`, `/tmp`, and
+`/home/welcome.txt` holding `Welcome to Relic.`. That image is not an
+empty disk.
+
+Action: Then use the desktop normally. Open the Editor, write text,
+and save it with Ctrl+S. Attempt a workspace save. Repeat the save
+attempt after making another edit.
+
+Expected visible outcome: Every save reports failure visibly at the
+time it happens. The Editor never says `saved` for a save into the
+held store. The desktop shows the store is held, or that the save
+failed; it does not report any of these saves as successful. The
+desktop does not close, hang, or lose the open windows, and the
+session keeps the edited text in memory.
+
+Data-preservation assertions:
+
+- The unsupported-version bytes stay exactly as they were: not
+  overwritten, not deleted, and not pruned.
+- The pointer still names the unsupported generation after the write
+  attempts.
+- No file is removed from the store by the failed writes.
+- The failure is reported on screen instead of being silent.
+
+Fixture note: COMMITTED names a generation whose first line is M2WS9,
+well-formed but a version this desktop does not understand; an older
+M2WS1 generation may also be present. Per the contract, a
+wrong-version committed image holds the store: saves fail and do not
+say they were saved, and nothing in the directory is replaced or
+deleted until wm.workspace_release(). That release is an explicit
+call, not a menu item, so this case does not cover what happens
+after a release.
+
+## Case 9: A requested store that cannot be opened must not report saved (D0118-4)
+
+Status: UNRUN.
+
+Setup: Start the desktop with no saved workspace. Open the Editor on
+a file and write text. Request a workspace store at a path that cannot
+be opened: the path is a regular file where a directory is expected,
+or a directory that cannot be listed.
+
+Action: Attempt to open that store, then press Ctrl+S in the Editor
+and attempt a workspace save.
+
+Expected visible outcome: The desktop shows that the store could not
+be opened, the workspace is not enabled, and the Editor reports the
+save failed. It never says `saved` for a save into a store that did
+not open. The session keeps the text in memory and the desktop stays
+usable.
+
+Data-preservation assertions:
+
+- The text stays in the session exactly as typed.
+- Nothing is written to the unopenable path.
+- A later save to a store that opens still commits the shared files
+  and the open windows, and a restart restores that snapshot, as in
+  Case 1. Undo, the clipboard, a running IDE program, and Snake's
+  board are not in it.
+- The failure is reported on screen instead of being silent.
+
+Fixture note: the requested store path cannot be opened (a regular
+file in place of the directory, or a directory that cannot be
+listed). Per the contract, the load leaves the vfs as it was, the
+workspace is not enabled, and the notice is `workspace: cannot open
+store`. This is distinct from opening with an empty path, which is a
+session-only opt-out and is not a failure; this case always uses a
+requested path that cannot be opened.
+
 ---
 
 ## Case list
@@ -246,8 +424,12 @@ Data-preservation assertions:
 | 3c | Unsupported-version saved workspace data | PASS |
 | 4 | Visible save failure | PASS |
 | 5 | First-run defaults | PASS |
+| 6 | Corrupt committed generation, newer uncommitted not loaded | UNRUN |
+| 7 | Corrupted retry commit keeps prior committed generation | UNRUN |
+| 8 | Unsupported-version store held through normal writes | UNRUN |
+| 9 | Requested store that cannot be opened never reports saved | UNRUN |
 
-Specified cases: 7. Executed cases: 7.
+Specified cases: 11. Executed cases: 7. Cases 6 to 9 are UNRUN.
 
 ## Wording changes (Nov 9 2026)
 
