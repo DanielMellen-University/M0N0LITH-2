@@ -280,12 +280,18 @@ Data-preservation assertions:
 - No content from the damaged generation appears anywhere.
 - The failure is reported on screen instead of being silent.
 
-Fixture note: COMMITTED names g2; g2.m2ws is truncated or altered so
-it does not parse; g1.m2ws is complete and valid; g3.m2ws is complete
-and valid and is named by neither COMMITTED nor META. Per the contract
-load rule for a truncated committed generation, the fallback is the
-newest valid generation older than the named one, which is g1. A newer
-complete file is ignored uncommitted and is not installed.
+Fixture note: COMMITTED names g2; g2.m2ws is rejected by the parser
+(truncated, a bad record, or a raw CR); g1.m2ws is complete and valid;
+g3.m2ws is complete and valid and is named by neither COMMITTED nor
+META. A change that still parses as M2WS1 is installed, including
+edited file text: this desktop has no checksum. A first line other
+than M2WS1 is a wrong version, which holds the store (case 8) instead
+of this fallback. Per the contract load rule for a truncated or
+otherwise invalid committed generation, the fallback is the newest
+valid generation older than the named one, which is g1. A newer
+complete file is ignored uncommitted and is not installed. Quitting
+does not publish another generation, so the damaged g2 is what the
+next start opens.
 
 ## Case 7: Corrupted retry commit keeps the actual prior committed generation (D0118-2)
 
@@ -298,8 +304,9 @@ workspace save and cut it off partway, with the fault stage
 partial-generation or full-uncommitted, so the second version is never
 committed. The fault arm is one-shot, so the next save runs with no
 fault armed: save the workspace again, so the second version commits
-as a new generation. Then damage that new committed generation so it
-no longer parses, and quit the desktop.
+as a new generation. Quit. This desktop does not publish another
+generation on the way out. Then damage that committed generation so
+the parser rejects it.
 
 Action: Start the desktop again.
 
@@ -307,35 +314,44 @@ Expected visible outcome: The desktop starts, it does not hang, and it
 shows that the committed image could not be used and that it recovered
 the first version. It restores exactly the first version's text. It
 does not show the second version, does not show a mix of the two
-versions, and does not fall back to first-run defaults.
+versions, and does not replace that file with the shipped first-run
+image.
 
 Data-preservation assertions:
 
-- The file shows exactly the first version, the version from the last
-  completed workspace save.
+- The file shows exactly the first version. The retry did commit the
+  second version, and that generation was then damaged, so the last
+  completed save is not what comes back. The backup kept beside that
+  commit is the first version.
 - No content from the interrupted save appears anywhere.
-- No content from the corrupted save appears anywhere.
+- No content from the damaged generation appears anywhere.
 - The failure is reported on screen instead of being silent.
 
-Fixture note: COMMITTED names g3; g3.m2ws is truncated or altered so
-it does not parse; g1.m2ws is complete and valid; META names committed
+Fixture note: COMMITTED names g3; g3.m2ws is rejected by the parser
+(truncated, a bad record, or a raw CR), not merely edited into another
+valid M2WS1 image; g1.m2ws is complete and valid; META names committed
 g3, previous g1. The uncommitted g2 leftover (g2.m2ws, or
 g2.m2ws.partial for the partial-generation variant) was pruned by the
 successful g3 commit, which keeps only the new commit and the
 generation installed when that save started, which is g1. Per the
-contract load rule for a truncated committed generation, the fallback
-is the newest valid generation older than the named one, which is g1.
-A newer complete file would be ignored uncommitted, not installed.
+contract load rule for a truncated or otherwise invalid committed
+generation, the fallback is the newest valid generation older than
+the named one, which is g1. A newer complete file would be ignored
+uncommitted, not installed. A wrong-version header is case 8, not
+this fallback.
 
 ## Case 8: Unsupported-version store stays held through normal writes (D0118-3)
 
 Status: UNRUN.
 
-Setup: As in Case 3c, the store holds a committed generation written
-in a newer version than this desktop understands. Start the desktop.
-It shows that the saved workspace is from a version it cannot use, it
-holds the store, and it falls back to first-run defaults or to an
-older generation it can parse.
+Setup: The store holds a committed generation written in a newer
+version than this desktop understands. Start the desktop. It shows
+that the saved workspace is from a version it cannot use, and it
+holds the store. It restores the newest generation older than the
+named one that still parses as M2WS1. When there is none, it uses the
+shipped first-run image: no windows, and `/home`, `/tmp`, and
+`/home/welcome.txt` holding `Welcome to Relic.`. That image is not an
+empty disk.
 
 Action: Then use the desktop normally. Open the Editor, write text,
 and save it with Ctrl+S. Attempt a workspace save. Repeat the save
@@ -388,8 +404,10 @@ Data-preservation assertions:
 
 - The text stays in the session exactly as typed.
 - Nothing is written to the unopenable path.
-- A later save to a store that opens still works, and a restart after
-  that save restores the saved state as in Case 1.
+- A later save to a store that opens still commits the shared files,
+  and a restart restores those files. Open windows, Notes, Clicker,
+  and unsaved Editor, IDE, and Paint buffers are not in this store, so
+  a restart does not bring them back.
 - The failure is reported on screen instead of being silent.
 
 Fixture note: the requested store path cannot be opened (a regular
