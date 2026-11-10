@@ -1,0 +1,58 @@
+plain
+/home/hello.relic:3:11 cannot add an int and a string
+/home/hello.relic 3 11 ["cannot add an int and a string"]
+host error
+/home/bad.relic:1:7 unclosed '('
+/home/bad.relic 1 7 ["unclosed '('"]
+warning
+std/strings.relic:10:5 warning: 'x' is not defined
+std/strings.relic 10 5 ["warning: 'x' is not defined"]
+windows
+C:\src\main.relic:2:4 expected an expression
+C:\src\main.relic 2 4 ["expected an expression"]
+repl
+<repl>:1:1 boom
+<repl> 1 1 ["boom"]
+not an error
+none
+none
+none
+none
+none
+message keeps colons
+/tmp/a.relic:12:3 see also: line 4
+/tmp/a.relic 12 3 ["see also: line 4"]
+no message
+/tmp/a.relic:1:2
+/tmp/a.relic 1 2 [""]
+trimmed
+/home/a.relic:4:1 spaced
+/home/a.relic 4 1 ["spaced"]
+block
+/home/a.relic:1:1 first
+/home/b.relic:2:8 second
+empty block 0
+round trip
+true
+/home/bad.relic:1:7 unclosed '('
+from err
+/home/hello.relic:3:11 cannot add an int and a string
+/home/bad.relic:1:4 unclosed '('
+none
+/home/a.relic:1:1 stopped
+place
+1 1 0 ["p"]
+2 1 9 ["p"]
+2 9 17 ["+"]
+2 80 23 ["\n"]
+9 1 33 [""]
+2 0 9 ["p"]
+empty 0
+bounds [9, 23, 2]
+past end [33, 33, 4]
+line 0 0
+same file
+true
+false
+true
+true

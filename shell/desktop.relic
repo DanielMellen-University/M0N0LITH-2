@@ -15,6 +15,7 @@
 # typed text keeps its case and symbols.
 use wm
 use std/graphics
+use std/os
 
 fun draw_box(b, r, g, bl)
     graphics.rect(b[0], b[1], b[2], b[3], r, g, bl)
@@ -37,6 +38,8 @@ fun draw_window(d, w)
     for b in wm.paint_boxes(w)   # Paint's canvas and swatches
         graphics.rect(b[0], b[1], b[2], b[3], b[4], b[5], b[6])
     let lines = wm.visible_lines(w)
+    for b in wm.error_boxes(w)   # the IDE's error line, behind the selection
+        draw_box(b, 255, 214, 153)
     for b in wm.mark_boxes(w)   # the Editor's selection, behind its text
         draw_box(b, 170, 200, 240)
     let row = 0
@@ -106,8 +109,32 @@ fun draw(d)
     draw_notice(d)
     graphics.present()
 
+# One frame of the IDE for a screenshot. M0N0LITH_IDE_SHOT=error shows a
+# program that does not parse; jump shows the same program after Ctrl+E.
+# No workspace is opened, so this does not read or write a session.
+fun ide_shot(d, mode)
+    let i = wm.launch(d, wm.ide)
+    let s = i.state
+    s.path = "/home/bad.relic"
+    s.text = "print(\"ok\")\nprint(2\nprint(\"no\")\n"
+    wm.key(d, "ctrl+r")
+    if mode == "jump"
+        wm.key(d, "ctrl+e")
+    return i
+
 if not graphics.available()
     print("this relic was built without graphics; rebuild with -DRELIC_SDL=ON")
+else if os.env("M0N0LITH_IDE_SHOT") != none
+    let d = wm.new_desktop(640, 480, wm.default_apps())
+    ide_shot(d, os.env("M0N0LITH_IDE_SHOT"))
+    graphics.open(d.width, d.height, "MONOLITH 2")
+    draw(d)
+    let ms = 1200
+    let wait = os.env("M0N0LITH_SHOT_MS")
+    if wait != none and wait != ""
+        ms = int(wait)
+    graphics.wait(ms)
+    graphics.close()
 else
     let d = wm.new_desktop(640, 480, wm.default_apps())
     # Saved files and open windows outlive this process. Unset

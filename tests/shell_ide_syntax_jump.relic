@@ -1,4 +1,4 @@
-# IDE: Ctrl+E goes to a syntax error's line too, and after a good run, when
+# IDE: Ctrl+E goes to a syntax error's column too, and after a good run, when
 # there is no error, Ctrl+E moves nothing.
 use ../shell/wm
 use std/vfs

@@ -1,1 +1,1 @@
-error ["line 1: unclosed '('"]
+error ["/home/welcome.txt:1:6 unclosed '('"]

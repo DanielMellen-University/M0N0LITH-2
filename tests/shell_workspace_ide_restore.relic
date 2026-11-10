@@ -1,0 +1,150 @@
+# A saved IDE error must render on the first frame, jump to its column by key
+# and click, and regain its highlight. Every restored app has its init fields.
+use ../shell/wm
+use std/files
+use std/strings
+use std/vfs
+
+fun check(label, got, want)
+    if got != want
+        print("FAIL", label, got, want)
+        fail(label)
+
+fun wipe()
+    try
+        files.remove_tree("ws-ide-restore")
+    catch err
+        none
+
+fun desktop() = wm.new_desktop(640, 480, wm.default_apps())
+
+fun reload()
+    wm.workspace_flush()
+    check("flush", wm.workspace_notice(), "")
+    wm.workspace_open("ws-ide-restore")
+    let d = desktop()
+    wm.workspace_bind(d)
+    check("reopen", wm.workspace_notice(), "")
+    return d
+
+fun ide_window(d)
+    for w in d.windows
+        if w.app.name == "IDE"
+            return w
+    fail("no IDE")
+
+fun cursor(s) = len(s.text) - s.back
+
+fun click_error(d, w)
+    let shown = wm.visible_lines(w)
+    for row in 0..len(shown)
+        if strings.starts_with(shown[row], "/home/bad.relic:")
+            wm.click(d, w.x + wm.text_left + 3, w.y + wm.title_height + wm.text_top + row * wm.line_height + 5)
+            wm.release(d)
+            return
+    fail("no error row")
+
+wipe()
+wm.workspace_open("ws-ide-restore")
+let d = desktop()
+wm.workspace_bind(d)
+for app in wm.default_apps()
+    if app.name != "IDE"
+        wm.launch(d, app)
+let i = wm.launch(d, wm.ide)
+let s = i.state
+s.path = "/home/bad.relic"
+s.text = "print(1)\nprint(2\n"
+wm.key(d, "ctrl+r")
+check("error output", s.out, ["/home/bad.relic:2:6 unclosed '('"])
+check("error line", s.err_line, 2)
+check("error column", s.err_col, 6)
+wm.key(d, "ctrl+e")
+let target = cursor(s)
+check("column position", target, 14)
+wm.key(d, "ctrl+home")
+wm.visible_lines(i)
+let boxes = wm.error_boxes(i)
+check("original highlight", len(boxes) > 0, true)
+print("before", s.out, s.err_line, s.err_col, target)
+
+d = reload()
+i = ide_window(d)
+s = i.state
+# This first frame used to crash in _ide_lines on the missing err_col.
+let shown = wm.visible_lines(i)
+check("restored output", s.out, ["/home/bad.relic:2:6 unclosed '('"])
+check("restored line", s.err_line, 2)
+check("restored column", s.err_col, 6)
+check("diagnostic count", len(s.diags), 1)
+let diag = s.diags[0]
+check("diagnostic file", diag.file, s.path)
+check("diagnostic line", diag.line, 2)
+check("diagnostic column", diag.col, 6)
+check("diagnostic message", diag.msg, "unclosed '('")
+check("restored highlight", wm.error_boxes(i), boxes)
+for w in d.windows
+    for field in w.app.init()
+        check(w.app.name + " field " + field, field in w.state, true)
+    wm.visible_lines(w)
+print("restored fields", len(d.windows), "apps; diagnostics and highlight restored")
+wm.key(d, "ctrl+e")
+check("restored ctrl+e", cursor(s), target)
+print("ctrl+e", cursor(s))
+wm.key(d, "ctrl+home")
+click_error(d, i)
+check("restored error click", cursor(s), target)
+print("error click", cursor(s))
+
+# Ordinary output restores a complete state without inventing an error.
+s.text = "print(1)\n"
+s.back = 0
+wm.key(d, "ctrl+r")
+d = reload()
+i = ide_window(d)
+s = i.state
+wm.visible_lines(i)
+check("ordinary output", s.out, ["1"])
+check("no diagnostics", s.diags, [])
+check("no error line", s.err_line, none)
+check("no error column", s.err_col, none)
+check("no highlight", wm.error_boxes(i), [])
+let before = cursor(s)
+wm.key(d, "ctrl+e")
+check("no error jump", cursor(s), before)
+print("ordinary output", s.out, s.err_line, s.err_col)
+
+# A module diagnostic is restored too, but cannot select a line in this file.
+vfs.write(s.fs, "/home/bad.relic", "fun hello(\n")
+s.path = "/home/main.relic"
+s.text = "use bad\n"
+s.back = 0
+wm.key(d, "ctrl+r")
+d = reload()
+i = ide_window(d)
+s = i.state
+wm.visible_lines(i)
+check("module diagnostic count", len(s.diags), 1)
+check("module diagnostic file", s.diags[0].file, "/home/bad.relic")
+check("module error line", s.err_line, none)
+check("module error column", s.err_col, none)
+check("module highlight", wm.error_boxes(i), [])
+before = cursor(s)
+wm.key(d, "ctrl+e")
+check("module jump", cursor(s), before)
+print("module", s.diags[0].file, s.err_line, s.err_col)
+
+# Pre-diagnostic snapshots can name a line without a file:line:col in output.
+s.out = ["old error"]
+s.err_line = 1
+d = reload()
+i = ide_window(d)
+s = i.state
+wm.visible_lines(i)
+check("legacy diagnostics", s.diags, [])
+check("legacy column", s.err_col, 1)
+wm.key(d, "ctrl+e")
+check("legacy jump", cursor(s), 0)
+print("legacy", s.err_line, s.err_col, cursor(s))
+wipe()
+print("ok")

@@ -1,0 +1,81 @@
+# Parsing and navigation for the IDE's error list. A toolchain line is
+# "file:line:col: error: message" (or a warning). The pane shows
+# "file:line:col message". The cursor index counts characters, and a column
+# past the end of the line stays on that line.
+use ../shell/ide_diag
+
+fun show(d)
+    if d == none
+        print("none")
+        return
+    print(ide_diag.format(d))
+    print(d.file, d.line, d.col, [d.msg])
+
+print("plain")
+show(ide_diag.parse_line("/home/hello.relic:3:11 cannot add an int and a string"))
+print("host error")
+show(ide_diag.parse_line("/home/bad.relic:1:7: error: unclosed '('"))
+print("warning")
+show(ide_diag.parse_line("std/strings.relic:10:5: warning: 'x' is not defined"))
+print("windows")
+show(ide_diag.parse_line("C:\\src\\main.relic:2:4: error: expected an expression"))
+print("repl")
+show(ide_diag.parse_line("<repl>:1:1: error: boom"))
+print("not an error")
+show(ide_diag.parse_line("not an error"))
+show(ide_diag.parse_line("    print(1)"))
+show(ide_diag.parse_line("    ^"))
+show(ide_diag.parse_line(""))
+show(ide_diag.parse_line(":1:1 missing file"))
+print("message keeps colons")
+show(ide_diag.parse_line("/tmp/a.relic:12:3: error: see also: line 4"))
+print("no message")
+show(ide_diag.parse_line("/tmp/a.relic:1:2"))
+print("trimmed")
+show(ide_diag.parse_line("  /home/a.relic:4:1 spaced  "))
+
+print("block")
+let blob = "/home/a.relic:1:1 first" + chr(13) + "\nhello\n    ^\n/home/b.relic:2:8: error: second\n\n"
+for d in ide_diag.parse_text(blob)
+    print(ide_diag.format(d))
+print("empty block", len(ide_diag.parse_text("")))
+
+print("round trip")
+let src = "/home/hello.relic:3:11 cannot add an int and a string"
+print(ide_diag.format(ide_diag.parse_line(src)) == src)
+let host = ide_diag.parse_line("/home/bad.relic:1:7: error: unclosed '('")
+print(ide_diag.format(host))
+
+print("from err")
+let e = {line: 3, col: 11, msg: "cannot add an int and a string"}
+print(ide_diag.format(ide_diag.from_err(e, "/home/hello.relic")))
+let e2 = {line: 1, col: 4, msg: "unclosed '('", file: "/home/bad.relic"}
+print(ide_diag.format(ide_diag.from_err(e2, "/home/main.relic")))
+print(ide_diag.from_err(none, "/home/a.relic"))
+let e3 = {line: 0, col: 0, msg: "stopped", file: ""}
+print(ide_diag.format(ide_diag.from_err(e3, "/home/a.relic")))
+
+print("place")
+let text = "print(1)\nprint(a + \"x\")\nprint(3)\n"
+fun at(line, col)
+    let p = ide_diag.cursor_at(text, line, col)
+    let ch = ""
+    if p < len(text)
+        ch = text[p]
+    print(line, col, p, [ch])
+at(1, 1)
+at(2, 1)
+at(2, 9)
+at(2, 80)
+at(9, 1)
+at(2, 0)
+print("empty", ide_diag.cursor_at("", 1, 1))
+print("bounds", ide_diag.line_bounds(text, 2))
+print("past end", ide_diag.line_bounds(text, 9))
+print("line 0", ide_diag.cursor_at(text, 0, 1))
+
+print("same file")
+print(ide_diag.same_file("/home/a.relic", "/home/a.relic"))
+print(ide_diag.same_file("/home/a.relic", "/home/bad.relic"))
+print(ide_diag.same_file("/home/a.relic", ""))
+print(ide_diag.same_file("/home/a.relic", none))

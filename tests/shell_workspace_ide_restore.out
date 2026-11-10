@@ -1,0 +1,8 @@
+before ["/home/bad.relic:2:6 unclosed '('"] 2 6 14
+restored fields 8 apps; diagnostics and highlight restored
+ctrl+e 14
+error click 14
+ordinary output ["1"] none none
+module /home/bad.relic none none
+legacy 1 1 0
+ok

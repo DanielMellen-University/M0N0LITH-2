@@ -35,6 +35,7 @@ use std/lists
 use ../relic/selfhost/lexer
 use ../relic/selfhost/parser
 use ../relic/selfhost/interp
+use ide_diag
 
 let bar_height = 24     # taskbar along the bottom
 let title_height = 16   # window title bar
@@ -772,12 +773,12 @@ fun visible_lines(w)
 # The highlighted parts (the Editor's selection) as [x, y, w, h] boxes, for the
 # lines the last visible_lines(w) gave. An app with marks(state) gives them as
 # [line, from, to] in the lines it returned.
-fun mark_boxes(w)
+fun _mark_boxes(w, marks)
     let out = []
-    if not "marks" in w.app or not "shown_lines" in w.state
+    if not "shown_lines" in w.state
         return out
     let cols = cols_fit(w)
-    for m in w.app.marks(w.state)
+    for m in marks
         for row in 0..len(w.state.shown_lines)
             if w.state.shown_lines[row] == m[0]
                 let a = math.min(m[1], cols)
@@ -785,6 +786,18 @@ fun mark_boxes(w)
                 if b > a
                     append(out, [w.x + text_left + a * char_width, w.y + title_height + text_top + row * line_height, (b - a) * char_width, line_height])
     return out
+
+fun mark_boxes(w)
+    if not "marks" in w.app
+        return []
+    return _mark_boxes(w, w.app.marks(w.state))
+
+# The IDE's error line, in its own color. Filled by _ide_lines as
+# [line, from, to] in the same coordinates as mark_boxes.
+fun error_boxes(w)
+    if not "err_marks" in w.state
+        return []
+    return _mark_boxes(w, w.state.err_marks)
 
 # An app's painted boxes (Paint's canvas and swatches) in desktop coordinates,
 # cut to the window's content so nothing spills over the edges.
@@ -2807,14 +2820,37 @@ fun _editor_relayout(s)
         return _ide_lines(s)
     return _editor_lines(s)
 
+# The pane line under a click, as [text, index, column], from the lines last
+# laid out. none on the title, past the last row, or before anything was drawn.
+fun _ide_hit(s, x, y)
+    if y < text_top or not "shown_lines" in s
+        return none
+    let row = int((y - text_top) / line_height)
+    if row < 0 or row >= len(s.shown_lines)
+        return none
+    let lines = _editor_relayout(s)
+    let li = s.shown_lines[row]
+    if li < 0 or li >= len(lines)
+        return none
+    let col = 0
+    if x >= text_left
+        col = int((x - text_left) / char_width)
+    return [lines[li], li, col]
+
 # A click on a text line puts the cursor at that character (past the line's
 # end: at its end) and drops the selection; dragging from there selects. The
-# title line and the IDE's pane do nothing, and nor does a click while an IDE
-# run waits for input.
+# title line and a plain output line do nothing. In the IDE a click on an
+# error line goes to that column, a click on the header that names Ctrl+E does
+# too, and a click on [stop] ends a run that is waiting for input.
 fun _editor_click(s, x, y)
     s.press = none
     s.overwrite = false   # a click is not the second Ctrl+S, so the warning stands
     if "run" in s and s.run != none
+        # [stop] is the first six characters of the pane's header. A click
+        # anywhere else while the run waits still does not type into the program.
+        let hit = _ide_hit(s, x, y)
+        if hit != none and strings.starts_with(hit[0], "[stop]") and hit[2] < 6
+            _ide_escape(s)
         return none
     # a click gives up a find, replace or line number, as another key does
     if "find" in s and s.find != none
@@ -2823,15 +2859,21 @@ fun _editor_click(s, x, y)
         s.goto = none
         s.status = s.find_was
     let lines = _editor_relayout(s)
-    if "err_line" in s and s.err_line != none and y >= text_top
-        # in the IDE, a click on the error in the pane (or the line above it
-        # that names Ctrl+E) goes to the error's line, as Ctrl+E does
+    if "diags" in s and y >= text_top and "shown_lines" in s
+        # a click on an error in the pane goes to that line and column. The
+        # header that names Ctrl+E goes to the one Ctrl+E follows. A printed
+        # line that is not an error, and an error in another file, do nothing.
         let row = int((y - text_top) / line_height)
-        if row < len(s.shown_lines)
+        if row >= 0 and row < len(s.shown_lines)
             let li = s.shown_lines[row]
-            if li > len(s.starts) and li < len(lines) and (strings.starts_with(lines[li], "line {s.err_line}: ") or strings.starts_with(lines[li], "-- output (ctrl+e"))
-                _ide_to_error(s)
-                return none
+            if li > len(s.starts) and li < len(lines)
+                let d = ide_diag.parse_line(lines[li])
+                if d != none
+                    _ide_jump(s, d)
+                    return none
+                if strings.starts_with(lines[li], "-- output (ctrl+e")
+                    _ide_to_error(s)
+                    return none
     let pos = _editor_point(s, x, y, false)
     if pos == none
         return none
@@ -3272,16 +3314,23 @@ fun _editor_key(s, k)
 # reads a line (os.read_line, os.prompt) the run pauses and the pane ends in an
 # input line: typing goes there, Return sends it, Esc stops the run. Between
 # inputs it may take _ide_steps steps, so a loop that never ends cannot hang
-# the desktop. An error shows as "line L: message" and Ctrl+E puts the cursor
-# at the start of that line.
+# the desktop. An error is one line of the pane, "file:line:col message", the
+# same place the toolchain reports. Ctrl+E, or a click on that line, puts the
+# cursor on that column, and the line is highlighted. A run that waits for
+# input shows [stop]; clicking it stops the run, as Esc does.
 let _ide_steps = 200000
 let _ide_pane = 6       # output lines shown at most, under a separator line
 let _ide_out_keep = 200 # output lines kept
 
-fun _ide_init()
-    let s = _editor_init()
-    s.out = []          # the last run's output, then its error if any
-    s.err_line = none   # line of the last run's error in this file, or none
+fun _ide_init() = _ide_state(_editor_init())
+
+# Both a new buffer and a restored one need all of the IDE's transient fields.
+fun _ide_state(s)
+    s.out = []          # the last run's output, then its errors
+    s.diags = []        # {file, line, col, msg}, in the order they were found
+    s.err_line = none   # line of the error Ctrl+E jumps to, in this file
+    s.err_col = none    # its column, 1-based, counting characters
+    s.err_marks = []    # the highlighted error line, for error_boxes
     s.run = none        # a run waiting for a line of input, or none
     s.input = ""        # the line typed so far for it
     return s
@@ -3296,7 +3345,9 @@ fun _ide_denied()
 
 fun _ide_run(s)
     s.out = []
+    s.diags = []
     s.err_line = none
+    s.err_col = none
     s.run = none
     s.input = ""
     let lexed = lexer.lex(s.text)
@@ -3342,13 +3393,18 @@ fun _ide_after(s, rt)
         return
     _ide_error(s, rt.err)
 
+# One compile or runtime error, appended to the list. The first one in this
+# file is the one Ctrl+E and the highlight follow. An error in a module stays
+# in the list and names that file, and a jump leaves the cursor here.
 fun _ide_error(s, err)
-    let where = "line {err.line}"
-    if "file" in err and err.file != "" and err.file != s.path
-        where = err.file + " line {err.line}"   # inside a module the program used
-    else
-        s.err_line = err.line
-    append(s.out, where + ": " + err.msg)
+    let d = ide_diag.from_err(err, s.path)
+    if d == none
+        return
+    append(s.diags, d)
+    append(s.out, ide_diag.format(d))
+    if s.err_line == none and ide_diag.same_file(s.path, d.file)
+        s.err_line = d.line
+        s.err_col = d.col
 
 # Keys while a run waits for a line: typing, Backspace, Return sends it.
 # Left, Right, Home and End move a cursor in it, s.in_left characters
@@ -3516,21 +3572,40 @@ fun _ide_toggle_comment(s)
         else
             _editor_set_pos(s, pos)
 
-# Ctrl+E: the cursor to the start of the error's line.
+# The cursor to a diagnostic's line and column, and that line becomes the one
+# the highlight follows. A diagnostic in another file does nothing.
+fun _ide_jump(s, d)
+    if not ide_diag.same_file(s.path, d.file)
+        return
+    s.err_line = d.line
+    s.err_col = d.col
+    s.mark = none
+    _editor_set_pos(s, ide_diag.cursor_at(s.text, d.line, d.col))
+
+# Ctrl+E: the cursor to the column of the error Ctrl+E follows.
 fun _ide_to_error(s)
     if s.err_line == none
         return
-    let pos = 0
-    let line = 1
-    let n = len(s.text)
-    while line < s.err_line and pos < n
-        let e = _line_end(s.text, pos)
-        if e >= n
-            break
-        pos = e + 1
-        line = line + 1
+    let col = 1
+    if "err_col" in s and s.err_col != none
+        col = s.err_col
     s.mark = none
-    _editor_set_pos(s, pos)
+    _editor_set_pos(s, ide_diag.cursor_at(s.text, s.err_line, col))
+
+# The error's line, as a mark over the characters on screen. The cursor's line
+# already carries the "_" the editor draws, so the mark covers that too.
+fun _ide_mark_error(s, out)
+    s.err_marks = []
+    if s.err_line == none or not ("starts" in s)
+        return
+    let start = ide_diag.line_bounds(s.text, s.err_line)[0]
+    for i in 0..len(s.starts)
+        if s.starts[i] == start
+            let n = len(out[i + 1])
+            if n < 1
+                n = 1
+            append(s.err_marks, [i + 1, 0, n])
+            return
 
 # The Editor's lines over the rows left above the pane, then the pane.
 fun _ide_lines(s)
@@ -3538,15 +3613,20 @@ fun _ide_lines(s)
     if len(s.out) > 0
         pane = ["-- output --"]
         if s.err_line != none
-            pane = ["-- output (ctrl+e: to line {s.err_line}) --"]
+            pane = ["-- output (ctrl+e: line {s.err_line} col {s.err_col}) --"]
     if s.run != none
-        pane = ["-- input (return: send, esc: stop) --"]
+        pane = ["[stop] return: send, esc: stop"]
     if len(pane) > 0
         let shown = _ide_pane
         if s.run != none
             shown = shown - 1
         let n = math.min(len(s.out), shown)
         for line in slice(s.out, len(s.out) - n, len(s.out))
+            # An error is often the last row, and the window keeps the end of
+            # that row. Cut it here so file:line:col stays on screen. The list
+            # itself (s.out) keeps the whole message.
+            if ide_diag.parse_line(line) != none and "cols" in s and s.cols > 0 and len(line) > s.cols
+                line = slice(line, 0, s.cols)
             append(pane, line)
         if s.run != none
             let at = len(s.input) - _ide_in_left(s)
@@ -3563,6 +3643,7 @@ fun _ide_lines(s)
     s.edit_rows = editor_rows   # Page Up and Page Down use the editor area, not the pane
     let out = _editor_lines(s)
     s.rows = rows
+    _ide_mark_error(s, out)
     out[0] = "IDE" + slice(out[0], 6, len(out[0]))   # "Editor [..." -> "IDE [..."
     out[0] = strings.replace(out[0], "(ctrl+s save)", "(ctrl+s save, ctrl+r run)")
     for line in pane
@@ -4346,13 +4427,21 @@ fun _restore_state(w)
     if w.app == "Editor"
         return _restore_editor(f)
     if w.app == "IDE"
-        let s = _restore_editor(f)
+        let s = _ide_state(_restore_editor(f))
         s.out = workspace.unpack_lines(f.out, 201)
-        s.err_line = none
+        for line in s.out
+            let diag = ide_diag.parse_line(line)
+            if diag != none
+                append(s.diags, diag)
         if f.err != "-"
             s.err_line = int(f.err)
-        s.run = none
-        s.input = ""
+            # Older snapshots may have only a line. Keep that jump at column 1
+            # unless the saved output also names its column in this buffer.
+            s.err_col = 1
+            for diag in s.diags
+                if diag.line == s.err_line and ide_diag.same_file(s.path, diag.file)
+                    s.err_col = math.max(1, diag.col)
+                    break
         return s
     if w.app == "Notes"
         return {text: f.text, before: none, left: int(f.left)}

@@ -1,1 +1,1 @@
-error ["1", "line 2: cannot add an int and a string"]
+error ["1", "/home/welcome.txt:2:9 cannot add an int and a string"]

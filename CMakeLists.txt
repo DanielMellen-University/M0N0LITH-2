@@ -25,7 +25,7 @@ endforeach()
 # Every shell file must pass relic check (no syntax errors or undefined names).
 # desktop.relic needs SDL to run, but check does not run it.
 add_test(NAME check_shell
-  COMMAND ${RELIC_EXE} check wm.relic workspace.relic desktop.relic
+  COMMAND ${RELIC_EXE} check wm.relic workspace.relic desktop.relic ide_diag.relic
   WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}/shell)
 
 # Two fresh relic processes share one workspace directory. The golden tests
