@@ -1,0 +1,81 @@
+# A bound desktop must save large Unicode files. Reload from disk into a fresh
+# desktop, then reject edits that preserve the plain sum of the code points.
+use ../shell/wm
+use std/files
+use std/strings
+use std/vfs
+
+fun wipe(path)
+    try
+        files.remove_tree(path)
+    catch e
+        none
+
+fun desktop()
+    return wm.new_desktop(640, 480, wm.default_apps())
+
+fun notes_text(d)
+    if len(d.windows) != 1 or d.windows[0].app.name != "Notes"
+        return none
+    return d.windows[0].state.text
+
+let unicode_dir = "ws-checksum-unicode"
+wipe(unicode_dir)
+wm.workspace_open(unicode_dir)
+let d = desktop()
+wm.workspace_bind(d)
+let notes = wm.launch(d, wm.notes)
+notes.state.text = "Unicode snapshot"
+let emoji = ""
+for i in 0..20000
+    emoji = emoji + "😀"
+let fs = wm.terminal.init().fs
+vfs.write(fs, "/home/emoji.txt", emoji)
+print("emoji save", [wm.workspace_flush()])
+
+# Discard memory-only changes, as a new process would, and bind a new desktop.
+vfs.write(fs, "/home/emoji.txt", "unsaved")
+notes.state.text = "unsaved"
+wm.workspace_open(unicode_dir)
+let restored = desktop()
+wm.workspace_bind(restored)
+let fs2 = wm.terminal.init().fs
+let text = ""
+if vfs.exists(fs2, "/home/emoji.txt")
+    text = vfs.read(fs2, "/home/emoji.txt")
+print("emoji reload", [wm.workspace_notice()], len(text), text == emoji)
+print("emoji desktop", len(restored.windows), [notes_text(restored)])
+wipe(unicode_dir)
+
+let corrupt_dir = "ws-checksum-corrupt"
+wipe(corrupt_dir)
+wm.workspace_open(corrupt_dir)
+let c = desktop()
+wm.workspace_bind(c)
+let old_notes = wm.launch(c, wm.notes)
+let fs3 = wm.terminal.init().fs
+vfs.write(fs3, "/home/pair.txt", "kept")
+old_notes.state.text = "older snapshot"
+print("older save", [wm.workspace_flush()])
+vfs.write(fs3, "/home/pair.txt", "ac")
+old_notes.state.text = "newer snapshot"
+print("newer save", [wm.workspace_flush()])
+let pointer = files.read(corrupt_dir + "/COMMITTED")
+let path = corrupt_dir + "/" + slice(pointer, 0, len(pointer) - 1) + ".m2ws"
+let image = files.read(path)
+let needle = "F /home/pair.txt ac\n"
+let at = strings.find(image, needle)
+if at < 0
+    fail("missing pair record")
+
+# ac -> bb changes the two code points by +1 and -1; ac -> ca swaps them.
+# Both are well-formed files and keep the old plain sum, including its Z line.
+for pair in ["bb", "ca"]
+    let changed = "F /home/pair.txt " + pair + "\n"
+    files.write(path, slice(image, 0, at) + changed + slice(image, at + len(needle), len(image)))
+    wm.workspace_open(corrupt_dir)
+    let recovered = desktop()
+    wm.workspace_bind(recovered)
+    print("reject", pair, [wm.workspace_notice()])
+    print("recovered", vfs.read(wm.terminal.init().fs, "/home/pair.txt"), [notes_text(recovered)])
+wipe(corrupt_dir)

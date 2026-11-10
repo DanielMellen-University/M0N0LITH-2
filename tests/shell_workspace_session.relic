@@ -1,0 +1,225 @@
+# Windows, places, the terminal's folder and history, and unsaved text are
+# stored in the same generation as the files. Flush stands in for quitting.
+# A damaged generation is not installed. An interrupted save keeps the last
+# one that committed.
+use ../shell/wm
+use std/files
+use std/strings
+use std/vfs
+
+fun wipe(path)
+    try
+        files.remove_tree(path)
+    catch e
+        none
+
+fun key_text(d, text)
+    for ch in text
+        if ch == " "
+            wm.key(d, "space")
+        else if ch == "\n"
+            wm.key(d, "return")
+        else
+            wm.key(d, ch)
+
+fun desktop()
+    return wm.new_desktop(640, 480, wm.default_apps())
+
+fun find_window(d, name)
+    for w in d.windows
+        if w.app.name == name
+            return w
+    fail("no " + name)
+
+fun focus(d, name)
+    let i = len(d.windows) - 1
+    while i >= 0
+        if d.windows[i].app.name == name
+            wm.restore(d, d.windows[i].id)
+            return d.windows[len(d.windows) - 1]
+        i = i - 1
+    fail("no " + name)
+
+fun window_line(w)
+    let m = 0
+    if w.minimized
+        m = 1
+    return w.app.name + " " + str(w.x) + " " + str(w.y) + " " + str(w.width) + " " + str(w.height) + " " + str(m)
+
+fun check(label, got, want)
+    if got != want
+        print("FAIL", label)
+        print(" got", [got])
+        print(" want", [want])
+        fail(label)
+
+wipe("ws-session")
+let d = desktop()
+wm.workspace_open("ws-session")
+wm.workspace_bind(d)
+let fs = wm.terminal.init().fs
+check("fresh windows", len(d.windows), 0)
+check("apps", len(d.apps), 8)
+check("fresh notice", wm.workspace_notice(), "")
+check("welcome", vfs.read(fs, "/home/welcome.txt"), "Welcome to Relic.\n")
+let snake = wm.launch(d, wm.snake)
+check("snake", wm.snake.lines(snake.state)[0], "Snake  score 0  best 0")
+wm.close(d, snake.id)
+
+wm.launch(d, wm.terminal)
+key_text(d, "echo alpha > note.txt\n")
+key_text(d, "echo beta >> note.txt\n")
+key_text(d, "cd /tmp\n")
+key_text(d, "pwd\n")
+
+wm.launch(d, wm.files_app)
+wm.key(d, "n")
+wm.key(d, "return")
+wm.launch(d, wm.editor)
+key_text(d, "gamma\n")
+wm.key(d, "ctrl+s")
+
+wm.launch(d, wm.notes)
+key_text(d, "keep this")
+wm.launch(d, wm.clicker)
+wm.key(d, "space")
+
+wm.launch(d, wm.paint_app)
+let paint = focus(d, "Paint")
+wm.paint_app.on_click(paint.state, 6, 40)
+wm.key(d, "ctrl+s")
+
+focus(d, "Terminal")
+key_text(d, "cd /home\n")
+key_text(d, "echo print(\"ide-out\") > hello.relic\n")
+focus(d, "Files")
+wm.key(d, "h")
+wm.key(d, "return")
+wm.launch(d, wm.ide)
+wm.key(d, "ctrl+r")
+
+focus(d, "Editor")
+wm.key(d, "!")
+
+let term = focus(d, "Terminal")
+wm.click(d, term.x + 8, term.y + 4)
+wm.motion(d, term.x + 8 + 36, term.y + 4 + 18)
+wm.release(d)
+let notes = focus(d, "Notes")
+wm.minimize(d, notes.id)
+
+wm.workspace_flush()
+check("flush", wm.workspace_notice(), "")
+
+wm.workspace_open("ws-session")
+let d2 = desktop()
+wm.workspace_bind(d2)
+check("restored notice", wm.workspace_notice(), "")
+check("restored count", len(d2.windows), 7)
+for w in d2.windows
+    print(window_line(w))
+let fs2 = wm.terminal.init().fs
+check("file", vfs.read(fs2, "/home/note.txt"), "alpha\nbeta\ngamma\n")
+for w in d2.windows
+    if w.app.name == "Terminal"
+        check("cwd", w.state.cwd, "/home")
+        check("past", strings.join(w.state.past, "|"), "echo alpha > note.txt|echo beta >> note.txt|cd /tmp|pwd|cd /home|echo print(\"ide-out\") > hello.relic")
+        check("moved", w.x != 40 or w.y != 30, true)
+    else if w.app.name == "Editor"
+        check("editor path", w.state.path, "/home/note.txt")
+        check("editor text", w.state.text, "alpha\nbeta\ngamma\n!")
+        check("editor status", w.state.status, "edited")
+    else if w.app.name == "Notes"
+        check("notes", w.state.text, "keep this")
+        check("notes minimized", w.minimized, true)
+    else if w.app.name == "Clicker"
+        check("clicks", w.state.count, 1)
+    else if w.app.name == "Paint"
+        check("paint cell", w.state.cells[0], 1)
+        check("paint path", w.state.path, "/home/picture.paint")
+    else if w.app.name == "IDE"
+        check("ide path", w.state.path, "/home/hello.relic")
+        check("ide out", strings.join(w.state.out, "|"), "ide-out")
+    else if w.app.name == "Files"
+        check("files path", w.state.path, "/home")
+
+# The editor's Ctrl+S is the workspace save. Cutting it off keeps the flush.
+focus(d2, "Editor")
+wm.workspace_fault("partial-generation")
+wm.key(d2, "x")
+wm.key(d2, "ctrl+s")
+let ed = find_window(d2, "Editor")
+check("not saved", strings.starts_with(ed.state.status, "workspace: save failed (partial-generation); kept "), true)
+print("interrupted", ed.state.status)
+wm.workspace_open("ws-session")
+let d3 = desktop()
+wm.workspace_bind(d3)
+for w in d3.windows
+    if w.app.name == "Editor"
+        check("kept buffer", w.state.text, "alpha\nbeta\ngamma\n!")
+check("kept file", vfs.read(wm.terminal.init().fs, "/home/note.txt"), "alpha\nbeta\ngamma\n")
+print("reopen", wm.workspace_notice())
+
+# One committed generation, then one changed byte. Nothing from that file is shown.
+let names = files.list("ws-session")
+let ptr = files.read("ws-session/COMMITTED")
+let gen = slice(ptr, 0, len(ptr) - 1)
+for name in names
+    if strings.starts_with(name, "g") and name != gen + ".m2ws"
+        if strings.ends_with(name, ".m2ws") or strings.ends_with(name, ".m2ws.partial")
+            files.remove("ws-session/" + name)
+let body = files.read("ws-session/" + gen + ".m2ws")
+let at = strings.find(body, "alpha")
+check("found alpha", at >= 0, true)
+files.write("ws-session/" + gen + ".m2ws", slice(body, 0, at) + "ALPHA" + slice(body, at + 5, len(body)))
+wm.workspace_open("ws-session")
+let d4 = desktop()
+wm.workspace_bind(d4)
+check("corrupt windows", len(d4.windows), 0)
+check("corrupt welcome", vfs.read(wm.terminal.init().fs, "/home/welcome.txt"), "Welcome to Relic.\n")
+check("corrupt no alpha", vfs.exists(wm.terminal.init().fs, "/home/note.txt"), false)
+print("corrupt", wm.workspace_notice())
+
+# Unsupported version: the bytes stay, and Ctrl+S does not say saved.
+files.write("ws-session/g1.m2ws", "M2WS9\n.\n")
+files.write("ws-session/COMMITTED", "g1\n")
+# Drop every other generation so the wrong version is what the pointer names.
+let names2 = files.list("ws-session")
+for name in names2
+    if strings.starts_with(name, "g") and name != "g1.m2ws"
+        if strings.ends_with(name, ".m2ws") or strings.ends_with(name, ".m2ws.partial")
+            files.remove("ws-session/" + name)
+let held = files.read("ws-session/g1.m2ws")
+wm.workspace_open("ws-session")
+let d5 = desktop()
+wm.workspace_bind(d5)
+wm.launch(d5, wm.editor)
+wm.key(d5, "z")
+wm.key(d5, "ctrl+s")
+let ew = find_window(d5, "Editor")
+check("version held", files.read("ws-session/g1.m2ws"), held)
+check("version status", strings.starts_with(ew.state.status, "workspace: save failed; store held"), true)
+print("version", wm.workspace_notice())
+print("version status", ew.state.status)
+
+# Newest generation cut off, previous one kept.
+wipe("ws-cut")
+let c = desktop()
+wm.workspace_open("ws-cut")
+wm.workspace_bind(c)
+wm.launch(c, wm.terminal)
+key_text(c, "echo kept > a.txt\n")
+wm.workspace_flush()
+key_text(c, "echo gone > a.txt\n")
+let newest = files.read("ws-cut/COMMITTED")
+let name = slice(newest, 0, len(newest) - 1)
+files.write("ws-cut/" + name + ".m2ws", "M2WS1\nD /home\n")
+wm.workspace_open("ws-cut")
+let c2 = desktop()
+wm.workspace_bind(c2)
+check("truncated file", vfs.read(wm.terminal.init().fs, "/home/a.txt"), "kept\n")
+print("truncated", wm.workspace_notice(), len(c2.windows))
+
+wipe("ws-session")
+wipe("ws-cut")
+print("ok")

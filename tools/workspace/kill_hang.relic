@@ -1,0 +1,12 @@
+# Writes an unfinished generation, then waits to be killed. It must not
+# publish COMMITTED. The parent kills the process after this file exists.
+use std/files
+use std/os
+
+let args = os.args()
+if len(args) != 1
+    fail("kill_hang needs the workspace directory")
+files.write(args[0] + "/g99.m2ws.partial", "M2WS1\n")
+files.write(args[0] + "/HUNG", "1\n")
+while true
+    let n = 1

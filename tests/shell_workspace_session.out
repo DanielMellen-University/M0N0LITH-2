@@ -1,0 +1,14 @@
+Clicker 136 110 180 60 0
+Paint 160 130 256 190 0
+Files 64 50 260 140 0
+IDE 184 150 320 200 0
+Editor 88 70 320 80 0
+Terminal 76 48 280 120 0
+Notes 112 90 220 60 1
+interrupted workspace: save failed (partial-generation); kept g27
+reopen workspace: ignored partial g28
+corrupt workspace: no valid generation; using defaults
+version workspace: committed image wrong version; store held; using defaults | workspace: save failed; store held (wrong-version); not written
+version status workspace: save failed; store held (wrong-version); not written
+truncated workspace: committed image truncated; recovered g3 1
+ok
