@@ -4,6 +4,8 @@
 use ../shell/wm
 use std/strings
 use std/math
+fun frozen_clock() = 1000
+wm.ide_clock(frozen_clock)
 let d = wm.new_desktop(640, 480, wm.default_apps())
 let e = wm.launch(d, wm.editor)
 e.state.text = "first line\nsecond\nthe third line"
@@ -127,7 +129,7 @@ press(e2, 1, 12, 2)
 press(e2, 1, 3, 3)
 press(e2, 2, 1, 3)
 # IDE: a click on the error in the pane, or on the line naming Ctrl+E, goes
-# to the error's line; other pane lines do nothing
+# to the error's line and column; other pane lines do nothing
 let ide2 = wm.launch(d, wm.ide)
 ide2.state.text = "print(1)\nprint(2)\nprint(nope)\nprint(4)"
 ide2.state.back = 0
@@ -136,16 +138,23 @@ let il = wm.visible_lines(ide2)
 print(il)
 fun ide_pos()
     return len(ide2.state.text) - ide2.state.back
-let err_row = len(il) - 1
+fun row_starting(lines, prefix)
+    for r in 0..len(lines)
+        if strings.starts_with(lines[r], prefix)
+            return r
+    return -1
+let err_row = row_starting(il, "/home/welcome.txt:3:")
+let head_row = row_starting(il, "-- output (ctrl+e")
+let plain_row = row_starting(il, "2")
 click_at(ide2, err_row, 3)
 print("error clicked: pos", ide_pos())
 wm.key(d, "ctrl+end")
 wm.visible_lines(ide2)
-click_at(ide2, err_row - 3, 0)
+click_at(ide2, head_row, 0)
 print("header clicked: pos", ide_pos())
 wm.key(d, "ctrl+end")
 il = wm.visible_lines(ide2)
-click_at(ide2, err_row - 1, 0)
+click_at(ide2, plain_row, 0)
 print("output line clicked: pos", ide_pos(), len(ide2.state.text))
 # a key while the button is held ends the drag: after the text went, a move
 # must not leave the selection's end past the text

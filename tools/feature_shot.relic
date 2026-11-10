@@ -1,0 +1,102 @@
+# Opens the desktop on one prepared window and holds it so a screenshot can
+# be taken. Not a test. relic/build-sdl/relic tools/feature_shot.relic find
+use ../shell/wm
+use std/graphics
+use std/os
+
+fun draw_box(b, r, g, bl)
+    graphics.rect(b[0], b[1], b[2], b[3], r, g, bl)
+
+fun draw_window(d, w)
+    if wm.focused(d) == w
+        draw_box([w.x, w.y, w.width, wm.title_height], 60, 90, 160)
+    else
+        draw_box([w.x, w.y, w.width, wm.title_height], 90, 90, 100)
+    draw_box([w.x, w.y + wm.title_height, w.width, w.height], 235, 235, 235)
+    graphics.text(w.x + 4, w.y + 2, wm.title_text(w), 255, 255, 255)
+    let cb = wm.close_box(w)
+    draw_box(cb, 180, 60, 60)
+    graphics.text(cb[0] + 4, cb[1] + 2, "x", 255, 255, 255)
+    let mb = wm.minimize_box(w)
+    draw_box(mb, 110, 110, 125)
+    graphics.text(mb[0] + 4, mb[1] + 2, "_", 255, 255, 255)
+    graphics.clip(w.x, w.y + wm.title_height, w.width, w.height)
+    for b in wm.paint_boxes(w)
+        graphics.rect(b[0], b[1], b[2], b[3], b[4], b[5], b[6])
+    let lines = wm.visible_lines(w)
+    for b in wm.mark_boxes(w)
+        draw_box(b, 170, 200, 240)
+    let row = 0
+    for line in lines
+        graphics.text(w.x + wm.text_left, w.y + wm.title_height + wm.text_top + row * wm.line_height, line, 20, 20, 20)
+        row = row + 1
+    graphics.unclip()
+    draw_box(wm.resize_box(w), 160, 160, 170)
+
+fun draw_taskbar(d)
+    let bt = wm.bar_top(d)
+    draw_box([0, bt, d.width, wm.bar_height], 50, 50, 55)
+    draw_box([2, bt + 3, wm.start_width - 4, wm.bar_height - 6], 70, 130, 70)
+    graphics.text(8, bt + 6, "Start", 255, 255, 255)
+    let t = wm.shown_tabs(d)
+    for i in 0..len(t)
+        let b = wm.tab_box(d, i)
+        if t[i] == wm.focused(d)
+            draw_box(b, 100, 100, 120)
+        else
+            draw_box(b, 75, 75, 85)
+        graphics.text(b[0] + 6, b[1] + 3, wm.tab_label(d, t[i]), 255, 255, 255)
+
+fun draw(d)
+    graphics.clear(30, 60, 90)
+    graphics.text(8, 8, "MONOLITH 2", 200, 220, 240)
+    for w in d.windows
+        if not w.minimized
+            draw_window(d, w)
+    draw_taskbar(d)
+    graphics.present()
+
+fun keys(d, list)
+    for k in list
+        wm.key(d, k)
+
+let which = "find"
+let args = os.args()
+if len(args) > 0
+    which = args[0]
+let d = wm.new_desktop(640, 480, wm.default_apps())
+if which == "replace"
+    let e = wm.launch(d, wm.editor)
+    e.width = 420
+    e.height = 160
+    e.state.text = "cat sat on the cat mat\n"
+    e.state.back = 0
+    keys(d, ["ctrl+h", "c", "a", "t", "return", "d", "o", "g", "alt+return"])
+else if which == "ide"
+    let i = wm.launch(d, wm.ide)
+    i.x = 40
+    i.y = 36
+    i.width = 460
+    i.height = 280
+    i.state.path = "/home/bad.relic"
+    i.state.text = "print(1) @\nprint(2)\nprint(3) @\n"
+    i.state.back = 0
+    wm.key(d, "ctrl+r")
+else
+    let e = wm.launch(d, wm.editor)
+    e.width = 420
+    e.height = 180
+    e.state.text = "one two one\nTwo one\none more\n"
+    e.state.back = len(e.state.text)
+    keys(d, ["ctrl+i", "ctrl+f", "t", "w", "o", "return"])
+if not graphics.available()
+    print("no sdl")
+else
+    graphics.open(640, 480, "MONOLITH 2")
+    draw(d)
+    let n = 0
+    while n < 40
+        graphics.wait(50)
+        draw(d)
+        n = n + 1
+    graphics.close()

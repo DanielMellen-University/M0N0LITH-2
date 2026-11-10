@@ -1,0 +1,30 @@
+# Ctrl+G takes a column after a colon. The cursor lands on that character,
+# or at the end of the line when the column is past it. A bare line number
+# still lands on column 1.
+use ../shell/wm
+let d = wm.new_desktop(640, 480, wm.default_apps())
+let e = wm.launch(d, wm.editor)
+let s = e.state
+s.text = "one\ntwo\nthree"
+s.back = 0
+fun keys(list)
+    for k in list
+        wm.key(d, k)
+fun pos() = len(s.text) - s.back
+fun here()
+    let p = pos()
+    return [p, s.text[p]]
+keys(["ctrl+g", "2", ":", "3", "return"])
+print("line 2 col 3", here(), s.status)
+keys(["ctrl+g", "2", ":", "9", "9", "return"])
+print("past the line", here(), s.status)
+keys(["ctrl+g", "1", "return"])
+print("no column", here(), s.status)
+keys(["ctrl+g", "0", "0", "3", ":", "0", "2", "return"])
+print("zeros", here(), s.status)
+keys(["ctrl+g", "2", ":", "return"])
+print("colon alone", here(), s.status)
+keys(["ctrl+g", ":", "2"])
+print("colon first is not taken", wm.visible_lines(e)[0])
+wm.dismiss(d)
+print("esc", s.status)

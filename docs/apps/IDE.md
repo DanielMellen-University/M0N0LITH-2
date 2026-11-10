@@ -8,9 +8,10 @@ The title reads `IDE [status] path  (ctrl+s save, ctrl+r run)`. Every Editor key
 
 Ctrl+R (or F5, or Ctrl+Return) runs the text in the buffer, saved or not. The program runs in Relic's self-hosted interpreter (`selfhost/interp` from the pinned Relic), inside the desktop: there is no separate process.
 
-- `print` and `eprint` lines go to the output pane. The pane shows the last 6 lines and keeps the last 200. Page Up and Page Down move by the program lines on show above that pane, not by the rows the pane takes.
+- `print` and `eprint` lines go to the output pane. The pane shows the last 6 lines and keeps the last 200, plus the run line under the header. Page Up and Page Down move by the program lines on show above that pane, not by the rows the pane takes.
 - The status becomes `ran`, `error`, `waiting for input` or `stopped`.
-- A compile error (the text does not lex or parse) or a runtime error is one row of that pane, `file:line:col message`, the same place Relic's tools report (`file:line:col: error: message`). The header reads `ctrl+e: line L col C`. Ctrl+E puts the cursor on that column, and so does a click on the error row or on that header. The error's line is highlighted in the editor. An error inside a module the program used names that module's path, and Ctrl+E does nothing then. A click on a printed line that is not an error moves nothing.
+- Under the pane's header, a run line says how it ended and how long it took: `-- run exit 0 12ms --` when it finished, `-- stop exit 1 12ms --` when it failed or was cut off at 200,000 steps, `-- run 12ms --` while it waits for input, and `-- stop exit 130 12ms --` when Escape or Ctrl+C stops it. The time is milliseconds from the start of that Ctrl+R.
+- A compile error or a runtime error is a row of that pane, `file:line:col message`, the same place Relic's tools report (`file:line:col: error: message`). A file with more than one syntax error lists them, up to 8. The header reads `ctrl+e: line L col C`. Ctrl+E puts the cursor on that column, and so does a click on the error row or on that header. F6 focuses the list: Up and Down move, Enter jumps. Alt+Down and Alt+Up move to the next or previous error and jump. The error's line is highlighted in the editor. An error inside a module the program used names that module's path, and Ctrl+E does nothing then. A click on a printed line that is not an error moves nothing.
 - While a run waits for input, the pane's header begins with `[stop]`. Clicking those six characters stops the run, as Escape and Ctrl+C do. The program itself runs between frames, so a loop that has not asked for input cannot be clicked until it stops or waits.
 - Ctrl+/ comments out the line the cursor is on, putting `# ` after its leading spaces, or takes a `#` (and the space after it) back off. It is one undo step, and the cursor stays on the same character, including a cursor still in the indent before the `#`. With a selection it does every line the selection is on (not one it only ends at the start of, as after Ctrl+L): if they are all comments already (blank lines aside) it takes the `#` off each, else it puts one on each, in one undo step, and the lines stay selected. A selection of only blank lines changes nothing and is not an undo step.
 
@@ -33,7 +34,7 @@ Ctrl+R (or F5, or Ctrl+Return) runs the text in the buffer, saved or not. The pr
 | Ctrl+U | removes everything before the cursor (all of it at the end) |
 | Ctrl+V | adds the first line of the desktop's clipboard to it |
 | Return | sends the line, and the run goes on |
-| Escape, Ctrl+C | stops the run; the pane shows `stopped` |
+| Escape, Ctrl+C | stops the run; the pane shows `stopped` and `-- stop exit 130 …ms --` |
 | Ctrl+R, F5, Ctrl+Return | starts the run again from the top |
 
 Ctrl+S saves the program and the run keeps waiting; the status reads `saved, waiting for input` (decided Oct 31 2026). Other keys are ignored while the run waits. Escape goes to the IDE while a run waits, and when text is selected (it drops the selection); at any other time it closes menus or quits the desktop as usual.

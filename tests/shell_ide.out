@@ -6,6 +6,7 @@ for x in xs
 eprint("done")
 _
 -- output --
+-- run exit 0 0ms --
 x 3
 x 1
 x 2
@@ -18,6 +19,7 @@ print(a + "x")
 print("after")
 _
 -- output (ctrl+e: line 3 col 9) --
+-- stop exit 1 0ms --
 /home/hello.relic:3:9 cannot add an int
 cursor at 28 ["+ \"x\""]
 ["/home/hello.relic:1:6 unclosed '('"] 1
@@ -33,6 +35,7 @@ for n in 0..300
     print(strings.pad_left(str(n), 4, "
 _
 -- output --
+-- run exit 0 0ms --
 0294
 0295
 0296
@@ -58,18 +61,19 @@ while true
 print("bye")
 _
 [stop] return: send, esc: stop
+-- run 0ms --
 name? Ann _B
 waiting for input ["name? Ann B", "hi Ann B"] [true]
 ran ["name? Ann B", "hi Ann B", "1", "got 1", "end", "bye"]
 -- after input [ran] none
 IDE [ran] /home/hello.relic
-    let l = os.read_line()
     if l == "end"
         break
     print("got", l)
 print("bye")
 _
 -- output --
+-- run exit 0 0ms --
 name? Ann B
 hi Ann B
 1

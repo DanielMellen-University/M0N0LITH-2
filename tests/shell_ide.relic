@@ -2,6 +2,8 @@
 # errors as "file:line:col message", and Ctrl+E to put the cursor on that column.
 use ../shell/wm
 use std/vfs
+fun frozen_clock() = 1000
+wm.ide_clock(frozen_clock)
 let d = wm.new_desktop(640, 480, wm.default_apps())
 let i = wm.launch(d, wm.ide)
 let s = i.state

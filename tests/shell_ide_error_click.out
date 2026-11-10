@@ -1,5 +1,5 @@
 error ["first", "/home/hello.relic:3:9 cannot add an int and a string"] 3
-rows 6 8 7
+rows 6 9 8
 header click 33
 after up 23
 error click 33

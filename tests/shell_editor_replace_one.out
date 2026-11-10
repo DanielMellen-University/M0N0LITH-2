@@ -1,0 +1,9 @@
+one ["dog sat on the cat"] replaced 1 1
+next ["dog sat on the dog"] replaced 1 2
+undo one ["dog sat on the cat"] 1
+undo both ["cat sat on the cat"] 0
+all ["dog sat on the dog"] replaced 2 1
+undo all ["cat sat on the cat"] 0
+grows once ["aa b aa"] replaced 2 1
+any case ["dog and dog"] replaced 2 1
+undo any ["Cat and cat"] 0

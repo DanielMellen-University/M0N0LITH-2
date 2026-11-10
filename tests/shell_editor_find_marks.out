@@ -1,0 +1,16 @@
+exact Editor [find: one] /home/welcome.txt
+[[1, 0, 3], [1, 9, 12], [2, 4, 7]]
+next Editor [find: one] /home/welcome.txt
+[[1, 8, 11], [1, 0, 3], [2, 4, 7]]
+f3 Editor [open] /home/welcome.txt
+[[2, 4, 7], [1, 0, 3], [1, 8, 11]]
+shift+f3 Editor [open] /home/welcome.txt
+[[1, 9, 12], [1, 0, 3], [2, 4, 7]]
+toggled case: any
+any case finds Two Editor [find (any): two] ...welcome.txt
+[[2, 0, 3], [1, 4, 7]]
+exact skips Two Editor [find: two] /home/welcome.txt
+[[1, 4, 7]]
+edit clears highlights Editor [edited] /home/welcome.txt
+[]
+["one x one\nTwo one\n"]
