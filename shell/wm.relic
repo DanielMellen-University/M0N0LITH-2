@@ -2301,7 +2301,30 @@ fun _editor_init()
     let disk = none
     if status == "open"
         disk = text
-    return {fs: _shell_fs, path: path, text: text, status: status, rows: 0, disk: disk, overwrite: false, undo: [], redo: [], back: 0, mark: none}
+    let s = {fs: _shell_fs, path: path, text: text, status: status, rows: 0, disk: disk, overwrite: false, undo: [], redo: [], back: 0, mark: none}
+    if status == "open"
+        _editor_load(s, path, text)
+    return s
+
+# A successful read into the buffer, as for a file picked in Files. Never carry an
+# undo step, selection or search from one file into the next. Like a new
+# window opened from Files, the cursor starts at the end.
+fun _editor_load(s, path, text)
+    s.path = path
+    s.text = text
+    s.disk = text
+    s.status = "open"
+    s.overwrite = false
+    s.undo = []
+    s.redo = []
+    s.back = 0
+    s.mark = none
+    s.find = none
+    s.replacing = none
+    s.goto = none
+    s.hl = none
+    s.last_find = ""
+    s.opening = none
 
 # The cursor is `back` characters before the end of the text (0: at the end, so
 # text set from outside keeps the cursor at its end). A selection runs from the
