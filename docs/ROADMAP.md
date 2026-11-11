@@ -17,7 +17,7 @@ M0N0LITH-2 is the MONOLITH 2 desktop written in Relic. The language roadmap is i
 Closed Nov 7 2026 for the behavior the Linux GUI walkthrough demonstrated, including the Snake slice named on the game box. See [Accepted](#accepted-nov-7-2026). The notes in each entry are what the model tests cover. Passing those tests is not, by itself, a GUI pass, and it does not extend Snake past the slice below. Anything marked parked was not part of the pass.
 
 - [x] Terminal (started: help, clear, history, echo, apps, date, pwd, cd, ls, cat, head, tail, wc, grep, find, sort, uniq, nl, mkdir, touch, write, rm, mv, cp, and `echo text > file` or `>>`, and `!!`; it keeps the last 200 lines of output and wraps to the window. Keys added Oct 31 2026: Up and Down bring back the last 50 commands, Tab completes command, file and folder names, Ctrl+C gives up the line, Ctrl+L clears, Ctrl+V pastes, Ctrl+Backspace removes a word; later the same day, sort, uniq and nl, and a count of lines for head and tail. On Nov 2 2026, quoted words, so a path may have spaces: Tab, ls, find, wc and Ctrl+V put such a name in quotes, and a quote inside a word (don't) is a letter; a cursor in the line (Left, Right, Home, End). Parked, not part of the pass: scrollback. See [Terminal](apps/TERMINAL.md))
-- [x] Text editor (started: edits and saves VFS files with Ctrl+S, or Cmd+S on macOS, and warns first when another app changed the file; Ctrl+Z undo up to 500 steps; Delete; arrows, Home/End and Ctrl+arrow word jumps move the cursor; Shift+arrows and Ctrl+A select; a file opened in Files opens in the next Editor; a big file stays quick; on Oct 31 2026 copy, cut and paste with the desktop's own clipboard, Ctrl+Y redo, Tab and Shift+Tab indents, Return keeping the indent, Home past the leading spaces, Ctrl+Home and Ctrl+End, Page Up and Page Down, Ctrl+Backspace and Ctrl+Delete by word, and Esc dropping a selection; later on Oct 31, Ctrl+L, Ctrl+D, Ctrl+K and Ctrl+J for lines, Ctrl+] and Ctrl+[ for indents, and Ctrl+Shift with the word and file moves to select. On Nov 2 2026 a click moves the cursor and a drag selects, Ctrl+F finds (F3 and Shift+F3 again), Ctrl+H replaces, Ctrl+G goes to a line, and the line keys work on every selected line. On Nov 9 2026 find highlights every match and Ctrl+I toggles case, Ctrl+H can replace one match or all of them (each one undo step), and Ctrl+G accepts a column. Parked, not part of the pass: opening a file by path. See [Editor](apps/EDITOR.md))
+- [x] Text editor (started: edits and saves VFS files with Ctrl+S, or Cmd+S on macOS, and warns first when another app changed the file; Ctrl+Z undo up to 500 steps; Delete; arrows, Home/End and Ctrl+arrow word jumps move the cursor; Shift+arrows and Ctrl+A select; a file opened in Files opens in the next Editor; a big file stays quick; on Oct 31 2026 copy, cut and paste with the desktop's own clipboard, Ctrl+Y redo, Tab and Shift+Tab indents, Return keeping the indent, Home past the leading spaces, Ctrl+Home and Ctrl+End, Page Up and Page Down, Ctrl+Backspace and Ctrl+Delete by word, and Esc dropping a selection; later on Oct 31, Ctrl+L, Ctrl+D, Ctrl+K and Ctrl+J for lines, Ctrl+] and Ctrl+[ for indents, and Ctrl+Shift with the word and file moves to select. On Nov 2 2026 a click moves the cursor and a drag selects, Ctrl+F finds (F3 and Shift+F3 again), Ctrl+H replaces, Ctrl+G goes to a line, and the line keys work on every selected line. On Nov 9 2026 find highlights every match and Ctrl+I toggles case, Ctrl+H can replace one match or all of them (each one undo step), and Ctrl+G accepts a column. On Nov 11 2026 Ctrl+O opens a file by path, with a second Return before discarding unsaved text; model tests pass, GUI not walked through. See [Editor](apps/EDITOR.md))
 - [x] File browser (started: browses the VFS with keys or clicks, folders marked with `/`; a double-click enters a folder once; Backspace goes up with the old folder selected; a long list follows the selected row, and opening a file selects it for the next Editor. Keys added Oct 31 2026: Home and End, Page Up and Page Down, and a letter or digit to jump to the next name starting with it; then Ctrl+Home and Ctrl+End, Left and Right to go up and into folders, and Ctrl+C to copy the selected path; on Nov 2 2026, F2 to rename. See [Files](apps/FILES.md))
 - [x] Drawing app (started Oct 31 2026, Daniel approved: Paint, a 60 by 36 cell canvas with 8 colors, an eraser, brush sizes 1 to 4, fill, line, rectangle and ellipse tools (outline or filled), a color picker (`i`), clear, undo and redo, and save, save as and open as `.paint` text files in the desktop's files; see [Paint](apps/PAINT.md) for the design calls)
 - [x] At least one game, for the slice shown on Linux on Nov 7 2026 (see [Snake](apps/SNAKE.md)). Snake launched. Right started it; the head then moved right across two screenshots with no further key (`space to pause`, score 0, best 0). Down turned it, and the head moved down until it stopped on the bottom row with `game over: r to play`, still score 0 best 0. `r` put the head back on the start cells and the line back to `arrows or space to start`. Not exercised in the window: pause, eating, hitting itself, a win, and the best-score file. The `shell_snake*` tests cover those. They do not open SDL, and they do not widen this GUI pass.
@@ -32,6 +32,10 @@ Closed Nov 7 2026 for the behavior the Linux GUI walkthrough demonstrated, inclu
   - Parked, not part of the pass: programs that draw, and a run that goes on in the background while not waiting for input.
   - Decided Oct 31 2026 (approved through CoS): Ctrl+S saves while a run waits for input, and the run keeps waiting; the 200,000 steps start again after each input line, so they are per line, not per run.
   - User docs: [IDE](apps/IDE.md).
+
+## Done after acceptance
+
+- [x] Editor open by path (Nov 11 2026, unparked by the project owner): Ctrl+O (Cmd+O on macOS), absolute or relative VFS paths, errors keeping the buffer, Esc cancelling, and a second Return before discarding unsaved edits. The IDE shares it. Tests `shell_editor_open_path`, `shell_editor_open_refuse`, `shell_editor_open_unsaved` and `shell_ide_open_path`. The GUI was not walked through; this does not extend the Nov 7 GUI pass. See [Editor](apps/EDITOR.md).
 
 ## Accepted (Nov 7 2026)
 
@@ -52,7 +56,6 @@ Commands and keys not named here were not pressed in the window. The 183 tests s
 ### Parked (not next work)
 
 - Terminal scrollback
-- Editor open by path
 - Host mounts
 - The desktop following the real window size, and maximize
 - IDE programs that draw, and a run that continues in the background while it is not waiting for input
@@ -68,7 +71,7 @@ Commands and keys not named here were not pressed in the window. The 183 tests s
 
 A documented workflow in the list above that fails, a file changed inside one session when nothing wrote it, or a loop that does not stop inside the step budget. A newer Relic, and the parked items, are not that list.
 
-Next work is maintenance of this list, and the workspace store below. The parked items stay parked.
+Next work is maintenance of this list, the completed Editor addition above, and the workspace store below. The remaining parked items stay parked.
 
 ## Workspace store
 
