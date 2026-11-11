@@ -1,0 +1,82 @@
+# Ctrl+O uses the same successful load as a new window opened from Files.
+use ../shell/wm
+use std/vfs
+let d = wm.new_desktop(640, 480, wm.default_apps())
+let f = wm.launch(d, wm.files_app)
+let fs = f.state.fs
+vfs.make_dir(fs, "/home/docs/sub")
+vfs.write(fs, "/home/docs/a.txt", "alpha")
+vfs.write(fs, "/home/docs/sub/my notes.txt", "notes")
+let e = wm.launch(d, wm.editor)
+let s = e.state
+fun typed(t) = wm.handle(d, {type: "text", text: t})
+fun open(path)
+    wm.key(d, "ctrl+o")
+    typed(path)
+    wm.key(d, "return")
+fun show(label)
+    print(label, s.path, [s.text], s.status, s.back, s.mark, len(s.undo), len(s.redo))
+# Cmd+O comes through the existing Cmd+letter mapping; empty Return waits.
+wm.handle(d, {type: "key_down", key: "o", ctrl: false, gui: true})
+wm.key(d, "return")
+print(wm.visible_lines(e)[0])
+typed("/home/docs/a.txX")
+wm.key(d, "backspace")
+typed("t")
+wm.key(d, "return")
+show("absolute")
+# Compare with Files picking the same file for a new Editor.
+wm.restore(d, f.id)
+f.state.path = "/home/docs"
+wm.visible_lines(f)
+f.state.sel = 1
+wm.key(d, "return")
+let other = wm.launch(d, wm.editor)
+print("same as Files", other.state.path == s.path, other.state.text == s.text, other.state.back == s.back, other.state.disk == s.disk)
+wm.restore(d, e.id)
+open("./sub/../sub/my notes.txt")
+show("relative with spaces")
+# Saving uses the new name and the new disk baseline, and still warns.
+wm.key(d, "!")
+vfs.write(fs, s.path, "another app")
+wm.key(d, "ctrl+s")
+print(s.status, vfs.read(fs, s.path))
+wm.key(d, "ctrl+s")
+print(s.status, vfs.read(fs, s.path), vfs.read(fs, "/home/docs/a.txt"))
+wm.key(d, "ctrl+z")
+wm.key(d, "ctrl+o")
+typed("../a.txt")
+wm.key(d, "return")
+print("undo made it dirty", s.status)
+wm.key(d, "enter")
+show("confirmed")
+wm.key(d, "ctrl+z")
+wm.key(d, "ctrl+y")
+show("no old undo or redo")
+# No filename: a relative path starts at /home. Backslashes follow std/paths.
+let blank = wm.launch(d, wm.editor)
+print("next still Files", blank.state.path)
+blank.state.path = ""
+blank.state.text = ""
+blank.state.disk = none
+open("docs\\a.txt")
+print("unnamed", blank.state.path, [blank.state.text], blank.state.status)
+# Paste a path copied from another buffer, first line only, without quotes.
+wm.restore(d, other.id)
+other.state.text = "/home/docs/sub/my notes.txt\nignored"
+wm.key(d, "ctrl+a")
+wm.key(d, "ctrl+c")
+wm.restore(d, blank.id)
+wm.key(d, "ctrl+o")
+typed("wrong word")
+wm.key(d, "ctrl+backspace")
+print("drop word", [blank.state.opening.text])
+wm.key(d, "ctrl+u")
+wm.key(d, "ctrl+v")
+wm.key(d, "return")
+print("pasted", blank.state.path, [blank.state.text], blank.state.status)
+# A long prompt keeps the end where typing happens, also in a narrow window.
+wm.key(d, "ctrl+o")
+typed("/home/abcdefghijklmnopqrstuvwxyz0123456789.txt")
+print([wm.visible_lines(blank)[0]])
+print("esc", wm.dismiss(d), blank.state.path, blank.state.status)

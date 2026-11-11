@@ -1,0 +1,15 @@
+Editor [open: _] /home/welcome.txt
+absolute /home/docs/a.txt ["alpha"] open 0 none 0 0
+same as Files true true true true
+relative with spaces /home/docs/sub/my notes.txt ["notes"] open 0 none 0 0
+changed on disk: ctrl+s again another app
+saved notes! alpha
+undo made it dirty unsaved: return again
+confirmed /home/docs/a.txt ["alpha"] open 0 none 0 0
+no old undo or redo /home/docs/a.txt ["alpha"] nothing to redo 0 none 0 0
+next still Files /home/docs/a.txt
+unnamed /home/docs/a.txt ["alpha"] open
+drop word ["wrong "]
+pasted /home/docs/sub/my notes.txt ["notes!"] open
+["Editor [open: ...vwxyz0123456789.txt_] "]
+esc true /home/docs/sub/my notes.txt open

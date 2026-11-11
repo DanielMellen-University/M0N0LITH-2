@@ -698,6 +698,11 @@ fun handle(d, e)
                 key(d, ch)
     else if e.type == "key_down"
         let k = key_of_event(e)
+        # Holding Return must not confirm discarding unsaved text. Only a
+        # fresh press submits the path prompt or answers its warning.
+        let w = focused(d)
+        if k == "return" and "repeat" in e and e.repeat and w != none and (w.app.name == "Editor" or w.app.name == "IDE") and _editor_opening(w.state)
+            return none
         if k != none
             key(d, k)
     else if e.type == "mouse_down" and e.button == 1
@@ -2306,7 +2311,7 @@ fun _editor_init()
         _editor_load(s, path, text)
     return s
 
-# A successful read into the buffer, as for a file picked in Files. Never carry an
+# A successful read, whether picked in Files or typed here. Never carry an
 # undo step, selection or search from one file into the next. Like a new
 # window opened from Files, the cursor starts at the end.
 fun _editor_load(s, path, text)
@@ -2325,6 +2330,60 @@ fun _editor_load(s, path, text)
     s.hl = none
     s.last_find = ""
     s.opening = none
+
+fun _editor_opening(s) = "opening" in s and s.opening != none
+
+# Ctrl+O is modal: only the path is edited until Return or Esc. A failed
+# read changes only the status. Unsaved means different from the last read
+# or save, even after undo or in a new file (where empty text is clean).
+fun _editor_open_key(s, k)
+    let ask = s.opening
+    if k == "return" or k == "enter"
+        if ask.text == ""
+            return
+        let base = "/home"
+        if s.path != ""
+            base = paths.dir(s.path)
+        let path = paths.normalize(paths.join(base, ask.text))
+        if not vfs.exists(s.fs, path)
+            ask.confirm = none
+            s.status = "no such file: " + path
+            return
+        if vfs.is_dir(s.fs, path)
+            ask.confirm = none
+            s.status = path + " is a folder"
+            return
+        if strings.ends_with(ask.text, "/") or strings.ends_with(ask.text, "\\")
+            ask.confirm = none
+            s.status = "not a folder: " + path
+            return
+        let dirty = s.text != s.disk
+        if s.disk == none
+            dirty = s.text != ""
+        if dirty and ask.confirm != path
+            ask.confirm = path
+            s.status = "unsaved: return again"
+            return
+        # Read before changing any buffer field, including undo and the name.
+        let text = ""
+        try
+            text = vfs.read(s.fs, path)
+        catch err
+            ask.confirm = none
+            s.status = err.message
+            return
+        _editor_load(s, path, text)
+        return
+    ask.confirm = none   # any intervening key disarms the second Return
+    if k == "ctrl+v"
+        ask.text = ask.text + _clip_line()
+    else if k == "ctrl+backspace"
+        ask.text = _drop_word(ask.text)
+    else if k == "ctrl+u"
+        ask.text = ""
+    else
+        ask.text = _typed(ask.text, k)
+    s.status = "open: " + ask.text + "_"
 
 # The cursor is `back` characters before the end of the text (0: at the end, so
 # text set from outside keeps the cursor at its end). A selection runs from the
@@ -2734,7 +2793,7 @@ fun _editor_lines(s)
     if "cols" in s and s.cols > 0
         cols = s.cols
     let head = "Editor [" + s.status + "] "
-    let asking = ("find" in s and s.find != none) or ("goto" in s and s.goto != none)
+    let asking = _editor_opening(s) or ("find" in s and s.find != none) or ("goto" in s and s.goto != none)
     if asking and cols > 0 and len(head) > cols
         # a long find or replace text keeps its end, where the typing is
         head = "Editor [" + _fit_typing(s.status, cols - 10) + "] "
@@ -2877,6 +2936,10 @@ fun _ide_hit(s, x, y)
 fun _editor_click(s, x, y)
     s.press = none
     s.overwrite = false   # a click is not the second Ctrl+S, so the warning stands
+    if _editor_opening(s)
+        s.opening.confirm = none
+        s.status = "open: " + s.opening.text + "_"
+        return none   # a path prompt never moves the buffer's cursor
     if "run" in s and s.run != none
         # [stop] is the first six characters of the pane's header. A click
         # anywhere else while the run waits still does not type into the program.
@@ -3286,6 +3349,19 @@ fun _editor_goto_key(s, k)
 
 fun _editor_key(s, k)
     s.press = none   # a key ends a drag: the text or the cursor may have moved under it
+    if _editor_opening(s)
+        _editor_open_key(s, k)
+        return
+    if k == "ctrl+o"
+        s.overwrite = false
+        if "find" in s and s.find != none
+            _editor_find_end(s)
+        if "goto" in s and s.goto != none
+            s.goto = none
+            s.status = s.find_was
+        s.opening = {text: "", was: s.status, confirm: none}
+        s.status = "open: _"
+        return
     if k == "ctrl+i"
         s.overwrite = false
         _editor_toggle_case(s)
@@ -3788,6 +3864,10 @@ fun _ide_input_edit(s, k)
 # Esc in the Editor (and the IDE): drops a selection, so an Esc meant for it
 # does not quit the desktop. True when there was one.
 fun _editor_escape(s)
+    if _editor_opening(s)
+        s.status = s.opening.was
+        s.opening = none
+        return true
     if "goto" in s and s.goto != none
         s.goto = none
         s.status = s.find_was
