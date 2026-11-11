@@ -1,8 +1,8 @@
 # Persistent workspace recovery: acceptance cases
 
 Status: cases 1 to 5 were run on Nov 9 2026 against the window session
-snapshot and pass. Cases 6 to 9 were run on Nov 10 2026 against the
-same build and pass. See "Results" for how each case was run and what
+snapshot and pass. Cases 6 to 9 were run on Nov 10 2026 against main
+6c321a3b and pass. See "Results" for how each case was run and what
 was not tried. Cases 3a, 3b, 3c and 5 were
 reworded on that date, before the results were recorded; the reasons
 are in "Wording changes".

@@ -88,7 +88,7 @@ def expect_case6_check(out):
     check("case6", "notice", out,
           'notice ["workspace: committed image invalid; recovered g1; ignored uncommitted g3"]')
     check("case6", "older text restored", out, 'note ["first version\\n"]')
-    check("case6", "no newer text shown", out, 'welcome ["Welcome to Relic.\\n"]')
+    check("case6", "welcome file still shows original text", out, 'welcome ["Welcome to Relic.\\n"]')
 
 
 def expect_case7_check(out):
@@ -111,6 +111,7 @@ def expect_case9_check(out):
     check("case9", "bad store not enabled", out, "bad-enabled false")
     check("case9", "bad notice", out, 'bad-notice ["workspace: cannot open store"]')
     check("case9", "bad save never says saved", out, 'bad-save ["workspace: cannot open store"]')
+    check("case9", "editor still holds the typed text", out, 'editor-text ["Welcome to Relic.\\nhello"]')
     check("case9", "good store enabled", out, "good-enabled true")
     check("case9", "good notice quiet", out, 'good-notice [""]')
     check("case9", "disk-change prompt on first good save", out,
