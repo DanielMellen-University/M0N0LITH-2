@@ -1,8 +1,9 @@
 # Persistent workspace recovery: acceptance cases
 
 Status: cases 1 to 5 were run on Nov 9 2026 against the window session
-snapshot and pass. Cases 6 to 9 are UNRUN. See "Results" for how cases
-1 to 5 were run and what was not tried. Cases 3a, 3b, 3c and 5 were
+snapshot and pass. Cases 6 to 9 were run on Nov 10 2026 against the
+same build and pass. See "Results" for how each case was run and what
+was not tried. Cases 3a, 3b, 3c and 5 were
 reworded on that date, before the results were recorded; the reasons
 are in "Wording changes".
 
@@ -20,17 +21,34 @@ any of those.
 
 ## Fixtures and fault injection
 
-No fixture assets were added. Faults were made the way the Results table
-says: by the store's own fault hooks in the golden tests, by killing a
-process, and by editing the saved files by hand between two processes.
+No fixture assets were added for cases 1 to 5. Faults were made the way the
+Results table says: by the store's own fault hooks in the golden tests,
+by killing a process, and by editing the saved files by hand between
+two processes.
+
+Cases 6 to 9 have fixture assets in `tests/fixtures/workspace-recovery/`
+(see that directory's README): `case6/`, `case7/` and `case8/` are
+isolated store layouts, and `case9-bad-store` is the unopenable store
+path. Each store was built by a setup program in
+`tools/workspace-recovery-muse/` with the real implementation, then
+damaged by hand after the process exited. The harness driver
+(`run_cases.py`) runs the live build-damage-check flow and also replays
+the committed fixtures; both runs assert the exact expected output.
 
 ### Update: cases 6 to 9 (D0120, 2026-11-09)
 
 Cases 6 to 9 are specified against `docs/workspace-recovery.md` and
-are UNRUN. No fixture assets were added for them. A desktop generation
+were UNRUN at that date. No fixture assets were added for them yet. A desktop generation
 carries a checksum and quitting writes another snapshot, so those cases
 say to damage the generation `COMMITTED` names after the process has
 exited, and not to treat a later quit as a no-op.
+
+### Update: cases 6 to 9 executed (D0122, 2026-11-10)
+
+Fixtures were built and all four cases were executed against the
+published contract at main `6c321a3b`. The harness is in
+`tools/workspace-recovery-muse/` and the fixtures are in
+`tests/fixtures/workspace-recovery/`. See Results (Nov 10 2026).
 
 ## How to read a case
 
@@ -244,7 +262,7 @@ Data-preservation assertions:
 
 ## Case 6: Corrupt committed generation must not load a newer uncommitted generation (D0118-1)
 
-Status: UNRUN.
+Status: PASS (Nov 10 2026).
 
 Setup: Start the desktop, open the Editor on a file with saved text,
 and save the workspace twice, so the store holds an older generation
@@ -286,7 +304,7 @@ COMMITTED names after that write, not before it.
 
 ## Case 7: Corrupted retry commit keeps the actual prior committed generation (D0118-2)
 
-Status: UNRUN.
+Status: PASS (Nov 10 2026).
 
 Setup: Start the desktop with no saved workspace. Open the Editor on
 a file, write a first version, and save the workspace, so the first
@@ -335,7 +353,7 @@ this fallback.
 
 ## Case 8: Unsupported-version store stays held through normal writes (D0118-3)
 
-Status: UNRUN.
+Status: PASS (Nov 10 2026).
 
 Setup: The store holds a committed generation written in a newer
 version than this desktop understands. Start the desktop. It shows
@@ -377,7 +395,7 @@ after a release.
 
 ## Case 9: A requested store that cannot be opened must not report saved (D0118-4)
 
-Status: UNRUN.
+Status: PASS (Nov 10 2026).
 
 Setup: Start the desktop with no saved workspace. Open the Editor on
 a file and write text. Request a workspace store at a path that cannot
@@ -424,12 +442,12 @@ requested path that cannot be opened.
 | 3c | Unsupported-version saved workspace data | PASS |
 | 4 | Visible save failure | PASS |
 | 5 | First-run defaults | PASS |
-| 6 | Corrupt committed generation, newer uncommitted not loaded | UNRUN |
-| 7 | Corrupted retry commit keeps prior committed generation | UNRUN |
-| 8 | Unsupported-version store held through normal writes | UNRUN |
-| 9 | Requested store that cannot be opened never reports saved | UNRUN |
+| 6 | Corrupt committed generation, newer uncommitted not loaded | PASS |
+| 7 | Corrupted retry commit keeps prior committed generation | PASS |
+| 8 | Unsupported-version store held through normal writes | PASS |
+| 9 | Requested store that cannot be opened never reports saved | PASS |
 
-Specified cases: 11. Executed cases: 7. Cases 6 to 9 are UNRUN.
+Specified cases: 11. Executed cases: 11.
 
 ## Wording changes (Nov 9 2026)
 
@@ -471,3 +489,31 @@ restart; macOS and Windows were not run in a window.
 Not covered: power loss (there is no fsync), two desktops writing one
 store at once (there is no lock), and keystrokes typed after the last
 snapshot when the process is killed instead of quit.
+
+## Results (Nov 10 2026)
+
+Run on Linux against main `6c321a3b` with the harness in
+`tools/workspace-recovery-muse/`:
+
+```console
+python3 tools/workspace-recovery-muse/run_cases.py --live --replay
+```
+
+The live run builds each store with the real implementation in
+separate processes, damages files by hand between processes, and
+checks what the next process installs. The replay run copies the
+committed fixtures from `tests/fixtures/workspace-recovery/` and runs
+only the check phases against them, so the fixtures themselves
+reproduce the results. Both runs passed every check. The full suite
+was green before and after (469/469 ctest).
+
+| Case | How it was run | What was seen |
+|---|---|---|
+| 6 | `case6_setup.relic` writes v1 then v2 (two session saves, COMMITTED g2, META committed g2 previous g1). The driver changes one character of g2's note.txt record, so its checksum no longer matches, and adds a valid uncommitted g3 holding third-version text. `check_store.relic` opens it | `workspace: committed image invalid; recovered g1; ignored uncommitted g3`, note.txt reads `first version`, the welcome file is unchanged, no third-version text anywhere |
+| 7 | `case7_setup.relic` commits v1, arms `partial-generation`, saves v2 (fails, `workspace: save failed (partial-generation); kept g1`), then retries and commits v2 as g3. The driver checks the faulted g2 leftover was pruned (only g1, g3, COMMITTED and META remain), then damages g3 the same way as case 6. `check_store.relic` opens it | `workspace: committed image invalid; recovered g1`, note.txt reads `first version` |
+| 8 | `case8_setup.relic` commits v1. The driver replaces the committed generation with `M2WS9` and points COMMITTED at g2, with META committed g2 previous g1. `case8_check.relic` opens it and tries Ctrl+S twice from the Editor | `workspace: committed image wrong version; store held; recovered g1`, note.txt reads `first version`, both saves report `workspace: save failed; store held (wrong-version); not written`, and every byte in the store is unchanged afterwards |
+| 9 | The bad store path is a regular file. `case9_check.relic` opens it, types in the Editor, and presses Ctrl+S, then opens a fresh good store and presses Ctrl+S twice. `case9_verify.relic` reopens the good store | `workspace: cannot open store`, the workspace is not enabled, the Editor never says `saved` for the bad store, nothing is written to the bad path. The first good-store Ctrl+S reports the disk change the store switch caused (`changed on disk: ctrl+s again`); the second says `saved`. A fresh process reads the saved text back |
+
+Not covered: the release of a held store (`wm.workspace_release()`),
+which case 8 does not try; power loss; and two desktops writing one
+store at once.
