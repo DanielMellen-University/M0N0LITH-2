@@ -1,0 +1,52 @@
+# The IDE shares Ctrl+O, including cancellation, confirmation and reset of
+# diagnostics. While a program waits for input the existing input rules win.
+use ../shell/wm
+use std/vfs
+let d = wm.new_desktop(640, 480, wm.default_apps())
+let i = wm.launch(d, wm.ide)
+let s = i.state
+fun clock() = 0
+wm.ide_clock(clock)
+vfs.make_dir(s.fs, "/home/code")
+vfs.write(s.fs, "/home/code/a.relic", "print(42)")
+vfs.write(s.fs, "/home/code/b.relic", "print(7)")
+fun typed(t) = wm.handle(d, {type: "text", text: t})
+fun ask(path)
+    wm.key(d, "ctrl+o")
+    typed(path)
+    wm.key(d, "return")
+s.text = "print(1"
+wm.key(d, "ctrl+r")
+wm.key(d, "f6")
+ask("/home/code/a.relic")
+print(wm.visible_lines(i)[0])
+let before = [s.text, s.back, s.mark, s.path, len(s.errors), s.out]
+for k in ["ctrl+r", "f5", "ctrl+return", "ctrl+e", "ctrl+/", "f6", "alt+down"]
+    wm.key(d, k)
+print("modal", [s.text, s.back, s.mark, s.path, len(s.errors), s.out] == before)
+print("esc", wm.dismiss(d), [s.text, s.back, s.mark, s.path, len(s.errors), s.out] == before)
+ask("/home/code/a.relic")
+wm.key(d, "return")
+print("opened", s.path, [s.text], s.status, s.back, s.mark, len(s.undo), len(s.redo))
+print("old run cleared", s.out, s.errors, s.diags, s.err_line, s.err_col, s.err_focus, s.elapsed_ms, s.exit_code)
+wm.key(d, "ctrl+e")
+print("old jump gone", s.back)
+wm.key(d, "ctrl+r")
+print("runs", s.out, s.exit_code)
+ask("b.relic")
+print("relative", s.path, [s.text], s.status, s.out)
+ask("missing.relic")
+print("missing", s.status, s.path, [s.text])
+wm.dismiss(d)
+ask(".")
+print("folder", s.status, s.path)
+wm.dismiss(d)
+s.text = "use std/os\nprint(os.read_line())\n"
+wm.key(d, "ctrl+r")
+wm.key(d, "ctrl+o")
+print("waiting", s.run != none, s.opening, [s.input])
+wm.dismiss(d)
+ask("a.relic")
+print("stopped can open", s.status)
+wm.key(d, "return")
+print(s.path, [s.text], s.status, s.run)

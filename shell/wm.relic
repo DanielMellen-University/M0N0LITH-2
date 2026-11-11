@@ -2373,6 +2373,8 @@ fun _editor_open_key(s, k)
             s.status = err.message
             return
         _editor_load(s, path, text)
+        if "run" in s
+            _ide_state(s)   # output and errors belonged to the previous file
         return
     ask.confirm = none   # any intervening key disarms the second Return
     if k == "ctrl+v"
@@ -3883,6 +3885,8 @@ fun _editor_escape(s)
 # Esc: stops a run that waits for input, or else drops a selection. True when
 # it did either.
 fun _ide_escape(s)
+    if _editor_opening(s)
+        return _editor_escape(s)
     if s.run != none
         s.run = none
         s.input = ""
@@ -4105,10 +4109,13 @@ fun _ide_lines(s)
     return out
 
 fun _ide_asking(s)
-    return ("find" in s and s.find != none) or ("goto" in s and s.goto != none)
+    return _editor_opening(s) or ("find" in s and s.find != none) or ("goto" in s and s.goto != none)
 
 fun _ide_key(s, k)
     s.press = none
+    if _editor_opening(s)
+        _editor_key(s, k)
+        return
     if not _ide_asking(s) and (k == "f5" or k == "ctrl+return" or k == "ctrl+keypad enter")
         k = "ctrl+r"   # F5 and Ctrl+Return run too, as in most IDEs and notebooks
     # Ctrl+R, Ctrl+E, Ctrl+/ and the input line are keys too: they cancel a
