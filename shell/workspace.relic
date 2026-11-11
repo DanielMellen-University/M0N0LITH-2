@@ -1097,6 +1097,27 @@ fun _wrote(path, text)
         _fail("cannot write store")
     return false
 
+# len counts code points; files.size on the next open counts UTF-8 bytes.
+fun _image_fits(text)
+    if len(text) > max_generation_bytes
+        return false
+    if len(text) <= int(max_generation_bytes / 4)
+        return true
+    let bytes = 0
+    for c in text
+        let n = ord(c)
+        if n < 128
+            bytes = bytes + 1
+        else if n < 2048
+            bytes = bytes + 2
+        else if n < 65536
+            bytes = bytes + 3
+        else
+            bytes = bytes + 4
+        if bytes > max_generation_bytes
+            return false
+    return true
+
 fun _commit(fs, extra)
     if not _requested or _opt_out
         return ""
@@ -1130,7 +1151,7 @@ fun _commit(fs, extra)
         image = _encode(rows, extra)
     catch err
         return _fail("cannot write store")
-    if len(image) > max_generation_bytes
+    if not _image_fits(image)
         return _fail("image too large")
     let checked = _parse(image)
     if not checked.ok

@@ -1,0 +1,34 @@
+# The writer's byte cap must agree with files.size on the next open.
+use ../shell/workspace
+use std/files
+use std/strings
+use std/vfs
+
+fun check(label, got, want)
+    if got != want
+        fail(label + ": " + str(got) + " != " + str(want))
+
+let dir = "ws-byte-limit"
+workspace.open(dir)
+let fs = vfs.new()
+workspace.load(fs)
+vfs.write(fs, "/home/kept", "old")
+check("first save", workspace.save(fs), "")
+let pointer = files.read(dir + "/COMMITTED")
+let meta = files.read(dir + "/META")
+let text = ""
+for i in 0..190000
+    text = text + "😀"
+vfs.write(fs, "/home/a", text)
+vfs.write(fs, "/home/b", text)
+check("Unicode byte cap", workspace.save(fs), "workspace: save failed; image too large; kept g1")
+check("pointer unchanged", files.read(dir + "/COMMITTED"), pointer)
+check("META unchanged", files.read(dir + "/META"), meta)
+check("nothing staged", files.list(dir), ["COMMITTED", "META", "g1.m2ws"])
+check("session kept", vfs.read(fs, "/home/a"), text)
+workspace.open(dir)
+workspace.load(fs)
+check("old file", vfs.read(fs, "/home/kept"), "old")
+check("oversize not installed", vfs.exists(fs, "/home/a"), false)
+print("Unicode byte cap preserves the committed generation")
+files.remove_tree(dir)
