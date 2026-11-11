@@ -1,6 +1,6 @@
 # Editor
 
-A text editor for files in the desktop's filesystem. A new Editor window opens the file last opened in Files, or `/home/welcome.txt` if none was. Opening a file by a path typed in the Editor is parked with the Nov 7 2026 acceptance, not scheduled. Ctrl+S writes the vfs and, when a workspace is open, commits it. The status stays off `saved` when that commit fails. Text that was not saved is still in the desktop's snapshot, and comes back if that window was open at the last snapshot or at quit. Undo does not come back. See [Workspace recovery](../workspace-recovery.md).
+A text editor for files in the desktop's filesystem. A new Editor window opens the file last opened in Files, or `/home/welcome.txt` if none was. Ctrl+O opens a file by a typed path in the same window (Cmd+O on macOS). Ctrl+S writes the vfs and, when a workspace is open, commits it. The status stays off `saved` when that commit fails. Text that was not saved is still in the desktop's snapshot, and comes back if that window was open at the last snapshot or at quit. Undo does not come back. See [Workspace recovery](../workspace-recovery.md).
 
 ## The title line
 
@@ -44,6 +44,7 @@ The status is one of:
 | Ctrl+Z | undoes the last edit |
 | Ctrl+Y | does again what Ctrl+Z undid, until the next edit |
 | Ctrl+S | saves |
+| Ctrl+O | opens a path prompt: type a VFS path, Backspace edits, Return opens, Esc cancels. Unsaved text needs Return again on the same path |
 | Ctrl+F | finds: type the text (the title shows `find: text_`), and Return selects the next place it is after the cursor, going round to the start; `(not found)` when it is nowhere. With no text yet, Return waits for some. A text too long for the title shows its end, `find: ...end_`. Every match on screen is highlighted. Case counts until Ctrl+I, which toggles it; the title then says `find (any):` and `Two` matches `two`. Ctrl+I again makes case count. With a selection on one line, Ctrl+F starts with it as the text, and typing replaces it (Backspace edits it). Backspace, Ctrl+Backspace, Ctrl+U and Ctrl+V edit the text; Esc, or any other key, stops finding, and that key then does what it always does; so does a click. Highlights stay until the next edit |
 | Ctrl+H | replaces: type the text (`replace: text_`), Return, then what goes in its place (`with: text_`). Return replaces every place it is, in one undo step; the title says `replaced N`, or `not found: text`, and the cursor goes to the start. Alt+Return replaces only the next place, also one undo step, and another Alt+Return does the one after (`replaced 1`). A replacement that contains the text is not replaced again. Ctrl+I toggles case for the search, as in Ctrl+F. As with Ctrl+F, a selection on one line is the text to start with, and typing replaces it. Esc, another key or a click gives up |
 | Ctrl+G | goes to a line: type its number (`line: N_`, digits only, at most 7), and Return puts the cursor at its start, or on the last line when the number is past the end; the title then says `line N`. A colon and a column (`line: N:C_`) land on that character, or at the end of the line when the column is past it; the title then says `line N:C`. Esc, another key or a click gives up |
@@ -59,6 +60,20 @@ The selection is drawn as a light blue box behind its text.
 ## Undo
 
 Each typed character, Backspace, Delete, new line, or replaced or removed selection is one step. The last 500 steps are kept, and saving does not clear them. A step stores only the part that changed, not a copy of the file, so undo stays cheap on a big file.
+
+## Opening by path
+
+Ctrl+O asks `open: path_` on the title line, in the Editor and the IDE. It starts empty. An absolute path starts at `/`; a relative one starts in the edited file's folder, or `/home` when the buffer has no filename. `.` and `..`, repeated slashes and backslashes follow `std/paths`. Spaces are part of the path; do not add quotes. A final slash on a file is refused as `not a folder: path`.
+
+Backspace edits the end, Ctrl+Backspace removes a word, Ctrl+U clears, and Ctrl+V pastes the clipboard's first line. Return on an empty prompt waits. A long path keeps its end in view. Other Editor and IDE shortcuts wait until the prompt closes. A click leaves the buffer and cursor alone.
+
+Return opens an existing file. A missing path says `no such file: path`; a directory says `path is a folder`. The prompt stays open to correct it. Neither failure changes the buffer, filename, cursor, selection, undo or redo. Esc cancels and restores the previous status too, keeping the selection.
+
+Text different from the last read or save is unsaved, including an undo after saving. In a new buffer with no saved file, any nonempty text is unsaved. Opening then says `unsaved: return again`. Press Return again on the unchanged path to discard those edits and open. Any intervening key or click cancels that confirmation, even editing the path back to the same name. A held Return cannot confirm it. The path is checked again on confirmation; if it disappeared or became a folder, nothing is discarded. Esc keeps the edits. Reloading the current path follows the same rule.
+
+A successful open uses the same buffer load as a new Editor opened from Files: the cursor starts at the end, selection, undo, redo and search highlights clear, and Ctrl+S uses the new filename and disk baseline. Undo cannot reach the previous file. The file chosen in Files for the next window stays as it was. The IDE also clears the previous run's output and diagnostics. While a run waits for input, Ctrl+O waits like the other Editor keys; stop the run with Esc first. An open prompt and its confirmation are not restored from a workspace snapshot.
+
+Added Nov 11 2026. The model tests cover this behavior; the GUI was not walked through.
 
 ## Saving and other apps
 

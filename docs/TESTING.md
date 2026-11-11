@@ -15,7 +15,7 @@ One test: `ctest --test-dir build -C Release -R golden_shell_ide`. Or run it str
 
 ## How they are checked
 
-CMake finds every `tests/*.relic` and adds it as `golden_<name>`. `tools/run_golden.cmake` runs it from `tests/`, and it passes when it exits with 0 and its standard output matches `<name>.out` exactly (Windows line endings are ignored). A test with no `.out` file must print nothing. One more test, `check_shell`, runs `relic check` on `wm.relic`, `workspace.relic`, `desktop.relic` and `ide_diag.relic`, which catches syntax errors and undefined names in the drawing code no test runs. That is 469 tests in all, and CI runs them on Linux, macOS and Windows. Eight of the golden programs, `workspace_restart`, and `workspace_kill` cover the store. `workspace_restart` runs four relic processes against one directory. `workspace_kill` kills a process after it has written a partial and before it publishes.
+CMake finds every `tests/*.relic` and adds it as `golden_<name>`. `tools/run_golden.cmake` runs it from `tests/`, and it passes when it exits with 0 and its standard output matches `<name>.out` exactly (Windows line endings are ignored). A test with no `.out` file must print nothing. One more test, `check_shell`, runs `relic check` on `wm.relic`, `workspace.relic`, `desktop.relic` and `ide_diag.relic`, which catches syntax errors and undefined names in the drawing code no test runs. That is 473 tests in all, and CI runs them on Linux, macOS and Windows. Eight of the golden programs, `workspace_restart`, and `workspace_kill` cover the store. `workspace_restart` runs four relic processes against one directory. `workspace_kill` kills a process after it has written a partial and before it publishes.
 
 None of them opens the SDL window. A passing run does not prove what the desktop draws. The Linux GUI pass, and what it did not try, is in the [roadmap](ROADMAP.md#accepted-nov-7-2026).
 
@@ -250,6 +250,9 @@ Write `tests/shell_<topic>.relic`, run it, read its output, and save that as `te
 | `shell_editor_word_keys` | Ctrl+Home and Ctrl+End go to the start and end of the file and drop the selection; Ctrl+Backspace and Ctrl+Delete remove a word, the selection, or nothing at the ends; Home stops after the leading spaces, then goes to the very start; Page Up and Page Down by the shown lines less one, Shift selecting; Ctrl+L selecting lines, from a selection made upwards too; Ctrl+D copying a line or the selected lines, and Ctrl+K removing them, each one undo, and only the selected line after Ctrl+L, the copy staying selected; Ctrl+J joining lines, or all the selected ones; Ctrl+] and Ctrl+[ indenting and taking it off, on the selected lines too; Ctrl+Up and Ctrl+Down moving a line or the selected lines |
 | `shell_editor_tab` | Tab types spaces to the next multiple of 4, over a selection, one undo step, in the IDE too; Shift+Tab takes an indent off and keeps the cursor on its character; Backspace in leading spaces goes back one indent, elsewhere one character |
 | `shell_editor_title` | Editor title keeps the file name and the status in view |
+| `shell_editor_open_path` | Ctrl+O and Cmd+O, absolute and relative paths, normalization and spaces, the Files load, the new save name and changed-on-disk warning, empty and long prompts, no old undo or redo, and `/home` for an unnamed buffer |
+| `shell_editor_open_refuse` | missing files, folders, trailing slashes and paths through files leave text, filename, cursor, selection, disk baseline and both histories intact; Esc restores status, modal keys and clicks cannot edit, and the next Editor's filename stays |
+| `shell_editor_open_unsaved` | warning before discarding unsaved text, Esc keeps edits, Return again opens; held Return cannot confirm, keys, clicks, path changes and missing targets disarm; same-path reload, undo back to clean and unnamed drafts |
 | `shell_editor_open_status` | Editor status on opening: open, new file, or why not |
 | `shell_editor_stale` | Editor reports a file removed before opening |
 | `shell_editor_edges` | Editor empty buffers, line edges and failed saves |
@@ -347,6 +350,7 @@ Write `tests/shell_<topic>.relic`, run it, read its output, and save that as `te
 | `shell_ide_div_zero` | dividing by zero is an error and names its line |
 | `shell_ide_comment_undo` | commenting a line is one undo step |
 | `shell_ide_unsaved` | Ctrl+R runs the buffer, not the older text saved in the file |
+| `shell_ide_open_path` | shared path prompt and confirmation, IDE shortcuts stay modal, Esc keeps the buffer and errors, a successful open clears output and diagnostics, relative opens, refusals, and Ctrl+O while waiting for input |
 | `shell_ide_goto` | Ctrl+G in the IDE goes to that line of the program |
 
 ### Paint

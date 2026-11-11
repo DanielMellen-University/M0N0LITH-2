@@ -1,0 +1,13 @@
+IDE [unsaved: return again] ...e.txt
+modal true
+esc true true
+opened /home/code/a.relic ["print(42)"] open 0 none 0 0
+old run cleared [] [] [] none none false none none
+old jump gone 0
+runs ["42"] 0
+relative /home/code/b.relic ["print(7)"] open []
+missing no such file: /home/code/missing.relic /home/code/b.relic ["print(7)"]
+folder /home/code is a folder /home/code/b.relic
+waiting true none [""]
+stopped can open unsaved: return again
+/home/code/a.relic ["print(42)"] open none

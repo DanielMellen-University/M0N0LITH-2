@@ -1,6 +1,6 @@
 # Keyboard and mouse reference
 
-Every key and click the desktop and its apps act on, checked against `shell/wm.relic` and `shell/desktop.relic`. Keys go to the window on top. On macOS, Cmd with a letter works as Ctrl with it (Cmd+S, Cmd+Z, Cmd+Y, Cmd+A, Cmd+C, Cmd+X, Cmd+V, Cmd+R, Cmd+E, Cmd+L, which selects a line in the Editor and clears the Terminal, Cmd+U, Cmd+D, Cmd+K, Cmd+J, and Cmd+W and Cmd+M for the window with focus). With any other key (Home, Backspace, Tab, the arrows) it is Ctrl on every system: only Cmd with a letter is read as Ctrl. AltGr (Ctrl+Alt) characters are typed as text, not read as shortcuts.
+Every key and click the desktop and its apps act on, checked against `shell/wm.relic` and `shell/desktop.relic`. Keys go to the window on top. On macOS, Cmd with a letter works as Ctrl with it (Cmd+O, Cmd+S, Cmd+Z, Cmd+Y, Cmd+A, Cmd+C, Cmd+X, Cmd+V, Cmd+R, Cmd+E, Cmd+L, which selects a line in the Editor and clears the Terminal, Cmd+U, Cmd+D, Cmd+K, Cmd+J, and Cmd+W and Cmd+M for the window with focus). With any other key (Home, Backspace, Tab, the arrows) it is Ctrl on every system: only Cmd with a letter is read as Ctrl. AltGr (Ctrl+Alt) characters are typed as text, not read as shortcuts.
 
 ## Desktop
 
@@ -21,7 +21,7 @@ Every key and click the desktop and its apps act on, checked against `shell/wm.r
 | Ctrl+W | closes the window with focus, as its x box does |
 | Ctrl+M | minimizes the window with focus, as its _ box does |
 | Ctrl+1 to Ctrl+9 | brings the window of that taskbar button (counting in the order opened) to the front, restoring it if minimized |
-| Escape | closes the Start menu or the +N list; else gives up what the window on top is asking for (a find, replace or line number in the Editor or the IDE, a name in Paint or Files, a delete question in Files), stops an IDE run that waits for input, or drops a selection in the Editor or the IDE; else quits the desktop (the in-memory files are lost). A held, repeating Escape does not quit |
+| Escape | closes the Start menu or the +N list; else gives up what the window on top is asking for (an open path, find, replace or line number in the Editor or the IDE, a name in Paint or Files, a delete question in Files), stops an IDE run that waits for input, or drops a selection in the Editor or the IDE; else quits the desktop (the in-memory files are lost). A held, repeating Escape does not quit |
 
 ## Clicker
 
@@ -120,6 +120,7 @@ The commands are in [the Terminal doc](apps/TERMINAL.md).
 | Ctrl+V | pastes it, over any selection |
 | Ctrl+Z | undoes the last edit (a cut or a paste is one), up to 500 |
 | Ctrl+Y | redoes what Ctrl+Z undid, newest first; a new edit ends it |
+| Ctrl+O | open by path in this window: absolute, or relative to the edited file's folder (`/home` with no filename). Backspace edits, Ctrl+Backspace a word, Ctrl+U clears, Ctrl+V pastes the first line, Return opens, Esc cancels. Unsaved text requires Return again on the unchanged path; any intervening key or click disarms it. Missing files and folders keep the buffer. Other app shortcuts and text clicks wait while the prompt is open |
 | Ctrl+S | saves. If another app changed the file since it was opened or saved, the first Ctrl+S warns and writes nothing, and a second one right after overwrites. Any other key, or a click or a drag, cancels that |
 | Ctrl+F | find: type the text, Return selects the next match after the cursor (going round to the start); every match on screen is highlighted. Esc, another key or a click stops. With a selection on one line it starts with that, and typing replaces it |
 | Ctrl+I | toggles case for find and replace (`case: any` or `case: exact`; during the prompt the title says `(any)`) |

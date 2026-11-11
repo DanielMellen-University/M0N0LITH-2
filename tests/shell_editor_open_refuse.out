@@ -1,0 +1,21 @@
+no such file: /home/missing.txt kept true
+retry kept true
+esc true true true
+/home is a folder kept true
+retry kept true
+esc true true true
+/ is a folder kept true
+retry kept true
+esc true true true
+not a folder: /home/welcome.txt kept true
+retry kept true
+esc true true true
+no such file: /home/welcome.txt/child kept true
+retry kept true
+esc true true true
+empty backspace
+open: _ true
+modal true true
+cancel true true true
+next file true
+redo ["Welcome to Relic.\nxy"] redone

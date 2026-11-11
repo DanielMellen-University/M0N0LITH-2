@@ -1,0 +1,20 @@
+Editor [unsaved: return again] ...e.txt
+warn kept true
+esc keeps true true edited
+held return unsaved: return again /home/welcome.txt
+other key disarmed unsaved: return again /home/welcome.txt
+retyped same path unsaved: return again /home/welcome.txt
+confirmed /home/a.txt ["A"] open 0 none 0 0
+undo ["A"] nothing to undo
+reload warns unsaved: return again ["A!"]
+changed path unsaved: return again /home/a.txt
+click disarmed unsaved: return again /home/a.txt
+gone no such file: /home/b.txt ["A!"]
+back warns unsaved: return again /home/a.txt
+became folder /home/b.txt is a folder ["A!"]
+file again warns unsaved: return again /home/a.txt
+opens latest /home/b.txt ["B now"]
+undo to clean /home/a.txt ["A"] open 0 0
+new warns unsaved: return again ["draft"]
+new kept true ["draft"]
+new confirmed /home/b.txt ["B now"]

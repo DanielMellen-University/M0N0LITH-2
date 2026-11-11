@@ -1,0 +1,44 @@
+# Failed opens and cancellation preserve the whole editing state, including
+# both histories, selection and the pending filename for other windows.
+use ../shell/wm
+use std/vfs
+let d = wm.new_desktop(640, 480, wm.default_apps())
+let e = wm.launch(d, wm.editor)
+let s = e.state
+fun typed(t) = wm.handle(d, {type: "text", text: t})
+fun editing() = [s.path, s.text, s.disk, s.back, s.mark, slice(s.undo, 0, len(s.undo)), slice(s.redo, 0, len(s.redo))]
+wm.key(d, "x")
+wm.key(d, "y")
+wm.key(d, "ctrl+z")
+wm.key(d, "shift+left")
+let before = editing()
+let was = s.status
+for path in ["missing.txt", "/home", "/", "/home/welcome.txt/", "/home/welcome.txt/child"]
+    wm.key(d, "ctrl+o")
+    typed(path)
+    wm.key(d, "return")
+    print(s.status, "kept", editing() == before)
+    wm.key(d, "return")
+    print("retry kept", editing() == before)
+    print("esc", wm.dismiss(d), editing() == before, s.status == was)
+# A click and every unrelated shortcut stay inside the modal prompt.
+wm.key(d, "ctrl+o")
+print("empty backspace")
+wm.key(d, "backspace")
+wm.key(d, "return")
+print(s.status, editing() == before)
+typed("/home/welcome.txt")
+for k in ["ctrl+s", "ctrl+z", "ctrl+a", "ctrl+f", "ctrl+h", "ctrl+g", "left", "delete"]
+    wm.key(d, k)
+wm.visible_lines(e)
+wm.click(d, e.x + 20, e.y + wm.title_height + wm.text_top + wm.line_height + 2)
+wm.motion(d, e.x + 50, e.y + 70)
+wm.release(d)
+print("modal", editing() == before, vfs.read(s.fs, s.path) == s.disk)
+print("cancel", wm.dismiss(d), editing() == before, s.status == was)
+# No change to the next Editor's filename, and redo still works here.
+let fresh = wm.launch(d, wm.editor)
+print("next file", fresh.state.path == s.path)
+wm.restore(d, e.id)
+wm.key(d, "ctrl+y")
+print("redo", [s.text], s.status)
