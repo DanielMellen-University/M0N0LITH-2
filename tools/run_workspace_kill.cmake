@@ -3,9 +3,8 @@
 if(NOT RELIC OR NOT ROOT OR NOT BUILD)
   message(FATAL_ERROR "RELIC, ROOT and BUILD are required")
 endif()
-set(dir "${BUILD}/workspace-kill")
-file(REMOVE_RECURSE "${dir}")
-file(MAKE_DIRECTORY "${dir}")
+include(${CMAKE_CURRENT_LIST_DIR}/workspace_temp.cmake)
+workspace_temp(dir)
 
 execute_process(
   COMMAND ${RELIC} ${ROOT}/tools/workspace/kill_setup.relic ${dir}
@@ -48,3 +47,4 @@ windows 1
 if(NOT read_out STREQUAL want)
   message(FATAL_ERROR "kill_read:\n--- got\n${read_out}--- want\n${want}")
 endif()
+file(REMOVE_RECURSE "${dir}")

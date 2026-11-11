@@ -5,12 +5,20 @@
 # the REPL, .args and .err cases, which no test here uses.
 get_filename_component(dir ${TEST} DIRECTORY)
 get_filename_component(name ${TEST} NAME_WE)
+set(run_dir "${dir}")
+if(name MATCHES "^shell_workspace_")
+  include(${CMAKE_CURRENT_LIST_DIR}/workspace_temp.cmake)
+  workspace_temp(run_dir)
+endif()
 execute_process(
   COMMAND ${RELIC} ${TEST}
-  WORKING_DIRECTORY ${dir}
+  WORKING_DIRECTORY ${run_dir}
   OUTPUT_VARIABLE out
   ERROR_VARIABLE err
   RESULT_VARIABLE code)
+if(name MATCHES "^shell_workspace_")
+  file(REMOVE_RECURSE "${run_dir}")
+endif()
 string(REPLACE "\r\n" "\n" out "${out}")
 set(want "")
 if(EXISTS ${dir}/${name}.out)

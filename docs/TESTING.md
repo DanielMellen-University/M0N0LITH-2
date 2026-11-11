@@ -383,16 +383,16 @@ Write `tests/shell_<topic>.relic`, run it, read its output, and save that as `te
 
 | Test | What it covers |
 |---|---|
-| `shell_workspace_defaults` | no store means no host files; an empty directory is the first run; one save writes `g1.m2ws`; reopening drops a memory-only change; `workspace_open("")` stops committing |
+| `shell_workspace_defaults` | no store means no host files; an empty directory is the first run; one save writes `g1.m2ws`; reopening drops a memory-only change; `workspace_open("")` stops committing; workspace goldens use private temporary working directories, removed even on failure |
 | `shell_workspace_roundtrip` | Terminal create, append and remove, a quoted name, Files rename, Editor save, IDE run, then a reopen; Notes and Clicker do not come back |
 | `shell_workspace_faults` | each fault stage keeps the previous generation and says so; the Editor does not say `saved` |
 | `shell_workspace_corrupt` | hand-written wrong version, truncated, extra, `..`, duplicate, missing parent, CR, bad escape, NUL, bad pointers, a number that is text, an empty image, an uncommitted generation, a partial, too many names, a too-long path |
 | `shell_workspace_chain` | a corrupt commit does not install a newer uncommitted file; partial or full-uncommitted then a retry keeps the previous commit through a later corruption; a torn pointer with `META` keeps that commit and ignores a newer file; a torn pointer with two files and no `META` holds; a wrong version and too many names are not overwritten; a failed open is not `saved`; an empty path is; IDE Ctrl+S persists and a fault does not say saved |
-| `workspace_restart` | the same session across two processes, then a torn pointer and a fourth process |
+| `workspace_restart` | the same session across two processes, then a torn pointer and a fourth process; a private temporary store is removed after success |
 | `shell_workspace_checksum` | a bound desktop saves and reloads a 20,000-emoji vfs file into a fresh desktop; compensating two-character edits and a swap are invalid and recover the older files and window with a visible notice |
 | `shell_workspace_session` | a bound desktop restores windows, places, Terminal cwd and history, unsaved Editor text, Notes, Clicker, Paint cells, and an IDE buffer; a partial fault keeps the previous snapshot; a changed byte and a wrong version are not installed; a truncated commit falls back to the older one |
 | `shell_workspace_ide_restore` | first restored IDE frame renders; every app has its init fields; diagnostics, Ctrl+E column, error-row click and highlight return; ordinary output, module errors and older line-only snapshots restore safely |
-| `workspace_kill` | a second process is killed after writing a partial; the third process still has the committed file and window |
+| `workspace_kill` | a second process is killed after writing a partial; the third process still has the committed file and window; the private temporary store is removed after success |
 
 ### Shared filesystem and fuzzing
 
