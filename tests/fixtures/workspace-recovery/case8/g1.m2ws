@@ -1,0 +1,8 @@
+M2WS1
+D /home
+F /home/note.txt first\sversion\n
+F /home/welcome.txt Welcome\sto\sRelic.\n
+D /tmp
+S -
+Z 445300
+.

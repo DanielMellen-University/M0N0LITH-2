@@ -1,0 +1,45 @@
+# D0122 case 8 check: open a store whose committed generation is M2WS9 with
+# a valid older M2WS1 generation present. The store is held: the Editor's
+# Ctrl+S must fail visibly, twice, and the driver checks the bytes on disk
+# stayed untouched. Run from the repo root:
+#   relic/build/relic tools/workspace-recovery-muse/case8_check.relic <dir>
+use ../../shell/wm
+use std/os
+use std/vfs
+
+fun key_text(d, text)
+    for ch in text
+        if ch == " "
+            wm.key(d, "space")
+        else if ch == "\n"
+            wm.key(d, "return")
+        else
+            wm.key(d, ch)
+
+fun desktop()
+    return wm.new_desktop(640, 480, wm.default_apps())
+
+fun find_window(d, name)
+    for w in d.windows
+        if w.app.name == name
+            return w
+    fail("no " + name)
+
+let args = os.args()
+if len(args) != 1
+    fail("case8_check needs the workspace directory")
+let d = desktop()
+wm.workspace_open(args[0])
+wm.workspace_bind(d)
+print("enabled", wm.workspace_enabled())
+print("notice", [wm.workspace_notice()])
+print("note", [vfs.read(wm.terminal.init().fs, "/home/note.txt")])
+wm.launch(d, wm.editor)
+key_text(d, "z")
+wm.key(d, "ctrl+s")
+let e = find_window(d, "Editor")
+print("save1", [e.state.status])
+key_text(d, "y")
+wm.key(d, "ctrl+s")
+print("save2", [e.state.status])
+print("notice-after", [wm.workspace_notice()])
