@@ -1,0 +1,32 @@
+# D0122 case 6 setup: two committed generations, v1 then v2. A desktop is
+# bound, so each Terminal write is a session save (S lines plus a checksum).
+# No flush follows: the process just exits, so COMMITTED still names g2 when
+# the driver damages it. Run from the repo root:
+#   relic/build/relic tools/workspace-recovery-muse/case6_setup.relic <dir>
+use ../../shell/wm
+use std/os
+use std/vfs
+
+fun type_line(t, line)
+    for ch in line
+        if ch == " "
+            wm.terminal.on_key(t, "space")
+        else
+            wm.terminal.on_key(t, ch)
+    wm.terminal.on_key(t, "return")
+
+fun desktop()
+    return wm.new_desktop(640, 480, wm.default_apps())
+
+let args = os.args()
+if len(args) != 1
+    fail("case6_setup needs the workspace directory")
+let d = desktop()
+wm.workspace_open(args[0])
+wm.workspace_bind(d)
+let t = wm.terminal.init()
+type_line(t, "echo first version > note.txt")
+print("after v1", [wm.workspace_notice()])
+type_line(t, "echo second version > note.txt")
+print("after v2", [wm.workspace_notice()])
+print("note", [vfs.read(t.fs, "/home/note.txt")])

@@ -1,0 +1,59 @@
+# D0122 case 9 check: open a store path that is a regular file, try to save
+# from the Editor, then open a good store and save there. The first Ctrl+S
+# after switching stores reports the disk change the switch caused (the
+# store replaced the file under the Editor), so a second Ctrl+S commits it.
+# Run from the repo root:
+#   relic/build/relic tools/workspace-recovery-muse/case9_check.relic <bad> <good>
+use ../../shell/wm
+use std/os
+use std/vfs
+
+fun key_text(d, text)
+    for ch in text
+        if ch == " "
+            wm.key(d, "space")
+        else if ch == "\n"
+            wm.key(d, "return")
+        else
+            wm.key(d, ch)
+
+fun desktop()
+    return wm.new_desktop(640, 480, wm.default_apps())
+
+fun find_window(d, name)
+    for w in d.windows
+        if w.app.name == name
+            return w
+    fail("no " + name)
+
+fun focus(d, name)
+    let i = len(d.windows) - 1
+    while i >= 0
+        if d.windows[i].app.name == name
+            wm.restore(d, d.windows[i].id)
+            return d.windows[len(d.windows) - 1]
+        i = i - 1
+    fail("no " + name)
+
+let args = os.args()
+if len(args) != 2
+    fail("case9_check needs the bad store path and the good store directory")
+let d = desktop()
+wm.workspace_open(args[0])
+print("bad-enabled", wm.workspace_enabled())
+print("bad-notice", [wm.workspace_notice()])
+wm.workspace_bind(d)
+wm.launch(d, wm.editor)
+key_text(d, "hello")
+wm.key(d, "ctrl+s")
+let e = find_window(d, "Editor")
+print("bad-save", [e.state.status])
+print("editor-text", [e.state.text])
+wm.workspace_open(args[1])
+print("good-enabled", wm.workspace_enabled())
+print("good-notice", [wm.workspace_notice()])
+focus(d, "Editor")
+wm.key(d, "ctrl+s")
+print("good-save-1", [e.state.status])
+wm.key(d, "ctrl+s")
+print("good-save-2", [e.state.status])

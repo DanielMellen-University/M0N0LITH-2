@@ -1,0 +1,14 @@
+# D0122 case 9 verify: a fresh process opens the good store and reports the
+# file the Editor saved there. Run from the repo root:
+#   relic/build/relic tools/workspace-recovery-muse/case9_verify.relic <dir>
+use ../../shell/wm
+use std/os
+use std/vfs
+
+let args = os.args()
+if len(args) != 1
+    fail("case9_verify needs the workspace directory")
+wm.workspace_open(args[0])
+print("enabled", wm.workspace_enabled())
+print("notice", [wm.workspace_notice()])
+print("welcome", [vfs.read(wm.terminal.init().fs, "/home/welcome.txt")])

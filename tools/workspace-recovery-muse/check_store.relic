@@ -1,0 +1,19 @@
+# D0122 shared check: open a store and report what installed. Used by cases
+# 6 and 7. This process never saves: it opens, prints, and exits. Run from
+# the repo root:
+#   relic/build/relic tools/workspace-recovery-muse/check_store.relic <dir>
+use ../../shell/wm
+use std/os
+use std/vfs
+
+let args = os.args()
+if len(args) != 1
+    fail("check_store needs the workspace directory")
+wm.workspace_open(args[0])
+print("enabled", wm.workspace_enabled())
+print("notice", [wm.workspace_notice()])
+let fs = wm.terminal.init().fs
+print("note-exists", vfs.exists(fs, "/home/note.txt"))
+if vfs.exists(fs, "/home/note.txt")
+    print("note", [vfs.read(fs, "/home/note.txt")])
+print("welcome", [vfs.read(fs, "/home/welcome.txt")])

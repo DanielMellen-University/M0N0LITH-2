@@ -1,0 +1,36 @@
+# D0122 case 7 setup: commit v1, fault a v2 save, then retry commits v2 as
+# g3. The fault is armed before the v2 write, so the first v2 save never
+# commits. The retry is a plain save. The process then exits without any
+# further save: no flush follows, so COMMITTED still names g3 when the
+# driver damages it. Run from the repo root:
+#   relic/build/relic tools/workspace-recovery-muse/case7_setup.relic <dir>
+use ../../shell/wm
+use std/os
+use std/vfs
+
+fun type_line(t, line)
+    for ch in line
+        if ch == " "
+            wm.terminal.on_key(t, "space")
+        else
+            wm.terminal.on_key(t, ch)
+    wm.terminal.on_key(t, "return")
+
+fun desktop()
+    return wm.new_desktop(640, 480, wm.default_apps())
+
+let args = os.args()
+if len(args) != 1
+    fail("case7_setup needs the workspace directory")
+let d = desktop()
+wm.workspace_open(args[0])
+wm.workspace_bind(d)
+let t = wm.terminal.init()
+type_line(t, "echo first version > note.txt")
+print("after v1", [wm.workspace_notice()])
+wm.workspace_fault("partial-generation")
+type_line(t, "echo second version > note.txt")
+print("after faulted v2", [wm.workspace_notice()])
+type_line(t, "echo second version > note.txt")
+print("after retry", [wm.workspace_notice()])
+print("note", [vfs.read(t.fs, "/home/note.txt")])
