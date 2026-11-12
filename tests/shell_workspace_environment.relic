@@ -1,0 +1,41 @@
+# Every case runs with an isolated process environment from the golden runner.
+use ../shell/wm
+use std/files
+use std/os
+use std/vfs
+
+fun check(label, got, want)
+    if got != want
+        fail(label + ": " + str(got) + " != " + str(want))
+
+let args = os.args()
+let mode = args[0]
+let path = args[1]
+wm.workspace_open("previous")
+let fs = wm.terminal.init().fs
+vfs.write(fs, "/home/memory", "untouched")
+wm.workspace_open_default()
+if path == "-"
+    check("disabled", wm.workspace_enabled(), false)
+    check("vfs untouched", vfs.read(fs, "/home/memory"), "untouched")
+    let notice = "workspace: no store path; this run is not saved"
+    if mode == "empty"
+        notice = ""
+    check("notice", wm.workspace_notice(), notice)
+    let e = wm.editor.init()
+    wm.editor.on_key(e, "ctrl+s")
+    let status = notice
+    if mode == "empty"
+        status = "saved"
+    check("save status", e.status, status)
+    check("previous store untouched", files.exists("previous/COMMITTED"), false)
+else
+    check("enabled", wm.workspace_enabled(), true)
+    check("quiet", wm.workspace_notice(), "")
+    check("directory created", files.is_dir(path), true)
+    check("fresh vfs", vfs.exists(fs, "/home/memory"), false)
+    let e = wm.editor.init()
+    wm.editor.on_key(e, "ctrl+s")
+    check("saved", e.status, "saved")
+    check("chosen store", files.read(path + "/COMMITTED"), "g1\n")
+print(mode, "ok")

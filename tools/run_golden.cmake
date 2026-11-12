@@ -23,12 +23,16 @@ if(name MATCHES "^shell_workspace_io_")
   set(run_test "${run_dir}/tests/${name}.relic")
   configure_file("${TEST}" "${run_test}" COPYONLY)
 endif()
-execute_process(
-  COMMAND ${RELIC} ${run_test}
-  WORKING_DIRECTORY ${run_dir}
-  OUTPUT_VARIABLE out
-  ERROR_VARIABLE err
-  RESULT_VARIABLE code)
+if(name STREQUAL "shell_workspace_environment")
+  include(${CMAKE_CURRENT_LIST_DIR}/run_workspace_environment.cmake)
+else()
+  execute_process(
+    COMMAND ${RELIC} ${run_test}
+    WORKING_DIRECTORY ${run_dir}
+    OUTPUT_VARIABLE out
+    ERROR_VARIABLE err
+    RESULT_VARIABLE code)
+endif()
 if(name MATCHES "^shell_workspace_")
   file(REMOVE_RECURSE "${run_dir}")
 endif()
