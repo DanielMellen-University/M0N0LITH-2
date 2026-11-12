@@ -1,0 +1,50 @@
+# Allocation sees every stored or named id; pruning follows the installed image.
+use ../shell/workspace
+use std/files
+use std/vfs
+
+fun check(label, got, want)
+    if got != want
+        fail(label + ": " + str(got) + " != " + str(want))
+
+let dir = "ws-ids"
+for kind in ["partial", "truncated", "uncommitted", "wrong-version", "pointer-only", "META-committed", "META-previous"]
+    files.make_dir(dir)
+    files.write(dir + "/g3.m2ws", "M2WS1\nF /kept old\n.\n")
+    files.write(dir + "/COMMITTED", "g3\n")
+    if kind == "partial"
+        files.write(dir + "/g90.m2ws.partial", "M2WS1\n")
+    else if kind == "truncated"
+        files.write(dir + "/g90.m2ws", "M2WS1\n")
+        files.write(dir + "/COMMITTED", "g90\n")
+    else if kind == "uncommitted"
+        files.write(dir + "/g90.m2ws", "M2WS1\nF /kept uncommitted\n.\n")
+    else if kind == "wrong-version"
+        files.write(dir + "/g90.m2ws", "M2WS9\n.\n")
+    else if kind == "pointer-only"
+        files.write(dir + "/COMMITTED", "g90\n")
+    else if kind == "META-committed"
+        files.write(dir + "/META", "committed g90\nprevious g3\n")
+    else
+        files.write(dir + "/META", "committed g3\nprevious g90\n")
+    files.write(dir + "/COMMITTED.next", "g999\n")
+    files.write(dir + "/META.next", "committed g999\nprevious none\n")
+    let fs = vfs.new()
+    workspace.open(dir)
+    workspace.load(fs)
+    check("installed old", vfs.read(fs, "/kept"), "old")
+    workspace.release()
+    vfs.write(fs, "/kept", "new")
+    workspace.arm("full-uncommitted")
+    check("first attempt", workspace.save(fs), "workspace: save failed (full-uncommitted); kept g3")
+    check("id not reused", files.exists(dir + "/g91.m2ws"), true)
+    check("retry", workspace.save(fs), "")
+    check("retry id", files.read(dir + "/COMMITTED"), "g92\n")
+    check("installed backup", files.read(dir + "/META"), "committed g92\nprevious g3\n")
+    check("exact prune", files.list(dir), ["COMMITTED", "META", "g3.m2ws", "g92.m2ws"])
+    files.write(dir + "/g92.m2ws", "M2WS1\n")
+    workspace.open(dir)
+    workspace.load(fs)
+    check("backup still recovers", vfs.read(fs, "/kept"), "old")
+    print(kind, "reserves g90; retry g92 keeps installed g3")
+    files.remove_tree(dir)

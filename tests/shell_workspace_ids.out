@@ -1,0 +1,7 @@
+partial reserves g90; retry g92 keeps installed g3
+truncated reserves g90; retry g92 keeps installed g3
+uncommitted reserves g90; retry g92 keeps installed g3
+wrong-version reserves g90; retry g92 keeps installed g3
+pointer-only reserves g90; retry g92 keeps installed g3
+META-committed reserves g90; retry g92 keeps installed g3
+META-previous reserves g90; retry g92 keeps installed g3
