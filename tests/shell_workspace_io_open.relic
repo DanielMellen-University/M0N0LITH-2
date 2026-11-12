@@ -1,0 +1,54 @@
+# Failed opens leave the current vfs alone and cannot report a durable save.
+use ../shell/workspace
+use ../tools/workspace/io_files as io
+use std/files
+use std/vfs
+
+fun check(label, got, want)
+    if got != want
+        fail(label + ": " + str(got) + " != " + str(want))
+
+let dir = "ws-open"
+let fs = vfs.new()
+workspace.open(dir)
+workspace.load(fs)
+vfs.write(fs, "/home/kept", "committed")
+check("save", workspace.save(fs), "")
+vfs.write(fs, "/home/kept", "memory")
+let pointer = files.read(dir + "/COMMITTED")
+io.control.mode = "list"
+workspace.open(dir)
+workspace.load(fs)
+check("unlistable disabled", workspace.enabled(), false)
+check("unlistable notice", workspace.notice(), "workspace: cannot open store")
+check("unlistable vfs untouched", vfs.read(fs, "/home/kept"), "memory")
+check("unlistable save refused", workspace.save(fs), "workspace: cannot open store")
+check("unlistable disk untouched", files.read(dir + "/COMMITTED"), pointer)
+print("unlistable directory preserves vfs and disables persistence")
+io.control.mode = ""
+files.write("ws-file", "not a directory")
+let long = ""
+for i in 0..1025
+    long = long + "a"
+for path in ["ws-file", "ws-file/child", "/", "bad\npath", "bad" + chr(0) + "path", long]
+    workspace.open(path)
+    if workspace.enabled()
+        workspace.load(fs)
+    check("failed open disabled", workspace.enabled(), false)
+    check("failed open notice", workspace.notice(), "workspace: cannot open store")
+    check("failed open vfs", vfs.read(fs, "/home/kept"), "memory")
+    check("failed open save", workspace.save(fs), "workspace: cannot open store")
+check("host file untouched", files.read("ws-file"), "not a directory")
+print("file and invalid paths preserve vfs and refuse saves")
+workspace.open(dir)
+workspace.load(fs)
+check("reopen enabled", workspace.enabled(), true)
+check("reopen quiet", workspace.notice(), "")
+check("reopen restores", vfs.read(fs, "/home/kept"), "committed")
+workspace.open("")
+check("opt out quiet", workspace.notice(), "")
+check("opt out save", workspace.save(fs), "")
+check("opt out vfs", vfs.read(fs, "/home/kept"), "committed")
+print("reopening clears failed-open state; empty path opts out")
+files.remove_tree(dir)
+files.remove("ws-file")

@@ -1,0 +1,6 @@
+partial-readback workspace: save failed; store readback mismatch; kept g1 reopened old
+generation-rename workspace: save failed; cannot write store; kept g1 reopened old
+staged-readback workspace: save failed; store readback mismatch; kept g1 reopened old
+pointer-rename workspace: save failed; cannot write store; kept g1 reopened old
+pointer-readback workspace: save failed; pointer publish uncertain reopened new
+pointer-read-error workspace: save failed; pointer publish uncertain reopened new

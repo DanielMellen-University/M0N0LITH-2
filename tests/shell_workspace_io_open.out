@@ -1,0 +1,3 @@
+unlistable directory preserves vfs and disables persistence
+file and invalid paths preserve vfs and refuse saves
+reopening clears failed-open state; empty path opts out

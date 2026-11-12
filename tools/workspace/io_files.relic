@@ -1,0 +1,41 @@
+# Test-only I/O adapter. All operations use real files except the armed failure.
+use std/files
+use std/strings
+let control = {mode: "", published: false, reads: []}
+
+fun read(path)
+    append(control.reads, path)
+    if control.mode == "partial-readback" and strings.ends_with(path, ".partial")
+        return "changed"
+    if control.mode == "staged-readback" and strings.ends_with(path, "/COMMITTED.next")
+        return "changed"
+    if control.published and strings.ends_with(path, "/COMMITTED")
+        if control.mode == "pointer-readback"
+            return "changed"
+        if control.mode == "pointer-read-error"
+            fail("injected pointer read error")
+    return files.read(path)
+
+fun write(path, text) = files.write(path, text)
+fun exists(path) = files.exists(path)
+fun is_dir(path) = files.is_dir(path)
+fun make_dir(path) = files.make_dir(path)
+fun remove(path) = files.remove(path)
+fun size(path)
+    if control.mode == "size-race" and strings.ends_with(path, ".m2ws")
+        return 0
+    return files.size(path)
+
+fun list(path)
+    if control.mode == "list"
+        fail("injected unlistable directory")
+    return files.list(path)
+
+fun rename(from, to)
+    if control.mode == "generation-rename" and strings.ends_with(to, ".m2ws")
+        fail("injected generation rename error")
+    if control.mode == "pointer-rename" and strings.ends_with(to, "/COMMITTED")
+        fail("injected pointer rename error")
+    files.rename(from, to)
+    if strings.ends_with(to, "/COMMITTED")
+        control.published = true

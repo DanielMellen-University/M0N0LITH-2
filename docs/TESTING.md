@@ -15,7 +15,7 @@ One test: `ctest --test-dir build -C Release -R golden_shell_ide`. Or run it str
 
 ## How they are checked
 
-CMake finds every `tests/*.relic` and adds it as `golden_<name>`. `tools/run_golden.cmake` runs it from `tests/`, and it passes when it exits with 0 and its standard output matches `<name>.out` exactly (Windows line endings are ignored). A test with no `.out` file must print nothing. One more test, `check_shell`, runs `relic check` on `wm.relic`, `workspace.relic`, `desktop.relic` and `ide_diag.relic`, which catches syntax errors and undefined names in the drawing code no test runs. That is 473 tests in all, and CI runs them on Linux, macOS and Windows. Eight of the golden programs, `workspace_restart`, and `workspace_kill` cover the store. `workspace_restart` runs four relic processes against one directory. `workspace_kill` kills a process after it has written a partial and before it publishes.
+CMake finds every `tests/*.relic` and adds it as `golden_<name>`. `tools/run_golden.cmake` runs it from `tests/`, and it passes when it exits with 0 and its standard output matches `<name>.out` exactly (Windows line endings are ignored). A test with no `.out` file must print nothing. One more test, `check_shell`, runs `relic check` on `wm.relic`, `workspace.relic`, `desktop.relic` and `ide_diag.relic`, which catches syntax errors and undefined names in the drawing code no test runs. That is 486 tests in all, and CI runs them on Linux, macOS and Windows. 21 of the golden programs, `workspace_restart`, and `workspace_kill` cover the store. `workspace_restart` runs four relic processes against one directory. `workspace_kill` kills a process after it has written a partial and before it publishes.
 
 None of them opens the SDL window. A passing run does not prove what the desktop draws. The Linux GUI pass, and what it did not try, is in the [roadmap](ROADMAP.md#accepted-nov-7-2026).
 
@@ -383,16 +383,29 @@ Write `tests/shell_<topic>.relic`, run it, read its output, and save that as `te
 
 | Test | What it covers |
 |---|---|
-| `shell_workspace_defaults` | no store means no host files; an empty directory is the first run; one save writes `g1.m2ws`; reopening drops a memory-only change; `workspace_open("")` stops committing |
+| `shell_workspace_byte_limit` | a Unicode image below the character caps but above the byte cap fails before writing; pointer, META and the recoverable files stay unchanged |
+| `shell_workspace_session_order` | file records after a session are rejected even with a valid checksum; files and windows recover together; unsorted file records before the session remain legal |
+| `shell_workspace_escapes` | all control escapes, spaces, backslashes and Unicode roundtrip; raw controls, raw directory spaces and noncanonical escapes reject the whole image; an unstorable vfs name cannot replace the commit |
+| `shell_workspace_io_publication` | test-only I/O adapter checks partial and staged readback mismatches, failed generation and pointer renames, and uncertain pointer readbacks; META stays unchanged and reopening follows the actual pointer |
+| `shell_workspace_io_open` | unlistable directory, file, file parent and invalid paths preserve the vfs and disable persistence; saves fail; reopening and empty-path opt-out clear the failure |
+| `shell_workspace_environment` | eight isolated process environments pin explicit and empty overrides, HOME and USERPROFILE precedence and empty fallbacks, directory creation, no-store notice, disabled saves, and reopening from a prior store |
+| `shell_workspace_notices` | boot notice survives successful saves; the latest failure or metadata warning is appended after a pipe and cleared on success; fault clearing, retry ids and reopening |
+| `shell_workspace_release` | all hold kinds preserve every byte through failed saves and release; the next save prunes to the new and installed generations, retaining unknown names |
+| `shell_workspace_ids` | partial, truncated, wrong-version and uncommitted files and pointer-only or META-only ids reserve numbers; retry skips its leftover, prunes staged files and keeps exactly the installed backup |
+| `shell_workspace_tokens` | malformed pointer and META spellings, leading zeros, unknown generation names, nine-digit maximum and exhausted ids; ambiguous metadata never promotes a newer image |
+| `shell_workspace_io_caps` | inclusive byte, text, path, entry and generation-name limits; size checks precede reads; pointer and META read limits; growth after the size check cannot bypass the UTF-8 byte cap |
+| `shell_workspace_session_schema` | all eight app schemas, missing/extra/duplicate fields, bad values, packed-line limits, invalid headers and checksum framing; 64 windows accepted, 65 rejected; 72 invalid sessions recover files and windows atomically |
+| `shell_workspace_recovery_apps` | nine recovery paths restore all seven apps, places and minimized state; Terminal output/history/draft/cursors, Files selection, unsaved Editor/IDE names and text, Notes, Clicker and Paint fields; first-frame rendering and empty undo/redo |
+| `shell_workspace_defaults` | no store means no host files; an empty directory is the first run; one save writes `g1.m2ws`; reopening drops a memory-only change; `workspace_open("")` stops committing; workspace goldens use private temporary working directories, removed even on failure |
 | `shell_workspace_roundtrip` | Terminal create, append and remove, a quoted name, Files rename, Editor save, IDE run, then a reopen; Notes and Clicker do not come back |
 | `shell_workspace_faults` | each fault stage keeps the previous generation and says so; the Editor does not say `saved` |
 | `shell_workspace_corrupt` | hand-written wrong version, truncated, extra, `..`, duplicate, missing parent, CR, bad escape, NUL, bad pointers, a number that is text, an empty image, an uncommitted generation, a partial, too many names, a too-long path |
 | `shell_workspace_chain` | a corrupt commit does not install a newer uncommitted file; partial or full-uncommitted then a retry keeps the previous commit through a later corruption; a torn pointer with `META` keeps that commit and ignores a newer file; a torn pointer with two files and no `META` holds; a wrong version and too many names are not overwritten; a failed open is not `saved`; an empty path is; IDE Ctrl+S persists and a fault does not say saved |
-| `workspace_restart` | the same session across two processes, then a torn pointer and a fourth process |
+| `workspace_restart` | the same session across two processes, then a torn pointer and a fourth process; a private temporary store is removed after success |
 | `shell_workspace_checksum` | a bound desktop saves and reloads a 20,000-emoji vfs file into a fresh desktop; compensating two-character edits and a swap are invalid and recover the older files and window with a visible notice |
 | `shell_workspace_session` | a bound desktop restores windows, places, Terminal cwd and history, unsaved Editor text, Notes, Clicker, Paint cells, and an IDE buffer; a partial fault keeps the previous snapshot; a changed byte and a wrong version are not installed; a truncated commit falls back to the older one |
 | `shell_workspace_ide_restore` | first restored IDE frame renders; every app has its init fields; diagnostics, Ctrl+E column, error-row click and highlight return; ordinary output, module errors and older line-only snapshots restore safely |
-| `workspace_kill` | a second process is killed after writing a partial; the third process still has the committed file and window |
+| `workspace_kill` | a second process is killed after writing a partial; the third process still has the committed file and window; the private temporary store is removed after success |
 
 ### Shared filesystem and fuzzing
 

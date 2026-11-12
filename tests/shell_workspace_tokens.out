@@ -1,0 +1,3 @@
+12 invalid pointer spellings use META
+12 malformed META records cannot choose a generation
+nine-digit maximum loads; exhaustion never wraps or overwrites

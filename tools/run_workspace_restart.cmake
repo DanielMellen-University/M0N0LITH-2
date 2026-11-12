@@ -3,9 +3,8 @@
 if(NOT RELIC OR NOT ROOT OR NOT BUILD)
   message(FATAL_ERROR "RELIC, ROOT and BUILD are required")
 endif()
-set(dir "${BUILD}/workspace-restart")
-file(REMOVE_RECURSE "${dir}")
-file(MAKE_DIRECTORY "${dir}")
+include(${CMAKE_CURRENT_LIST_DIR}/workspace_temp.cmake)
+workspace_temp(dir)
 
 function(run_phase script)
   execute_process(
@@ -67,3 +66,4 @@ lost false
 if(NOT phase_out STREQUAL want_recover)
   message(FATAL_ERROR "recover_session:\n--- got\n${phase_out}--- want\n${want_recover}")
 endif()
+file(REMOVE_RECURSE "${dir}")

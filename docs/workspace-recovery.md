@@ -32,7 +32,7 @@ No `HOME` and no `USERPROFILE`, and the variable unset: persistence stays off an
 | `wm.workspace_fault(stage)` | the next save stops at `stage` and then the arm is cleared. `""` clears it. Any other string fails as `workspace: unknown fault {stage}` |
 | `wm.workspace_release()` | drop a hold. Does not delete files. The next successful save may replace them |
 
-`workspace_fault` is how a test produces a torn save without killing the process. A fixture can instead be written as files; the loader does not care which writer made them.
+`workspace_fault` is how a test produces a torn save without killing the process. A fixture can instead be written as files; the loader does not care which writer made them. `shell_workspace_io_publication` tests host I/O failures through a test-only adapter, including a mismatching or unreadable pointer after its rename. It adds no production fault stages.
 
 ## On-disk layout
 
@@ -74,7 +74,7 @@ Escapes, in paths and in file text:
 | `\s` | space |
 | `\u` + 4 lowercase hex digits | a code 0 to 31 that is not already `\n`, `\r` or `\t` |
 
-Any other backslash is invalid. The first raw space in an `F` record separates the path from the text. No space means the text is empty. Paths do not contain a raw space.
+Any other backslash is invalid. Raw control characters are invalid inside records; use their escapes. `\u0009`, `\u000a` and `\u000d` are invalid too: use `\t`, `\n` and `\r`. The first raw space in an `F` record separates the path from the text. No space means the text is empty. Paths do not contain a raw space.
 
 A path, after unescaping, must be a vfs path and nothing else:
 
@@ -91,10 +91,12 @@ Caps, applied while parsing, before the session vfs is changed:
 
 | Cap | Value |
 |---|---|
-| generation file | 1,500,000 bytes (`files.size` first; the read is discarded when larger) |
+| generation file | 1,500,000 bytes (`files.size` before reading, then a byte check on the text read) |
 | entries (files plus directories) | 2,000 |
 | one file's text | 262,144 characters |
 | one path | 240 characters |
+
+The reader checks the UTF-8 byte cap again after reading, in case the file grew after `files.size`. The writer checks the same cap before writing a partial. A Unicode image that would be too large to reload fails with `image too large`; the pointer and metadata stay unchanged.
 
 `std/files.read` still loads a generation that passed the size check into one string. That is a bound on what we will install, not a claim that a hostile file cannot make the host allocate. This is not a sandbox.
 
@@ -122,7 +124,7 @@ D /tmp
 
 A generation written by the desktop records the open windows in the same file as the vfs. The rename of `COMMITTED` publishes both. A generation written by `save` with no session, which is what a test does when it never binds a desktop, has no window records. A file from before windows were stored still loads: the files come back and no windows open.
 
-`S` lines come after the `D` and `F` lines. `Z` is the last line before `.`, and only when there is an `S` line.
+`S` lines come after all the `D` and `F` lines. A file or directory record after the first `S` line invalidates the whole generation, even with a matching checksum. `Z` is the last line before `.`, and only when there is an `S` line.
 
 | Line | Meaning |
 |---|---|
@@ -130,7 +132,7 @@ A generation written by the desktop records the open windows in the same file as
 | `S W <App> <id> <x> <y> <width> <height> <0 or 1>` | one window, back to front. App is Clicker, Notes, Terminal, Files, Editor, IDE, Paint, or Snake. `1` means minimized. id is unique, from 1 |
 | `S F <key> <escaped value>` | one field of the window started by the previous `W`. The value uses the same escapes as a file. No raw space |
 
-A missing field, an extra field, a bad number, a duplicate id, or anything else in an `S` line is `invalid`. The vfs in that same file is not installed either.
+A session has at most 64 windows. A missing field, an extra field, a bad number, a duplicate id, or anything else malformed in an `S` line is `invalid`. The vfs in that same file is not installed either.
 
 | App | Fields |
 |---|---|

@@ -1,0 +1,2 @@
+all escapes roundtrip; 11 noncanonical records rejected
+unstorable vfs name keeps the previous commit

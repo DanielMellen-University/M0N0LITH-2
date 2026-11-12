@@ -1,0 +1,41 @@
+# A valid checksum does not make file records after the session legal.
+use ../shell/workspace
+use std/files
+use std/vfs
+
+fun check(label, got, want)
+    if got != want
+        fail(label + ": " + str(got) + " != " + str(want))
+
+fun image(body)
+    let prefix = "M2WS1\n" + body
+    let checksum = 0
+    let weight = len(prefix)
+    for c in prefix
+        checksum = (checksum + ord(c) * weight) % 1000000007
+        weight = weight - 1
+    return prefix + "Z " + str(checksum) + "\n.\n"
+
+let dir = "ws-order"
+workspace.open(dir)
+files.write(dir + "/g1.m2ws", image("F /kept old\nS W Notes 1 40 30 300 200 0\nS F text older\nS F left 5\n"))
+files.write(dir + "/COMMITTED", "g2\n")
+let fs = vfs.new()
+for body in ["S -\nF /new changed\n", "S -\nD /new\n", "S W Clicker 2 40 30 300 200 0\nF /new changed\nS F count 8\n"]
+    files.write(dir + "/g2.m2ws", image(body))
+    workspace.open(dir)
+    workspace.load(fs)
+    check("recovery notice", workspace.notice(), "workspace: committed image invalid; recovered g1")
+    check("old files", vfs.read(fs, "/kept"), "old")
+    check("new files absent", vfs.exists(fs, "/new"), false)
+    check("old session", workspace.session()[0].fields.text, "older")
+print("file records after session rejected atomically")
+# Unsorted file records are legal when they all precede the session.
+files.write(dir + "/g2.m2ws", image("F /new/file changed\nD /new\nS -\n"))
+workspace.open(dir)
+workspace.load(fs)
+check("valid notice", workspace.notice(), "")
+check("unordered records", vfs.read(fs, "/new/file"), "changed")
+check("empty desktop", workspace.session(), [])
+print("unordered files before session accepted")
+files.remove_tree(dir)

@@ -1,0 +1,8 @@
+oversize generation rejected before read
+byte cap checked again after read
+1500000-byte generation accepted
+text boundary accepted; one over rejected
+path boundary accepted; one over rejected
+entries boundary accepted; one over rejected
+16-byte pointer and 64-byte META read limits
+32 generation names accepted; 33 held

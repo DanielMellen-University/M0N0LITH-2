@@ -1,0 +1,63 @@
+# Every hold is read-only until release, which itself must not delete bytes.
+use ../shell/workspace
+use std/files
+use std/strings
+use std/vfs
+
+fun check(label, got, want)
+    if got != want
+        fail(label + ": " + str(got) + " != " + str(want))
+
+fun contents(dir)
+    let rows = []
+    for name in files.list(dir)
+        append(rows, [name, files.read(dir + "/" + name)])
+    return rows
+
+let dir = "ws-release"
+for kind in ["wrong-version", "wrong-version-older", "too-many", "ambiguous"]
+    files.make_dir(dir)
+    files.write(dir + "/notes.keep", "unknown")
+    files.write(dir + "/g01.m2ws", "unknown generation spelling")
+    let next_id = 10
+    let previous = "none"
+    if kind == "too-many"
+        for n in 1..34
+            files.write(dir + "/g" + str(n) + ".m2ws.partial", "M2WS1\n")
+        next_id = 34
+    else
+        files.write(dir + "/g9.m2ws", "M2WS9\n.\n")
+        files.write(dir + "/COMMITTED", "g9\n")
+        if kind != "wrong-version"
+            files.write(dir + "/g1.m2ws", "M2WS1\nF /marker older\n.\n")
+        if kind == "wrong-version-older"
+            previous = "g1"
+        if kind == "ambiguous"
+            files.write(dir + "/g9.m2ws", "M2WS1\nF /marker newer\n.\n")
+            files.write(dir + "/COMMITTED", "x")
+    let fs = vfs.new()
+    workspace.open(dir)
+    workspace.load(fs)
+    check("held notice", strings.contains(workspace.notice(), "store held"), true)
+    let before = contents(dir)
+    vfs.write(fs, "/released", "session")
+    check("held save", strings.contains(workspace.save(fs), "not written"), true)
+    check("held bytes", contents(dir), before)
+    workspace.release()
+    check("release notice", workspace.notice(), "workspace: store hold released")
+    check("release does not delete", contents(dir), before)
+    check("released save", workspace.save(fs), "")
+    check("released pointer", files.read(dir + "/COMMITTED"), "g" + str(next_id) + "\n")
+    check("released META", files.read(dir + "/META"), "committed g" + str(next_id) + "\nprevious " + previous + "\n")
+    let names = ["COMMITTED", "META", "g" + str(next_id) + ".m2ws", "g01.m2ws", "notes.keep"]
+    if previous == "g1"
+        append(names, "g1.m2ws")
+    check("exact prune", files.list(dir), host_sort(names))
+    check("unknown file", files.read(dir + "/notes.keep"), "unknown")
+    check("unknown spelling", files.read(dir + "/g01.m2ws"), "unknown generation spelling")
+    workspace.open(dir)
+    workspace.load(fs)
+    check("released session installed", vfs.read(fs, "/released"), "session")
+    check("new open quiet", workspace.notice(), "")
+    print(kind, "released as g" + str(next_id), "previous", previous)
+    files.remove_tree(dir)
