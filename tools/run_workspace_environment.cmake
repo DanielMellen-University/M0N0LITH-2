@@ -4,6 +4,14 @@ set(err "")
 set(code 0)
 foreach(mode explicit empty home profile empty-home home-priority none empty-homes)
   set(env_args --unset=M0N0LITH_WORKSPACE --unset=HOME --unset=USERPROFILE)
+  # Windows launches the child with an explicit environment block and, when
+  # USERPROFILE is missing from it, copies the caller's value back in. HOME is
+  # not restored that way. An empty USERPROFILE is kept, and open_default
+  # treats an empty profile the same as an unset one. Cases that set
+  # USERPROFILE overwrite this.
+  if(WIN32)
+    list(APPEND env_args "USERPROFILE=")
+  endif()
   set(case_dir "${run_dir}/${mode}")
   file(MAKE_DIRECTORY "${case_dir}")
   set(chosen "-")
