@@ -1,0 +1,50 @@
+# Pointer and metadata grammar cannot name noncanonical generations.
+use ../shell/workspace
+use std/files
+use std/vfs
+
+fun check(label, got, want)
+    if got != want
+        fail(label + ": " + str(got) + " != " + str(want))
+
+let dir = "ws-tokens"
+files.make_dir(dir)
+let old = "M2WS1\nF /value old\n.\n"
+files.write(dir + "/g1.m2ws", old)
+files.write(dir + "/g2.m2ws", "M2WS1\nF /value newer\n.\n")
+files.write(dir + "/META", "committed g1\nprevious none\n")
+let fs = vfs.new()
+let pointers = ["g0\n", "g01\n", "g1000000000\n", "g1", "g1" + chr(13) + "\n", "g1\n\n", "g1\nx", " g1\n", "g+1\n", "g-1\n", "g123456789012345\n", "g1234567890123456\n"]
+for ptr in pointers
+    files.write(dir + "/COMMITTED", ptr)
+    workspace.open(dir)
+    workspace.load(fs)
+    check("invalid pointer uses META", vfs.read(fs, "/value"), "old")
+    check("pointer notice", workspace.notice(), "workspace: pointer invalid; recovered g1; ignored uncommitted g2")
+print(len(pointers), "invalid pointer spellings use META")
+let metas = ["committed g01\nprevious none\n", "committed g0\nprevious none\n", "committed g1000000000\nprevious none\n", "committed g1\nprevious g01\n", "previous none\ncommitted g1\n", "committed g1\nprevious none", "committed g1" + chr(13) + "\nprevious none\n", "committed g1\nprevious none\n\n", "committed  g1\nprevious none\n", "committed g1\nprevious none \n", "committed g1\nprevious none\nextra\n", "committed g1\nprevious none\nxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"]
+files.write(dir + "/COMMITTED", "x")
+for meta in metas
+    files.write(dir + "/META", meta)
+    workspace.open(dir)
+    workspace.load(fs)
+    check("bad META holds ambiguous store", workspace.notice(), "workspace: pointer invalid; store held; using defaults; ignored uncommitted g2")
+    check("no candidate installed", vfs.exists(fs, "/value"), false)
+print(len(metas), "malformed META records cannot choose a generation")
+files.remove_tree(dir)
+files.make_dir(dir)
+# These are unknown names, not generation ids, and cannot force a hold.
+for name in ["g0.m2ws", "g01.m2ws", "g1000000000.m2ws", "g-1.m2ws", "g1.m2ws.extra"]
+    files.write(dir + "/" + name, "M2WS9\n.\n")
+files.write(dir + "/g999999999.m2ws", old)
+files.write(dir + "/COMMITTED", "g999999999\n")
+workspace.open(dir)
+workspace.load(fs)
+check("nine digit id", vfs.read(fs, "/value"), "old")
+check("unknown names ignored", workspace.notice(), "")
+let before = files.list(dir)
+check("id exhaustion", workspace.save(fs), "workspace: save failed; cannot write store; kept g999999999")
+check("no id wrap", files.list(dir), before)
+check("max id untouched", files.read(dir + "/g999999999.m2ws"), old)
+print("nine-digit maximum loads; exhaustion never wraps or overwrites")
+files.remove_tree(dir)
