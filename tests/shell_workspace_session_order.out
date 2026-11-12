@@ -1,0 +1,2 @@
+file records after session rejected atomically
+unordered files before session accepted

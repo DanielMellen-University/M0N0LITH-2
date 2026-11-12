@@ -124,7 +124,7 @@ D /tmp
 
 A generation written by the desktop records the open windows in the same file as the vfs. The rename of `COMMITTED` publishes both. A generation written by `save` with no session, which is what a test does when it never binds a desktop, has no window records. A file from before windows were stored still loads: the files come back and no windows open.
 
-`S` lines come after the `D` and `F` lines. `Z` is the last line before `.`, and only when there is an `S` line.
+`S` lines come after all the `D` and `F` lines. A file or directory record after the first `S` line invalidates the whole generation, even with a matching checksum. `Z` is the last line before `.`, and only when there is an `S` line.
 
 | Line | Meaning |
 |---|---|

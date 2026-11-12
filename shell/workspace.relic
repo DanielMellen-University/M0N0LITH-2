@@ -568,7 +568,7 @@ fun _parse(text)
             append(raw_session, slice(line, 2, len(line)))
             if len(raw_session) > 2000
                 return _bad("invalid")
-        else if len(dirs) + len(files) >= max_entries
+        else if len(raw_session) > 0 or len(dirs) + len(files) >= max_entries
             return _bad("invalid")
         else if strings.starts_with(line, "D ")
             let path = _unesc(slice(line, 2, len(line)))
