@@ -91,12 +91,12 @@ Caps, applied while parsing, before the session vfs is changed:
 
 | Cap | Value |
 |---|---|
-| generation file | 1,500,000 bytes (`files.size` first; the read is discarded when larger) |
+| generation file | 1,500,000 bytes (`files.size` before reading, then a byte check on the text read) |
 | entries (files plus directories) | 2,000 |
 | one file's text | 262,144 characters |
 | one path | 240 characters |
 
-The writer checks the same UTF-8 byte cap before writing a partial. A Unicode image that would be too large to reload fails with `image too large`; the pointer and metadata stay unchanged.
+The reader checks the UTF-8 byte cap again after reading, in case the file grew after `files.size`. The writer checks the same cap before writing a partial. A Unicode image that would be too large to reload fails with `image too large`; the pointer and metadata stay unchanged.
 
 `std/files.read` still loads a generation that passed the size check into one string. That is a bound on what we will install, not a claim that a hostile file cannot make the host allocate. This is not a sandbox.
 

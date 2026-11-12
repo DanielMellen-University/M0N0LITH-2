@@ -680,7 +680,7 @@ fun _read_generation(n)
         if files.is_dir(path) or files.size(path) > max_generation_bytes
             return _bad("invalid")
         let text = files.read(path)
-        if len(text) > max_generation_bytes
+        if not _image_fits(text)
             return _bad("invalid")
         return _parse(text)
     catch err

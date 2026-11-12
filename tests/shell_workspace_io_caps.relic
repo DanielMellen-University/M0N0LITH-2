@@ -1,0 +1,108 @@
+# Parse caps are inclusive; oversized host files must be rejected before read.
+use ../shell/workspace
+use ../tools/workspace/io_files as io
+use std/files
+use std/vfs
+
+fun check(label, got, want)
+    if got != want
+        fail(label + ": " + str(got) + " != " + str(want))
+
+fun repeat(c, n)
+    let text = ""
+    for i in 0..n
+        text = text + c
+    return text
+
+fun saw_read(path)
+    for seen in io.control.reads
+        if seen == path
+            return true
+    return false
+
+let dir = "ws-caps"
+let fs = vfs.new()
+files.make_dir(dir)
+files.write(dir + "/g1.m2ws", "M2WS1\nF /kept old\n.\n")
+files.write(dir + "/COMMITTED", "g2\n")
+
+fun load(text)
+    files.write(dir + "/g2.m2ws", text)
+    io.control.reads = []
+    workspace.open(dir)
+    workspace.load(fs)
+
+fun recovered()
+    check("recovery notice", workspace.notice(), "workspace: committed image invalid; recovered g1")
+    check("old vfs", vfs.read(fs, "/kept"), "old")
+
+load(repeat("x", 1500001))
+recovered()
+check("oversize never read", saw_read(dir + "/g2.m2ws"), false)
+print("oversize generation rejected before read")
+# A size check is not a promise that the file cannot grow before the read.
+let emoji = repeat("😀", 190000)
+io.control.mode = "size-race"
+load("M2WS1\nF /a " + emoji + "\nF /b " + emoji + "\n.\n")
+recovered()
+check("racing file was read", saw_read(dir + "/g2.m2ws"), true)
+io.control.mode = ""
+print("byte cap checked again after read")
+let exact = "M2WS1\n"
+for i in 0..5
+    exact = exact + "F /f" + str(i) + " " + repeat("a", 250000) + "\n"
+let head = "F /last "
+let tail = 1500000 - len(exact) - len(head) - 3
+exact = exact + head + repeat("b", tail) + "\n.\n"
+check("exact byte length", len(exact), 1500000)
+load(exact)
+check("byte boundary accepted", workspace.notice(), "")
+check("last file intact", len(vfs.read(fs, "/last")), tail)
+check("exact file read", saw_read(dir + "/g2.m2ws"), true)
+print("1500000-byte generation accepted")
+for cap in ["text", "path", "entries"]
+    for over in [0, 1]
+        let body = ""
+        if cap == "text"
+            body = "F /value " + repeat("x", 262144 + over) + "\n"
+        else if cap == "path"
+            body = "F /" + repeat("p", 239 + over) + " x\n"
+        else
+            for i in 0..2000 + over
+                body = body + "F /f" + str(i) + " x\n"
+        load("M2WS1\n" + body + ".\n")
+        if over == 1
+            recovered()
+        else
+            check("inclusive parse cap", workspace.notice(), "")
+    print(cap, "boundary accepted; one over rejected")
+files.remove(dir + "/g2.m2ws")
+# Size checks on the small control files also precede the read.
+for length in [16, 17]
+    files.write(dir + "/COMMITTED", repeat("x", length))
+    io.control.reads = []
+    workspace.open(dir)
+    workspace.load(fs)
+    check("pointer size read boundary", saw_read(dir + "/COMMITTED"), length == 16)
+for length in [64, 65]
+    files.write(dir + "/META", repeat("x", length))
+    io.control.reads = []
+    workspace.open(dir)
+    workspace.load(fs)
+    check("META size read boundary", saw_read(dir + "/META"), length == 64)
+print("16-byte pointer and 64-byte META read limits")
+files.remove(dir + "/META")
+files.write(dir + "/COMMITTED", "g1\n")
+for n in 2..33
+    files.write(dir + "/g" + str(n) + ".m2ws.partial", "M2WS1\n")
+workspace.open(dir)
+workspace.load(fs)
+check("32 names accepted", vfs.read(fs, "/kept"), "old")
+check("32 notice", workspace.notice(), "workspace: ignored partial g32")
+files.write(dir + "/g33.m2ws.partial", "M2WS1\n")
+workspace.open(dir)
+workspace.load(fs)
+check("33 names held", workspace.notice(), "workspace: too many generation files; store held; using defaults")
+check("33 defaults", vfs.exists(fs, "/kept"), false)
+print("32 generation names accepted; 33 held")
+files.remove_tree(dir)

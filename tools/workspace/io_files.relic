@@ -21,7 +21,10 @@ fun exists(path) = files.exists(path)
 fun is_dir(path) = files.is_dir(path)
 fun make_dir(path) = files.make_dir(path)
 fun remove(path) = files.remove(path)
-fun size(path) = files.size(path)
+fun size(path)
+    if control.mode == "size-race" and strings.ends_with(path, ".m2ws")
+        return 0
+    return files.size(path)
 
 fun list(path)
     if control.mode == "list"
