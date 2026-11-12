@@ -1,0 +1,45 @@
+# The boot report persists, while only the latest failed-save report is appended.
+use ../shell/workspace
+use std/files
+use std/vfs
+
+fun check(label, got, want)
+    if got != want
+        fail(label + ": " + str(got) + " != " + str(want))
+
+let dir = "ws-notices"
+workspace.open(dir)
+let fs = vfs.new()
+workspace.load(fs)
+check("initial", workspace.save(fs), "")
+files.write(dir + "/g2.m2ws.partial", "M2WS1\n")
+workspace.open(dir)
+workspace.load(fs)
+let boot = "workspace: ignored partial g2"
+check("boot", workspace.notice(), boot)
+workspace.arm("partial-generation")
+check("first failure", workspace.save(fs), "workspace: save failed (partial-generation); kept g1")
+check("appended", workspace.notice(), boot + " | workspace: save failed (partial-generation); kept g1")
+workspace.arm("full-uncommitted")
+check("second failure", workspace.save(fs), "workspace: save failed (full-uncommitted); kept g1")
+check("replaced failure", workspace.notice(), boot + " | workspace: save failed (full-uncommitted); kept g1")
+check("one shot retry", workspace.save(fs), "")
+check("boot survives success", workspace.notice(), boot)
+check("retry skips leftovers", files.read(dir + "/COMMITTED"), "g5\n")
+workspace.arm("staged-pointer")
+workspace.arm("")
+check("clear fault", workspace.save(fs), "")
+check("boot still survives", workspace.notice(), boot)
+files.make_dir(dir + "/META.next")
+check("metadata degraded success", workspace.save(fs), "")
+check("degraded appended", workspace.notice(), boot + " | workspace: saved; metadata backup not updated")
+files.remove(dir + "/META.next")
+check("metadata repaired success", workspace.save(fs), "")
+check("degraded cleared", workspace.notice(), boot)
+workspace.release()
+check("release without hold", workspace.notice(), boot)
+workspace.open(dir)
+workspace.load(fs)
+check("new open quiet", workspace.notice(), "")
+print("boot survives retries; latest save notice clears on success or reopen")
+files.remove_tree(dir)
