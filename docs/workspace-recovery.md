@@ -74,7 +74,7 @@ Escapes, in paths and in file text:
 | `\s` | space |
 | `\u` + 4 lowercase hex digits | a code 0 to 31 that is not already `\n`, `\r` or `\t` |
 
-Any other backslash is invalid. The first raw space in an `F` record separates the path from the text. No space means the text is empty. Paths do not contain a raw space.
+Any other backslash is invalid. Raw control characters are invalid inside records; use their escapes. `\u0009`, `\u000a` and `\u000d` are invalid too: use `\t`, `\n` and `\r`. The first raw space in an `F` record separates the path from the text. No space means the text is empty. Paths do not contain a raw space.
 
 A path, after unescaping, must be a vfs path and nothing else:
 

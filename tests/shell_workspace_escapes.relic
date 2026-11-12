@@ -1,0 +1,45 @@
+# Canonical escapes, safe vfs names, and rejection without a partial install.
+use ../shell/workspace
+use std/files
+use std/vfs
+
+fun check(label, got, want)
+    if got != want
+        fail(label + ": " + str(got) + " != " + str(want))
+
+let dir = "ws-escapes"
+workspace.open(dir)
+let fs = vfs.new()
+workspace.load(fs)
+let text = "space \\ café 😀"
+for n in 0..32
+    text = text + chr(n)
+vfs.make_dir(fs, "/home/space dir")
+vfs.write(fs, "/home/space dir/all", text)
+check("save escapes", workspace.save(fs), "")
+workspace.open(dir)
+workspace.load(fs)
+check("all escapes roundtrip", vfs.read(fs, "/home/space dir/all"), text)
+let kept = files.read(dir + "/g1.m2ws")
+files.write(dir + "/COMMITTED", "g2\n")
+let bad = ["D /raw space\n", "F /bad \\u0009\n", "F /bad \\u000a\n", "F /bad \\u000d\n", "F /bad \\u001A\n", "F /bad \\u0020\n", "F /bad \\u00\n", "F /bad \\q\n", "F /bad \\\n", "F /bad " + chr(0) + "\n", "F /bad \t\n"]
+for body in bad
+    files.write(dir + "/g2.m2ws", "M2WS1\n" + body + ".\n")
+    workspace.open(dir)
+    workspace.load(fs)
+    check("invalid escape or raw byte", workspace.notice(), "workspace: committed image invalid; recovered g1")
+    check("old bytes", files.read(dir + "/g1.m2ws"), kept)
+    check("old vfs", vfs.read(fs, "/home/space dir/all"), text)
+    check("no new file", vfs.exists(fs, "/bad"), false)
+print("all escapes roundtrip;", len(bad), "noncanonical records rejected")
+# A vfs name the format cannot store fails before publication.
+files.remove(dir + "/g2.m2ws")
+files.write(dir + "/COMMITTED", "g1\n")
+workspace.open(dir)
+workspace.load(fs)
+vfs.write(fs, "/home/bad\nname", "memory only")
+check("bad save path", workspace.save(fs), "workspace: save failed; path cannot be stored; kept g1")
+check("pointer kept", files.read(dir + "/COMMITTED"), "g1\n")
+check("memory retained", vfs.read(fs, "/home/bad\nname"), "memory only")
+print("unstorable vfs name keeps the previous commit")
+files.remove_tree(dir)

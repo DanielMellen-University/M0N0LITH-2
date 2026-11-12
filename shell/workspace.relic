@@ -246,6 +246,8 @@ fun _unesc(s)
     while i < len(s)
         let c = s[i]
         if c != "\\"
+            if ord(c) < 32
+                return none
             out = out + c
             i = i + 1
         else
@@ -269,7 +271,7 @@ fun _unesc(s)
                 i = i + 2
             else if e == "u"
                 let v = _unhex(s, i + 2)
-                if v == none or v > 31
+                if v == none or v > 31 or v == 9 or v == 10 or v == 13
                     return none
                 try
                     out = out + chr(v)
@@ -571,7 +573,10 @@ fun _parse(text)
         else if len(raw_session) > 0 or len(dirs) + len(files) >= max_entries
             return _bad("invalid")
         else if strings.starts_with(line, "D ")
-            let path = _unesc(slice(line, 2, len(line)))
+            let raw = slice(line, 2, len(line))
+            if strings.contains(raw, " ")
+                return _bad("invalid")
+            let path = _unesc(raw)
             if not _valid_path(path) or path in seen
                 return _bad("invalid")
             seen[path] = "D"
