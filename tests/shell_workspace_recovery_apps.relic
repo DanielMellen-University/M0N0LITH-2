@@ -1,0 +1,136 @@
+# Every recovery path installs the same files and all seven saved app states.
+use ../shell/wm
+use std/files
+use std/strings
+use std/vfs
+
+fun check(label, got, want)
+    if got != want
+        fail(label + ": " + str(got) + " != " + str(want))
+
+fun desktop() = wm.new_desktop(1024, 768, wm.default_apps())
+
+fun image(dir)
+    let p = files.read(dir + "/COMMITTED")
+    return files.read(dir + "/" + slice(p, 0, len(p) - 1) + ".m2ws")
+
+let dir = "ws-recovery-apps"
+wm.workspace_open(dir)
+let d = desktop()
+wm.workspace_bind(d)
+let fs = wm.terminal.init().fs
+vfs.write(fs, "/home/marker", "old")
+vfs.write(fs, "/tmp/item", "selected")
+vfs.write(fs, "/home/editor.txt", "disk editor")
+vfs.write(fs, "/home/ide.relic", "disk ide")
+let places = []
+for app in [wm.terminal, wm.files_app, wm.editor, wm.ide, wm.notes, wm.clicker, wm.paint_app]
+    let w = wm.launch(d, app)
+    let s = w.state
+    w.x = 20 + 12 * w.id
+    w.y = 30 + 10 * w.id
+    w.minimized = app.name == "Notes"
+    append(places, [w.id, w.x, w.y, w.width, w.height, w.minimized])
+    if app.name == "Terminal"
+        s.cwd = "/tmp"
+        s.input = "draft"
+        s.left = 2
+        s.draft = "unfinished"
+        s.buf = ["Terminal. Type help.", "/tmp> pwd", "/tmp"]
+        s.past = ["cd /tmp", "pwd"]
+        s.back = 1
+    else if app.name == "Files"
+        s.path = "/tmp"
+        s.sel = 1
+    else if app.name == "Editor" or app.name == "IDE"
+        s.path = "/home/editor.txt"
+        s.disk = "disk editor"
+        s.text = "unsaved editor"
+        if app.name == "IDE"
+            s.path = "/home/ide.relic"
+            s.disk = "disk ide"
+            s.text = "unsaved ide"
+            s.out = ["recorded output"]
+        s.back = 2
+        s.mark = 1
+    else if app.name == "Notes"
+        s.text = "remember"
+        s.left = 3
+    else if app.name == "Clicker"
+        s.count = 42
+    else
+        s.cells[0] = 8
+        s.cells[2159] = 3
+        s.path = "/home/unsaved.paint"
+        s.color = 5
+        s.size = 3
+        s.tool = "fill rect"
+        s.status = "edited"
+check("old snapshot", wm.workspace_flush(), "")
+let old = image(dir)
+vfs.write(fs, "/home/marker", "newer")
+d.windows[0].state.cwd = "/home"
+d.windows[4].state.text = "newer notes"
+check("new snapshot", wm.workspace_flush(), "")
+let newer = image(dir)
+files.remove_tree(dir)
+
+for kind in ["leftovers", "invalid-session", "truncated-session", "missing-image", "wrong-version", "torn-META", "missing-pointer-META", "single-torn", "single-missing"]
+    files.make_dir(dir)
+    files.write(dir + "/g1.m2ws", old)
+    files.write(dir + "/COMMITTED", "g2\n")
+    if kind == "leftovers"
+        files.write(dir + "/COMMITTED", "g1\n")
+        files.write(dir + "/g3.m2ws", newer)
+        files.write(dir + "/g4.m2ws.partial", "M2WS1\n")
+    else if kind == "invalid-session"
+        files.write(dir + "/g2.m2ws", strings.replace(newer, "S F count 42\n", "S F count 43\n"))
+    else if kind == "truncated-session"
+        let at = strings.find(newer, "S F cwd")
+        check("session found", at > 0, true)
+        files.write(dir + "/g2.m2ws", slice(newer, 0, at + 5))
+    else if kind == "wrong-version"
+        files.write(dir + "/g2.m2ws", strings.replace(newer, "M2WS1\n", "M2WS9\n"))
+    else if kind == "torn-META" or kind == "missing-pointer-META"
+        files.write(dir + "/g3.m2ws", newer)
+        files.write(dir + "/META", "committed g1\nprevious none\n")
+        if kind == "torn-META"
+            files.write(dir + "/COMMITTED", "x")
+        else
+            files.remove(dir + "/COMMITTED")
+    else if kind == "single-torn"
+        files.write(dir + "/COMMITTED", "x")
+    else if kind == "single-missing"
+        files.remove(dir + "/COMMITTED")
+    wm.workspace_open(dir)
+    let restored = desktop()
+    wm.workspace_bind(restored)
+    check("old file", vfs.read(fs, "/home/marker"), "old")
+    check("seven windows", len(restored.windows), 7)
+    for i in 0..len(restored.windows)
+        let w = restored.windows[i]
+        let s = w.state
+        check("place and minimized", [w.id, w.x, w.y, w.width, w.height, w.minimized], places[i])
+        if w.app.name == "Terminal"
+            check("Terminal", [s.cwd, s.input, s.left, s.draft, s.buf, s.past, s.back], ["/tmp", "draft", 2, "unfinished", ["Terminal. Type help.", "/tmp> pwd", "/tmp"], ["cd /tmp", "pwd"], 1])
+        else if w.app.name == "Files"
+            check("Files", [s.path, s.sel], ["/tmp", 1])
+        else if w.app.name == "Editor" or w.app.name == "IDE"
+            let text = "unsaved editor"
+            let path = "/home/editor.txt"
+            let disk = "disk editor"
+            if w.app.name == "IDE"
+                text = "unsaved ide"
+                path = "/home/ide.relic"
+                disk = "disk ide"
+                check("IDE output", s.out, ["recorded output"])
+            check("buffer", [s.path, s.text, s.disk, s.back, s.mark, s.status, s.undo, s.redo], [path, text, disk, 2, 1, "edited", [], []])
+        else if w.app.name == "Notes"
+            check("Notes", [s.text, s.left], ["remember", 3])
+        else if w.app.name == "Clicker"
+            check("Clicker", s.count, 42)
+        else
+            check("Paint", [s.path, s.cells[0], s.cells[2159], s.color, s.size, s.tool, s.status, s.foreign, s.undo, s.redo], ["/home/unsaved.paint", 8, 3, 5, 3, "fill rect", "edited", false, [], []])
+        wm.visible_lines(w)
+    print(kind, wm.workspace_notice(), "seven apps restored")
+    files.remove_tree(dir)

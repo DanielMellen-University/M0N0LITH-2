@@ -1,0 +1,9 @@
+leftovers workspace: ignored uncommitted g3; ignored partial g4 seven apps restored
+invalid-session workspace: committed image invalid; recovered g1 seven apps restored
+truncated-session workspace: committed image truncated; recovered g1 seven apps restored
+missing-image workspace: committed image invalid; recovered g1 seven apps restored
+wrong-version workspace: committed image wrong version; store held; recovered g1 seven apps restored
+torn-META workspace: pointer invalid; recovered g1; ignored uncommitted g3 seven apps restored
+missing-pointer-META workspace: pointer missing; recovered g1; ignored uncommitted g3 seven apps restored
+single-torn workspace: pointer invalid; recovered g1 seven apps restored
+single-missing workspace: pointer missing; recovered g1 seven apps restored
