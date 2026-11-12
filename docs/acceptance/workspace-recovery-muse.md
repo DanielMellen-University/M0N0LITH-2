@@ -1,9 +1,11 @@
 # Persistent workspace recovery: acceptance cases
 
 Status: cases 1 to 5 were run on Nov 9 2026 against the window session
-snapshot and pass. Cases 6 to 9 were run on Nov 10 2026 against main
-6c321a3b and pass. See "Results" for how each case was run and what
-was not tried. Cases 3a, 3b, 3c and 5 were
+snapshot and pass, and were re-verified on Nov 12 2026 against main
+dd1bb60 (full suite 486/486, see "Results (Nov 12 2026)"). Cases 6 to 9
+were run on Nov 10 2026 against main 6c321a3b and pass, and were rerun
+on Nov 12 2026 against main dd1bb60 and pass. See "Results" for how
+each case was run and what was not tried. Cases 3a, 3b, 3c and 5 were
 reworded on that date, before the results were recorded; the reasons
 are in "Wording changes".
 
@@ -50,6 +52,19 @@ published contract at main `6c321a3b`. The harness is in
 `tools/workspace-recovery-muse/` and the fixtures are in
 `tests/fixtures/workspace-recovery/`. See Results (Nov 10 2026).
 
+### Update: rerun on main dd1bb60 (D0133, 2026-11-12)
+
+All eleven cases were rerun against main `dd1bb60` (PR #38 merged,
+workspace-recovery depth work). Cases 1 to 5 were re-verified through
+the full suite (486/486 ctest, including the 23 workspace tests,
+`workspace_restart` and `workspace_kill`). Cases 6 to 9 were rerun
+live and by replay with the harness in
+`tools/workspace-recovery-muse/`; both runs passed every check (49 ok
+lines, 0 failures). The committed fixtures were regenerated with
+`make_fixtures.py` and came out byte-identical, so PR #38 did not
+change what the implementation writes. No fixture or harness file
+needed a change. See Results (Nov 12 2026).
+
 ## How to read a case
 
 - Setup: the visible state before the case starts.
@@ -78,7 +93,7 @@ and how the desktop reports it, is set by the implementation
 
 ## Case 1: Cross-app save and restart roundtrip
 
-Status: PASS (Nov 9 2026).
+Status: PASS (Nov 9 2026; re-verified Nov 12 2026).
 
 Setup: Start the desktop with no saved workspace. Open Terminal and
 write a file with two lines of text. Open Files and open that file, so
@@ -104,7 +119,7 @@ Data-preservation assertions:
 
 ## Case 2: Interrupted save keeps the last committed version
 
-Status: PASS (Nov 9 2026).
+Status: PASS (Nov 9 2026; re-verified Nov 12 2026).
 
 Setup: Start the desktop with no saved workspace. Open the Editor on a
 file, write a first version, and save it. Save the workspace, so the
@@ -133,7 +148,7 @@ Data-preservation assertions:
 
 ## Case 3a: Truncated saved workspace data
 
-Status: PASS (Nov 9 2026).
+Status: PASS (Nov 9 2026; re-verified Nov 12 2026).
 
 Setup: Start the desktop, open the Editor on a file with saved text,
 open Paint on a saved picture, save the workspace, and quit. Then
@@ -157,7 +172,7 @@ Data-preservation assertions:
 
 ## Case 3b: Corrupt saved workspace data
 
-Status: PASS (Nov 9 2026).
+Status: PASS (Nov 9 2026; re-verified Nov 12 2026).
 
 Setup: Start the desktop, open the Editor on a file with saved text,
 open Paint on a saved picture, save the workspace, and quit. Then
@@ -182,7 +197,7 @@ Data-preservation assertions:
 
 ## Case 3c: Unsupported-version saved workspace data
 
-Status: PASS (Nov 9 2026).
+Status: PASS (Nov 9 2026; re-verified Nov 12 2026).
 
 Setup: Start the desktop, open the Editor on a file with saved text,
 save the workspace, and quit. Then replace the saved workspace data
@@ -208,7 +223,7 @@ Data-preservation assertions:
 
 ## Case 4: Visible save failure
 
-Status: PASS (Nov 9 2026).
+Status: PASS (Nov 9 2026; re-verified Nov 12 2026).
 
 Setup: Start the desktop with no saved workspace. Open the Editor on a
 file, write text, and save it with Ctrl+S. Open Paint, draw a mark,
@@ -238,7 +253,7 @@ Data-preservation assertions:
 
 ## Case 5: First-run defaults
 
-Status: PASS (Nov 9 2026).
+Status: PASS (Nov 9 2026; re-verified Nov 12 2026).
 
 Setup: Start the desktop with no saved workspace at all, as a
 first-time user would. No files have been created and no workspace
@@ -262,7 +277,7 @@ Data-preservation assertions:
 
 ## Case 6: Corrupt committed generation must not load a newer uncommitted generation (D0118-1)
 
-Status: PASS (Nov 10 2026).
+Status: PASS (Nov 12 2026).
 
 Setup: Start the desktop, open the Editor on a file with saved text,
 and save the workspace twice, so the store holds an older generation
@@ -304,7 +319,7 @@ COMMITTED names after that write, not before it.
 
 ## Case 7: Corrupted retry commit keeps the actual prior committed generation (D0118-2)
 
-Status: PASS (Nov 10 2026).
+Status: PASS (Nov 12 2026).
 
 Setup: Start the desktop with no saved workspace. Open the Editor on
 a file, write a first version, and save the workspace, so the first
@@ -353,7 +368,7 @@ this fallback.
 
 ## Case 8: Unsupported-version store stays held through normal writes (D0118-3)
 
-Status: PASS (Nov 10 2026).
+Status: PASS (Nov 12 2026).
 
 Setup: The store holds a committed generation written in a newer
 version than this desktop understands. Start the desktop. It shows
@@ -395,7 +410,7 @@ after a release.
 
 ## Case 9: A requested store that cannot be opened must not report saved (D0118-4)
 
-Status: PASS (Nov 10 2026).
+Status: PASS (Nov 12 2026).
 
 Setup: Start the desktop with no saved workspace. Open the Editor on
 a file and write text. Request a workspace store at a path that cannot
@@ -513,6 +528,65 @@ was green before and after (469/469 ctest).
 | 7 | `case7_setup.relic` commits v1, arms `partial-generation`, saves v2 (fails, `workspace: save failed (partial-generation); kept g1`), then retries and commits v2 as g3. The driver checks the faulted g2 leftover was pruned (only g1, g3, COMMITTED and META remain), then damages g3 the same way as case 6. `check_store.relic` opens it | `workspace: committed image invalid; recovered g1`, note.txt reads `first version` |
 | 8 | `case8_setup.relic` commits v1. The driver replaces the committed generation with `M2WS9` and points COMMITTED at g2, with META committed g2 previous g1. `case8_check.relic` opens it and tries Ctrl+S twice from the Editor | `workspace: committed image wrong version; store held; recovered g1`, note.txt reads `first version`, both saves report `workspace: save failed; store held (wrong-version); not written`, and every byte in the store is unchanged afterwards |
 | 9 | The bad store path is a regular file. `case9_check.relic` opens it, types in the Editor, and presses Ctrl+S, then opens a fresh good store and presses Ctrl+S twice. `case9_verify.relic` reopens the good store | `workspace: cannot open store`, the workspace is not enabled, the Editor never says `saved` for the bad store, nothing is written to the bad path. The first good-store Ctrl+S reports the disk change the store switch caused (`changed on disk: ctrl+s again`); the second says `saved`. A fresh process reads the saved text back |
+
+Not covered: the release of a held store (`wm.workspace_release()`),
+which case 8 does not try; power loss; and two desktops writing one
+store at once.
+
+## Results (Nov 12 2026)
+
+Rerun on Linux against main `dd1bb60` (PR #38 merged). Cases 1 to 5
+were re-verified through the full suite, cases 6 to 9 through the
+harness. No case changed outcome; every case still passes.
+
+Full suite, from the repo root:
+
+```console
+cmake -S . -B build -DCMAKE_BUILD_TYPE=Release
+cmake --build build -j4
+ctest --test-dir build -C Release
+```
+
+Result: 486/486 passed, 0 failed, including all 23 workspace tests,
+`check_shell`, `workspace_restart` and `workspace_kill`. That is the
+evidence for cases 1 to 5: the golden tests that drove them on Nov 9
+(`shell_workspace_session`, `workspace_kill`, `shell_workspace_faults`
+and the rest) are in that suite and green at the new head, together
+with the new PR #38 workspace tests.
+
+Harness, from the repo root (Relic built from the pinned submodule
+first: `cmake -S relic -B relic/build -DRELIC_BUILD_HOST=ON &&
+cmake --build relic/build`):
+
+```console
+python3 tools/workspace-recovery-muse/run_cases.py --live --replay
+```
+
+Result: `RESULT: PASS, all four cases`, 49 ok lines, 0 failures.
+The live run builds each store with the real implementation in
+separate processes, damages files by hand between processes, and
+checks what the next process installs. The replay run copies the
+committed fixtures from `tests/fixtures/workspace-recovery/` and runs
+only the check phases against them. Both runs passed every check.
+
+| Case | How it was run | What was seen |
+|---|---|---|
+| 1 | full suite at dd1bb60 (`shell_workspace_session` and the workspace goldens) | same windows and files came back after a restart, as on Nov 9 |
+| 2 | full suite at dd1bb60 (`workspace_kill`, `shell_workspace_faults`, `shell_workspace_session`) | a killed or faulted save left the last committed files and windows; the leftover partial was ignored |
+| 3a | full suite at dd1bb60 (workspace goldens) | truncated committed image fell back to the earlier whole save with a visible notice |
+| 3b | full suite at dd1bb60 (workspace goldens) | corrupt committed image fell back to the earlier whole save with a visible notice |
+| 3c | full suite at dd1bb60 (workspace goldens) | wrong-version committed image held the store and fell back with a visible notice |
+| 4 | full suite at dd1bb60 (workspace goldens) | a failed save was reported visibly and the windows and text stayed |
+| 5 | full suite at dd1bb60 (workspace goldens) | a new, empty workspace directory opened with first-run defaults twice |
+| 6 | harness live and replay at dd1bb60 | `workspace: committed image invalid; recovered g1; ignored uncommitted g3`, note.txt reads `first version` |
+| 7 | harness live and replay at dd1bb60 | faulted save reports `workspace: save failed (partial-generation); kept g1`; retry commits v2 as g3; damaged g3 falls back with `workspace: committed image invalid; recovered g1`, note.txt reads `first version` |
+| 8 | harness live and replay at dd1bb60 | `workspace: committed image wrong version; store held; recovered g1`; both Editor Ctrl+S attempts report `workspace: save failed; store held (wrong-version); not written`; every store byte unchanged afterwards |
+| 9 | harness live and replay at dd1bb60 | `workspace: cannot open store`, workspace not enabled, Editor never says `saved` for the bad store, nothing written to the bad path; the first good-store Ctrl+S reports the disk-change guard (`changed on disk: ctrl+s again`); the second says `saved`; a fresh process reads the saved text back |
+
+Fixture check: `make_fixtures.py` was run against dd1bb60 and the
+regenerated fixtures came out byte-identical to the committed ones,
+so PR #38 did not change what the implementation writes, and no
+fixture or harness file needed a change.
 
 Not covered: the release of a held store (`wm.workspace_release()`),
 which case 8 does not try; power loss; and two desktops writing one
