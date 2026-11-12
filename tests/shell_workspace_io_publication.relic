@@ -1,0 +1,51 @@
+# The runner copies workspace.relic and changes only its std/files import to
+# the test adapter. No production fault stages or hooks are added.
+use ../shell/workspace
+use ../tools/workspace/io_files as io
+use std/files
+use std/vfs
+
+fun check(label, got, want)
+    if got != want
+        fail(label + ": " + str(got) + " != " + str(want))
+
+let dir = "ws-publication"
+for mode in ["partial-readback", "generation-rename", "staged-readback", "pointer-rename", "pointer-readback", "pointer-read-error"]
+    io.control.mode = ""
+    io.control.published = false
+    workspace.open(dir)
+    let fs = vfs.new()
+    workspace.load(fs)
+    vfs.write(fs, "/home/a", "old")
+    check("initial save", workspace.save(fs), "")
+    let meta = files.read(dir + "/META")
+    io.control.mode = mode
+    io.control.published = false
+    vfs.write(fs, "/home/a", "new")
+    let result = workspace.save(fs)
+    let uncertain = mode == "pointer-readback" or mode == "pointer-read-error"
+    let expected = "workspace: save failed; cannot write store; kept g1"
+    if mode == "partial-readback" or mode == "staged-readback"
+        expected = "workspace: save failed; store readback mismatch; kept g1"
+    if uncertain
+        expected = "workspace: save failed; pointer publish uncertain"
+    check("save result", result, expected)
+    check("save notice", workspace.notice(), expected)
+    check("META unchanged", files.read(dir + "/META"), meta)
+    check("session change retained", vfs.read(fs, "/home/a"), "new")
+    check("old generation retained", files.exists(dir + "/g1.m2ws"), true)
+    if uncertain
+        check("rename published", files.read(dir + "/COMMITTED"), "g2\n")
+    else if mode != "pointer-rename"
+        check("old pointer", files.read(dir + "/COMMITTED"), "g1\n")
+    else
+        check("remove then rename gap", files.exists(dir + "/COMMITTED"), false)
+    io.control.mode = ""
+    workspace.open(dir)
+    workspace.load(fs)
+    let value = "old"
+    if uncertain
+        value = "new"
+    check("reopen follows actual commit", vfs.read(fs, "/home/a"), value)
+    print(mode, result, "reopened", value)
+    files.remove_tree(dir)
