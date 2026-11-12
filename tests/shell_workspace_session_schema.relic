@@ -1,0 +1,126 @@
+# Valid files cannot be installed with an invalid window session, even when
+# its checksum matches. Exercise each app's fields as one schema contract.
+use ../shell/workspace
+use std/files
+use std/strings
+use std/vfs
+
+fun check(label, got, want)
+    if got != want
+        fail(label + ": " + str(got) + " != " + str(want))
+
+fun repeat(c, n)
+    let out = ""
+    for i in 0..n
+        out = out + c
+    return out
+
+fun image(body)
+    let prefix = "M2WS1\n" + body
+    let sum = 0
+    let weight = len(prefix)
+    for c in prefix
+        sum = (sum + ord(c) * weight) % 1000000007
+        weight = weight - 1
+    return prefix + "Z " + str(sum) + "\n.\n"
+
+fun session(app, fields)
+    let body = "S W " + app + " 2 40 30 300 200 0\n"
+    for row in fields
+        body = body + "S F " + row[0] + " " + workspace.escape(row[1]) + "\n"
+    return body
+
+fun changed(app, fields, key, value)
+    let rows = []
+    for row in fields
+        if row[0] == key
+            append(rows, [key, value])
+        else
+            append(rows, row)
+    return session(app, rows)
+
+let dir = "ws-schema"
+files.make_dir(dir)
+files.write(dir + "/g1.m2ws", image("F /kept old\nS W Notes 1 20 30 220 60 0\nS F text older\nS F left 5\n"))
+files.write(dir + "/COMMITTED", "g2\n")
+let fs = vfs.new()
+let count = 0
+
+fun reject(label, body)
+    files.write(dir + "/g2.m2ws", image("F /new changed\n" + body))
+    workspace.open(dir)
+    workspace.load(fs)
+    check(label, workspace.notice(), "workspace: committed image invalid; recovered g1")
+    check("old file", vfs.read(fs, "/kept"), "old")
+    check("no partial install", vfs.exists(fs, "/new"), false)
+    check("old session", workspace.session()[0].fields.text, "older")
+    count = count + 1
+
+let samples = {
+    Terminal: [["cwd", "/"], ["input", "ab"], ["draft", "draft"], ["buf", "1\nx"], ["past", "1\ny"], ["left", "1"], ["back", "1"]],
+    Files: [["path", "/"], ["sel", "0"]],
+    Editor: [["path", "/file"], ["text", "abc"], ["back", "1"], ["mark", "2"], ["disk_set", "0"], ["disk", ""]],
+    IDE: [["path", "/file"], ["text", "abc"], ["back", "1"], ["mark", "-"], ["disk_set", "1"], ["disk", "old"], ["out", "1\nx"], ["err", "1"]],
+    Notes: [["text", "abc"], ["left", "1"]],
+    Clicker: [["count", "1"]],
+    Paint: [["path", "/picture"], ["cells", repeat("0", 2160)], ["color", "1"], ["size", "1"], ["tool", "brush"], ["status", "edited"], ["foreign", "0"]],
+    Snake: []
+}
+let invalid = {
+    Terminal: [["cwd", "relative"], ["left", "3"], ["back", "2"], ["buf", "01\nx"], ["buf", "2\nx"], ["buf", repeat("0\n", 201)], ["past", repeat("0\n", 51)]],
+    Files: [["path", "/.."], ["sel", "-1"], ["sel", "100001"]],
+    Editor: [["path", "/"], ["back", "4"], ["mark", "4"], ["disk_set", "2"], ["disk", "unexpected"]],
+    IDE: [["out", repeat("0\n", 201)], ["err", "0"], ["err", "1000001"], ["back", "-1"]],
+    Notes: [["left", "4"], ["left", "01"]],
+    Clicker: [["count", "-1"], ["count", "1000000001"]],
+    Paint: [["path", "/.."], ["cells", repeat("0", 2159)], ["cells", repeat("0", 2159) + "9"], ["color", "9"], ["size", "0"], ["size", "5"], ["tool", "unknown"], ["foreign", "2"]],
+    Snake: []
+}
+for app in samples
+    let fields = samples[app]
+    let body = session(app, fields)
+    files.write(dir + "/g2.m2ws", image("F /new changed\n" + body))
+    workspace.open(dir)
+    workspace.load(fs)
+    check("valid " + app, workspace.notice(), "")
+    check("valid app", workspace.session()[0].app, app)
+    reject(app + " extra field", body + "S F extra x\n")
+    if len(fields) > 0
+        let line = "S F " + fields[0][0] + " " + workspace.escape(fields[0][1]) + "\n"
+        reject(app + " missing field", strings.replace(body, line, ""))
+        reject(app + " duplicate field", body + line)
+    for row in invalid[app]
+        reject(app + " invalid " + row[0], changed(app, fields, row[0], row[1]))
+    print(app, "schema checked")
+let clicker = session("Clicker", samples.Clicker)
+for pair in [["Clicker", "Unknown"], [" 2 ", " 0 "], [" 2 ", " 02 "], [" 2 ", " 1000001 "], [" 300 ", " 0 "], [" 200 ", " -1 "], [" 0\n", " 2\n"]]
+    reject("window header", strings.replace(clicker, pair[0], pair[1]))
+reject("duplicate id", clicker + clicker)
+reject("empty with window", "S -\n" + clicker)
+reject("field without window", "S F count 1\n")
+reject("raw field space", strings.replace(session("Notes", samples.Notes), "S F text abc", "S F text a b"))
+let many = ""
+for id in 1..65
+    many = many + "S W Snake " + str(id) + " 20 30 300 200 0\n"
+files.write(dir + "/g2.m2ws", image("F /new changed\n" + many))
+workspace.open(dir)
+workspace.load(fs)
+check("64 windows accepted", len(workspace.session()), 64)
+reject("65 windows", many + "S W Snake 65 20 30 300 200 0\n")
+# Checksum and framing failures must also reject the otherwise valid files.
+let valid = image("F /new changed\n" + clicker)
+let at = strings.find(valid, "Z ")
+let prefix = slice(valid, 0, at)
+let malformed = [prefix + ".\n", "M2WS1\nF /new changed\nZ 1\n.\n"]
+for checksum in ["", "01", "-1", "1000000007", "junk"]
+    append(malformed, prefix + "Z " + checksum + "\n.\n")
+for text in malformed
+    files.write(dir + "/g2.m2ws", text)
+    workspace.open(dir)
+    workspace.load(fs)
+    check("checksum framing", workspace.notice(), "workspace: committed image invalid; recovered g1")
+    check("checksum atomic files", vfs.read(fs, "/kept"), "old")
+    check("checksum atomic windows", workspace.session()[0].fields.text, "older")
+    count = count + 1
+print(count, "invalid sessions recover files and windows together")
+files.remove_tree(dir)

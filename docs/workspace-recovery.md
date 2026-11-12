@@ -132,7 +132,7 @@ A generation written by the desktop records the open windows in the same file as
 | `S W <App> <id> <x> <y> <width> <height> <0 or 1>` | one window, back to front. App is Clicker, Notes, Terminal, Files, Editor, IDE, Paint, or Snake. `1` means minimized. id is unique, from 1 |
 | `S F <key> <escaped value>` | one field of the window started by the previous `W`. The value uses the same escapes as a file. No raw space |
 
-A missing field, an extra field, a bad number, a duplicate id, or anything else in an `S` line is `invalid`. The vfs in that same file is not installed either.
+A session has at most 64 windows. A missing field, an extra field, a bad number, a duplicate id, or anything else malformed in an `S` line is `invalid`. The vfs in that same file is not installed either.
 
 | App | Fields |
 |---|---|
