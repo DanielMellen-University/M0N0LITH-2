@@ -100,6 +100,63 @@ def snapshot(store):
     return {p.name: p.read_bytes() for p in sorted(store.iterdir()) if p.is_file()}
 
 
+def parse_snaps(out):
+    """Parse the release_check `snap <tag> <name> <escaped>` lines.
+
+    Returns {tag: {name: escaped-content}}. Content is escaped by the
+    Relic program (backslash first, then newline), so one file is one
+    line and the driver can compare snapshots byte for byte.
+    """
+    snaps = {}
+    for line in out.split("\n"):
+        if line.startswith("snap "):
+            parts = line.split(" ", 3)
+            if len(parts) == 4:
+                _, tag, name, esc = parts
+                snaps.setdefault(tag, {})[name] = esc
+    return snaps
+
+
+def check_snaps_equal(case, label, out, tag_a, tag_b):
+    """Assert two printed store snapshots hold identical bytes."""
+    snaps = parse_snaps(out)
+    a, b = snaps.get(tag_a), snaps.get(tag_b)
+    if a is None or b is None:
+        missing = tag_a if a is None else tag_b
+        print(f"  FAIL: {label}\n    no {missing} snapshot in output")
+        FAILURES.append(f"{case}: {label}")
+        return
+    if a == b:
+        print(f"  ok: {label}")
+        return
+    only_a = sorted(set(a) - set(b))
+    only_b = sorted(set(b) - set(a))
+    changed = sorted(n for n in set(a) & set(b) if a[n] != b[n])
+    print(f"  FAIL: {label}\n    only in {tag_a}: {only_a}\n    only in {tag_b}: {only_b}\n    changed: {changed}")
+    FAILURES.append(f"{case}: {label}")
+
+
+def check_snap_has(case, label, out, tag, name, want):
+    """Assert one file's escaped bytes in a printed snapshot."""
+    snaps = parse_snaps(out)
+    got = snaps.get(tag, {}).get(name)
+    if got == want:
+        print(f"  ok: {label}")
+    else:
+        print(f"  FAIL: {label}\n    want {name}: {want!r}\n    got: {got!r}")
+        FAILURES.append(f"{case}: {label}")
+
+
+def check_snap_missing(case, label, out, tag, name):
+    """Assert one file is absent from a printed snapshot."""
+    snaps = parse_snaps(out)
+    if name not in snaps.get(tag, {}):
+        print(f"  ok: {label}")
+    else:
+        print(f"  FAIL: {label}\n    {name} present in {tag} snapshot")
+        FAILURES.append(f"{case}: {label}")
+
+
 def expect_case6_check(out):
     check("case6", "notice", out,
           'notice ["workspace: committed image invalid; recovered g1; ignored uncommitted g3"]')
@@ -145,6 +202,12 @@ def expect_case10_check(out):
           'notice ["workspace: committed image wrong version; store held; recovered g1"]')
     check("case10", "first save fails visibly", out,
           'save1 ["workspace: save failed; store held (wrong-version); not written"]')
+    check_snaps_equal("case10", "failed save wrote nothing", out, "before", "after-save1")
+    check_snaps_equal("case10", "release deleted nothing", out, "after-save1", "after-release")
+    check_snap_has("case10", "wrong-version g2 survived the failed save", out,
+                    "after-release", "g2.m2ws", "M2WS9\\n.\\n")
+    check_snap_has("case10", "pointer still names g2 after release", out,
+                    "after-release", "COMMITTED", "g2\\n")
     check("case10", "release notice", out, 'release-notice ["workspace: store hold released"]')
     check("case10", "save after release says saved", out, 'save2 ["saved"]')
     check("case10", "new generation committed", out, 'committed ["g3\\n"]')
@@ -171,6 +234,12 @@ def expect_case12_check(out):
           'notice ["workspace: pointer invalid; store held; using defaults; ignored uncommitted g2"]')
     check("case12", "first save fails visibly", out,
           'save1 ["workspace: save failed; store held (ambiguous); not written"]')
+    check_snaps_equal("case12", "failed save wrote nothing", out, "before", "after-save1")
+    check_snaps_equal("case12", "release deleted nothing", out, "after-save1", "after-release")
+    check_snap_has("case12", "torn pointer still torn after release", out,
+                    "after-release", "COMMITTED", "x")
+    check_snap_missing("case12", "no META was created by the failed save or release", out,
+                        "after-release", "META")
     check("case12", "release notice", out, 'release-notice ["workspace: store hold released"]')
     check("case12", "save after release says saved", out, 'save2 ["saved"]')
     check("case12", "new generation committed", out, 'committed ["g3\\n"]')
@@ -192,6 +261,16 @@ def expect_case13_check(out):
           'notice ["workspace: too many generation files; store held; using defaults"]')
     check("case13", "first save fails visibly", out,
           'save1 ["workspace: save failed; store held (too-many); not written"]')
+    check_snaps_equal("case13", "failed save wrote nothing", out, "before", "after-save1")
+    check_snaps_equal("case13", "release deleted nothing", out, "after-save1", "after-release")
+    snaps = parse_snaps(out)
+    want_names = sorted(["COMMITTED", "META"] + [f"g{n}.m2ws" for n in range(1, 34)])
+    got_names = sorted(snaps.get("after-release", {}))
+    if got_names == want_names:
+        print("  ok: release kept all 33 generations")
+    else:
+        print(f"  FAIL: release kept all 33 generations\n    want: {want_names}\n    got: {got_names}")
+        FAILURES.append("case13: release kept all 33 generations")
     check("case13", "release notice", out, 'release-notice ["workspace: store hold released"]')
     check("case13", "save after release says saved", out, 'save2 ["saved"]')
     check("case13", "new generation committed", out, 'committed ["g34\\n"]')

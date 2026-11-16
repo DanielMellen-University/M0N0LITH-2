@@ -6,8 +6,23 @@
 #   relic/build/relic tools/workspace-recovery-muse/release_check.relic <dir> <text>
 use ../../shell/wm
 use std/files
+use std/lists
 use std/os
+use std/strings
 use std/vfs
+
+# One line per store file, content escaped so the driver can parse it back:
+# backslash first, then newline. The driver asserts the three snapshots
+# are byte-identical, which proves the failed save and the release wrote
+# nothing (the successful second save is the only write, and it happens
+# after the last snapshot).
+fun esc(s)
+    let out = strings.replace(s, "\\", "\\\\")
+    return strings.replace(out, "\n", "\\n")
+
+fun snap(dir, tag)
+    for name in lists.sort(files.list(dir))
+        print("snap", tag, name, esc(files.read(dir + "/" + name)))
 
 fun key_text(d, text)
     for ch in text
@@ -35,13 +50,16 @@ wm.workspace_open(args[0])
 wm.workspace_bind(d)
 print("enabled", wm.workspace_enabled())
 print("notice", [wm.workspace_notice()])
+snap(args[0], "before")
 wm.launch(d, wm.editor)
 key_text(d, args[1])
 wm.key(d, "ctrl+s")
 let e = find_window(d, "Editor")
 print("save1", [e.state.status])
+snap(args[0], "after-save1")
 wm.workspace_release()
 print("release-notice", [wm.workspace_notice()])
+snap(args[0], "after-release")
 wm.key(d, "ctrl+s")
 print("save2", [e.state.status])
 print("notice-after", [wm.workspace_notice()])
