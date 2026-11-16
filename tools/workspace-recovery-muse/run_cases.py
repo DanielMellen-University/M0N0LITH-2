@@ -396,7 +396,15 @@ def live_case11(tmp):
     assert (store / "COMMITTED").read_text() == "g2\n", "COMMITTED is not g2"
     assert (store / "META").read_text() == "committed g2\nprevious g1\n", "META mismatch"
     (store / "COMMITTED").write_text("x")
+    before = snapshot(store)
     expect_case11_check(run("check_store.relic", store))
+    after = snapshot(store)
+    if before == after:
+        print("  ok: nothing in the store is rewritten by the open alone")
+    else:
+        print(f"  FAIL: store changed on open\n    before: {sorted(before)}\n    after: {sorted(after)}")
+        FAILURES.append("case11: store changed on open")
+    assert (store / "COMMITTED").read_text() == "x", "COMMITTED was repaired to g2 by the open"
     print("case11 done")
 
 
@@ -507,7 +515,15 @@ def replay_case11(tmp):
     print("== replay case 11 from the committed fixture ==")
     store = Path(tmp) / "replay-case11"
     shutil.copytree(FIXTURES / "case11", store)
+    before = snapshot(store)
     expect_case11_check(run("check_store.relic", store))
+    after = snapshot(store)
+    if before == after:
+        print("  ok: nothing in the store is rewritten by the open alone")
+    else:
+        print("  FAIL: store changed on open")
+        FAILURES.append("case11 replay: store changed on open")
+    assert (store / "COMMITTED").read_text() == "x", "COMMITTED was repaired to g2 by the open"
     print("case11 replay done")
 
 
