@@ -4,7 +4,8 @@ Status: cases 1 to 5 were run on Nov 9 2026 against the window session
 snapshot and pass, and were re-verified on Nov 12 2026 against main
 dd1bb60 (full suite 486/486, see "Results (Nov 12 2026)"). Cases 6 to 9
 were run on Nov 10 2026 against main 6c321a3b and pass, and were rerun
-on Nov 12 2026 against main dd1bb60 and pass. See "Results" for how
+on Nov 12 2026 against main dd1bb60 and pass. Cases 10 to 14 were run
+on Nov 16 2026 against main 0e7b8d9c and pass. See "Results" for how
 each case was run and what was not tried. Cases 3a, 3b, 3c and 5 were
 reworded on that date, before the results were recorded; the reasons
 are in "Wording changes".
@@ -28,14 +29,15 @@ Results table says: by the store's own fault hooks in the golden tests,
 by killing a process, and by editing the saved files by hand between
 two processes.
 
-Cases 6 to 9 have fixture assets in `tests/fixtures/workspace-recovery/`
-(see that directory's README): `case6/`, `case7/` and `case8/` are
-isolated store layouts, and `case9-bad-store` is the unopenable store
-path. Each store was built by a setup program in
-`tools/workspace-recovery-muse/` with the real implementation, then
-damaged by hand after the process exited. The harness driver
-(`run_cases.py`) runs the live build-damage-check flow and also replays
-the committed fixtures; both runs assert the exact expected output.
+Cases 6 to 14 have fixture assets in `tests/fixtures/workspace-recovery/`
+(see that directory's README): `case6/`, `case7/`, `case8/`, `case10/`,
+`case11/`, `case12/`, `case13/` and `case14/` are isolated store
+layouts, and `case9-bad-store` is the unopenable store path. Each store
+was built by a setup program in `tools/workspace-recovery-muse/` with
+the real implementation, then damaged by hand after the process exited.
+The harness driver (`run_cases.py`) runs the live build-damage-check
+flow and also replays the committed fixtures; both runs assert the
+exact expected output.
 
 ### Update: cases 6 to 9 (D0120, 2026-11-09)
 
@@ -64,6 +66,15 @@ lines, 0 failures). The committed fixtures were regenerated with
 `make_fixtures.py` and came out byte-identical, so PR #38 did not
 change what the implementation writes. No fixture or harness file
 needed a change. See Results (Nov 12 2026).
+
+### Update: cases 10 to 14 executed (D0134, 2026-11-16)
+
+Cases 10 to 14 cover the release of a held store, torn pointers, more
+than 32 generation names, and leftovers that must be named and not
+installed. They were specified against `docs/workspace-recovery.md`
+and executed against main `0e7b8d9c` with the harness in
+`tools/workspace-recovery-muse/` and fixtures in
+`tests/fixtures/workspace-recovery/`. See Results (Nov 16 2026).
 
 ## How to read a case
 
@@ -444,6 +455,170 @@ store`. This is distinct from opening with an empty path, which is a
 session-only opt-out and is not a failure; this case always uses a
 requested path that cannot be opened.
 
+## Case 10: Release of a held store, then a save succeeds (D0134-1)
+
+Status: PASS (Nov 16 2026).
+
+Setup: The store holds a committed generation written in a newer
+version than this desktop understands, as in Case 8. Start the
+desktop. It shows the saved workspace is from a version it cannot
+use, holds the store, and restores the newest generation older than
+the named one that still parses as M2WS1.
+
+Action: Open the Editor, write text, and attempt a workspace save
+with Ctrl+S. It fails visibly. Then release the store hold
+explicitly, and attempt the save again with Ctrl+S. Quit, and start
+the desktop again on the same store.
+
+Expected visible outcome: The first save reports failure visibly and
+the Editor never says `saved` for it. After the release, the second
+save says `saved`. The desktop shows the hold is released. After the
+restart, the desktop is quiet (no notice), the older text is still
+there, and the text written after the release survived the restart.
+
+Data-preservation assertions:
+
+- The unsupported-version bytes are not overwritten or deleted by the
+  failed first save.
+- The save after the release commits a new generation, and the pointer
+  names it. The older generation is kept alongside it.
+- The metadata names the new commit and the previous generation.
+- The text written after the release survives a restart.
+
+Fixture note: COMMITTED names a generation whose whole file is
+`M2WS9`, with META naming committed g2 and previous g1, exactly the
+Case 8 damage. The check program opens the store, tries Ctrl+S,
+releases the hold, tries Ctrl+S again, and reports the pointer,
+the metadata, and the store contents.
+
+## Case 11: Torn pointer with a usable META recovers the named generation (D0134-2)
+
+Status: PASS (Nov 16 2026).
+
+Setup: The store holds two committed generations, v1 then v2, with
+META naming committed g2 and previous g1. After the process exits,
+the pointer file is torn: COMMITTED holds the single byte `x`
+instead of a generation name. Start the desktop.
+
+Action: Open the store. No save is attempted.
+
+Expected visible outcome: The desktop shows the pointer is invalid
+and that it recovered g2, the generation META names. It restores the
+newer text, not the first-run defaults and not the older version.
+
+Data-preservation assertions:
+
+- The recovered generation is the one META names (g2), not the older
+  generation and not defaults.
+- The newer text survives; the welcome file is unchanged.
+- Nothing in the store is rewritten by the open alone.
+
+Fixture note: COMMITTED is the single byte `x`; META still reads
+`committed g2` and `previous g1`. Per the contract, a torn pointer
+with a usable META recovers the generation META names.
+
+## Case 12: Torn pointer with no usable META holds the store until release (D0134-3)
+
+Status: PASS (Nov 16 2026).
+
+Setup: The store holds two committed generations, v1 then v2, but
+after the process exits the pointer file is torn (COMMITTED holds
+the single byte `x`) and META is missing, so no generation can be
+named with confidence. Start the desktop.
+
+Action: Open the Editor, write text, and attempt a workspace save
+with Ctrl+S. It fails visibly. Then release the store hold
+explicitly, and attempt the save again with Ctrl+S. Quit, and start
+the desktop again on the same store.
+
+Expected visible outcome: The desktop shows the pointer is invalid,
+the store is held, and it is using defaults, naming the uncommitted
+g2 as ignored. The first save reports failure visibly and the Editor
+never says `saved` for it. After the release, the second save says
+`saved`. After the restart, the desktop is quiet (no notice), there
+is no note file in the defaults image, and the text written after
+the release survived the restart.
+
+Data-preservation assertions:
+
+- No generation is guessed: the desktop uses defaults while the
+  store is held, and the uncommitted g2 is reported as ignored.
+- The save after the release commits a new generation, and the
+  pointer names it. The metadata names no previous generation, since
+  no prior commit could be established.
+- The older generations are pruned by the new commit; only the new
+  commit remains alongside COMMITTED and META.
+- The text written after the release survives a restart.
+
+Fixture note: COMMITTED is the single byte `x` and META is absent.
+Per the contract, a torn pointer with no usable META holds the store
+(ambiguous) until an explicit release.
+
+## Case 13: More than 32 generation names hold the store until release (D0134-4)
+
+Status: PASS (Nov 16 2026).
+
+Setup: The store holds one committed generation, v1, plus copies of
+it under 32 more generation names, so 33 generation names in total.
+Start the desktop.
+
+Action: Open the Editor, write text, and attempt a workspace save
+with Ctrl+S. It fails visibly. Then release the store hold
+explicitly, and attempt the save again with Ctrl+S. Quit, and start
+the desktop again on the same store.
+
+Expected visible outcome: The desktop shows there are too many
+generation files, the store is held, and it is using defaults. The
+first save reports failure visibly and the Editor never says `saved`
+for it. After the release, the second save says `saved` and commits
+as g34, the next generation name after the 33 already present.
+After the restart, the desktop is quiet (no notice), there is no
+note file in the defaults image, and the text written after the
+release survived the restart.
+
+Data-preservation assertions:
+
+- No generation is guessed while the store is held: the desktop uses
+  defaults.
+- The save after the release commits as g34, and the pointer names
+  it. The metadata names no previous generation.
+- The older generations are pruned by the new commit; only the new
+  commit remains alongside COMMITTED and META.
+- The text written after the release survives a restart.
+
+Fixture note: g1 holds the first version and g2 through g33 are
+byte copies of it, so the store carries 33 generation names. Per the
+contract, more than 32 generation names hold the store (too-many)
+until an explicit release.
+
+## Case 14: Newer uncommitted generation and partial leftover are named, not installed (D0134-5)
+
+Status: PASS (Nov 16 2026).
+
+Setup: The store holds two committed generations, v1 then v2, with
+the pointer naming g2. After the process exits, a valid but
+uncommitted g3 holding yet newer text is added, plus a partial
+`g4.m2ws.partial` leftover holding only a header. Start the desktop.
+
+Action: Open the store. No save is attempted.
+
+Expected visible outcome: The desktop shows a notice naming both
+leftovers: the uncommitted g3 and the partial g4. It restores the
+committed g2 text, not the newer uncommitted text and not defaults.
+
+Data-preservation assertions:
+
+- The committed text survives; the newer uncommitted text is never
+  shown as if it were the saved workspace.
+- The welcome file is unchanged.
+- Both leftovers are named in the notice, and neither is installed.
+
+Fixture note: g3 is a complete files-only generation holding
+third-version text that was never committed, and `g4.m2ws.partial`
+holds only the `M2WS1` header line. Per the contract, uncommitted
+and partial generations are reported as ignored and the committed
+generation is installed.
+
 ---
 
 ## Case list
@@ -461,8 +636,13 @@ requested path that cannot be opened.
 | 7 | Corrupted retry commit keeps prior committed generation | PASS |
 | 8 | Unsupported-version store held through normal writes | PASS |
 | 9 | Requested store that cannot be opened never reports saved | PASS |
+| 10 | Release of a held store, then a save succeeds | PASS |
+| 11 | Torn pointer with a usable META recovers the named generation | PASS |
+| 12 | Torn pointer with no usable META holds the store until release | PASS |
+| 13 | More than 32 generation names hold the store until release | PASS |
+| 14 | Newer uncommitted generation and partial leftover named, not installed | PASS |
 
-Specified cases: 11. Executed cases: 11.
+Specified cases: 16. Executed cases: 16.
 
 ## Wording changes (Nov 9 2026)
 
