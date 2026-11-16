@@ -4,7 +4,8 @@ Status: cases 1 to 5 were run on Nov 9 2026 against the window session
 snapshot and pass, and were re-verified on Nov 12 2026 against main
 dd1bb60 (full suite 486/486, see "Results (Nov 12 2026)"). Cases 6 to 9
 were run on Nov 10 2026 against main 6c321a3b and pass, and were rerun
-on Nov 12 2026 against main dd1bb60 and pass. See "Results" for how
+on Nov 12 2026 against main dd1bb60 and pass. Cases 10 to 14 were run
+on Nov 16 2026 against main 0e7b8d9c and pass. See "Results" for how
 each case was run and what was not tried. Cases 3a, 3b, 3c and 5 were
 reworded on that date, before the results were recorded; the reasons
 are in "Wording changes".
@@ -28,14 +29,15 @@ Results table says: by the store's own fault hooks in the golden tests,
 by killing a process, and by editing the saved files by hand between
 two processes.
 
-Cases 6 to 9 have fixture assets in `tests/fixtures/workspace-recovery/`
-(see that directory's README): `case6/`, `case7/` and `case8/` are
-isolated store layouts, and `case9-bad-store` is the unopenable store
-path. Each store was built by a setup program in
-`tools/workspace-recovery-muse/` with the real implementation, then
-damaged by hand after the process exited. The harness driver
-(`run_cases.py`) runs the live build-damage-check flow and also replays
-the committed fixtures; both runs assert the exact expected output.
+Cases 6 to 14 have fixture assets in `tests/fixtures/workspace-recovery/`
+(see that directory's README): `case6/`, `case7/`, `case8/`, `case10/`,
+`case11/`, `case12/`, `case13/` and `case14/` are isolated store
+layouts, and `case9-bad-store` is the unopenable store path. Each store
+was built by a setup program in `tools/workspace-recovery-muse/` with
+the real implementation, then damaged by hand after the process exited.
+The harness driver (`run_cases.py`) runs the live build-damage-check
+flow and also replays the committed fixtures; both runs assert the
+exact expected output.
 
 ### Update: cases 6 to 9 (D0120, 2026-11-09)
 
@@ -64,6 +66,15 @@ lines, 0 failures). The committed fixtures were regenerated with
 `make_fixtures.py` and came out byte-identical, so PR #38 did not
 change what the implementation writes. No fixture or harness file
 needed a change. See Results (Nov 12 2026).
+
+### Update: cases 10 to 14 executed (D0134, 2026-11-16)
+
+Cases 10 to 14 cover the release of a held store, torn pointers, more
+than 32 generation names, and leftovers that must be named and not
+installed. They were specified against `docs/workspace-recovery.md`
+and executed against main `0e7b8d9c` with the harness in
+`tools/workspace-recovery-muse/` and fixtures in
+`tests/fixtures/workspace-recovery/`. See Results (Nov 16 2026).
 
 ## How to read a case
 
@@ -444,6 +455,186 @@ store`. This is distinct from opening with an empty path, which is a
 session-only opt-out and is not a failure; this case always uses a
 requested path that cannot be opened.
 
+## Case 10: Release of a held store, then a save succeeds (D0134-1)
+
+Status: PASS (Nov 16 2026).
+
+Setup: The store holds a committed generation written in a newer
+version than this desktop understands, as in Case 8. Start the
+desktop. It shows the saved workspace is from a version it cannot
+use, holds the store, and restores the newest generation older than
+the named one that still parses as M2WS1.
+
+Action: Open the Editor, write text, and attempt a workspace save
+with Ctrl+S. It fails visibly. Then release the store hold
+explicitly, and attempt the save again with Ctrl+S. Quit, and start
+the desktop again on the same store.
+
+Expected visible outcome: The first save reports failure visibly and
+the Editor never says `saved` for it. After the release, the second
+save says `saved`. The desktop shows the hold is released. After the
+restart, the desktop is quiet (no notice), the older text is still
+there, and the text written after the release survived the restart.
+
+Data-preservation assertions:
+
+- The unsupported-version bytes are not overwritten or deleted by the
+  failed first save, and the release deletes nothing either: the check
+  program prints full store byte snapshots before the failed first
+  save, after it, and after the release, and the driver asserts all
+  three are identical. The M2WS9 g2 file survives the failed save,
+  and the pointer still names g2 after the release.
+- The save after the release commits a new generation, and the pointer
+  names it. The older generation is kept alongside it.
+- The metadata names the new commit and the previous generation.
+- The text written after the release survives a restart.
+
+Fixture note: COMMITTED names a generation whose whole file is
+`M2WS9`, with META naming committed g2 and previous g1, exactly the
+Case 8 damage. The check program opens the store, tries Ctrl+S,
+releases the hold, tries Ctrl+S again, and reports the pointer,
+the metadata, and the store contents. It also prints the three
+store snapshots the driver compares.
+
+## Case 11: Torn pointer with a usable META recovers the named generation (D0134-2)
+
+Status: PASS (Nov 16 2026).
+
+Setup: The store holds two committed generations, v1 then v2, with
+META naming committed g2 and previous g1. After the process exits,
+the pointer file is torn: COMMITTED holds the single byte `x`
+instead of a generation name. Start the desktop.
+
+Action: Open the store. No save is attempted.
+
+Expected visible outcome: The desktop shows the pointer is invalid
+and that it recovered g2, the generation META names. It restores the
+newer text, not the first-run defaults and not the older version.
+
+Data-preservation assertions:
+
+- The recovered generation is the one META names (g2), not the older
+  generation and not defaults.
+- The newer text survives; the welcome file is unchanged.
+- Nothing in the store is rewritten by the open alone: the driver
+  takes full store byte snapshots around the open in live and replay
+  and asserts they are identical, and COMMITTED stays the torn byte
+  `x` instead of being repaired to g2.
+
+Fixture note: COMMITTED is the single byte `x`; META still reads
+`committed g2` and `previous g1`. Per the contract, a torn pointer
+with a usable META recovers the generation META names.
+
+## Case 12: Torn pointer with no usable META holds the store until release (D0134-3)
+
+Status: PASS (Nov 16 2026).
+
+Setup: The store holds two committed generations, v1 then v2, but
+after the process exits the pointer file is torn (COMMITTED holds
+the single byte `x`) and META is missing, so no generation can be
+named with confidence. Start the desktop.
+
+Action: Open the Editor, write text, and attempt a workspace save
+with Ctrl+S. It fails visibly. Then release the store hold
+explicitly, and attempt the save again with Ctrl+S. Quit, and start
+the desktop again on the same store.
+
+Expected visible outcome: The desktop shows the pointer is invalid,
+the store is held, and it is using defaults, naming the uncommitted
+g2 as ignored. The first save reports failure visibly and the Editor
+never says `saved` for it. After the release, the second save says
+`saved`. After the restart, the desktop is quiet (no notice), there
+is no note file in the defaults image, and the text written after
+the release survived the restart.
+
+Data-preservation assertions:
+
+- No generation is guessed: the desktop uses defaults while the
+  store is held, and the uncommitted g2 is reported as ignored.
+- The failed first save and the release write nothing: full store
+  byte snapshots before the failed first save, after it, and after
+  the release are identical. COMMITTED stays the torn byte `x` and
+  no META file is created by either step.
+- The save after the release commits a new generation, and the
+  pointer names it. The metadata names no previous generation, since
+  no prior commit could be established.
+- The older generations are pruned by the new commit; only the new
+  commit remains alongside COMMITTED and META.
+- The text written after the release survives a restart.
+
+Fixture note: COMMITTED is the single byte `x` and META is absent.
+Per the contract, a torn pointer with no usable META holds the store
+(ambiguous) until an explicit release.
+
+## Case 13: More than 32 generation names hold the store until release (D0134-4)
+
+Status: PASS (Nov 16 2026).
+
+Setup: The store holds one committed generation, v1, plus copies of
+it under 32 more generation names, so 33 generation names in total.
+Start the desktop.
+
+Action: Open the Editor, write text, and attempt a workspace save
+with Ctrl+S. It fails visibly. Then release the store hold
+explicitly, and attempt the save again with Ctrl+S. Quit, and start
+the desktop again on the same store.
+
+Expected visible outcome: The desktop shows there are too many
+generation files, the store is held, and it is using defaults. The
+first save reports failure visibly and the Editor never says `saved`
+for it. After the release, the second save says `saved` and commits
+as g34, the next generation name after the 33 already present.
+After the restart, the desktop is quiet (no notice), there is no
+note file in the defaults image, and the text written after the
+release survived the restart.
+
+Data-preservation assertions:
+
+- No generation is guessed while the store is held: the desktop uses
+  defaults.
+- The failed first save and the release write nothing: full store
+  byte snapshots before the failed first save, after it, and after
+  the release are identical, and all 33 generation names are still
+  present after the release.
+- The save after the release commits as g34, and the pointer names
+  it. The metadata names no previous generation.
+- The older generations are pruned by the new commit; only the new
+  commit remains alongside COMMITTED and META.
+- The text written after the release survives a restart.
+
+Fixture note: g1 holds the first version and g2 through g33 are
+byte copies of it, so the store carries 33 generation names. Per the
+contract, more than 32 generation names hold the store (too-many)
+until an explicit release.
+
+## Case 14: Newer uncommitted generation and partial leftover are named, not installed (D0134-5)
+
+Status: PASS (Nov 16 2026).
+
+Setup: The store holds two committed generations, v1 then v2, with
+the pointer naming g2. After the process exits, a valid but
+uncommitted g3 holding yet newer text is added, plus a partial
+`g4.m2ws.partial` leftover holding only a header. Start the desktop.
+
+Action: Open the store. No save is attempted.
+
+Expected visible outcome: The desktop shows a notice naming both
+leftovers: the uncommitted g3 and the partial g4. It restores the
+committed g2 text, not the newer uncommitted text and not defaults.
+
+Data-preservation assertions:
+
+- The committed text survives; the newer uncommitted text is never
+  shown as if it were the saved workspace.
+- The welcome file is unchanged.
+- Both leftovers are named in the notice, and neither is installed.
+
+Fixture note: g3 is a complete files-only generation holding
+third-version text that was never committed, and `g4.m2ws.partial`
+holds only the `M2WS1` header line. Per the contract, uncommitted
+and partial generations are reported as ignored and the committed
+generation is installed.
+
 ---
 
 ## Case list
@@ -461,8 +652,13 @@ requested path that cannot be opened.
 | 7 | Corrupted retry commit keeps prior committed generation | PASS |
 | 8 | Unsupported-version store held through normal writes | PASS |
 | 9 | Requested store that cannot be opened never reports saved | PASS |
+| 10 | Release of a held store, then a save succeeds | PASS |
+| 11 | Torn pointer with a usable META recovers the named generation | PASS |
+| 12 | Torn pointer with no usable META holds the store until release | PASS |
+| 13 | More than 32 generation names hold the store until release | PASS |
+| 14 | Newer uncommitted generation and partial leftover named, not installed | PASS |
 
-Specified cases: 11. Executed cases: 11.
+Specified cases: 16. Executed cases: 16.
 
 ## Wording changes (Nov 9 2026)
 
@@ -591,3 +787,119 @@ fixture or harness file needed a change.
 Not covered: the release of a held store (`wm.workspace_release()`),
 which case 8 does not try; power loss; and two desktops writing one
 store at once.
+
+## Results (Nov 16 2026)
+
+Run on Linux against main `0e7b8d9c` (PR #39 merged). Cases 1 to 5
+were re-verified through the full suite, cases 6 to 14 through the
+harness. No case changed outcome; every case still passes.
+
+Full suite, from the repo root:
+
+```console
+cmake -S . -B build -DCMAKE_BUILD_TYPE=Release
+cmake --build build -j4
+ctest --test-dir build -C Release
+```
+
+Result: 486/486 passed, 0 failed, including all 23 workspace tests,
+`check_shell`, `workspace_restart` and `workspace_kill`. That is the
+evidence for cases 1 to 5: the golden tests that drove them on Nov 9
+are in that suite and green at the new head.
+
+Harness, from the repo root (Relic built from the pinned submodule
+first: `cmake -S relic -B relic/build -DRELIC_BUILD_HOST=ON &&
+cmake --build relic/build`):
+
+```console
+python3 tools/workspace-recovery-muse/run_cases.py --live --replay
+```
+
+Result: `RESULT: PASS, all nine cases`. The live run passed every
+check (72 ok lines, 0 failures); the replay run passed every check
+(57 ok lines, 0 failures). The live run builds each store with the
+real implementation in separate processes, damages files by hand
+between processes, and checks what the next process installs. The
+replay run copies the committed fixtures from
+`tests/fixtures/workspace-recovery/` and runs only the check phases
+against them. Both runs passed every check. The new Relic program
+`release_check.relic` passes `relic check`, as do the setup and
+check programs it reuses.
+
+| Case | How it was run | What was seen |
+|---|---|---|
+| 1 | full suite at 0e7b8d9c (`shell_workspace_session` and the workspace goldens) | same windows and files came back after a restart, as on Nov 9 |
+| 2 | full suite at 0e7b8d9c (`workspace_kill`, `workspace_faults`, `shell_workspace_session`) | a killed or faulted save left the last committed files and windows; the leftover partial was ignored |
+| 3a | full suite at 0e7b8d9c (workspace goldens) | truncated committed image fell back to the earlier whole save with a visible notice |
+| 3b | full suite at 0e7b8d9c (workspace goldens) | corrupt committed image fell back to the earlier whole save with a visible notice |
+| 3c | full suite at 0e7b8d9c (workspace goldens) | wrong-version committed image held the store and fell back with a visible notice |
+| 4 | full suite at 0e7b8d9c (workspace goldens) | a failed save was reported visibly and the windows and text stayed |
+| 5 | full suite at 0e7b8d9c (workspace goldens) | a new, empty workspace directory opened with first-run defaults twice |
+| 6 | harness live and replay at 0e7b8d9c | `workspace: committed image invalid; recovered g1; ignored uncommitted g3`, note.txt reads `first version` |
+| 7 | harness live and replay at 0e7b8d9c | faulted save reports `workspace: save failed (partial-generation); kept g1`; retry commits v2 as g3; damaged g3 falls back with `workspace: committed image invalid; recovered g1`, note.txt reads `first version` |
+| 8 | harness live and replay at 0e7b8d9c | `workspace: committed image wrong version; store held; recovered g1`; both Editor Ctrl+S attempts report `workspace: save failed; store held (wrong-version); not written`; every store byte unchanged afterwards |
+| 9 | harness live and replay at 0e7b8d9c | `workspace: cannot open store`, workspace not enabled, Editor never says `saved` for the bad store, nothing written to the bad path; the first good-store Ctrl+S reports the disk-change guard (`changed on disk: ctrl+s again`); the second says `saved`; a fresh process reads the saved text back |
+| 10 | harness live and replay at 0e7b8d9c | `workspace: committed image wrong version; store held; recovered g1`; the first Ctrl+S reports `workspace: save failed; store held (wrong-version); not written`; after `wm.workspace_release()` the notice is `workspace: store hold released` and the second Ctrl+S says `saved`, committing g3 with META `committed g3, previous g1`; a fresh process is quiet, the older text is still there, and the released text survived |
+| 11 | harness live and replay at 0e7b8d9c | torn COMMITTED (`x`) with a usable META: `workspace: pointer invalid; recovered g2`, note.txt reads `second version`, the welcome file is unchanged |
+| 12 | harness live and replay at 0e7b8d9c | torn COMMITTED (`x`) with no META: `workspace: pointer invalid; store held; using defaults; ignored uncommitted g2`; the first Ctrl+S reports `workspace: save failed; store held (ambiguous); not written`; after release the second Ctrl+S says `saved`, committing g3 with META `committed g3, previous none`; only the new commit remains; a fresh process is quiet and the released text survived |
+| 13 | harness live and replay at 0e7b8d9c | 33 generation names: `workspace: too many generation files; store held; using defaults`; the first Ctrl+S reports `workspace: save failed; store held (too-many); not written`; after release the second Ctrl+S says `saved`, committing g34 with META `committed g34, previous none`; only the new commit remains; a fresh process is quiet and the released text survived |
+| 14 | harness live and replay at 0e7b8d9c | `workspace: ignored uncommitted g3; ignored partial g4`, note.txt reads `second version`, the welcome file is unchanged |
+
+Fixture check: `make_fixtures.py` was run against 0e7b8d9c and the
+regenerated case 6, 7 and 8 fixtures came out byte-identical to the
+committed ones, so nothing since PR #38 changed what the
+implementation writes. New fixtures were added for cases 10 to 14
+and replayed from the committed files.
+
+Not covered: power loss (there is no fsync), and two desktops
+writing one store at once (there is no lock). The release of a held
+store, which was not covered before, is now covered by cases 10,
+12 and 13.
+
+## Results (Nov 16 2026, D0140 fix round)
+
+Engineer reviewed PR #40 at head `6106e2a3` (CI 6/6 green, identity
+fine) and rejected it with two medium findings, both about proving
+that steps which must not write really do not write. This fix round
+answers them on the same branch, off main `0e7b8d9c`, with new
+commits only. No case changed outcome; every case still passes, and
+the assertions are now stronger for cases 10 to 13.
+
+Full suite, from the repo root:
+
+```console
+ctest --test-dir build
+```
+
+Result: 486/486 passed, 0 failed, total test time 54.23 sec,
+including all 23 workspace tests. The Relic host suite in
+`relic/build` also passed: 543/543, 0 failed.
+
+Harness, from the repo root:
+
+```console
+python3 tools/workspace-recovery-muse/run_cases.py --live --replay
+```
+
+Result: `RESULT: PASS, all nine cases`. The live run passed every
+check (84 ok lines, 0 failures); the replay run passed every check
+(69 ok lines, 0 failures). The new checks, all passing in live and
+replay:
+
+- Case 10: the failed first save wrote nothing and the release
+  deleted nothing (all three store snapshots identical); the M2WS9
+  g2 file survived the failed save and the pointer still named g2
+  after the release.
+- Case 11: nothing in the store was rewritten by the open alone
+  (store bytes identical around the open), and COMMITTED stayed the
+  torn byte `x` instead of being repaired to g2.
+- Case 12: the failed first save wrote nothing and the release
+  deleted nothing; COMMITTED stayed `x` and no META file was
+  created by either step.
+- Case 13: the failed first save wrote nothing and the release
+  deleted nothing; all 33 generation names were still present after
+  the release.
+
+Fixture check: `make_fixtures.py` was run again and the regenerated
+fixtures came out byte-identical to the committed ones, so the fix
+round changed no fixture input.

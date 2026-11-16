@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Regenerate the committed fixture stores for D0122 cases 6-9.
+"""Regenerate the committed fixture stores for D0122 cases 6-9 and D0134 cases 10-14.
 
 Each fixture is a real store: the setup program builds it with the
 actual implementation, then the driver applies the same hand damage the
@@ -15,7 +15,7 @@ import sys
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
-from run_cases import RELIC, HARNESS, ROOT, damage_one_char, g3_uncommitted, run
+from run_cases import RELIC, HARNESS, ROOT, damage_one_char, g3_uncommitted, hold_wrong_version, run
 
 FIXTURES = ROOT / "tests" / "fixtures" / "workspace-recovery"
 
@@ -53,8 +53,45 @@ def main():
     bad = work / "case9-bad-store"
     bad.write_text("not-a-directory\n")
 
+    # Case 10: wrong-version hold (case 8's damage) on a one-commit store.
+    c10 = work / "case10"
+    c10.mkdir()
+    run("case8_setup.relic", c10)
+    hold_wrong_version(c10)
+
+    # Case 11: torn pointer (COMMITTED is the single byte `x`), META usable.
+    c11 = work / "case11"
+    c11.mkdir()
+    run("case6_setup.relic", c11)
+    (c11 / "COMMITTED").write_text("x")
+
+    # Case 12: torn pointer with no usable META.
+    c12 = work / "case12"
+    c12.mkdir()
+    run("case6_setup.relic", c12)
+    (c12 / "COMMITTED").write_text("x")
+    (c12 / "META").unlink()
+
+    # Case 13: more than 32 generation names (g1 plus copies as g2..g33).
+    c13 = work / "case13"
+    c13.mkdir()
+    run("case8_setup.relic", c13)
+    g1 = (c13 / "g1.m2ws").read_bytes()
+    for n in range(2, 34):
+        (c13 / f"g{n}.m2ws").write_bytes(g1)
+
+    # Case 14: newer uncommitted g3 plus a partial g4 leftover.
+    c14 = work / "case14"
+    c14.mkdir()
+    run("case6_setup.relic", c14)
+    (c14 / "g3.m2ws").write_text(g3_uncommitted())
+    (c14 / "g4.m2ws.partial").write_text("M2WS1\n")
+
     FIXTURES.mkdir(parents=True, exist_ok=True)
-    for name in ("case6", "case7", "case8"):
+    for name in ("case6", "case7", "case8", "case10", "case11", "case12", "case13", "case14"):
+        dest = FIXTURES / name
+        shutil.rmtree(dest, ignore_errors=True)
+        shutil.copytree(work / name, dest)
         dest = FIXTURES / name
         shutil.rmtree(dest, ignore_errors=True)
         shutil.copytree(work / name, dest)
