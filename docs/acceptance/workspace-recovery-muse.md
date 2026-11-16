@@ -479,7 +479,11 @@ there, and the text written after the release survived the restart.
 Data-preservation assertions:
 
 - The unsupported-version bytes are not overwritten or deleted by the
-  failed first save.
+  failed first save, and the release deletes nothing either: the check
+  program prints full store byte snapshots before the failed first
+  save, after it, and after the release, and the driver asserts all
+  three are identical. The M2WS9 g2 file survives the failed save,
+  and the pointer still names g2 after the release.
 - The save after the release commits a new generation, and the pointer
   names it. The older generation is kept alongside it.
 - The metadata names the new commit and the previous generation.
@@ -489,7 +493,8 @@ Fixture note: COMMITTED names a generation whose whole file is
 `M2WS9`, with META naming committed g2 and previous g1, exactly the
 Case 8 damage. The check program opens the store, tries Ctrl+S,
 releases the hold, tries Ctrl+S again, and reports the pointer,
-the metadata, and the store contents.
+the metadata, and the store contents. It also prints the three
+store snapshots the driver compares.
 
 ## Case 11: Torn pointer with a usable META recovers the named generation (D0134-2)
 
@@ -511,7 +516,10 @@ Data-preservation assertions:
 - The recovered generation is the one META names (g2), not the older
   generation and not defaults.
 - The newer text survives; the welcome file is unchanged.
-- Nothing in the store is rewritten by the open alone.
+- Nothing in the store is rewritten by the open alone: the driver
+  takes full store byte snapshots around the open in live and replay
+  and asserts they are identical, and COMMITTED stays the torn byte
+  `x` instead of being repaired to g2.
 
 Fixture note: COMMITTED is the single byte `x`; META still reads
 `committed g2` and `previous g1`. Per the contract, a torn pointer
@@ -543,6 +551,10 @@ Data-preservation assertions:
 
 - No generation is guessed: the desktop uses defaults while the
   store is held, and the uncommitted g2 is reported as ignored.
+- The failed first save and the release write nothing: full store
+  byte snapshots before the failed first save, after it, and after
+  the release are identical. COMMITTED stays the torn byte `x` and
+  no META file is created by either step.
 - The save after the release commits a new generation, and the
   pointer names it. The metadata names no previous generation, since
   no prior commit could be established.
@@ -580,6 +592,10 @@ Data-preservation assertions:
 
 - No generation is guessed while the store is held: the desktop uses
   defaults.
+- The failed first save and the release write nothing: full store
+  byte snapshots before the failed first save, after it, and after
+  the release are identical, and all 33 generation names are still
+  present after the release.
 - The save after the release commits as g34, and the pointer names
   it. The metadata names no previous generation.
 - The older generations are pruned by the new commit; only the new
@@ -839,3 +855,51 @@ Not covered: power loss (there is no fsync), and two desktops
 writing one store at once (there is no lock). The release of a held
 store, which was not covered before, is now covered by cases 10,
 12 and 13.
+
+## Results (Nov 16 2026, D0140 fix round)
+
+Engineer reviewed PR #40 at head `6106e2a3` (CI 6/6 green, identity
+fine) and rejected it with two medium findings, both about proving
+that steps which must not write really do not write. This fix round
+answers them on the same branch, off main `0e7b8d9c`, with new
+commits only. No case changed outcome; every case still passes, and
+the assertions are now stronger for cases 10 to 13.
+
+Full suite, from the repo root:
+
+```console
+ctest --test-dir build
+```
+
+Result: 486/486 passed, 0 failed, total test time 54.23 sec,
+including all 23 workspace tests. The Relic host suite in
+`relic/build` also passed: 543/543, 0 failed.
+
+Harness, from the repo root:
+
+```console
+python3 tools/workspace-recovery-muse/run_cases.py --live --replay
+```
+
+Result: `RESULT: PASS, all nine cases`. The live run passed every
+check (84 ok lines, 0 failures); the replay run passed every check
+(69 ok lines, 0 failures). The new checks, all passing in live and
+replay:
+
+- Case 10: the failed first save wrote nothing and the release
+  deleted nothing (all three store snapshots identical); the M2WS9
+  g2 file survived the failed save and the pointer still named g2
+  after the release.
+- Case 11: nothing in the store was rewritten by the open alone
+  (store bytes identical around the open), and COMMITTED stayed the
+  torn byte `x` instead of being repaired to g2.
+- Case 12: the failed first save wrote nothing and the release
+  deleted nothing; COMMITTED stayed `x` and no META file was
+  created by either step.
+- Case 13: the failed first save wrote nothing and the release
+  deleted nothing; all 33 generation names were still present after
+  the release.
+
+Fixture check: `make_fixtures.py` was run again and the regenerated
+fixtures came out byte-identical to the committed ones, so the fix
+round changed no fixture input.
