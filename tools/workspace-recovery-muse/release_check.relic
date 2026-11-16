@@ -1,0 +1,50 @@
+# D0134 shared check: open a held store, try to save from the Editor,
+# release the hold, save again, and report the store state. Used by
+# cases 10 (wrong-version hold), 12 (ambiguous torn pointer) and 13
+# (too many generation files). The driver asserts the exact expected
+# output per case. Run from the repo root:
+#   relic/build/relic tools/workspace-recovery-muse/release_check.relic <dir> <text>
+use ../../shell/wm
+use std/files
+use std/os
+use std/vfs
+
+fun key_text(d, text)
+    for ch in text
+        if ch == " "
+            wm.key(d, "space")
+        else if ch == "\n"
+            wm.key(d, "return")
+        else
+            wm.key(d, ch)
+
+fun desktop()
+    return wm.new_desktop(640, 480, wm.default_apps())
+
+fun find_window(d, name)
+    for w in d.windows
+        if w.app.name == name
+            return w
+    fail("no " + name)
+
+let args = os.args()
+if len(args) != 2
+    fail("release_check needs the workspace directory and the text to type")
+let d = desktop()
+wm.workspace_open(args[0])
+wm.workspace_bind(d)
+print("enabled", wm.workspace_enabled())
+print("notice", [wm.workspace_notice()])
+wm.launch(d, wm.editor)
+key_text(d, args[1])
+wm.key(d, "ctrl+s")
+let e = find_window(d, "Editor")
+print("save1", [e.state.status])
+wm.workspace_release()
+print("release-notice", [wm.workspace_notice()])
+wm.key(d, "ctrl+s")
+print("save2", [e.state.status])
+print("notice-after", [wm.workspace_notice()])
+print("committed", [files.read(args[0] + "/COMMITTED")])
+print("meta", [files.read(args[0] + "/META")])
+print("names", files.list(args[0]))
