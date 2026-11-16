@@ -771,3 +771,71 @@ fixture or harness file needed a change.
 Not covered: the release of a held store (`wm.workspace_release()`),
 which case 8 does not try; power loss; and two desktops writing one
 store at once.
+
+## Results (Nov 16 2026)
+
+Run on Linux against main `0e7b8d9c` (PR #39 merged). Cases 1 to 5
+were re-verified through the full suite, cases 6 to 14 through the
+harness. No case changed outcome; every case still passes.
+
+Full suite, from the repo root:
+
+```console
+cmake -S . -B build -DCMAKE_BUILD_TYPE=Release
+cmake --build build -j4
+ctest --test-dir build -C Release
+```
+
+Result: 486/486 passed, 0 failed, including all 23 workspace tests,
+`check_shell`, `workspace_restart` and `workspace_kill`. That is the
+evidence for cases 1 to 5: the golden tests that drove them on Nov 9
+are in that suite and green at the new head.
+
+Harness, from the repo root (Relic built from the pinned submodule
+first: `cmake -S relic -B relic/build -DRELIC_BUILD_HOST=ON &&
+cmake --build relic/build`):
+
+```console
+python3 tools/workspace-recovery-muse/run_cases.py --live --replay
+```
+
+Result: `RESULT: PASS, all nine cases`. The live run passed every
+check (72 ok lines, 0 failures); the replay run passed every check
+(57 ok lines, 0 failures). The live run builds each store with the
+real implementation in separate processes, damages files by hand
+between processes, and checks what the next process installs. The
+replay run copies the committed fixtures from
+`tests/fixtures/workspace-recovery/` and runs only the check phases
+against them. Both runs passed every check. The new Relic program
+`release_check.relic` passes `relic check`, as do the setup and
+check programs it reuses.
+
+| Case | How it was run | What was seen |
+|---|---|---|
+| 1 | full suite at 0e7b8d9c (`shell_workspace_session` and the workspace goldens) | same windows and files came back after a restart, as on Nov 9 |
+| 2 | full suite at 0e7b8d9c (`workspace_kill`, `workspace_faults`, `shell_workspace_session`) | a killed or faulted save left the last committed files and windows; the leftover partial was ignored |
+| 3a | full suite at 0e7b8d9c (workspace goldens) | truncated committed image fell back to the earlier whole save with a visible notice |
+| 3b | full suite at 0e7b8d9c (workspace goldens) | corrupt committed image fell back to the earlier whole save with a visible notice |
+| 3c | full suite at 0e7b8d9c (workspace goldens) | wrong-version committed image held the store and fell back with a visible notice |
+| 4 | full suite at 0e7b8d9c (workspace goldens) | a failed save was reported visibly and the windows and text stayed |
+| 5 | full suite at 0e7b8d9c (workspace goldens) | a new, empty workspace directory opened with first-run defaults twice |
+| 6 | harness live and replay at 0e7b8d9c | `workspace: committed image invalid; recovered g1; ignored uncommitted g3`, note.txt reads `first version` |
+| 7 | harness live and replay at 0e7b8d9c | faulted save reports `workspace: save failed (partial-generation); kept g1`; retry commits v2 as g3; damaged g3 falls back with `workspace: committed image invalid; recovered g1`, note.txt reads `first version` |
+| 8 | harness live and replay at 0e7b8d9c | `workspace: committed image wrong version; store held; recovered g1`; both Editor Ctrl+S attempts report `workspace: save failed; store held (wrong-version); not written`; every store byte unchanged afterwards |
+| 9 | harness live and replay at 0e7b8d9c | `workspace: cannot open store`, workspace not enabled, Editor never says `saved` for the bad store, nothing written to the bad path; the first good-store Ctrl+S reports the disk-change guard (`changed on disk: ctrl+s again`); the second says `saved`; a fresh process reads the saved text back |
+| 10 | harness live and replay at 0e7b8d9c | `workspace: committed image wrong version; store held; recovered g1`; the first Ctrl+S reports `workspace: save failed; store held (wrong-version); not written`; after `wm.workspace_release()` the notice is `workspace: store hold released` and the second Ctrl+S says `saved`, committing g3 with META `committed g3, previous g1`; a fresh process is quiet, the older text is still there, and the released text survived |
+| 11 | harness live and replay at 0e7b8d9c | torn COMMITTED (`x`) with a usable META: `workspace: pointer invalid; recovered g2`, note.txt reads `second version`, the welcome file is unchanged |
+| 12 | harness live and replay at 0e7b8d9c | torn COMMITTED (`x`) with no META: `workspace: pointer invalid; store held; using defaults; ignored uncommitted g2`; the first Ctrl+S reports `workspace: save failed; store held (ambiguous); not written`; after release the second Ctrl+S says `saved`, committing g3 with META `committed g3, previous none`; only the new commit remains; a fresh process is quiet and the released text survived |
+| 13 | harness live and replay at 0e7b8d9c | 33 generation names: `workspace: too many generation files; store held; using defaults`; the first Ctrl+S reports `workspace: save failed; store held (too-many); not written`; after release the second Ctrl+S says `saved`, committing g34 with META `committed g34, previous none`; only the new commit remains; a fresh process is quiet and the released text survived |
+| 14 | harness live and replay at 0e7b8d9c | `workspace: ignored uncommitted g3; ignored partial g4`, note.txt reads `second version`, the welcome file is unchanged |
+
+Fixture check: `make_fixtures.py` was run against 0e7b8d9c and the
+regenerated case 6, 7 and 8 fixtures came out byte-identical to the
+committed ones, so nothing since PR #38 changed what the
+implementation writes. New fixtures were added for cases 10 to 14
+and replayed from the committed files.
+
+Not covered: power loss (there is no fsync), and two desktops
+writing one store at once (there is no lock). The release of a held
+store, which was not covered before, is now covered by cases 10,
+12 and 13.
