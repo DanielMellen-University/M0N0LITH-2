@@ -1,0 +1,50 @@
+# The ^ box maximizes a window to the desktop above the taskbar, and a second
+# press puts it back where it was. wm.maximize and wm.unmaximize do the same.
+use ../shell/wm
+let d = wm.new_desktop(640, 480, wm.default_apps())
+fun place(w) = [w.x, w.y, w.width, w.height]
+
+let t = wm.launch(d, wm.terminal)
+let n = wm.launch(d, wm.notes)
+print("start", place(n), wm.is_maximized(n))
+
+# the ^ box sits just left of the _ box, the same size
+let xb = wm.maximize_box(n)
+let mb = wm.minimize_box(n)
+print(xb[0] + xb[2] == mb[0], xb[1] == mb[1], xb[2] == wm.title_height)
+
+print(wm.click(d, xb[0] + 2, xb[1] + 2))
+print("max", place(n), wm.is_maximized(n))
+print("fills to the bar", n.y + wm.title_height + n.height == wm.bar_top(d))
+
+# the boxes moved with the window to the right edge
+xb = wm.maximize_box(n)
+print(wm.close_box(n)[0] + wm.title_height == d.width)
+print(wm.click(d, xb[0] + 2, xb[1] + 2))
+print("back", place(n), wm.is_maximized(n))
+
+# calls from code: maximize twice keeps the first place, unmaximize twice is one
+wm.maximize(d, t.id)
+wm.maximize(d, t.id)
+print("term max", place(t))
+wm.unmaximize(d, t.id)
+wm.unmaximize(d, t.id)
+print("term back", place(t))
+print(wm.toggle_maximize(d, t.id), wm.toggle_maximize(d, t.id), wm.toggle_maximize(d, 99))
+
+# a maximized window keeps its state when minimized and restored
+wm.maximize(d, n.id)
+wm.minimize(d, n.id)
+wm.restore(d, n.id)
+print("restored", place(n), wm.is_maximized(n))
+wm.unmaximize(d, n.id)
+
+# a place that no longer fits (a smaller desktop) is fitted on the way back
+wm.maximize(d, n.id)
+d.width = 200
+wm.unmaximize(d, n.id)
+print("fitted", place(n))
+
+# the title leaves room for all three boxes
+n.width = 220
+print("[" + wm.title_text(n) + "]", len(wm.title_text(n)) * 8 + 4 + 3 * wm.title_height <= n.width)

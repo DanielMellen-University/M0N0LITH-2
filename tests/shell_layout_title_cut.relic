@@ -1,4 +1,4 @@
-# The title is cut so it stops before the minimize and close boxes.
+# The title is cut so it stops before the maximize, minimize and close boxes.
 use ../shell/wm
 let d = wm.new_desktop(640, 480, wm.default_apps())
 let w = wm.launch(d, wm.notes)

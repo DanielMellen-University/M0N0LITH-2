@@ -7,7 +7,7 @@ print(wm.click(d, w.x + 10, w.y + 4))
 wm.motion(d, -500, -500)
 print("dragged far up left", w.x, w.y)
 # what shows at the left edge is 40 pixels of title left of the _ and x boxes
-print("right edge", w.x + w.width, "boxes from", wm.minimize_box(w)[0])
+print("right edge", w.x + w.width, "boxes from", wm.maximize_box(w)[0])
 wm.motion(d, 5000, 5000)
 print("dragged far down right", w.x, w.y)
 wm.release(d)

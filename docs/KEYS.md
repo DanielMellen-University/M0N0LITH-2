@@ -12,6 +12,7 @@ Every key and click the desktop and its apps act on, checked against `shell/wm.r
 | Drag a title bar | moves the window |
 | Drag the bottom-right corner | resizes the window |
 | Click the _ box | minimizes the window |
+| Click the ^ box | maximizes the window to the desktop above the taskbar; on a maximized window (the box shows v) puts it back where it was |
 | Click the x box | closes the window |
 | Click a taskbar button | brings its window to the front, or minimizes it if it is already in front |
 | Click the +N button | opens or closes the list of windows without a taskbar button |
