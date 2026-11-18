@@ -5,8 +5,8 @@ snapshot and pass, and were re-verified on Nov 12 2026 against main
 dd1bb60 (full suite 486/486, see "Results (Nov 12 2026)"). Cases 6 to 9
 were run on Nov 10 2026 against main 6c321a3b and pass, and were rerun
 on Nov 12 2026 against main dd1bb60 and pass. Cases 10 to 14 were run
-on Nov 16 2026 against main 0e7b8d9c and pass. Cases 15 to 19 are specified
-below and were UNRUN when specified. See "Results" for how
+on Nov 16 2026 against main 0e7b8d9c and pass. Cases 15 to 19 were run
+on Nov 18 2026 against main 397c8393 and pass. See "Results" for how
 each case was run and what was not tried. Cases 3a, 3b, 3c and 5 were
 reworded on that date, before the results were recorded; the reasons
 are in "Wording changes".
@@ -77,6 +77,21 @@ installed. They were specified against `docs/workspace-recovery.md`
 and executed against main `0e7b8d9c` with the harness in
 `tools/workspace-recovery-muse/` and fixtures in
 `tests/fixtures/workspace-recovery/`. See Results (Nov 16 2026).
+
+### Update: cases 15 to 19 executed (D0142, 2026-11-18)
+
+Cases 15 to 17 close the open-alone gap the D0141 note named: the
+release_check "before" snapshot is taken after workspace_open, so
+cases 10, 12 and 13 did not prove the open itself writes nothing. A
+new check program prints full store byte snapshots before and after
+the open, and the driver asserts they are identical, for each of the
+three held-store flavors. Cases 18 and 19 cover the missing-pointer
+rows of the load table: a usable META recovers the named generation,
+and exactly one valid generation with no META installs that one. They
+were specified against `docs/workspace-recovery.md` and executed
+against main `397c8393` with the harness in
+`tools/workspace-recovery-muse/` and fixtures in
+`tests/fixtures/workspace-recovery/`. See Results (Nov 18 2026).
 
 ## How to read a case
 
@@ -639,7 +654,7 @@ generation is installed.
 
 ## Case 15: Open alone writes nothing on a wrong-version held store (D0142-1)
 
-Status: UNRUN.
+Status: PASS (Nov 18 2026).
 
 Setup: The store holds a committed generation written in a newer
 version than this desktop understands, as in Case 8. Start the
@@ -665,7 +680,7 @@ notice, the installed text, and the two store snapshots.
 
 ## Case 16: Open alone writes nothing on an ambiguous torn-pointer held store (D0142-2)
 
-Status: UNRUN.
+Status: PASS (Nov 18 2026).
 
 Setup: The store holds two committed generations, v1 then v2, but
 after the process exits the pointer file is torn (COMMITTED holds
@@ -692,7 +707,7 @@ Per the contract, a torn pointer with no usable META holds the store
 
 ## Case 17: Open alone writes nothing on a too-many-generations held store (D0142-3)
 
-Status: UNRUN.
+Status: PASS (Nov 18 2026).
 
 Setup: The store holds one committed generation, v1, plus copies of
 it under 32 more generation names, so 33 generation names in total.
@@ -718,7 +733,7 @@ until an explicit release.
 
 ## Case 18: Missing pointer with a usable META recovers the named generation (D0142-4)
 
-Status: UNRUN.
+Status: PASS (Nov 18 2026).
 
 Setup: The store holds two committed generations, v1 then v2, with
 META naming committed g2 and previous g1. After the process exits,
@@ -743,7 +758,7 @@ META recovers the generation META names.
 
 ## Case 19: Missing pointer with one valid generation installs it (D0142-5)
 
-Status: UNRUN.
+Status: PASS (Nov 18 2026).
 
 Setup: The store holds one committed generation, v1. After the
 process exits, the pointer file is deleted entirely and META is
@@ -786,13 +801,13 @@ META and exactly one valid generation installs that one.
 | 12 | Torn pointer with no usable META holds the store until release | PASS |
 | 13 | More than 32 generation names hold the store until release | PASS |
 | 14 | Newer uncommitted generation and partial leftover named, not installed | PASS |
-| 15 | Open alone writes nothing on a wrong-version held store | UNRUN |
-| 16 | Open alone writes nothing on an ambiguous torn-pointer held store | UNRUN |
-| 17 | Open alone writes nothing on a too-many-generations held store | UNRUN |
-| 18 | Missing pointer with a usable META recovers the named generation | UNRUN |
-| 19 | Missing pointer with one valid generation installs it | UNRUN |
+| 15 | Open alone writes nothing on a wrong-version held store | PASS |
+| 16 | Open alone writes nothing on an ambiguous torn-pointer held store | PASS |
+| 17 | Open alone writes nothing on a too-many-generations held store | PASS |
+| 18 | Missing pointer with a usable META recovers the named generation | PASS |
+| 19 | Missing pointer with one valid generation installs it | PASS |
 
-Specified cases: 21. Executed cases: 16.
+Specified cases: 21. Executed cases: 21.
 
 ## Wording changes (Nov 9 2026)
 
@@ -1037,3 +1052,83 @@ replay:
 Fixture check: `make_fixtures.py` was run again and the regenerated
 fixtures came out byte-identical to the committed ones, so the fix
 round changed no fixture input.
+
+## Results (Nov 18 2026)
+
+Run on Linux against main `397c8393` (PR #40 merged). Cases 1 to 5
+were re-verified through the full suite, cases 6 to 19 through the
+harness. No case changed outcome; every case still passes.
+
+Full suite, from the repo root:
+
+```console
+cmake -S . -B build -DCMAKE_BUILD_TYPE=Release
+cmake --build build -j4
+ctest --test-dir build -C Release
+```
+
+Result: 484/486 passed, total test time 849.25 sec, including all 23
+workspace tests, `check_shell`, `workspace_restart` and
+`workspace_kill`. The 2 failures are the pre-existing timing tests
+`golden_shell_last_lines_long` and `golden_shell_overflow_speed`,
+which assert an operation finishes in under 0.5 seconds and print
+`fast: false` on this slow VM; every other output line matches the
+golden exactly, and both fail the same way at pristine main before
+any change in this batch. That is the evidence for cases 1 to 5: the
+golden tests that drove them on Nov 9 are in that suite and green at
+the new head, apart from the two timing flags.
+
+Harness, from the repo root (Relic built from the pinned submodule
+first: `cmake -S relic -B relic/build -DRELIC_BUILD_HOST=ON &&
+cmake --build relic/build`):
+
+```console
+python3 tools/workspace-recovery-muse/run_cases.py --live --replay
+```
+
+Result: `RESULT: PASS, all fourteen cases`. The live run passed every
+check (109 ok lines, 0 failures); the replay run passed every check
+(87 ok lines, 0 failures). The live run builds each store with the
+real implementation in separate processes, damages files by hand
+between processes, and checks what the next process installs. The
+replay run copies the committed fixtures from
+`tests/fixtures/workspace-recovery/` and runs only the check phases
+against them. Both runs passed every check. The new Relic program
+`open_check.relic` passes `relic check`, as do the setup and check
+programs it reuses.
+
+| Case | How it was run | What was seen |
+| 1 | full suite at 397c8393 (`shell_workspace_session` and the workspace goldens) | same windows and files came back after a restart, as on Nov 9 |
+| 2 | full suite at 397c8393 (`workspace_kill`, `workspace_faults`, `shell_workspace_session`) | a killed or faulted save left the last committed files and windows; the leftover partial was ignored |
+| 3a | full suite at 397c8393 (workspace goldens) | truncated committed image fell back to the earlier whole save with a visible notice |
+| 3b | full suite at 397c8393 (workspace goldens) | corrupt committed image fell back to the earlier whole save with a visible notice |
+| 3c | full suite at 397c8393 (workspace goldens) | wrong-version committed image held the store and fell back with a visible notice |
+| 4 | full suite at 397c8393 (workspace goldens) | a failed save was reported visibly and the windows and text stayed |
+| 5 | full suite at 397c8393 (workspace goldens) | a new, empty workspace directory opened with first-run defaults twice |
+| 6 | harness live and replay at 397c8393 | `workspace: committed image invalid; recovered g1; ignored uncommitted g3`, note.txt reads `first version` |
+| 7 | harness live and replay at 397c8393 | faulted save reports `workspace: save failed (partial-generation); kept g1`; retry commits v2 as g3; damaged g3 falls back with `workspace: committed image invalid; recovered g1`, note.txt reads `first version` |
+| 8 | harness live and replay at 397c8393 | `workspace: committed image wrong version; store held; recovered g1`; both Editor Ctrl+S attempts report `workspace: save failed; store held (wrong-version); not written`; every store byte unchanged afterwards |
+| 9 | harness live and replay at 397c8393 | `workspace: cannot open store`, workspace not enabled, Editor never says `saved` for the bad store, nothing written to the bad path; the first good-store Ctrl+S reports the disk-change guard (`changed on disk: ctrl+s again`); the second says `saved`; a fresh process reads the saved text back |
+| 10 | harness live and replay at 397c8393 | `workspace: committed image wrong version; store held; recovered g1`; the first Ctrl+S reports `workspace: save failed; store held (wrong-version); not written`; after `wm.workspace_release()` the notice is `workspace: store hold released` and the second Ctrl+S says `saved`, committing g3 with META `committed g3, previous g1`; a fresh process is quiet, the older text is still there, and the released text survived |
+| 11 | harness live and replay at 397c8393 | torn COMMITTED (`x`) with a usable META: `workspace: pointer invalid; recovered g2`, note.txt reads `second version`, the welcome file is unchanged |
+| 12 | harness live and replay at 397c8393 | torn COMMITTED (`x`) with no META: `workspace: pointer invalid; store held; using defaults; ignored uncommitted g2`; the first Ctrl+S reports `workspace: save failed; store held (ambiguous); not written`; after release the second Ctrl+S says `saved`, committing g3 with META `committed g3, previous none`; only the new commit remains; a fresh process is quiet and the released text survived |
+| 13 | harness live and replay at 397c8393 | 33 generation names: `workspace: too many generation files; store held; using defaults`; the first Ctrl+S reports `workspace: save failed; store held (too-many); not written`; after release the second Ctrl+S says `saved`, committing g34 with META `committed g34, previous none`; only the new commit remains; a fresh process is quiet and the released text survived |
+| 14 | harness live and replay at 397c8393 | `workspace: ignored uncommitted g3; ignored partial g4`, note.txt reads `second version`, the welcome file is unchanged |
+| 15 | harness live and replay at 397c8393 | `workspace: committed image wrong version; store held; recovered g1`; the open alone wrote nothing (store snapshots before and after the open identical), note.txt reads `first version` |
+| 16 | harness live and replay at 397c8393 | `workspace: pointer invalid; store held; using defaults; ignored uncommitted g2`; the open alone wrote nothing, COMMITTED stayed the torn byte `x`, no META was created, no note file in the defaults image |
+| 17 | harness live and replay at 397c8393 | `workspace: too many generation files; store held; using defaults`; the open alone wrote nothing, all 33 generation names still present, no note file in the defaults image |
+| 18 | harness live and replay at 397c8393 | `workspace: pointer missing; recovered g2`, note.txt reads `second version`, the welcome file is unchanged |
+| 19 | harness live and replay at 397c8393 | `workspace: pointer missing; recovered g1`, note.txt reads `first version`, the welcome file is unchanged |
+
+Fixture check: `make_fixtures.py` was run against 397c8393 and the
+regenerated case 6 to 14 fixtures came out byte-identical to the
+committed ones, so nothing since PR #40 changed what the
+implementation writes. New fixtures were added for cases 15 to 19
+and replayed from the committed files.
+
+Not covered: COMMITTED naming a missing generation file, and a corrupt
+META with a valid COMMITTED (further load-table rows, candidates for
+cases 20-21); power loss (there is no fsync), and two desktops
+writing one store at once (there is no lock). The open-alone gap the
+D0141 note named for cases 10, 12 and 13 is now closed by cases 15,
+16 and 17.
