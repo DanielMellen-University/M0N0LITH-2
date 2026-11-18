@@ -34,6 +34,9 @@ Write `tests/shell_<topic>.relic`, run it, read its output, and save that as `te
 | `shell_wm` | drives wm.relic with fake clicks and keys; output must match shell_wm.out |
 | `shell_lifecycle` | window ids, focus and tab order through lifecycle changes |
 | `shell_minimize` | minimize and restore from the taskbar and the _ box |
+| `shell_maximize` | the ^ box maximizes to the desktop above the taskbar and puts the window back; maximize and unmaximize called twice; a maximized window minimized and restored; a place fitted to a smaller desktop; the title leaving room for three boxes |
+| `shell_maximize_drag` | a double-click on the title maximizes and puts back; a maximized window's title and corner do not drag it; a double-click in the text stays the app's; maximizing ends a drag that was going |
+| `shell_maximize_keys` | F11 maximizes and puts back the window with focus and no app sees it; nothing with no window; a minimized window is skipped |
 | `shell_close_focus` | closing a focused window gives focus to the next window down, closing another leaves focus alone, closing the last leaves none |
 | `shell_start_menu` | the Start button opens and closes the menu; Up, Down and Return on the open menu |
 | `shell_menu_all_rows` | every Start menu row launches its app, in the documented order, with the first row marked on each open |
@@ -394,7 +397,8 @@ Write `tests/shell_<topic>.relic`, run it, read its output, and save that as `te
 | `shell_workspace_ids` | partial, truncated, wrong-version and uncommitted files and pointer-only or META-only ids reserve numbers; retry skips its leftover, prunes staged files and keeps exactly the installed backup |
 | `shell_workspace_tokens` | malformed pointer and META spellings, leading zeros, unknown generation names, nine-digit maximum and exhausted ids; ambiguous metadata never promotes a newer image |
 | `shell_workspace_io_caps` | inclusive byte, text, path, entry and generation-name limits; size checks precede reads; pointer and META read limits; growth after the size check cannot bypass the UTF-8 byte cap |
-| `shell_workspace_session_schema` | all eight app schemas, missing/extra/duplicate fields, bad values, packed-line limits, invalid headers and checksum framing; 64 windows accepted, 65 rejected; 72 invalid sessions recover files and windows atomically |
+| `shell_workspace_session_schema` | all eight app schemas, missing/extra/duplicate fields, bad values, packed-line limits, invalid headers (a window flag past 3) and checksum framing; 64 windows accepted, 65 rejected; 72 invalid sessions recover files and windows atomically |
+| `shell_workspace_maximized` | a maximized window is written at its old place with flag 2 (3 when also minimized), comes back maximized at the new desktop's size, and goes back to that place |
 | `shell_workspace_recovery_apps` | nine recovery paths restore all seven apps, places and minimized state; Terminal output/history/draft/cursors, Files selection, unsaved Editor/IDE names and text, Notes, Clicker and Paint fields; first-frame rendering and empty undo/redo |
 | `shell_workspace_defaults` | no store means no host files; an empty directory is the first run; one save writes `g1.m2ws`; reopening drops a memory-only change; `workspace_open("")` stops committing; workspace goldens use private temporary working directories, removed even on failure |
 | `shell_workspace_roundtrip` | Terminal create, append and remove, a quoted name, Files rename, Editor save, IDE run, then a reopen; Notes and Clicker do not come back |

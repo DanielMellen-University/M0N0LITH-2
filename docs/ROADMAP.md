@@ -36,6 +36,7 @@ Closed Nov 7 2026 for the behavior the Linux GUI walkthrough demonstrated, inclu
 ## Done after acceptance
 
 - [x] Editor open by path (Nov 11 2026, unparked by the project owner): Ctrl+O (Cmd+O on macOS), absolute or relative VFS paths, errors keeping the buffer, Esc cancelling, and a second Return before discarding unsaved edits. The IDE shares it. Tests `shell_editor_open_path`, `shell_editor_open_refuse`, `shell_editor_open_unsaved` and `shell_ide_open_path`. The GUI was not walked through; this does not extend the Nov 7 GUI pass. See [Editor](apps/EDITOR.md).
+- [x] Window maximize (Nov 18 2026, unparked by the project owner): the ^ box left of the _ box, a double-click on the title bar and F11 maximize a window to the desktop above the taskbar and put it back at its old place. A maximized window does not drag or resize, keeps its state through minimize and restore, and comes back maximized from a workspace snapshot. The desktop itself still stays 640 by 480. Tests `shell_maximize`, `shell_maximize_drag`, `shell_maximize_keys` and `shell_workspace_maximized`. The GUI was not walked through; this does not extend the Nov 7 GUI pass. See [Windows](apps/WINDOWS.md).
 
 ## Accepted (Nov 7 2026)
 
@@ -57,7 +58,7 @@ Commands and keys not named here were not pressed in the window. The 183 tests s
 
 - Terminal scrollback
 - Host mounts
-- The desktop following the real window size, and maximize
+- The desktop following the real window size
 - IDE programs that draw, and a run that continues in the background while it is not waiting for input
 
 ### Limits that are part of the pass

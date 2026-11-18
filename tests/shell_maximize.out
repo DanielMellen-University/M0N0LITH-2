@@ -1,0 +1,14 @@
+start [64, 50, 220, 60] false
+true true true
+maximize
+max [0, 0, 640, 440] true
+fills to the bar true
+true
+unmaximize
+back [64, 50, 220, 60] false
+term max [0, 0, 640, 440]
+term back [40, 30, 280, 120]
+maximize unmaximize desktop
+restored [0, 0, 640, 440] true
+fitted [64, 50, 136, 60]
+[Notes] true

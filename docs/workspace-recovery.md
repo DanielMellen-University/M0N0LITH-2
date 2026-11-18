@@ -129,7 +129,7 @@ A generation written by the desktop records the open windows in the same file as
 | Line | Meaning |
 |---|---|
 | `S -` | the desktop was saved with no windows. It is the only `S` line |
-| `S W <App> <id> <x> <y> <width> <height> <0 or 1>` | one window, back to front. App is Clicker, Notes, Terminal, Files, Editor, IDE, Paint, or Snake. `1` means minimized. id is unique, from 1 |
+| `S W <App> <id> <x> <y> <width> <height> <0 to 3>` | one window, back to front. App is Clicker, Notes, Terminal, Files, Editor, IDE, Paint, or Snake. `1` means minimized, `2` maximized and `3` both. For a maximized window x to height are the place it goes back to, and a new desktop maximizes it again at its own size. id is unique, from 1 |
 | `S F <key> <escaped value>` | one field of the window started by the previous `W`. The value uses the same escapes as a file. No raw space |
 
 A session has at most 64 windows. A missing field, an extra field, a bad number, a duplicate id, or anything else malformed in an `S` line is `invalid`. The vfs in that same file is not installed either.
@@ -225,7 +225,7 @@ The next generation number is one past every id already stored or named. A faile
 - A wrong-version committed file, more than 32 generation names, or an ambiguous torn pointer holds the store. Continued use does not overwrite or delete it. `workspace_release` then a later successful save may.
 - The first successful commit has no older generation. From the second on, the generation that was installed when the save started is kept until the save after next replaces it as the backup.
 - Two processes must not write one store. The format has no lock.
-- Open windows are in the snapshot the desktop writes: place, size, minimized, the Terminal's folder, output and command history, Files' folder, Editor and IDE text (saved or not), Notes' line, Clicker's count, and Paint's cells. Undo, the clipboard, a running IDE program, and Snake's board are not. A files-only `save` does not write them. Keystrokes since the last snapshot are not on disk until the next snapshot or quit.
+- Open windows are in the snapshot the desktop writes: place, size, minimized, maximized, the Terminal's folder, output and command history, Files' folder, Editor and IDE text (saved or not), Notes' line, Clicker's count, and Paint's cells. Undo, the clipboard, a running IDE program, and Snake's board are not. A files-only `save` does not write them. Keystrokes since the last snapshot are not on disk until the next snapshot or quit.
 - A program run in the IDE still cannot write the host disk. The store is written by the desktop, not by that program.
 - There is no fsync. This is not a promise about power loss.
 

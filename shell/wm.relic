@@ -275,14 +275,21 @@ fun tab_label(d, w)
 
 fun close_box(w) = [w.x + w.width - title_height, w.y, title_height, title_height]
 
-# The window's name cut to the room the title bar has left of the _ and x boxes
-# (desktop.relic draws it 4 pixels in).
+# The window's name cut to the room the title bar has left of the ^, _ and x
+# boxes (desktop.relic draws it 4 pixels in).
 fun title_text(w)
-    let room = int((w.width - 2 * title_height - 4) / char_width)
+    let room = int((w.width - 3 * title_height - 4) / char_width)
     return slice(w.app.name, 0, math.max(0, room))
 
 # The _ box, just left of the x box. It minimizes the window.
 fun minimize_box(w) = [w.x + w.width - 2 * title_height, w.y, title_height, title_height]
+
+# The ^ box, just left of the _ box. It maximizes the window, or puts a
+# maximized one back where it was.
+fun maximize_box(w) = [w.x + w.width - 3 * title_height, w.y, title_height, title_height]
+
+# True while the window fills the desktop; restore_to holds the place it had.
+fun is_maximized(w) = "restore_to" in w and w.restore_to != none
 
 fun resize_box(w) = [w.x + w.width - grip, w.y + title_height + w.height - grip, grip, grip]
 
@@ -292,7 +299,7 @@ fun _inside(b, x, y) = x >= b[0] and x < b[0] + b[2] and y >= b[1] and y < b[1] 
 # they never open off the desktop.
 fun launch(d, app)
     let n = _cascade_slot(d)
-    let w = {id: d.next_id, app: app, state: app.init(), x: 40 + n * 24, y: 30 + n * 20, width: app.width, height: app.height, minimized: false}
+    let w = {id: d.next_id, app: app, state: app.init(), x: 40 + n * 24, y: 30 + n * 20, width: app.width, height: app.height, minimized: false, restore_to: none}
     d.next_id = d.next_id + 1
     # Leave room for the minimum size before fitting a cascaded window.
     w.x = math.min(w.x, math.max(0, d.width - min_width))
@@ -370,12 +377,57 @@ fun restore(d, id)
     _raise(d, i)
     _persist_desk(d)
 
+# Fill the desktop above the taskbar, keeping the old place for unmaximize.
+# A maximized window is left as it is.
+fun maximize(d, id)
+    let i = _index_of(d, id)
+    if i < 0 or is_maximized(d.windows[i])
+        return
+    _fill_desktop(d, d.windows[i])
+    _end_drag_for(d, id)
+    _persist_desk(d)
+
+fun _fill_desktop(d, w)
+    w.restore_to = [w.x, w.y, w.width, w.height]
+    w.x = 0
+    w.y = 0
+    w.width = d.width
+    w.height = math.max(min_height, bar_top(d) - title_height)
+
+# Put a maximized window back at the place it had, fitted to the desktop.
+fun unmaximize(d, id)
+    let i = _index_of(d, id)
+    if i < 0 or not is_maximized(d.windows[i])
+        return
+    let w = d.windows[i]
+    let r = w.restore_to
+    w.restore_to = none
+    w.x = r[0]
+    w.y = r[1]
+    w.width = r[2]
+    w.height = r[3]
+    _clamp_size(d, w)
+    _clamp_pos(d, w)
+    _end_drag_for(d, id)
+    _persist_desk(d)
+
+# Maximize, or unmaximize a window that already is. Gives the click word.
+fun toggle_maximize(d, id)
+    let i = _index_of(d, id)
+    if i < 0
+        return "desktop"
+    if is_maximized(d.windows[i])
+        unmaximize(d, id)
+        return "unmaximize"
+    maximize(d, id)
+    return "maximize"
+
 # Keep enough of the title bar on screen so the window stays reachable: 40
-# pixels of it at either edge. Off the left edge the _ and x boxes sit in the part
-# that shows, so 40 more than those are kept there (it used to leave 8 to grab).
+# pixels of it at either edge. Off the left edge the ^, _ and x boxes sit in the
+# part that shows, so 40 more than those are kept there (it used to leave 8 to grab).
 fun _clamp_pos(d, w)
     let max_x = d.width - 40
-    let min_x = 40 + 2 * title_height - w.width
+    let min_x = 40 + 3 * title_height - w.width
     if w.x < min_x
         w.x = min_x
     if w.x > max_x
@@ -425,6 +477,7 @@ fun _begin_drag(d, w, mode, x, y)
 #   "tab" a taskbar button that showed its window  "minimize" the _ box, or a tab of the window on top
 #   "overflow" the +N button (toggled the hidden-windows list)   "tab" also a row of that list
 #   "bar" empty taskbar   "close" the x box   "title" and "resize" start a drag
+#   "maximize" or "unmaximize" the ^ box
 #   "app" inside a window (its on_click ran)   "desktop" nothing
 # Call motion and release after a "title" or "resize". A press first drops any drag still on.
 fun click(d, x, y)
@@ -507,10 +560,17 @@ fun _click_in(d, w, x, y)
     if _inside(minimize_box(w), x, y)
         minimize(d, w.id)
         return "minimize"
+    if _inside(maximize_box(w), x, y)
+        return toggle_maximize(d, w.id)
     if y < w.y + title_height
-        _begin_drag(d, w, "move", x, y)
+        # a double-click on the title maximizes, or puts a maximized window back
+        if d.clicks == 2
+            return toggle_maximize(d, w.id)
+        # a maximized window stays put: its title does not drag
+        if not is_maximized(w)
+            _begin_drag(d, w, "move", x, y)
         return "title"
-    if _inside(resize_box(w), x, y)
+    if _inside(resize_box(w), x, y) and not is_maximized(w)
         _begin_drag(d, w, "resize", x, y)
         return "resize"
     if "selected" in w.app
@@ -641,6 +701,9 @@ fun _key_do(d, k)
     else if w != none and k == "ctrl+m"
         # minimizes it, as its _ box does; the next window down gets focus
         minimize(d, w.id)
+    else if w != none and k == "f11"
+        # maximizes it, or puts it back, as its ^ box does
+        toggle_maximize(d, w.id)
     else if w != none
         w.app.on_key(w.state, k)
 
@@ -648,7 +711,7 @@ fun _key_do(d, k)
 
 # Keys that are not typed text; the apps handle these by name. Letters, digits,
 # punctuation and space come as text events, which carry shift, layout and Unicode.
-let _named_keys = ["return", "backspace", "tab", "up", "down", "left", "right", "delete", "home", "end", "pageup", "pagedown", "f2", "f3", "f5", "f6"]
+let _named_keys = ["return", "backspace", "tab", "up", "down", "left", "right", "delete", "home", "end", "pageup", "pagedown", "f2", "f3", "f5", "f6", "f11"]
 let _shift_keys = ["left", "right", "up", "down", "home", "end", "tab", "pageup", "pagedown", "f3"]   # shift+left and so on select in the Editor; shift+tab takes out an indent
 let _ctrl_shift_keys = ["left", "right", "home", "end", "tab"]
 let _modifier_keys = ["left ctrl", "right ctrl", "left shift", "right shift", "left alt", "right alt", "left gui", "right gui"]
@@ -4816,11 +4879,17 @@ fun _paint_digits(cells)
         out = out + str(c)
     return out
 
+# A maximized window is written at the place it goes back to, with 2 added to
+# the minimized flag, so a new process can maximize it again on its own desktop.
 fun _window_header(w)
     let m = 0
     if w.minimized
         m = 1
-    return "W " + w.app.name + " " + str(w.id) + " " + str(w.x) + " " + str(w.y) + " " + str(w.width) + " " + str(w.height) + " " + str(m)
+    let place = [w.x, w.y, w.width, w.height]
+    if is_maximized(w)
+        m = m + 2
+        place = w.restore_to
+    return "W " + w.app.name + " " + str(w.id) + " " + str(place[0]) + " " + str(place[1]) + " " + str(place[2]) + " " + str(place[3]) + " " + str(m)
 
 fun _fields_of(w, lines)
     let s = w.state
@@ -4945,11 +5014,13 @@ fun _apply_session(d, sess)
     for w in sess
         let app = _app_by_name(w.app)
         let state = _restore_state(w)
-        let win = {id: w.id, app: app, state: state, x: w.x, y: w.y, width: w.width, height: w.height, minimized: w.minimized}
+        let win = {id: w.id, app: app, state: state, x: w.x, y: w.y, width: w.width, height: w.height, minimized: w.minimized, restore_to: none}
         if w.id > max_id
             max_id = w.id
         _clamp_size(d, win)
         _clamp_pos(d, win)
+        if "maximized" in w and w.maximized
+            _fill_desktop(d, win)   # on this desktop's size, not the one it was saved on
         append(d.windows, win)
         if w.app == "Editor" or w.app == "IDE"
             _shell_open.path = state.path

@@ -9,9 +9,11 @@ Every key and click the desktop and its apps act on, checked against `shell/wm.r
 | Click Start | opens the Start menu, or closes it |
 | Click a Start menu row | launches that app |
 | Up, Down, Return (menu open) | move the marked row of the Start menu, going round at the ends, and launch it; the first row is marked each time it opens |
-| Drag a title bar | moves the window |
-| Drag the bottom-right corner | resizes the window |
+| Drag a title bar | moves the window (not a maximized one) |
+| Double-click a title bar | maximizes the window, or puts a maximized one back |
+| Drag the bottom-right corner | resizes the window (not a maximized one) |
 | Click the _ box | minimizes the window |
+| Click the ^ box | maximizes the window to the desktop above the taskbar; on a maximized window (the box shows v) puts it back where it was |
 | Click the x box | closes the window |
 | Click a taskbar button | brings its window to the front, or minimizes it if it is already in front |
 | Click the +N button | opens or closes the list of windows without a taskbar button |
@@ -20,6 +22,7 @@ Every key and click the desktop and its apps act on, checked against `shell/wm.r
 | Ctrl+Shift+Tab | the other way: the window with focus goes to the bottom, so it undoes a Ctrl+Tab |
 | Ctrl+W | closes the window with focus, as its x box does |
 | Ctrl+M | minimizes the window with focus, as its _ box does |
+| F11 | maximizes the window with focus, or puts it back, as its ^ box does |
 | Ctrl+1 to Ctrl+9 | brings the window of that taskbar button (counting in the order opened) to the front, restoring it if minimized |
 | Escape | closes the Start menu or the +N list; else gives up what the window on top is asking for (an open path, find, replace or line number in the Editor or the IDE, a name in Paint or Files, a delete question in Files), stops an IDE run that waits for input, or drops a selection in the Editor or the IDE; else quits the desktop (the in-memory files are lost). A held, repeating Escape does not quit |
 

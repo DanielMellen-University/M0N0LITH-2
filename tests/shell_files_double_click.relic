@@ -29,7 +29,7 @@ print("no clicks field", wm.handle(d, {type: "mouse_down", button: 1, x: f.x + 1
 f.state.path = "/home"
 wm.visible_lines(f)
 print("click()", wm.click(d, f.x + 10, row_y(2)), f.state.path, d.clicks)
-# double-clicking a title bar still starts a drag, and other apps still get the press
+# double-clicking a title bar maximizes the window (not a Files open), and other apps still get the press
 wm.release(d)
 print("title double press", wm.handle(d, {type: "mouse_down", button: 1, x: f.x + 10, y: f.y + 2, clicks: 2}))
 wm.release(d)

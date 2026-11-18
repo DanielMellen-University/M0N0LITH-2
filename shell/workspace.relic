@@ -467,14 +467,15 @@ fun _start_window(line, ids)
     let y = _parse_int(tok[4], -100000, 100000)
     let w = _parse_int(tok[5], 1, 100000)
     let h = _parse_int(tok[6], 1, 100000)
-    let m = _parse_int(tok[7], 0, 1)
+    # 1 is minimized, 2 maximized (x to height are then its place before), 3 both
+    let m = _parse_int(tok[7], 0, 3)
     if id == none or x == none or y == none or w == none or h == none or m == none
         return none
     if str(id) in ids
         return none
     ids[str(id)] = true
-    let minimized = m == 1
-    return {app: tok[1], id: id, x: x, y: y, width: w, height: h, minimized: minimized, fields: {}}
+    let minimized = m == 1 or m == 3
+    return {app: tok[1], id: id, x: x, y: y, width: w, height: h, minimized: minimized, maximized: m >= 2, fields: {}}
 
 fun _add_field(win, line)
     let rest = slice(line, 2, len(line))

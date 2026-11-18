@@ -2,10 +2,11 @@
 #   relic/build-sdl/relic shell/desktop.relic
 # Click Start (again to close the menu), pick an app, click inside it or type.
 # Drag a title bar to move, drag the bottom-right corner to resize. The x box
-# closes a window, the _ box minimizes it. A taskbar button brings its window
-# to the front, or minimizes it if it is already in front; click it again to
-# restore. With more windows than tabs fit, a +N button at the end of the bar
-# opens a list of the windows without a tab. Ctrl+S (Cmd+S on macOS) saves in
+# closes a window, the _ box minimizes it, and the ^ box maximizes it (v puts
+# it back). A taskbar button brings its window to the front, or minimizes it
+# if it is already in front; click it again to restore. With more windows
+# than tabs fit, a +N button at the end of the bar opens a list of the
+# windows without a tab. Ctrl+S (Cmd+S on macOS) saves in
 # the Editor, the IDE and Paint; Ctrl+R runs the IDE's program. In Paint, press
 # and drag on the canvas to draw. Snake moves on the clock while its window
 # is focused.
@@ -33,6 +34,12 @@ fun draw_window(d, w)
     let mb = wm.minimize_box(w)
     draw_box(mb, 110, 110, 125)
     graphics.text(mb[0] + 4, mb[1] + 2, "_", 255, 255, 255)
+    let xb = wm.maximize_box(w)
+    draw_box(xb, 110, 110, 125)
+    if wm.is_maximized(w)
+        graphics.text(xb[0] + 4, xb[1] + 2, "v", 255, 255, 255)
+    else
+        graphics.text(xb[0] + 4, xb[1] + 2, "^", 255, 255, 255)
     # nothing an app draws goes outside its window
     graphics.clip(w.x, w.y + wm.title_height, w.width, w.height)
     for b in wm.paint_boxes(w)   # Paint's canvas and swatches
