@@ -1,0 +1,48 @@
+# A maximized window is written at the place it goes back to, flagged 2 (3
+# when it is also minimized), and comes back maximized on the new desktop's
+# size, still able to go back to that place.
+use ../shell/wm
+use std/files
+use std/strings
+
+fun check(label, got, want)
+    if got != want
+        fail(label + ": " + str(got) + " != " + str(want))
+
+fun image(dir)
+    let p = files.read(dir + "/COMMITTED")
+    return files.read(dir + "/" + slice(p, 0, len(p) - 1) + ".m2ws")
+
+fun place(w) = [w.x, w.y, w.width, w.height]
+
+let dir = "ws-maximized"
+wm.workspace_open(dir)
+let d = wm.new_desktop(640, 480, wm.default_apps())
+wm.workspace_bind(d)
+let n = wm.launch(d, wm.notes)
+let c = wm.launch(d, wm.clicker)
+let t = wm.launch(d, wm.terminal)
+wm.maximize(d, n.id)
+wm.maximize(d, c.id)
+wm.minimize(d, c.id)
+check("flush", wm.workspace_flush(), "")
+let img = image(dir)
+for line in strings.split(img, "\n")
+    if strings.starts_with(line, "S W ")
+        print(line)
+
+# a new desktop, bigger than the one it was saved on
+wm.workspace_open(dir)
+let e = wm.new_desktop(800, 600, wm.default_apps())
+wm.workspace_bind(e)
+check("notice", wm.workspace_notice(), "")
+for w in e.windows
+    print(w.app.name, place(w), wm.is_maximized(w), w.minimized)
+let notes = e.windows[0]
+wm.unmaximize(e, notes.id)
+print("back", place(notes))
+
+# once it is back, it is written with flag 0 again
+check("flush again", wm.workspace_flush(), "")
+print(strings.contains(image(dir), "S W Notes 1 40 30 220 60 0\n"))
+files.remove_tree(dir)

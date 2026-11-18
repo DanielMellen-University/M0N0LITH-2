@@ -383,14 +383,16 @@ fun maximize(d, id)
     let i = _index_of(d, id)
     if i < 0 or is_maximized(d.windows[i])
         return
-    let w = d.windows[i]
+    _fill_desktop(d, d.windows[i])
+    _end_drag_for(d, id)
+    _persist_desk(d)
+
+fun _fill_desktop(d, w)
     w.restore_to = [w.x, w.y, w.width, w.height]
     w.x = 0
     w.y = 0
     w.width = d.width
     w.height = math.max(min_height, bar_top(d) - title_height)
-    _end_drag_for(d, id)
-    _persist_desk(d)
 
 # Put a maximized window back at the place it had, fitted to the desktop.
 fun unmaximize(d, id)
@@ -4877,11 +4879,17 @@ fun _paint_digits(cells)
         out = out + str(c)
     return out
 
+# A maximized window is written at the place it goes back to, with 2 added to
+# the minimized flag, so a new process can maximize it again on its own desktop.
 fun _window_header(w)
     let m = 0
     if w.minimized
         m = 1
-    return "W " + w.app.name + " " + str(w.id) + " " + str(w.x) + " " + str(w.y) + " " + str(w.width) + " " + str(w.height) + " " + str(m)
+    let place = [w.x, w.y, w.width, w.height]
+    if is_maximized(w)
+        m = m + 2
+        place = w.restore_to
+    return "W " + w.app.name + " " + str(w.id) + " " + str(place[0]) + " " + str(place[1]) + " " + str(place[2]) + " " + str(place[3]) + " " + str(m)
 
 fun _fields_of(w, lines)
     let s = w.state
@@ -5011,6 +5019,8 @@ fun _apply_session(d, sess)
             max_id = w.id
         _clamp_size(d, win)
         _clamp_pos(d, win)
+        if "maximized" in w and w.maximized
+            _fill_desktop(d, win)   # on this desktop's size, not the one it was saved on
         append(d.windows, win)
         if w.app == "Editor" or w.app == "IDE"
             _shell_open.path = state.path

@@ -1,0 +1,8 @@
+S W Notes 1 40 30 220 60 2
+S W Clicker 2 64 50 180 60 3
+S W Terminal 3 88 70 280 120 0
+Notes [0, 0, 800, 560] true false
+Clicker [0, 0, 800, 560] true true
+Terminal [88, 70, 280, 120] false false
+back [40, 30, 220, 60]
+true

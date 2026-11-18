@@ -93,7 +93,7 @@ for app in samples
         reject(app + " invalid " + row[0], changed(app, fields, row[0], row[1]))
     print(app, "schema checked")
 let clicker = session("Clicker", samples.Clicker)
-for pair in [["Clicker", "Unknown"], [" 2 ", " 0 "], [" 2 ", " 02 "], [" 2 ", " 1000001 "], [" 300 ", " 0 "], [" 200 ", " -1 "], [" 0\n", " 2\n"]]
+for pair in [["Clicker", "Unknown"], [" 2 ", " 0 "], [" 2 ", " 02 "], [" 2 ", " 1000001 "], [" 300 ", " 0 "], [" 200 ", " -1 "], [" 0\n", " 4\n"]]
     reject("window header", strings.replace(clicker, pair[0], pair[1]))
 reject("duplicate id", clicker + clicker)
 reject("empty with window", "S -\n" + clicker)
