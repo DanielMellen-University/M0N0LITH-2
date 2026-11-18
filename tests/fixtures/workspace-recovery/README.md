@@ -79,3 +79,37 @@ version. g3 is a complete files-only generation holding yet newer
 text that was never committed, and `g4.m2ws.partial` holds only the
 `M2WS1` header line. Opening this store recovers g2 and reports both
 leftovers as ignored.
+
+## case15
+
+COMMITTED names g2, whose whole file is `M2WS9`, a version this
+desktop does not understand. g1 is complete and valid and holds the
+first version. Opening this store recovers g1 and holds the store;
+the open alone writes nothing, which the check program proves with
+store snapshots taken before and after the open.
+
+## case16
+
+COMMITTED is the single byte `x`, a torn pointer, and META is absent,
+so no generation can be named with confidence. Opening this store
+holds it and uses defaults; the open alone writes nothing, which the
+check program proves with store snapshots taken before and after the
+open.
+
+## case17
+
+COMMITTED names g1, which is complete and valid and holds the first
+version, but g2 through g33 are byte copies of it, so the store
+carries 33 generation names. Opening this store holds it and uses
+defaults; the open alone writes nothing, which the check program
+proves with store snapshots taken before and after the open.
+
+## case18
+
+COMMITTED is absent. META still reads `committed g2` and `previous
+g1`, so opening this store recovers g2, the generation META names.
+
+## case19
+
+COMMITTED and META are both absent, and g1 is the only generation
+file. Opening this store recovers g1, the one valid generation.
