@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
-"""D0134 workspace-recovery harness driver.
+"""D0142 workspace-recovery harness driver.
 
-Runs cases 6-14 for real: separate relic processes share one store
+Runs cases 6-19 for real: separate relic processes share one store
 directory per case, the driver damages files by hand between processes
 (exactly as a user-facing fault would), and every expected line is
 asserted against the actual program output. Nothing here edits an
@@ -294,6 +294,42 @@ def expect_case14_check(out):
     check("case14", "welcome file still shows original text", out, 'welcome ["Welcome to Relic.\\n"]')
 
 
+def expect_case15_check(out):
+    check("case15", "held notice", out,
+          'notice ["workspace: committed image wrong version; store held; recovered g1"]')
+    check("case15", "older text restored", out, 'note ["first version\\n"]')
+    check("case15", "welcome file still shows original text", out, 'welcome ["Welcome to Relic.\\n"]')
+    check_snaps_equal("case15", "open alone wrote nothing", out, "before", "after")
+
+
+def expect_case16_check(out):
+    check("case16", "held notice", out,
+          'notice ["workspace: pointer invalid; store held; using defaults; ignored uncommitted g2"]')
+    check("case16", "no note file in the defaults image", out, "note-exists false")
+    check("case16", "welcome file still shows original text", out, 'welcome ["Welcome to Relic.\\n"]')
+    check_snaps_equal("case16", "open alone wrote nothing", out, "before", "after")
+
+
+def expect_case17_check(out):
+    check("case17", "held notice", out,
+          'notice ["workspace: too many generation files; store held; using defaults"]')
+    check("case17", "no note file in the defaults image", out, "note-exists false")
+    check("case17", "welcome file still shows original text", out, 'welcome ["Welcome to Relic.\\n"]')
+    check_snaps_equal("case17", "open alone wrote nothing", out, "before", "after")
+
+
+def expect_case18_check(out):
+    check("case18", "notice", out, 'notice ["workspace: pointer missing; recovered g2"]')
+    check("case18", "newer text restored", out, 'note ["second version\\n"]')
+    check("case18", "welcome file still shows original text", out, 'welcome ["Welcome to Relic.\\n"]')
+
+
+def expect_case19_check(out):
+    check("case19", "notice", out, 'notice ["workspace: pointer missing; recovered g1"]')
+    check("case19", "older text restored", out, 'note ["first version\\n"]')
+    check("case19", "welcome file still shows original text", out, 'welcome ["Welcome to Relic.\\n"]')
+
+
 def live_case6(tmp):
     print("== case 6: corrupt committed must not load a newer uncommitted ==")
     store = Path(tmp) / "case6"
@@ -454,6 +490,75 @@ def live_case14(tmp):
     print("case14 done")
 
 
+def live_case15(tmp):
+    print("== case 15: open alone writes nothing on a wrong-version held store ==")
+    store = Path(tmp) / "case15"
+    store.mkdir()
+    out = run("case8_setup.relic", store)
+    check("case15", "v1 save quiet", out, 'after v1 [""]')
+    assert (store / "COMMITTED").read_text() == "g1\n", "COMMITTED is not g1"
+    hold_wrong_version(store)
+    expect_case15_check(run("open_check.relic", store))
+    print("case15 done")
+
+
+def live_case16(tmp):
+    print("== case 16: open alone writes nothing on an ambiguous held store ==")
+    store = Path(tmp) / "case16"
+    store.mkdir()
+    out = run("case6_setup.relic", store)
+    check("case16", "v1 save quiet", out, 'after v1 [""]')
+    check("case16", "v2 save quiet", out, 'after v2 [""]')
+    assert (store / "COMMITTED").read_text() == "g2\n", "COMMITTED is not g2"
+    (store / "COMMITTED").write_text("x")
+    (store / "META").unlink()
+    expect_case16_check(run("open_check.relic", store))
+    print("case16 done")
+
+
+def live_case17(tmp):
+    print("== case 17: open alone writes nothing on a too-many held store ==")
+    store = Path(tmp) / "case17"
+    store.mkdir()
+    out = run("case8_setup.relic", store)
+    check("case17", "v1 save quiet", out, 'after v1 [""]')
+    assert (store / "COMMITTED").read_text() == "g1\n", "COMMITTED is not g1"
+    g1 = (store / "g1.m2ws").read_bytes()
+    for n in range(2, 34):
+        (store / f"g{n}.m2ws").write_bytes(g1)
+    names = [p.name for p in store.iterdir() if p.name.startswith("g")]
+    assert len(names) == 33, f"expected 33 generation names, got {len(names)}"
+    expect_case17_check(run("open_check.relic", store))
+    print("case17 done")
+
+
+def live_case18(tmp):
+    print("== case 18: missing pointer with a usable META recovers the named generation ==")
+    store = Path(tmp) / "case18"
+    store.mkdir()
+    out = run("case6_setup.relic", store)
+    check("case18", "v1 save quiet", out, 'after v1 [""]')
+    check("case18", "v2 save quiet", out, 'after v2 [""]')
+    assert (store / "COMMITTED").read_text() == "g2\n", "COMMITTED is not g2"
+    assert (store / "META").read_text() == "committed g2\nprevious g1\n", "META mismatch"
+    (store / "COMMITTED").unlink()
+    expect_case18_check(run("check_store.relic", store))
+    print("case18 done")
+
+
+def live_case19(tmp):
+    print("== case 19: missing pointer with one valid generation installs it ==")
+    store = Path(tmp) / "case19"
+    store.mkdir()
+    out = run("case8_setup.relic", store)
+    check("case19", "v1 save quiet", out, 'after v1 [""]')
+    assert (store / "COMMITTED").read_text() == "g1\n", "COMMITTED is not g1"
+    (store / "COMMITTED").unlink()
+    (store / "META").unlink()
+    expect_case19_check(run("check_store.relic", store))
+    print("case19 done")
+
+
 def replay_case6(tmp):
     print("== replay case 6 from the committed fixture ==")
     store = Path(tmp) / "replay-case6"
@@ -553,6 +658,46 @@ def replay_case14(tmp):
     print("case14 replay done")
 
 
+def replay_case15(tmp):
+    print("== replay case 15 from the committed fixture ==")
+    store = Path(tmp) / "replay-case15"
+    shutil.copytree(FIXTURES / "case15", store)
+    expect_case15_check(run("open_check.relic", store))
+    print("case15 replay done")
+
+
+def replay_case16(tmp):
+    print("== replay case 16 from the committed fixture ==")
+    store = Path(tmp) / "replay-case16"
+    shutil.copytree(FIXTURES / "case16", store)
+    expect_case16_check(run("open_check.relic", store))
+    print("case16 replay done")
+
+
+def replay_case17(tmp):
+    print("== replay case 17 from the committed fixture ==")
+    store = Path(tmp) / "replay-case17"
+    shutil.copytree(FIXTURES / "case17", store)
+    expect_case17_check(run("open_check.relic", store))
+    print("case17 replay done")
+
+
+def replay_case18(tmp):
+    print("== replay case 18 from the committed fixture ==")
+    store = Path(tmp) / "replay-case18"
+    shutil.copytree(FIXTURES / "case18", store)
+    expect_case18_check(run("check_store.relic", store))
+    print("case18 replay done")
+
+
+def replay_case19(tmp):
+    print("== replay case 19 from the committed fixture ==")
+    store = Path(tmp) / "replay-case19"
+    shutil.copytree(FIXTURES / "case19", store)
+    expect_case19_check(run("check_store.relic", store))
+    print("case19 replay done")
+
+
 def main():
     if not RELIC.exists():
         print(f"relic not built: {RELIC}")
@@ -575,9 +720,15 @@ def main():
             live_case12(tmp)
             live_case13(tmp)
             live_case14(tmp)
+            live_case15(tmp)
+            live_case16(tmp)
+            live_case17(tmp)
+            live_case18(tmp)
+            live_case19(tmp)
         if replay:
             for fixture in ("case6", "case7", "case8", "case9-bad-store",
-                            "case10", "case11", "case12", "case13", "case14"):
+                            "case10", "case11", "case12", "case13", "case14",
+                            "case15", "case16", "case17", "case18", "case19"):
                 assert (FIXTURES / fixture).exists(), f"missing fixture: {fixture}"
             replay_case6(tmp)
             replay_case7(tmp)
@@ -588,6 +739,11 @@ def main():
             replay_case12(tmp)
             replay_case13(tmp)
             replay_case14(tmp)
+            replay_case15(tmp)
+            replay_case16(tmp)
+            replay_case17(tmp)
+            replay_case18(tmp)
+            replay_case19(tmp)
     except (RuntimeError, AssertionError) as exc:
         print(f"ERROR: {exc}")
         FAILURES.append(str(exc))
@@ -597,7 +753,7 @@ def main():
         for failure in FAILURES:
             print(" - " + failure)
         return 1
-    print("RESULT: PASS, all nine cases")
+    print("RESULT: PASS, all fourteen cases")
     if "--keep" not in sys.argv:
         shutil.rmtree(tmp, ignore_errors=True)
         print(f"stores under {tmp} removed")
