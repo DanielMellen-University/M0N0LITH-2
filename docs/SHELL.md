@@ -7,15 +7,16 @@ Two files in `shell/`:
 
 ## The model
 
-`new_desktop(width, height, apps)` gives a map with `windows` (running apps, the last one on top), `apps` (what Start can launch), `menu_open`, `overflow_open` (the hidden-windows list below), `drag` and `clicks` (1, or the `clicks` count of the `mouse_down` that `handle` is passing on, so 2 for the second press of a double-click). A window is `{id, app, state, x, y, width, height, minimized, restore_to}`; `restore_to` is `none`, or the `[x, y, width, height]` a maximized window goes back to. `state` belongs to the app.
+`new_desktop(width, height, apps)` gives a map with `windows` (running apps, the last one on top), `apps` (what Start can launch), `menu_open`, `overflow_open` (the hidden-windows list below), `drag`, `pointer` (the last `[x, y]` `handle` saw from the mouse, or `none`) and `clicks` (1, or the `clicks` count of the `mouse_down` that `handle` is passing on, so 2 for the second press of a double-click). A window is `{id, app, state, x, y, width, height, minimized, restore_to}`; `restore_to` is `none`, or the `[x, y, width, height]` a maximized window goes back to. `state` belongs to the app.
 
-Input goes in through four calls, or through `handle(d, e)`, which takes one `graphics.next_event()` map and calls the right one:
+Input goes in through these calls, or through `handle(d, e)`, which takes one `graphics.next_event()` map and calls the right one:
 
 | Call | What it does |
 |---|---|
 | `click(d, x, y)` | a press: Start, a tab, a window's x, _ or ^ box, its title (starts a move), its corner (starts a resize), or the app inside. Gives a word for what it hit: `launch`, `start`, `overflow`, `tab`, `minimize`, `maximize`, `unmaximize`, `bar`, `close`, `title`, `resize`, `app`, `desktop` |
 | `motion(d, x, y)` | moves or resizes the window being dragged, if any, or passes the pointer to an app with `on_drag` after a press in it (Paint draws, the Editor and the IDE select) |
 | `tick(d, ms)` | the clock for the focused window's app, if it has `on_tick` (Snake) |
+| `wheel(d, dy)` | a wheel turn (`dy` notches, up positive) for the top window under `pointer`, or the focused one before any pointer is seen, if its app has `on_wheel` (Terminal). It does not raise the window. True if an app took it |
 | `release(d)` | ends a drag |
 | `dismiss(d)` | Escape: closes the Start menu and the hidden-windows list, or else passes Escape to the focused window's `on_escape` if its app has one (the IDE stops a run waiting for input). True if something took it; desktop.relic quits on an Escape that nothing took, unless the key is held down and repeating |
 | `maximize(d, id)`, `unmaximize(d, id)`, `toggle_maximize(d, id)` | fill the desktop above the taskbar with a window, keeping its place, and put it back there (fitted to the desktop); `is_maximized(w)` says which. A `click` with `clicks` 2 on a title bar toggles it, and a maximized window's title and corner start no drag. `maximize_box(w)` is the ^ box left of the _ box |
@@ -44,6 +45,7 @@ An app is a map: `name`, `width`, `height`, `init()`, `lines(state)`, `on_click(
 - `selected(state)` for a list (Files): the title line stays and the list scrolls just far enough to show the selected line. `visible_lines` puts the window's `cols` in its state too, and Files shortens a long folder path in its title to fit. (Every app's state gets `cols`; Paint uses it to fit its save-as prompt.)
 - `on_escape(state)` for an app that takes Escape (the Editor and the IDE while text is selected or a find, replace or line number is typed, the IDE during a run, Paint while a name is typed, and Files during a rename): `dismiss(d)` calls it for the focused window once no menu or list was open to close, and it gives true when it used the key. The IDE uses it to stop a run that waits for input; any other time it gives false and Escape quits as before.
 - `on_drag(state, x, y)` for an app you draw or select in (Paint, the Editor and the IDE): after a press inside the window's content, `motion(d, x, y)` passes the pointer to it, in content coordinates, until `release(d)`.
+- `on_wheel(state, dy)` for an app that scrolls with the mouse wheel (Terminal, three rows a notch).
 - `on_tick(state, ms)` for an app that moves on its own (Snake): `tick(d, ms)` passes the clock in milliseconds to the focused window's app; `desktop.relic` calls it every frame with `graphics.ticks()`, and tests pass their own times.
 - `paint(state)` for an app that draws more than text (Paint, Snake): `[x, y, w, h, r, g, b]` boxes in content coordinates. `paint_boxes(w)` cuts them to the window's content and moves them to desktop coordinates, and `desktop.relic` draws them under the text.
 

@@ -74,6 +74,7 @@ Every key and click the desktop and its apps act on, checked against `shell/wm.r
 | Tab | completes a command name, or a file or folder name (in quotes when it has a space); lists the choices when it cannot add more |
 | Page Up, Page Down (or with Shift) | scroll the kept output back or forward a window at a time; any other key goes back to the prompt |
 | Ctrl+Home, Ctrl+End | scroll to the oldest kept output, or back to the prompt |
+| Mouse wheel over the window | scrolls the output three rows a notch, without bringing the window to the front |
 
 The commands are in [the Terminal doc](apps/TERMINAL.md).
 

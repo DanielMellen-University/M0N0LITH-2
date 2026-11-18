@@ -137,6 +137,7 @@ Write `tests/shell_<topic>.relic`, run it, read its output, and save that as `te
 | `shell_terminal_frame` | Terminal builds only the rows that fit, matching a full wrap |
 | `shell_terminal_scrollback` | Page Up and Page Down (and with Shift) scroll the output a page at a time with a rows-below note, stop at the oldest row and at the prompt; typing goes back to the prompt; a click while scrolled does nothing; wrapped rows scroll one at a time; nothing scrolls when all fits |
 | `shell_terminal_scroll_ends` | Ctrl+Home goes to the oldest kept line and Ctrl+End back to the prompt, leaving the typed line and its cursor; the top after more than 200 lines is the oldest still kept |
+| `shell_terminal_wheel` | the wheel scrolls the Terminal under the pointer three rows a notch, or the focused one before a pointer is seen; focus does not move; Notes, the desktop, the taskbar and a minimized Terminal take nothing |
 | `shell_terminal_ctrl_backspace_midline` | Ctrl+Backspace in the middle of the line takes off the word before the cursor and keeps the rest; trailing spaces and punctuation after a word go with it |
 | `shell_terminal_ctrl_l_cursor` | Ctrl+L in the middle of the line empties the output and keeps the line and the cursor where they were |
 | `shell_terminal_recall_edit_down` | editing a recalled line and pressing Down gives back the line being typed, not the edit; Up again gives the newest command |

@@ -160,7 +160,7 @@ fun _existing_dir(fs, p)
     return x
 
 fun new_desktop(width, height, apps)
-    return {width: width, height: height, apps: apps, windows: [], menu_open: false, menu_sel: 0, overflow_open: false, next_id: 1, drag: none, clicks: 1}
+    return {width: width, height: height, apps: apps, windows: [], menu_open: false, menu_sel: 0, overflow_open: false, next_id: 1, drag: none, clicks: 1, pointer: none}
 
 fun bar_top(d) = d.height - bar_height
 
@@ -749,6 +749,34 @@ fun key_of_event(e)
         return e.key
     return none
 
+# The window a wheel turn goes to: the top one under the pointer, or the one
+# with focus while the pointer has not been seen yet. none over the desktop
+# or the taskbar.
+fun _wheel_window(d)
+    if not "pointer" in d or d.pointer == none
+        return focused(d)
+    let x = d.pointer[0]
+    let y = d.pointer[1]
+    if y >= bar_top(d)
+        return none
+    let i = len(d.windows) - 1
+    while i >= 0
+        let w = d.windows[i]
+        if not w.minimized and _inside([w.x, w.y, w.width, w.height + title_height], x, y)
+            return w
+        i = i - 1
+    return none
+
+# A wheel turn of dy notches (up is positive, as SDL gives it) for the app
+# under the pointer, if it takes one. It does not raise the window or move
+# focus. Gives true when an app took it.
+fun wheel(d, dy)
+    let w = _wheel_window(d)
+    if w == none or not "on_wheel" in w.app or dy == 0
+        return false
+    w.app.on_wheel(w.state, dy)
+    return true
+
 # Feeds one graphics event to the desktop: typed text and named keys go to the
 # window on top, the left mouse button clicks, drags and releases. Gives the
 # click result word for a click, else none.
@@ -768,7 +796,10 @@ fun handle(d, e)
             return none
         if k != none
             key(d, k)
+    else if e.type == "wheel"
+        wheel(d, e.dy)
     else if e.type == "mouse_down" and e.button == 1
+        d.pointer = [e.x, e.y]
         # clicks is 2 for the second press of a double-click (3 for a triple)
         d.clicks = 1
         if "clicks" in e
@@ -777,6 +808,7 @@ fun handle(d, e)
         d.clicks = 1
         return r
     else if e.type == "mouse_move"
+        d.pointer = [e.x, e.y]
         motion(d, e.x, e.y)
     else if e.type == "mouse_up" and e.button == 1
         release(d)
@@ -2029,6 +2061,12 @@ fun _term_left(s)
     if not "left" in s
         return 0
     return math.max(0, math.min(s.left, len(s.input)))
+
+# The wheel scrolls the output three rows a notch, the same way Page Up and
+# Page Down do; a turn down at the prompt does nothing.
+fun _term_wheel(s, dy)
+    let to = _term_scroll(s) + 3 * dy
+    s.scroll = math.max(0, math.min(to, _term_max_scroll(s, _term_prompt(s))))
 
 # Left, Right, Home and End move the cursor in the line, Ctrl+Left and
 # Ctrl+Right by words, and Delete takes the character after it (Ctrl+Delete
@@ -4913,7 +4951,7 @@ fun _snake_paint(s)
 
 let clicker = {name: "Clicker", width: 180, height: 60, init: _clicker_init, lines: _clicker_lines, on_click: _clicker_click, on_key: _clicker_key}
 let notes = {name: "Notes", width: 220, height: 60, init: _notes_init, lines: _notes_lines, on_click: _notes_click, on_key: _notes_key, tail: true, pinned: 1}
-let terminal = {name: "Terminal", width: 280, height: 120, init: _term_init, lines: _term_lines, on_click: _term_click, on_key: _term_key, tail: true, pinned: 0}
+let terminal = {name: "Terminal", width: 280, height: 120, init: _term_init, lines: _term_lines, on_click: _term_click, on_key: _term_key, on_wheel: _term_wheel, tail: true, pinned: 0}
 let files_app = {name: "Files", width: 260, height: 140, init: _files_init, lines: _files_lines, on_click: _files_click, on_key: _files_key, on_escape: _files_escape, selected: _files_selected}
 let editor = {name: "Editor", width: 320, height: 80, init: _editor_init, lines: _editor_lines, on_click: _editor_click, on_key: _editor_key, on_drag: _editor_drag, on_escape: _editor_escape, tail: true, pinned: 1, marks: _editor_marks}
 let ide = {name: "IDE", width: 320, height: 200, init: _ide_init, lines: _ide_lines, on_click: _editor_click, on_key: _ide_key, on_drag: _editor_drag, on_escape: _ide_escape, tail: true, pinned: 1, marks: _editor_marks}
