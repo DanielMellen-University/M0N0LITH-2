@@ -59,9 +59,10 @@
 > wc /home
   wc: is a folder: /home
 > wc
-  usage: wc <path>
+  usage: wc <path>...
 > wc a b
-  usage: wc <path>
+  wc: not found: /home/a
+  wc: not found: /home/b
 > rm w.txt
 > rm e.txt
 > echo hi > c.txt

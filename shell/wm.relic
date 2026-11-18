@@ -1390,17 +1390,18 @@ fun _term_cat(s, path)
         _term_reply(s, "cat: " + err.message)
 
 # wc: lines (newlines, as Unix counts them), words (runs of non-space) and
-# characters, then the path as given.
+# characters, then the path as given. Gives [lines, words, characters], or
+# none after an error.
 fun _term_wc(s, path)
     if _term_not_folder(s, "wc", path, false)
-        return
+        return none
     let p = _term_path(s, path)
     if not vfs.exists(s.fs, p)
         _term_reply(s, "wc: " + _term_missing(s, p))
-        return
+        return none
     if vfs.is_dir(s.fs, p)
         _term_reply(s, "wc: is a folder: " + p)
-        return
+        return none
     let text = vfs.read(s.fs, p)
     let words = 0
     let inside = false
@@ -1410,7 +1411,9 @@ fun _term_wc(s, path)
         else if not inside
             inside = true
             words = words + 1
-    _term_reply(s, "{strings.count(text, "\n")} {words} {len(text)} " + _term_name(path))   # quoted like ls when it has a space
+    let lines = strings.count(text, "\n")
+    _term_reply(s, "{lines} {words} {len(text)} " + _term_name(path))   # quoted like ls when it has a space
+    return [lines, words, len(text)]
 
 fun _term_cd(s, parts)
     let p = _term_optional_path(s, parts, "/home")
@@ -2087,8 +2090,19 @@ fun _term_run(s, line)
         else
             _term_du(s, parts)
     else if cmd == "wc"
-        if _term_args(s, parts, 1, "wc <path>")
-            _term_wc(s, parts[1])
+        # several paths, one after another as for cat, then a total line
+        if len(parts) < 2
+            _term_reply(s, "usage: wc <path>...")
+        let total = [0, 0, 0]
+        let counted = 0
+        for path in slice(parts, 1, len(parts))
+            let c = _term_wc(s, path)
+            if c != none
+                counted = counted + 1
+                for k in 0..3
+                    total[k] = total[k] + c[k]
+        if len(parts) > 2 and counted > 0
+            _term_reply(s, "{total[0]} {total[1]} {total[2]} total")
     else if cmd == "rm"
         # several paths, one after another as for cat; an error for one does not stop the rest
         if len(parts) < 2
