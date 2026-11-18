@@ -1759,6 +1759,52 @@ fun _term_tree(s, parts)
         f = "file"
     _term_reply(s, "{counts.dirs} {d}, {counts.files} {f}")
 
+# The characters in a file, or in every file under a folder, and how many
+# files that is: [characters, files].
+fun _term_size_of(s, p)
+    if not vfs.is_dir(s.fs, p)
+        return [vfs.size(s.fs, p), 1]
+    let total = [0, 0]
+    for e in vfs.entries(s.fs, p)
+        let sub = _term_size_of(s, paths.join(p, e[0]))
+        total[0] = total[0] + sub[0]
+        total[1] = total[1] + sub[1]
+    return total
+
+# du: how much is in a folder (the current one without a path): one line per
+# name in it, the characters in that file or under that folder first, then
+# the total. On a file, that file's line alone.
+fun _term_du(s, parts)
+    if len(parts) > 1 and _term_not_folder(s, "du", parts[1], false)
+        return
+    let p = _term_optional_path(s, parts, s.cwd)
+    if not vfs.exists(s.fs, p)
+        _term_reply(s, "du: " + _term_missing(s, p))
+        return
+    if not vfs.is_dir(s.fs, p)
+        _term_reply(s, "{vfs.size(s.fs, p)} " + _term_name(paths.base(p)))
+        return
+    let rows = []
+    let total = [0, 0]
+    for e in vfs.entries(s.fs, p)
+        let sub = _term_size_of(s, paths.join(p, e[0]))
+        total[0] = total[0] + sub[0]
+        total[1] = total[1] + sub[1]
+        let name = e[0]
+        if e[1]
+            name = name + "/"
+        append(rows, [str(sub[0]), _term_name(name)])
+    let width = len(str(total[0]))
+    for r in slice(rows, math.max(0, len(rows) - (term_history - 1)), len(rows))
+        _term_reply(s, strings.pad_left(r[0], width, " ") + " " + r[1])
+    let f = "files"
+    if total[1] == 1
+        f = "file"
+    let c = "characters"
+    if total[0] == 1
+        c = "character"
+    _term_reply(s, "{total[0]} {c}, {total[1]} {f}")
+
 fun _term_find(s, word)
     let out = []
     _term_find_in(s, s.cwd, "", word, out)
@@ -1836,7 +1882,7 @@ fun _split_words(line)
 
 
 # Commands whose words are all paths, so a word like -l or -r is a mistake, not a name.
-let _path_commands = ["cd", "ls", "cat", "mkdir", "touch", "rm", "mv", "cp", "wc", "head", "tail", "grep", "sort", "uniq", "nl", "tree"]
+let _path_commands = ["cd", "ls", "cat", "mkdir", "touch", "rm", "mv", "cp", "wc", "head", "tail", "grep", "sort", "uniq", "nl", "tree", "du"]
 
 fun _term_run(s, line)
     s.cwd = _existing_dir(s.fs, s.cwd)
@@ -1868,7 +1914,7 @@ fun _term_run(s, line)
         _term_reply(s, "pwd cd ls cat head tail")
         _term_reply(s, "mkdir touch write rm mv cp")
         _term_reply(s, "wc grep find sort uniq nl")
-        _term_reply(s, "tree")
+        _term_reply(s, "tree du")
         _term_reply(s, "echo text > file, >> adds")
         _term_reply(s, "\"my file\": quotes keep spaces")
         _term_reply(s, "!! the last again, !N history N")
@@ -1962,6 +2008,11 @@ fun _term_run(s, line)
             _term_reply(s, "usage: tree [path]")
         else
             _term_tree(s, parts)
+    else if cmd == "du"
+        if len(parts) > 2
+            _term_reply(s, "usage: du [path]")
+        else
+            _term_du(s, parts)
     else if cmd == "wc"
         if _term_args(s, parts, 1, "wc <path>")
             _term_wc(s, parts[1])
@@ -1987,7 +2038,7 @@ let _term_recall_keep = 50
 # with "/" after it, anything else with a space); several are taken as far as
 # they agree, and when that adds nothing they are listed. No match, or an
 # empty line: nothing.
-let _term_commands = ["apps", "cat", "cd", "clear", "cp", "date", "echo", "find", "grep", "head", "help", "history", "ls", "mkdir", "mv", "nl", "pwd", "rm", "sort", "tail", "touch", "tree", "uniq", "wc", "write"]
+let _term_commands = ["apps", "cat", "cd", "clear", "cp", "date", "du", "echo", "find", "grep", "head", "help", "history", "ls", "mkdir", "mv", "nl", "pwd", "rm", "sort", "tail", "touch", "tree", "uniq", "wc", "write"]
 
 fun _common_start(names)
     let out = names[0]
