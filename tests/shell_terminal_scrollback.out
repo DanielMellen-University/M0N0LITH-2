@@ -1,0 +1,16 @@
+bottom 0 ["line 9", "/home> echo line 10", "line 10", "/home> echo line 11", "line 11", "/home> echo line 12", "line 12", "/home> _"]
+rows 8
+one page 6 ["/home> echo line 7", "line 7", "/home> echo line 8", "line 8", "/home> echo line 9", "line 9", "/home> echo line 10", "-- 6 more below: pagedown --"]
+two pages 12 ["/home> echo line 4", "line 4", "/home> echo line 5", "line 5", "/home> echo line 6", "line 6", "/home> echo line 7", "-- 12 more below: pagedown --"]
+top 19 ["Terminal. Type help.", "/home> echo line 1", "line 1", "/home> echo line 2", "line 2", "/home> echo line 3", "line 3", "-- 19 more below: pagedown --"]
+down 13 ["line 3", "/home> echo line 4", "line 4", "/home> echo line 5", "line 5", "/home> echo line 6", "line 6", "-- 13 more below: pagedown --"]
+bottom again 0 ["line 9", "/home> echo line 10", "line 10", "/home> echo line 11", "line 11", "/home> echo line 12", "line 12", "/home> _"]
+typed 0 ["line 9", "/home> echo line 10", "line 10", "/home> echo line 11", "line 11", "/home> echo line 12", "line 12", "/home> x_"]
+x
+1
+wrapped 0 ["89ABCDEFGHIJKLMNOPQRSTUVWXYZabcdef", "ghijklmnopqrstuvwxyz0123456789", "/home> _"]
+wrapped back 1 ["89ABCDEFGHIJKLMNOPQRSTUVWXYZabcdef", "ghijklmnopqrstuvwxyz0123456789", "-- 1 more below: pagedown --"]
+wrapped back two 2 ["abcdefghijklmnopqrstuvwxyz01234567", "89ABCDEFGHIJKLMNOPQRSTUVWXYZabcdef", "-- 2 more below: pagedown --"]
+wrapped top 3 ["Terminal. Type help.", "abcdefghijklmnopqrstuvwxyz01234567", "-- 3 more below: pagedown --"]
+fits 0 ["Terminal. Type help.", "abcdefghijklmnopqrstuvwxyz01234567", "89ABCDEFGHIJKLMNOPQRSTUVWXYZabcdef", "ghijklmnopqrstuvwxyz0123456789", "/home> _"]
+fits still 0 ["Terminal. Type help.", "abcdefghijklmnopqrstuvwxyz01234567", "89ABCDEFGHIJKLMNOPQRSTUVWXYZabcdef", "ghijklmnopqrstuvwxyz0123456789", "/home> _"]

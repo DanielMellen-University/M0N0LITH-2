@@ -1103,7 +1103,7 @@ fun _two(n)
 
 # Relic-native terminal (no host process spawn). It works on the shared VFS
 # from a current folder that starts at /home. Paths may be relative to it.
-fun _term_init() = {buf: ["Terminal. Type help."], input: "", left: 0, cwd: "/home", fs: _shell_fs, cols: term_width, past: [], back: 0, draft: ""}
+fun _term_init() = {buf: ["Terminal. Type help."], input: "", left: 0, cwd: "/home", fs: _shell_fs, cols: term_width, past: [], back: 0, draft: "", scroll: 0}
 
 # A line cut into pieces of at most width characters, so a long line wraps
 # in the window instead of losing its end.
@@ -1129,14 +1129,77 @@ fun _wrap_last(line, width, k)
         append(out, slice(line, p * w, math.min(len(line), (p + 1) * w)))
     return out
 
+# How many rows the Terminal is scrolled back from the newest output (0: at
+# the prompt). A snapshot does not keep it.
+fun _term_scroll(s)
+    if not "scroll" in s
+        return 0
+    return math.max(0, s.scroll)
+
+# The rows of the output and the prompt, wrapped to cols, from row first up to
+# (not including) row last, counting from the oldest kept line. Only the lines
+# that reach into that range are cut.
+fun _term_row_range(s, prompt, first, last)
+    let out = []
+    let at = 0
+    let all = s.buf + [prompt]
+    let w = math.max(1, s.cols)
+    for line in all
+        if at >= last
+            break
+        let n = math.max(1, int((len(line) + w - 1) / w))
+        if at + n > first
+            for p in math.max(0, first - at)..math.min(n, last - at)
+                append(out, slice(line, p * w, math.min(len(line), (p + 1) * w)))
+        at = at + n
+    return out
+
+# All the rows the output and the prompt wrap to.
+fun _term_row_count(s, prompt)
+    let w = math.max(1, s.cols)
+    let n = 0
+    for line in s.buf + [prompt]
+        n = n + math.max(1, int((len(line) + w - 1) / w))
+    return n
+
+# The output rows a scrolled-back window has room for: all but the last row,
+# which says how many are below.
+fun _term_room(s)
+    if not "rows" in s or s.rows <= 1
+        return 1
+    return s.rows - 1
+
+# The furthest back the Terminal scrolls: the oldest kept row at the top.
+fun _term_max_scroll(s, prompt) = math.max(0, _term_row_count(s, prompt) - _term_room(s))
+
+fun _term_prompt(s)
+    let at = len(s.input) - _term_left(s)
+    return s.cwd + "> " + slice(s.input, 0, at) + "_" + slice(s.input, at, len(s.input))
+
+# Scrolled back, the window shows older rows and, on its last row, how many
+# rows are below them. The scroll stops at the oldest kept row.
+fun _term_scrolled_lines(s, prompt)
+    let total = _term_row_count(s, prompt)
+    let room = _term_room(s)
+    s.scroll = math.min(_term_scroll(s), _term_max_scroll(s, prompt))
+    if s.scroll == 0
+        return none
+    let last = total - s.scroll
+    let out = _term_row_range(s, prompt, math.max(0, last - room), last)
+    append(out, _fit("-- " + str(s.scroll) + " more below: pagedown --", s.cols, false))
+    return out
+
 # The output and the prompt, wrapped to cols. Once visible_lines has set rows,
 # only the last rows rows are built: wrapping all 200 kept lines each frame took
 # about 0.24 s after cat of a file with one 200,000-character line.
 fun _term_lines(s)
     s.cwd = _existing_dir(s.fs, s.cwd)   # another Terminal may have removed or moved it
-    let at = len(s.input) - _term_left(s)
-    let prompt = s.cwd + "> " + slice(s.input, 0, at) + "_" + slice(s.input, at, len(s.input))
+    let prompt = _term_prompt(s)
     let out = []
+    if "rows" in s and s.rows > 1 and _term_scroll(s) > 0
+        let back = _term_scrolled_lines(s, prompt)
+        if back != none
+            return back
     if not "rows" in s or s.rows <= 0
         for line in s.buf
             for piece in _wrap(line, s.cols)
@@ -1162,7 +1225,7 @@ fun _term_lines(s)
 # A click on the line being typed puts the cursor at the character clicked
 # (past its end: at the end); a click on the output does nothing.
 fun _term_click(s, x, y)
-    if y < text_top or not "rows" in s or s.rows <= 0
+    if y < text_top or not "rows" in s or s.rows <= 0 or _term_scroll(s) > 0
         return none
     let lines = _term_lines(s)
     let row = int((y - text_top) / line_height)
@@ -1973,6 +2036,18 @@ fun _term_left(s)
 # Tab and the other editing keys work at it, on the part before it. Return,
 # Up, Down and Ctrl+C take the whole line and put the cursor back at the end.
 fun _term_key(s, k)
+    if k == "pageup" or k == "shift+pageup" or k == "pagedown" or k == "shift+pagedown"
+        # a page of output back or forward, one row kept from the page before
+        let page = 1
+        if "rows" in s and s.rows > 2
+            page = s.rows - 2
+        if k == "pageup" or k == "shift+pageup"
+            s.scroll = math.min(_term_scroll(s) + page, _term_max_scroll(s, _term_prompt(s)))
+        else
+            s.scroll = math.max(0, _term_scroll(s) - page)
+        return
+    # any other key goes back to the prompt first
+    s.scroll = 0
     let n = len(s.input)
     let left = _term_left(s)
     if k == "left"
@@ -4972,7 +5047,7 @@ fun _restore_editor(f)
 fun _restore_state(w)
     let f = w.fields
     if w.app == "Terminal"
-        return {buf: workspace.unpack_lines(f.buf, 201), input: f.input, left: int(f.left), cwd: f.cwd, fs: _shell_fs, cols: term_width, past: workspace.unpack_lines(f.past, 51), back: int(f.back), draft: f.draft}
+        return {buf: workspace.unpack_lines(f.buf, 201), input: f.input, left: int(f.left), cwd: f.cwd, fs: _shell_fs, cols: term_width, past: workspace.unpack_lines(f.past, 51), back: int(f.back), draft: f.draft, scroll: 0}
     if w.app == "Files"
         return {fs: _shell_fs, path: f.path, sel: int(f.sel), first: 1, rows: 0, names: [], dirs: [], names_path: "", stale: false, recovered: false, confirm: none, note: none}
     if w.app == "Editor"
