@@ -1,0 +1,10 @@
+start 0 > ..   g.txt
+down three 3   ..   g.txt
+last 11   d.txt > welcome.txt
+up two 9   b.txt > i.txt
+first 0 > ..   g.txt
+Terminal 1
+Files
+true
+none 2
+true 2

@@ -135,6 +135,9 @@ Write `tests/shell_<topic>.relic`, run it, read its output, and save that as `te
 | `shell_terminal_ls` | Terminal packs directory listings to the window width |
 | `shell_terminal_wrap` | Terminal wraps long lines to the window width |
 | `shell_terminal_frame` | Terminal builds only the rows that fit, matching a full wrap |
+| `shell_terminal_scrollback` | Page Up and Page Down (and with Shift) scroll the output a page at a time with a rows-below note, stop at the oldest row and at the prompt; typing goes back to the prompt; a click while scrolled does nothing; wrapped rows scroll one at a time; nothing scrolls when all fits |
+| `shell_terminal_scroll_ends` | Ctrl+Home goes to the oldest kept line and Ctrl+End back to the prompt, leaving the typed line and its cursor; the top after more than 200 lines is the oldest still kept |
+| `shell_terminal_wheel` | the wheel scrolls the Terminal under the pointer three rows a notch, or the focused one before a pointer is seen; focus does not move; Notes, the desktop, the taskbar and a minimized Terminal take nothing |
 | `shell_terminal_ctrl_backspace_midline` | Ctrl+Backspace in the middle of the line takes off the word before the cursor and keeps the rest; trailing spaces and punctuation after a word go with it |
 | `shell_terminal_ctrl_l_cursor` | Ctrl+L in the middle of the line empties the output and keeps the line and the cursor where they were |
 | `shell_terminal_recall_edit_down` | editing a recalled line and pressing Down gives back the line being typed, not the edit; Up again gives the newest command |
@@ -208,6 +211,7 @@ Write `tests/shell_<topic>.relic`, run it, read its output, and save that as `te
 | `shell_files_rename` | F2 renames a file or a folder (with what is in it) and keeps it selected; not over a name that is there, not to a name with /, Esc, the same name and ..; a long name showing its end, a click or another key giving up a rename, a click a Delete question; the next Editor's file follows a rename or a Terminal mv |
 | `shell_files_resize_click` | Files waits for a redraw after a resize before accepting a row click |
 | `shell_files_up_down` | Up and Down move one row at a time and stop at the first and last row |
+| `shell_files_wheel` | the wheel moves the Files selection a row a notch both ways and stops at the ends, leaves focus on the window in front, gives up a Delete question, and does nothing while renaming |
 | `shell_files_scroll` | a long list scrolls just far enough to keep the selected row in view, the title stays first, and Home shows the first rows again |
 | `shell_files_open_editor` | opening a file sets the next Editor's file without leaving the folder, and entering a folder leaves that file alone |
 | `shell_files_rename_edit` | F2 rename editing: Ctrl+Backspace drops the last word, Ctrl+U clears, Backspace on empty does nothing, Space inserts, Ctrl+V pastes the clipboard line |

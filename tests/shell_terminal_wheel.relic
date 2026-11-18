@@ -1,0 +1,47 @@
+# The mouse wheel scrolls the Terminal under the pointer three rows a notch,
+# without raising it or moving focus. Other apps and the desktop ignore it.
+use ../shell/wm
+let d = wm.new_desktop(640, 480, wm.default_apps())
+let w = wm.launch(d, wm.terminal)
+let t = w.state
+for i in 1..21
+    t.buf = t.buf + ["out " + str(i)]
+fun show(label)
+    let v = wm.visible_lines(w)
+    print(label, t.scroll, v[0], v[len(v) - 1])
+fun spin(x, y, dy)
+    wm.handle(d, {type: "mouse_move", x: x, y: y, dx: 0, dy: 0})
+    return wm.handle(d, {type: "wheel", dx: 0, dy: dy})
+
+show("start")
+# before any pointer is seen, the window with focus gets it
+wm.handle(d, {type: "wheel", dx: 0, dy: 1})
+show("focus")
+spin(w.x + 40, w.y + 40, 1)
+show("up one")
+spin(w.x + 40, w.y + 40, 5)
+show("top")
+spin(w.x + 40, w.y + 40, -2)
+show("down two")
+spin(w.x + 40, w.y + 40, -9)
+show("prompt")
+
+# a Notes window on top elsewhere keeps focus while the Terminal scrolls
+let n = wm.launch(d, wm.notes)
+n.x = 400
+n.y = 300
+spin(w.x + 40, w.y + 40, 1)
+print(wm.focused(d).app.name, t.scroll)
+# over Notes (no wheel), over the desktop, over the taskbar: nothing scrolls
+spin(n.x + 20, n.y + 30, 1)
+spin(600, 100, 1)
+spin(100, 470, 1)
+print(t.scroll)
+# a minimized Terminal does not take it
+wm.minimize(d, w.id)
+spin(w.x + 40, w.y + 40, 1)
+print(t.scroll)
+# keys still go back to the prompt as before
+wm.restore(d, w.id)
+wm.key(d, "x")
+print(t.scroll, t.input)

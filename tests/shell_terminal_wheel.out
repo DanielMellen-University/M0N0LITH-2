@@ -1,0 +1,10 @@
+start 0 out 14 /home> _
+focus 3 out 12 -- 3 more below: pagedown --
+up one 6 out 9 -- 6 more below: pagedown --
+top 15 Terminal. Type help. -- 15 more below: pagedown --
+down two 9 out 6 -- 9 more below: pagedown --
+prompt 0 out 14 /home> _
+Notes 3
+3
+3
+0 x

@@ -1,0 +1,67 @@
+# Page Up and Page Down scroll the Terminal's kept output; the last row then
+# says how many rows are below. Any other key goes back to the prompt.
+use ../shell/wm
+let d = wm.new_desktop(640, 480, wm.default_apps())
+let w = wm.launch(d, wm.terminal)
+let t = w.state
+fun type(line)
+    for c in line
+        if c == " "
+            wm.key(d, "space")
+        else
+            wm.key(d, c)
+    wm.key(d, "return")
+fun show(label)
+    print(label, t.scroll, wm.visible_lines(w))
+
+for i in 1..13
+    type("echo line " + str(i))
+show("bottom")
+print("rows", wm.rows_fit(w))
+
+wm.key(d, "pageup")
+show("one page")
+wm.key(d, "shift+pageup")
+show("two pages")
+# the top stops at the oldest kept row
+for i in 0..20
+    wm.key(d, "pageup")
+show("top")
+wm.key(d, "pagedown")
+show("down")
+for i in 0..20
+    wm.key(d, "shift+pagedown")
+show("bottom again")
+
+# typing goes back to the prompt, and the letter is typed
+wm.key(d, "pageup")
+wm.key(d, "x")
+show("typed")
+print(t.input)
+
+# a click while scrolled back does not move the cursor
+wm.key(d, "left")
+wm.key(d, "pageup")
+wm.click(d, w.x + 10, w.y + wm.title_height + 10)
+print(t.left)
+
+# a long line wraps, and in a short window its rows scroll one at a time
+t.buf = ["Terminal. Type help.", "abcdefghijklmnopqrstuvwxyz0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789"]
+t.input = ""
+w.height = 48
+wm.key(d, "end")
+show("wrapped")
+wm.key(d, "pageup")
+show("wrapped back")
+wm.key(d, "pageup")
+show("wrapped back two")
+for i in 0..5
+    wm.key(d, "pageup")
+show("wrapped top")
+
+# with everything in view there is nothing to scroll
+w.height = 120
+wm.key(d, "end")
+show("fits")
+wm.key(d, "pageup")
+show("fits still")

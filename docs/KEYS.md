@@ -72,6 +72,9 @@ Every key and click the desktop and its apps act on, checked against `shell/wm.r
 | Ctrl+L | empties the output, like `clear` |
 | Ctrl+U | removes everything before the cursor, as in a shell (all of it at the end) |
 | Tab | completes a command name, or a file or folder name (in quotes when it has a space); lists the choices when it cannot add more |
+| Page Up, Page Down (or with Shift) | scroll the kept output back or forward a window at a time; any other key goes back to the prompt |
+| Ctrl+Home, Ctrl+End | scroll to the oldest kept output, or back to the prompt |
+| Mouse wheel over the window | scrolls the output three rows a notch, without bringing the window to the front |
 
 The commands are in [the Terminal doc](apps/TERMINAL.md).
 
@@ -83,6 +86,7 @@ The commands are in [the Terminal doc](apps/TERMINAL.md).
 | Up, Down | move the selection |
 | Home, End (or with Ctrl) | the first or last row |
 | Page Up, Page Down | a window of rows up or down, stopping at the ends |
+| Mouse wheel over the window | moves the selection a row a notch, without bringing the window to the front; nothing while a name is typed |
 | A letter or digit | the next name that starts with it, any case, going round |
 | Return | opens the selected row |
 | F2 | renames the selected row: type the name, Return renames, Esc, a click or another key gives up |
