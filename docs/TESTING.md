@@ -172,6 +172,7 @@ Write `tests/shell_<topic>.relic`, run it, read its output, and save that as `te
 | `shell_terminal_grep_dot` | grep matches characters as written: a dot is not a pattern, and case counts |
 | `shell_terminal_tree` | tree of the current folder, a path, an empty folder, `..`, and a file; quoted names; a missing path, a file with `/`, two words and an option are errors |
 | `shell_terminal_du` | du of the current folder, a path, a file and an empty folder, sizes lined up and quoted names; a missing path, a file with `/`, two words and an option are errors |
+| `shell_terminal_diff` | diff of a changed, added and removed line both ways, the same file, an empty file, a quoted name and a moved line; usage, missing, folder and option errors; two long files that differ all through give the first difference, one change in a long file is still found |
 | `shell_terminal_find_own` | find matches an entry's own name, shows a folder with a slash, and does not match text only in a parent path |
 | `shell_terminal_history_keep` | history keeps the last 50 commands, the oldest falls off, and !1 runs whatever is now first |
 | `shell_terminal_bang_zero` | !0 is not in history, and !001 runs command 1 |

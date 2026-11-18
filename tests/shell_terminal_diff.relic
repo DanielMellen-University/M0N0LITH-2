@@ -1,0 +1,51 @@
+# diff shows the lines that differ between two files: -N for line N of the
+# first that the second lacks, +N for line N of the second.
+use ../shell/wm
+use std/vfs
+use std/strings
+let t = wm.terminal.init()
+fun run(line)
+    t.buf = []
+    for c in line
+        if c == " "
+            wm.terminal.on_key(t, "space")
+        else
+            wm.terminal.on_key(t, c)
+    wm.terminal.on_key(t, "return")
+    for l in t.buf
+        print(l)
+vfs.write(t.fs, "/home/a.txt", "one\ntwo\nthree\nfour\n")
+vfs.write(t.fs, "/home/b.txt", "one\n2\nthree\nfour\nfive\n")
+vfs.write(t.fs, "/home/c.txt", "one\ntwo\nthree\nfour\n")
+vfs.write(t.fs, "/home/empty.txt", "")
+vfs.write(t.fs, "/home/my file.txt", "zero\none\ntwo\nthree\nfour\n")
+run("diff a.txt b.txt")
+run("diff b.txt a.txt")
+run("diff a.txt c.txt")
+run("diff a.txt empty.txt")
+run("diff empty.txt a.txt")
+run("diff a.txt \"my file.txt\"")
+# a line moved: one removed and one added, the rest kept
+vfs.write(t.fs, "/home/m1.txt", "a\nb\nc\nd\n")
+vfs.write(t.fs, "/home/m2.txt", "b\nc\nd\na\n")
+run("diff m1.txt m2.txt")
+# errors
+run("diff a.txt")
+run("diff a.txt b.txt c.txt")
+run("diff a.txt missing.txt")
+run("diff /home b.txt")
+run("diff -u a.txt")
+# two long files that differ all through: only the first difference
+let x = []
+let y = []
+for i in 0..600
+    append(x, "x" + str(i))
+    append(y, "y" + str(i))
+vfs.write(t.fs, "/home/x.txt", strings.join(x, "\n"))
+vfs.write(t.fs, "/home/y.txt", strings.join(y, "\n"))
+run("diff x.txt y.txt")
+# long files with one change in the middle are still compared
+y = slice(x, 0, len(x))
+y[300] = "changed"
+vfs.write(t.fs, "/home/y.txt", strings.join(y, "\n"))
+run("diff x.txt y.txt")
