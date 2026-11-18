@@ -5,7 +5,8 @@ snapshot and pass, and were re-verified on Nov 12 2026 against main
 dd1bb60 (full suite 486/486, see "Results (Nov 12 2026)"). Cases 6 to 9
 were run on Nov 10 2026 against main 6c321a3b and pass, and were rerun
 on Nov 12 2026 against main dd1bb60 and pass. Cases 10 to 14 were run
-on Nov 16 2026 against main 0e7b8d9c and pass. See "Results" for how
+on Nov 16 2026 against main 0e7b8d9c and pass. Cases 15 to 19 are specified
+below and were UNRUN when specified. See "Results" for how
 each case was run and what was not tried. Cases 3a, 3b, 3c and 5 were
 reworded on that date, before the results were recorded; the reasons
 are in "Wording changes".
@@ -31,7 +32,8 @@ two processes.
 
 Cases 6 to 14 have fixture assets in `tests/fixtures/workspace-recovery/`
 (see that directory's README): `case6/`, `case7/`, `case8/`, `case10/`,
-`case11/`, `case12/`, `case13/` and `case14/` are isolated store
+`case11/`, `case12/`, `case13/`, `case14/`, `case15/`, `case16/`,
+`case17/`, `case18/` and `case19/` are isolated store
 layouts, and `case9-bad-store` is the unopenable store path. Each store
 was built by a setup program in `tools/workspace-recovery-muse/` with
 the real implementation, then damaged by hand after the process exited.
@@ -635,6 +637,133 @@ holds only the `M2WS1` header line. Per the contract, uncommitted
 and partial generations are reported as ignored and the committed
 generation is installed.
 
+## Case 15: Open alone writes nothing on a wrong-version held store (D0142-1)
+
+Status: UNRUN.
+
+Setup: The store holds a committed generation written in a newer
+version than this desktop understands, as in Case 8. Start the
+desktop.
+
+Action: Open the store. No save is attempted, and no release is attempted.
+
+Expected visible outcome: The desktop shows the saved workspace is from
+a version it cannot use, holds the store, and restores the newest
+generation older than the named one that still parses as M2WS1.
+
+Data-preservation assertions:
+
+- Nothing in the store is rewritten by the open alone: the check
+  program prints full store byte snapshots before the open and after
+  it, and the driver asserts they are identical.
+- The older text survives; the welcome file is unchanged.
+
+Fixture note: COMMITTED names a generation whose whole file is
+`M2WS9`, with META naming committed g2 and previous g1, exactly the
+Case 8 damage. The check program opens the store and reports the
+notice, the installed text, and the two store snapshots.
+
+## Case 16: Open alone writes nothing on an ambiguous torn-pointer held store (D0142-2)
+
+Status: UNRUN.
+
+Setup: The store holds two committed generations, v1 then v2, but
+after the process exits the pointer file is torn (COMMITTED holds
+the single byte `x`) and META is missing, so no generation can be
+named with confidence. Start the desktop.
+
+Action: Open the store. No save is attempted, and no release is attempted.
+
+Expected visible outcome: The desktop shows the pointer is invalid,
+the store is held, and it is using defaults, naming the uncommitted
+g2 as ignored.
+
+Data-preservation assertions:
+
+- Nothing in the store is rewritten by the open alone: the check
+  program prints full store byte snapshots before the open and after
+  it, and the driver asserts they are identical. COMMITTED stays the
+  torn byte `x` and no META file is created by the open.
+- No note file is in the defaults image; the welcome file is unchanged.
+
+Fixture note: COMMITTED is the single byte `x` and META is absent.
+Per the contract, a torn pointer with no usable META holds the store
+(ambiguous) until an explicit release.
+
+## Case 17: Open alone writes nothing on a too-many-generations held store (D0142-3)
+
+Status: UNRUN.
+
+Setup: The store holds one committed generation, v1, plus copies of
+it under 32 more generation names, so 33 generation names in total.
+Start the desktop.
+
+Action: Open the store. No save is attempted, and no release is attempted.
+
+Expected visible outcome: The desktop shows there are too many
+generation files, the store is held, and it is using defaults.
+
+Data-preservation assertions:
+
+- Nothing in the store is rewritten by the open alone: the check
+  program prints full store byte snapshots before the open and after
+  it, and the driver asserts they are identical. All 33 generation
+  names are still present after the open.
+- No note file is in the defaults image; the welcome file is unchanged.
+
+Fixture note: g1 holds the first version and g2 through g33 are
+byte copies of it, so the store carries 33 generation names. Per the
+contract, more than 32 generation names hold the store (too-many)
+until an explicit release.
+
+## Case 18: Missing pointer with a usable META recovers the named generation (D0142-4)
+
+Status: UNRUN.
+
+Setup: The store holds two committed generations, v1 then v2, with
+META naming committed g2 and previous g1. After the process exits,
+the pointer file is deleted entirely: there is no COMMITTED file.
+Start the desktop.
+
+Action: Open the store. No save is attempted.
+
+Expected visible outcome: The desktop shows the pointer is missing
+and that it recovered g2, the generation META names. It restores the
+newer text, not the first-run defaults and not the older version.
+
+Data-preservation assertions:
+
+- The recovered generation is the one META names (g2), not the older
+  generation and not defaults.
+- The newer text survives; the welcome file is unchanged.
+
+Fixture note: COMMITTED is absent; META still reads `committed g2`
+and `previous g1`. Per the contract, a missing pointer with a usable
+META recovers the generation META names.
+
+## Case 19: Missing pointer with one valid generation installs it (D0142-5)
+
+Status: UNRUN.
+
+Setup: The store holds one committed generation, v1. After the
+process exits, the pointer file is deleted entirely and META is
+deleted too, so there is no COMMITTED and no META. Start the desktop.
+
+Action: Open the store. No save is attempted.
+
+Expected visible outcome: The desktop shows the pointer is missing
+and that it recovered g1, the one valid generation. It restores the
+first version, not the first-run defaults.
+
+Data-preservation assertions:
+
+- The single valid generation is installed, not defaults.
+- The first version text survives; the welcome file is unchanged.
+
+Fixture note: COMMITTED and META are both absent and g1 is the only
+generation file. Per the contract, a missing pointer with no usable
+META and exactly one valid generation installs that one.
+
 ---
 
 ## Case list
@@ -657,8 +786,13 @@ generation is installed.
 | 12 | Torn pointer with no usable META holds the store until release | PASS |
 | 13 | More than 32 generation names hold the store until release | PASS |
 | 14 | Newer uncommitted generation and partial leftover named, not installed | PASS |
+| 15 | Open alone writes nothing on a wrong-version held store | UNRUN |
+| 16 | Open alone writes nothing on an ambiguous torn-pointer held store | UNRUN |
+| 17 | Open alone writes nothing on a too-many-generations held store | UNRUN |
+| 18 | Missing pointer with a usable META recovers the named generation | UNRUN |
+| 19 | Missing pointer with one valid generation installs it | UNRUN |
 
-Specified cases: 16. Executed cases: 16.
+Specified cases: 21. Executed cases: 16.
 
 ## Wording changes (Nov 9 2026)
 
