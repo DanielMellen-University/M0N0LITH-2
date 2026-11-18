@@ -1721,6 +1721,44 @@ fun _term_find_in(s, dir, rel, word, out)
         if e[1]
             _term_find_in(s, paths.join(dir, e[0]), shown, word, out)
 
+# tree: a folder and everything under it, two spaces in per level, folders
+# with / after them as ls shows them, then how many of each there were.
+fun _term_tree_in(s, dir, depth, out, counts)
+    for e in vfs.entries(s.fs, dir)
+        let name = e[0]
+        if e[1]
+            name = name + "/"
+            counts.dirs = counts.dirs + 1
+        else
+            counts.files = counts.files + 1
+        append(out, strings.repeat("  ", depth) + _term_name(name))
+        if e[1]
+            _term_tree_in(s, paths.join(dir, e[0]), depth + 1, out, counts)
+
+fun _term_tree(s, parts)
+    if len(parts) > 1 and _term_not_folder(s, "tree", parts[1], false)
+        return
+    let p = _term_optional_path(s, parts, s.cwd)
+    if not vfs.exists(s.fs, p)
+        _term_reply(s, "tree: " + _term_missing(s, p))
+        return
+    if not vfs.is_dir(s.fs, p)
+        _term_reply(s, _term_name(paths.base(p)))
+        return
+    let out = [_term_name(p)]
+    let counts = {dirs: 0, files: 0}
+    _term_tree_in(s, p, 1, out, counts)
+    # the end of a big tree, as find keeps it, then the counts
+    for line in slice(out, math.max(0, len(out) - (term_history - 1)), len(out))
+        _term_reply(s, line)
+    let d = "folders"
+    if counts.dirs == 1
+        d = "folder"
+    let f = "files"
+    if counts.files == 1
+        f = "file"
+    _term_reply(s, "{counts.dirs} {d}, {counts.files} {f}")
+
 fun _term_find(s, word)
     let out = []
     _term_find_in(s, s.cwd, "", word, out)
@@ -1798,7 +1836,7 @@ fun _split_words(line)
 
 
 # Commands whose words are all paths, so a word like -l or -r is a mistake, not a name.
-let _path_commands = ["cd", "ls", "cat", "mkdir", "touch", "rm", "mv", "cp", "wc", "head", "tail", "grep", "sort", "uniq", "nl"]
+let _path_commands = ["cd", "ls", "cat", "mkdir", "touch", "rm", "mv", "cp", "wc", "head", "tail", "grep", "sort", "uniq", "nl", "tree"]
 
 fun _term_run(s, line)
     s.cwd = _existing_dir(s.fs, s.cwd)
@@ -1830,6 +1868,7 @@ fun _term_run(s, line)
         _term_reply(s, "pwd cd ls cat head tail")
         _term_reply(s, "mkdir touch write rm mv cp")
         _term_reply(s, "wc grep find sort uniq nl")
+        _term_reply(s, "tree")
         _term_reply(s, "echo text > file, >> adds")
         _term_reply(s, "\"my file\": quotes keep spaces")
         _term_reply(s, "!! the last again, !N history N")
@@ -1918,6 +1957,11 @@ fun _term_run(s, line)
     else if cmd == "nl"
         if _term_args(s, parts, 1, "nl <path>")
             _term_nl(s, parts[1])
+    else if cmd == "tree"
+        if len(parts) > 2
+            _term_reply(s, "usage: tree [path]")
+        else
+            _term_tree(s, parts)
     else if cmd == "wc"
         if _term_args(s, parts, 1, "wc <path>")
             _term_wc(s, parts[1])
@@ -1943,7 +1987,7 @@ let _term_recall_keep = 50
 # with "/" after it, anything else with a space); several are taken as far as
 # they agree, and when that adds nothing they are listed. No match, or an
 # empty line: nothing.
-let _term_commands = ["apps", "cat", "cd", "clear", "cp", "date", "echo", "find", "grep", "head", "help", "history", "ls", "mkdir", "mv", "nl", "pwd", "rm", "sort", "tail", "touch", "uniq", "wc", "write"]
+let _term_commands = ["apps", "cat", "cd", "clear", "cp", "date", "echo", "find", "grep", "head", "help", "history", "ls", "mkdir", "mv", "nl", "pwd", "rm", "sort", "tail", "touch", "tree", "uniq", "wc", "write"]
 
 fun _common_start(names)
     let out = names[0]

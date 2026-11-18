@@ -1,0 +1,35 @@
+/home> tree
+/home
+  empty/
+  proj/
+    "my notes.txt"
+    src/
+      main.relic
+  welcome.txt
+3 folders, 3 files
+/home> tree proj
+/home/proj
+  "my notes.txt"
+  src/
+    main.relic
+1 folder, 2 files
+/home> tree /home/empty
+/home/empty
+0 folders, 0 files
+/home> tree proj/src/main.relic
+main.relic
+/home> tree missing
+tree: not found: /home/missing
+/home> tree "proj/my notes.txt/"
+tree: not a folder: /home/proj/my notes.txt
+/home> tree a b
+usage: tree [path]
+/home> tree -a
+tree: no options, not even -a
+/home> cd proj/src
+/home/proj/src> tree ..
+/home/proj
+  "my notes.txt"
+  src/
+    main.relic
+1 folder, 2 files
