@@ -1,0 +1,40 @@
+# Ctrl+Home scrolls the Terminal to its oldest kept output and Ctrl+End back
+# to the prompt, without touching the line being typed.
+use ../shell/wm
+let d = wm.new_desktop(640, 480, wm.default_apps())
+let w = wm.launch(d, wm.terminal)
+let t = w.state
+fun type(line)
+    for c in line
+        if c == " "
+            wm.key(d, "space")
+        else
+            wm.key(d, c)
+fun show(label)
+    print(label, t.scroll, wm.visible_lines(w))
+
+for i in 1..9
+    type("echo " + str(i))
+    wm.key(d, "return")
+type("ls")
+wm.key(d, "left")
+show("start")
+
+wm.key(d, "ctrl+home")
+show("oldest")
+print(t.input, t.left)
+# Page Down from the top goes forward a page
+wm.key(d, "pagedown")
+show("page")
+wm.key(d, "ctrl+end")
+show("prompt")
+print(t.input, t.left)
+
+# past 200 kept lines, the top is the oldest line still kept
+t.input = ""
+for i in 0..120
+    type("echo r" + str(i))
+    wm.key(d, "return")
+print(len(t.buf))
+wm.key(d, "ctrl+home")
+print(wm.visible_lines(w)[0], t.buf[0])

@@ -52,7 +52,7 @@ Commands split on spaces. A part in double or single quotes is one word with its
 
 ## Output
 
-The Terminal keeps the last 200 lines of output; older ones fall off the top. Page Up scrolls back through them a window at a time (keeping one row from the page before), and Page Down forward again; Shift with either does the same. While scrolled back, the last row says how many rows are below, as `-- 6 more below: pagedown --`, a click does not move the cursor, and any other key goes back to the prompt before it does what it does. Scrolling stops at the oldest kept row, and is not in a workspace snapshot. Long lines wrap to the window's width, so one kept line can take several rows. Only the rows that fit the window are built each frame, so a big `cat` stays quick.
+The Terminal keeps the last 200 lines of output; older ones fall off the top. Page Up scrolls back through them a window at a time (keeping one row from the page before), and Page Down forward again; Shift with either does the same. Ctrl+Home goes to the oldest kept line and Ctrl+End back to the prompt; neither changes the line being typed. While scrolled back, the last row says how many rows are below, as `-- 6 more below: pagedown --`, a click does not move the cursor, and any other key goes back to the prompt before it does what it does. Scrolling stops at the oldest kept row, and is not in a workspace snapshot. Long lines wrap to the window's width, so one kept line can take several rows. Only the rows that fit the window are built each frame, so a big `cat` stays quick.
 
 ## In the code
 

@@ -2046,6 +2046,13 @@ fun _term_key(s, k)
         else
             s.scroll = math.max(0, _term_scroll(s) - page)
         return
+    if k == "ctrl+home"
+        # the oldest kept output, at the top of the window
+        s.scroll = _term_max_scroll(s, _term_prompt(s))
+        return
+    if k == "ctrl+end"
+        s.scroll = 0   # back to the prompt, nothing else
+        return
     # any other key goes back to the prompt first
     s.scroll = 0
     let n = len(s.input)

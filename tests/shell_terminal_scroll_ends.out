@@ -1,0 +1,8 @@
+start 0 ["5", "/home> echo 6", "6", "/home> echo 7", "7", "/home> echo 8", "8", "/home> l_s"]
+oldest 11 ["Terminal. Type help.", "/home> echo 1", "1", "/home> echo 2", "2", "/home> echo 3", "3", "-- 11 more below: pagedown --"]
+ls 1
+page 5 ["3", "/home> echo 4", "4", "/home> echo 5", "5", "/home> echo 6", "6", "-- 5 more below: pagedown --"]
+prompt 0 ["5", "/home> echo 6", "6", "/home> echo 7", "7", "/home> echo 8", "8", "/home> l_s"]
+ls 1
+200
+/home> echo r20 /home> echo r20
