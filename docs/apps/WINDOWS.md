@@ -25,7 +25,7 @@ The height is the area under the 16 pixel title bar.
 
 ## Focus and stacking
 
-The window on top that is not minimized has focus: its title bar is blue, and it gets the keys. Clicking anywhere in a window brings it to the front. Ctrl+Tab brings the lowest window that is not minimized to the front, so pressing it again goes round them all. Ctrl+Shift+Tab goes round the other way: the window with focus goes to the bottom, which undoes a Ctrl+Tab. Ctrl+W closes the window with focus, the same as its x box: an Editor's unsaved text goes with it. Ctrl+M minimizes it, the same as its _ box. Ctrl+1 to Ctrl+9 bring the first to the ninth window, in the order they were opened (the taskbar's order), to the front, restoring it if it was minimized.
+The window on top that is not minimized has focus: its title bar is blue, and it gets the keys. Clicking anywhere in a window brings it to the front. Ctrl+Tab brings the lowest window that is not minimized to the front, so pressing it again goes round them all. Ctrl+Shift+Tab goes round the other way: the window with focus goes to the bottom, which undoes a Ctrl+Tab. Ctrl+W closes the window with focus, the same as its x box: an Editor's unsaved text goes with it. Ctrl+M minimizes it, the same as its _ box, and F11 maximizes it or puts it back, the same as its ^ box. Ctrl+1 to Ctrl+9 bring the first to the ninth window, in the order they were opened (the taskbar's order), to the front, restoring it if it was minimized.
 
 ## Moving and resizing
 
@@ -45,4 +45,4 @@ The _ box minimizes a window: it keeps its taskbar button but is not drawn, take
 
 Escape quits the desktop when nothing else takes it (see [the keys](../KEYS.md)). Everything in the in-memory filesystem is lost then. The desktop stays 640 by 480. Following the real window's size, and maximize, are parked with the Nov 7 2026 acceptance, not scheduled.
 
-Tests: `shell_wm`, `shell_lifecycle`, `shell_minimize`, `shell_maximize`, `shell_maximize_drag`, `shell_start_menu`, `shell_menu_*`, `shell_drag_resize`, `shell_resize_offset`, `shell_launch_small`, `shell_cascade_gaps`, `shell_missed_release`, `shell_outside_click`, `shell_title`, `shell_fuzz` and `shell_window_cycle` (Ctrl+Tab, Ctrl+Shift+Tab, Ctrl+W).
+Tests: `shell_wm`, `shell_lifecycle`, `shell_minimize`, `shell_maximize`, `shell_maximize_drag`, `shell_maximize_keys`, `shell_start_menu`, `shell_menu_*`, `shell_drag_resize`, `shell_resize_offset`, `shell_launch_small`, `shell_cascade_gaps`, `shell_missed_release`, `shell_outside_click`, `shell_title`, `shell_fuzz` and `shell_window_cycle` (Ctrl+Tab, Ctrl+Shift+Tab, Ctrl+W).

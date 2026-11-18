@@ -1,0 +1,32 @@
+# F11 maximizes the window with focus, or puts it back, as its ^ box does.
+# No app sees the key.
+use ../shell/wm
+let d = wm.new_desktop(640, 480, wm.default_apps())
+fun place(w) = [w.x, w.y, w.width, w.height]
+
+# no window: nothing happens
+wm.key(d, "f11")
+print(len(d.windows))
+
+let n = wm.launch(d, wm.notes)
+let t = wm.launch(d, wm.terminal)
+wm.handle(d, {type: "key_down", key: "f11", ctrl: false, shift: false, alt: false, gui: false, repeat: false})
+print("term", place(t), wm.is_maximized(t), wm.is_maximized(n))
+print(t.state.input == "")
+
+# the window below keeps its own place; Ctrl+Tab to it and maximize it too
+wm.key(d, "ctrl+tab")
+wm.key(d, "f11")
+print("notes", place(n), wm.is_maximized(n))
+print(n.state.text == "")
+
+# F11 again on each puts both back
+wm.key(d, "f11")
+wm.key(d, "ctrl+tab")
+wm.key(d, "f11")
+print("back", place(n), place(t))
+
+# a minimized window is not the focus, so F11 skips it
+wm.key(d, "ctrl+m")
+wm.key(d, "f11")
+print(wm.focused(d).app.name, wm.is_maximized(n), wm.is_maximized(t))
