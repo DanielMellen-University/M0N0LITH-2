@@ -1,0 +1,39 @@
+# D0142 shared check: snapshot a store, open it, and report what installed.
+# Proves the open alone writes nothing: the driver asserts the before and
+# after snapshots are byte-identical. This is the check the D0141 note asks
+# for: release_check takes its "before" snapshot after workspace_open, so
+# cases 10, 12 and 13 do not prove the open itself writes nothing. Used by
+# cases 15 (wrong-version hold), 16 (ambiguous torn pointer) and 17 (too
+# many generation files). Run from the repo root:
+#   relic/build/relic tools/workspace-recovery-muse/open_check.relic <dir>
+use ../../shell/wm
+use std/files
+use std/lists
+use std/os
+use std/strings
+use std/vfs
+
+# One line per store file, content escaped so the driver can parse it back:
+# backslash first, then newline. The driver asserts the two snapshots are
+# byte-identical, which proves the open alone wrote nothing.
+fun esc(s)
+    let out = strings.replace(s, "\\", "\\\\")
+    return strings.replace(out, "\n", "\\n")
+
+fun snap(dir, tag)
+    for name in lists.sort(files.list(dir))
+        print("snap", tag, name, esc(files.read(dir + "/" + name)))
+
+let args = os.args()
+if len(args) != 1
+    fail("open_check needs the workspace directory")
+snap(args[0], "before")
+wm.workspace_open(args[0])
+print("enabled", wm.workspace_enabled())
+print("notice", [wm.workspace_notice()])
+let fs = wm.terminal.init().fs
+print("note-exists", vfs.exists(fs, "/home/note.txt"))
+if vfs.exists(fs, "/home/note.txt")
+    print("note", [vfs.read(fs, "/home/note.txt")])
+print("welcome", [vfs.read(fs, "/home/welcome.txt")])
+snap(args[0], "after")

@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
-"""Regenerate the committed fixture stores for D0122 cases 6-9 and D0134 cases 10-14.
+"""Regenerate the committed fixture stores for D0122 cases 6-9, D0134 cases 10-14,
+and D0142 cases 15-19.
 
 Each fixture is a real store: the setup program builds it with the
 actual implementation, then the driver applies the same hand damage the
@@ -87,8 +88,46 @@ def main():
     (c14 / "g3.m2ws").write_text(g3_uncommitted())
     (c14 / "g4.m2ws.partial").write_text("M2WS1\n")
 
+    # Case 15: wrong-version hold (case 10's store); the open alone must
+    # write nothing.
+    c15 = work / "case15"
+    c15.mkdir()
+    run("case8_setup.relic", c15)
+    hold_wrong_version(c15)
+
+    # Case 16: torn pointer with no usable META (case 12's store); the open
+    # alone must write nothing.
+    c16 = work / "case16"
+    c16.mkdir()
+    run("case6_setup.relic", c16)
+    (c16 / "COMMITTED").write_text("x")
+    (c16 / "META").unlink()
+
+    # Case 17: more than 32 generation names (case 13's store); the open
+    # alone must write nothing.
+    c17 = work / "case17"
+    c17.mkdir()
+    run("case8_setup.relic", c17)
+    g1 = (c17 / "g1.m2ws").read_bytes()
+    for n in range(2, 34):
+        (c17 / f"g{n}.m2ws").write_bytes(g1)
+
+    # Case 18: COMMITTED missing, META names a parseable generation.
+    c18 = work / "case18"
+    c18.mkdir()
+    run("case6_setup.relic", c18)
+    (c18 / "COMMITTED").unlink()
+
+    # Case 19: COMMITTED missing, exactly one valid generation, no META.
+    c19 = work / "case19"
+    c19.mkdir()
+    run("case8_setup.relic", c19)
+    (c19 / "COMMITTED").unlink()
+    (c19 / "META").unlink()
+
     FIXTURES.mkdir(parents=True, exist_ok=True)
-    for name in ("case6", "case7", "case8", "case10", "case11", "case12", "case13", "case14"):
+    for name in ("case6", "case7", "case8", "case10", "case11", "case12", "case13", "case14",
+                 "case15", "case16", "case17", "case18", "case19"):
         dest = FIXTURES / name
         shutil.rmtree(dest, ignore_errors=True)
         shutil.copytree(work / name, dest)
