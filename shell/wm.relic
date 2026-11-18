@@ -561,9 +561,14 @@ fun _click_in(d, w, x, y)
     if _inside(maximize_box(w), x, y)
         return toggle_maximize(d, w.id)
     if y < w.y + title_height
-        _begin_drag(d, w, "move", x, y)
+        # a double-click on the title maximizes, or puts a maximized window back
+        if d.clicks == 2
+            return toggle_maximize(d, w.id)
+        # a maximized window stays put: its title does not drag
+        if not is_maximized(w)
+            _begin_drag(d, w, "move", x, y)
         return "title"
-    if _inside(resize_box(w), x, y)
+    if _inside(resize_box(w), x, y) and not is_maximized(w)
         _begin_drag(d, w, "resize", x, y)
         return "resize"
     if "selected" in w.app

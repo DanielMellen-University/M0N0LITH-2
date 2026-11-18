@@ -35,6 +35,7 @@ Write `tests/shell_<topic>.relic`, run it, read its output, and save that as `te
 | `shell_lifecycle` | window ids, focus and tab order through lifecycle changes |
 | `shell_minimize` | minimize and restore from the taskbar and the _ box |
 | `shell_maximize` | the ^ box maximizes to the desktop above the taskbar and puts the window back; maximize and unmaximize called twice; a maximized window minimized and restored; a place fitted to a smaller desktop; the title leaving room for three boxes |
+| `shell_maximize_drag` | a double-click on the title maximizes and puts back; a maximized window's title and corner do not drag it; a double-click in the text stays the app's; maximizing ends a drag that was going |
 | `shell_close_focus` | closing a focused window gives focus to the next window down, closing another leaves focus alone, closing the last leaves none |
 | `shell_start_menu` | the Start button opens and closes the menu; Up, Down and Return on the open menu |
 | `shell_menu_all_rows` | every Start menu row launches its app, in the documented order, with the first row marked on each open |

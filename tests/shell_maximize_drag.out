@@ -1,0 +1,12 @@
+start [40, 30, 220, 60]
+title true
+maximize none [0, 0, 640, 440]
+title none
+after drag [0, 0, 640, 440]
+app none
+after grip [0, 0, 640, 440]
+unmaximize [40, 30, 220, 60]
+app false
+title true
+none
+still [0, 0, 640, 440]

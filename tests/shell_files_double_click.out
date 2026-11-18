@@ -5,5 +5,5 @@ third press app /home/proj
 a new single click app /home/proj/deep
 no clicks field app /home/proj
 click() app /home/proj 1
-title double press title
+title double press maximize
 clicker ["Clicks: 0", "Click here to count."] ["Clicks: 2", "Click here to count."]

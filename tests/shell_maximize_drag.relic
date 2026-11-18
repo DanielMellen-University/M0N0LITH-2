@@ -1,0 +1,44 @@
+# A maximized window does not move or resize by dragging, and a double-click
+# on a title bar maximizes or puts the window back.
+use ../shell/wm
+let d = wm.new_desktop(640, 480, wm.default_apps())
+fun place(w) = [w.x, w.y, w.width, w.height]
+fun press(d, x, y, clicks)
+    d.clicks = clicks
+    let r = wm.click(d, x, y)
+    d.clicks = 1
+    return r
+
+let n = wm.launch(d, wm.notes)
+print("start", place(n))
+
+# double-click on the title: the first press starts a move, the second maximizes
+print(press(d, n.x + 20, n.y + 4, 1), d.drag != none)
+wm.release(d)
+print(press(d, n.x + 20, n.y + 4, 2), d.drag, place(n))
+
+# its title press does not start a move, so a drag leaves it where it is
+print(press(d, 100, 4, 1), d.drag)
+wm.motion(d, 300, 200)
+wm.release(d)
+print("after drag", place(n))
+
+# the corner grip does not resize it; the press goes to the app instead
+let g = wm.resize_box(n)
+print(press(d, g[0] + 2, g[1] + 2, 1), d.drag)
+wm.motion(d, 200, 200)
+wm.release(d)
+print("after grip", place(n))
+
+# a double-click on the title again puts it back
+print(press(d, 100, 4, 2), place(n))
+
+# the second press of a double-click in the text is the app's, not a maximize
+print(press(d, n.x + 20, n.y + 30, 2), wm.is_maximized(n))
+
+# a drag that was going when the window maximized ends
+print(press(d, n.x + 20, n.y + 4, 1), d.drag != none)
+wm.maximize(d, n.id)
+print(d.drag)
+wm.motion(d, 400, 300)
+print("still", place(n))

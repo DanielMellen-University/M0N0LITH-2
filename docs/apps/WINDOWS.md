@@ -35,7 +35,7 @@ The window on top that is not minimized has focus: its title bar is blue, and it
 
 ## Maximizing
 
-The ^ box, left of the _ box, maximizes a window: it fills the desktop above the taskbar, 640 by 440 under its title bar. The box then shows v, and pressing it again puts the window back at the place and size it had, cut to fit if the desktop got smaller. Minimizing and restoring a maximized window keeps it maximized. The title text leaves room for all three boxes.
+The ^ box, left of the _ box, maximizes a window: it fills the desktop above the taskbar, 640 by 440 under its title bar. The box then shows v, and pressing it again puts the window back at the place and size it had, cut to fit if the desktop got smaller. A double-click on the title bar does the same as the box, both ways. A maximized window does not move when its title is dragged, and its bottom-right corner does not resize it; a press there goes to the app. Minimizing and restoring a maximized window keeps it maximized. The title text leaves room for all three boxes.
 
 ## Minimizing and closing
 
@@ -45,4 +45,4 @@ The _ box minimizes a window: it keeps its taskbar button but is not drawn, take
 
 Escape quits the desktop when nothing else takes it (see [the keys](../KEYS.md)). Everything in the in-memory filesystem is lost then. The desktop stays 640 by 480. Following the real window's size, and maximize, are parked with the Nov 7 2026 acceptance, not scheduled.
 
-Tests: `shell_wm`, `shell_lifecycle`, `shell_minimize`, `shell_maximize`, `shell_start_menu`, `shell_menu_*`, `shell_drag_resize`, `shell_resize_offset`, `shell_launch_small`, `shell_cascade_gaps`, `shell_missed_release`, `shell_outside_click`, `shell_title`, `shell_fuzz` and `shell_window_cycle` (Ctrl+Tab, Ctrl+Shift+Tab, Ctrl+W).
+Tests: `shell_wm`, `shell_lifecycle`, `shell_minimize`, `shell_maximize`, `shell_maximize_drag`, `shell_start_menu`, `shell_menu_*`, `shell_drag_resize`, `shell_resize_offset`, `shell_launch_small`, `shell_cascade_gaps`, `shell_missed_release`, `shell_outside_click`, `shell_title`, `shell_fuzz` and `shell_window_cycle` (Ctrl+Tab, Ctrl+Shift+Tab, Ctrl+W).
