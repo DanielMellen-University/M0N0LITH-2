@@ -15,6 +15,7 @@ A long list scrolls just far enough to keep the selected row in view; the title 
 | Up, Down | move the selection |
 | Home, End | the first or last row; with Ctrl the same, as in the Editor |
 | Page Up, Page Down | as many rows as the window shows less one, so one row stays in view; they stop at the first and last row |
+| Mouse wheel over the window | moves the selection a row a notch, as Up and Down do, without bringing the window to the front; it gives up a Delete question, and does nothing while a name is typed |
 | A letter or digit | the next name that starts with it, in any case, going round to the top (never `..`) |
 | Return | opens the selected row |
 | F2 | renames the selected row: the title reads `rename: name_` with its name to edit (Backspace, Ctrl+Backspace, Ctrl+U, Ctrl+V), Return renames it in the same folder and Esc, a click in the window, or another key such as an arrow gives up (that key then does what it does). A name too long for the title shows its end, `rename: ...end_`. Not over a name that is there (`already there: name`), and not to a name with a `/` |

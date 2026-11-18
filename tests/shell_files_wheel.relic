@@ -1,0 +1,45 @@
+# The wheel over Files moves its selection a row a notch, as Up and Down do,
+# without bringing the window to the front. A name being typed ignores it.
+use ../shell/wm
+use std/vfs
+let d = wm.new_desktop(640, 480, wm.default_apps())
+let f = wm.launch(d, wm.files_app)
+let s = f.state
+for name in ["a.txt", "b.txt", "c.txt", "d.txt", "e.txt", "f.txt", "g.txt", "h.txt", "i.txt", "j.txt"]
+    vfs.write(s.fs, "/home/" + name, "x")
+fun spin(x, y, dy)
+    wm.handle(d, {type: "mouse_move", x: x, y: y, dx: 0, dy: 0})
+    wm.handle(d, {type: "wheel", dx: 0, dy: dy})
+fun show(label)
+    let v = wm.visible_lines(f)
+    print(label, s.sel, v[1], v[len(v) - 1])
+
+show("start")
+spin(f.x + 30, f.y + 40, -3)
+show("down three")
+spin(f.x + 30, f.y + 40, -20)
+show("last")
+spin(f.x + 30, f.y + 40, 2)
+show("up two")
+spin(f.x + 30, f.y + 40, 50)
+show("first")
+
+# a Terminal in front elsewhere keeps focus
+let t = wm.launch(d, wm.terminal)
+t.x = 350
+t.y = 250
+spin(f.x + 30, f.y + 40, -1)
+print(wm.focused(d).app.name, s.sel)
+
+# a Delete question is given up by a turn, as by a key
+wm.key(d, "ctrl+tab")
+print(wm.focused(d).app.name)
+wm.key(d, "delete")
+print(s.confirm != none)
+spin(f.x + 30, f.y + 40, -1)
+print(s.confirm, s.sel)
+
+# while renaming, the wheel does nothing
+wm.key(d, "f2")
+spin(f.x + 30, f.y + 40, -1)
+print(s.renaming != none, s.sel)

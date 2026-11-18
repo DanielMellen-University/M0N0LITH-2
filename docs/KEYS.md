@@ -86,6 +86,7 @@ The commands are in [the Terminal doc](apps/TERMINAL.md).
 | Up, Down | move the selection |
 | Home, End (or with Ctrl) | the first or last row |
 | Page Up, Page Down | a window of rows up or down, stopping at the ends |
+| Mouse wheel over the window | moves the selection a row a notch, without bringing the window to the front; nothing while a name is typed |
 | A letter or digit | the next name that starts with it, any case, going round |
 | Return | opens the selected row |
 | F2 | renames the selected row: type the name, Return renames, Esc, a click or another key gives up |

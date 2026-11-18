@@ -2387,6 +2387,17 @@ fun _files_escape(s)
         return true
     return false
 
+# The wheel moves the selection one row a notch, as Up and Down do (so a
+# Delete question is given up). While a name is typed it does nothing.
+fun _files_wheel(s, dy)
+    if "renaming" in s and s.renaming != none
+        return
+    let k = "down"
+    if dy > 0
+        k = "up"
+    for i in 0..math.abs(dy)
+        _files_key(s, k)
+
 fun _files_key(s, k)
     if "renaming" in s and s.renaming != none
         _files_rename_key(s, k)
@@ -4952,7 +4963,7 @@ fun _snake_paint(s)
 let clicker = {name: "Clicker", width: 180, height: 60, init: _clicker_init, lines: _clicker_lines, on_click: _clicker_click, on_key: _clicker_key}
 let notes = {name: "Notes", width: 220, height: 60, init: _notes_init, lines: _notes_lines, on_click: _notes_click, on_key: _notes_key, tail: true, pinned: 1}
 let terminal = {name: "Terminal", width: 280, height: 120, init: _term_init, lines: _term_lines, on_click: _term_click, on_key: _term_key, on_wheel: _term_wheel, tail: true, pinned: 0}
-let files_app = {name: "Files", width: 260, height: 140, init: _files_init, lines: _files_lines, on_click: _files_click, on_key: _files_key, on_escape: _files_escape, selected: _files_selected}
+let files_app = {name: "Files", width: 260, height: 140, init: _files_init, lines: _files_lines, on_click: _files_click, on_key: _files_key, on_wheel: _files_wheel, on_escape: _files_escape, selected: _files_selected}
 let editor = {name: "Editor", width: 320, height: 80, init: _editor_init, lines: _editor_lines, on_click: _editor_click, on_key: _editor_key, on_drag: _editor_drag, on_escape: _editor_escape, tail: true, pinned: 1, marks: _editor_marks}
 let ide = {name: "IDE", width: 320, height: 200, init: _ide_init, lines: _ide_lines, on_click: _editor_click, on_key: _ide_key, on_drag: _editor_drag, on_escape: _ide_escape, tail: true, pinned: 1, marks: _editor_marks}
 let paint_app = {name: "Paint", width: 256, height: 190, init: _paint_init, lines: _paint_lines, on_click: _paint_click, on_key: _paint_key, on_drag: _paint_drag, on_escape: _paint_escape, paint: _paint_paint}
