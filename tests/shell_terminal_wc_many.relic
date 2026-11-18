@@ -1,0 +1,24 @@
+# wc takes several paths, one line each, then a total of the ones it could
+# count. An error for one does not stop the rest.
+use ../shell/wm
+use std/vfs
+let t = wm.terminal.init()
+fun run(line)
+    t.buf = []
+    for c in line
+        if c == " "
+            wm.terminal.on_key(t, "space")
+        else
+            wm.terminal.on_key(t, c)
+    wm.terminal.on_key(t, "return")
+    for l in t.buf
+        print(l)
+vfs.write(t.fs, "/home/a.txt", "one two\nthree\n")
+vfs.write(t.fs, "/home/b b.txt", "four\n")
+vfs.write(t.fs, "/home/empty.txt", "")
+run("wc a.txt")
+run("wc a.txt \"b b.txt\" empty.txt")
+run("wc a.txt missing.txt /home")
+run("wc missing.txt /home")
+run("wc a.txt a.txt")
+run("wc")

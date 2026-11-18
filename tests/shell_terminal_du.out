@@ -1,0 +1,21 @@
+/home> du
+   0 empty/
+1203 proj/
+  18 welcome.txt
+1221 characters, 3 files
+/home> du proj
+   3 "my notes.txt"
+1200 src/
+1203 characters, 2 files
+/home> du proj/src/main.relic
+1200 main.relic
+/home> du /home/empty
+0 characters, 0 files
+/home> du missing
+du: not found: /home/missing
+/home> du proj/src/main.relic/
+du: not a folder: /home/proj/src/main.relic
+/home> du a b
+usage: du [path]
+/home> du -h
+du: no options, not even -h

@@ -1,0 +1,40 @@
+/home> diff a.txt b.txt
+-2 two
++2 2
++5 five
+/home> diff b.txt a.txt
+-2 2
++2 two
+-5 five
+/home> diff a.txt c.txt
+diff: same lines
+/home> diff a.txt empty.txt
+-1 one
+-2 two
+-3 three
+-4 four
+/home> diff empty.txt a.txt
++1 one
++2 two
++3 three
++4 four
+/home> diff a.txt "my file.txt"
++1 zero
+/home> diff m1.txt m2.txt
+-1 a
++4 a
+/home> diff a.txt
+usage: diff <path> <path>
+/home> diff a.txt b.txt c.txt
+usage: diff <path> <path>
+/home> diff a.txt missing.txt
+diff: not found: /home/missing.txt
+/home> diff /home b.txt
+diff: is a folder: /home
+/home> diff -u a.txt
+diff: no options, not even -u
+/home> diff x.txt y.txt
+diff: too long to compare; first difference at line 1
+/home> diff x.txt y.txt
+-301 x300
++301 changed

@@ -1,0 +1,30 @@
+# tree shows a folder and everything under it, two spaces in per level, then
+# how many folders and files it found.
+use ../shell/wm
+use std/vfs
+let t = wm.terminal.init()
+fun run(line)
+    t.buf = []
+    for c in line
+        if c == " "
+            wm.terminal.on_key(t, "space")
+        else
+            wm.terminal.on_key(t, c)
+    wm.terminal.on_key(t, "return")
+    for l in t.buf
+        print(l)
+vfs.make_dir(t.fs, "/home/proj")
+vfs.make_dir(t.fs, "/home/proj/src")
+vfs.write(t.fs, "/home/proj/src/main.relic", "print(1)\n")
+vfs.write(t.fs, "/home/proj/my notes.txt", "x")
+vfs.make_dir(t.fs, "/home/empty")
+run("tree")
+run("tree proj")
+run("tree /home/empty")
+run("tree proj/src/main.relic")
+run("tree missing")
+run("tree \"proj/my notes.txt/\"")
+run("tree a b")
+run("tree -a")
+run("cd proj/src")
+run("tree ..")

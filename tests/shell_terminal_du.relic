@@ -1,0 +1,29 @@
+# du gives the characters in each file and folder of a folder, lined up, then
+# the total and how many files; on a file, that file alone.
+use ../shell/wm
+use std/vfs
+use std/strings
+let t = wm.terminal.init()
+fun run(line)
+    t.buf = []
+    for c in line
+        if c == " "
+            wm.terminal.on_key(t, "space")
+        else
+            wm.terminal.on_key(t, c)
+    wm.terminal.on_key(t, "return")
+    for l in t.buf
+        print(l)
+vfs.make_dir(t.fs, "/home/proj")
+vfs.make_dir(t.fs, "/home/proj/src")
+vfs.write(t.fs, "/home/proj/src/main.relic", strings.repeat("x", 1200))
+vfs.write(t.fs, "/home/proj/my notes.txt", "abc")
+vfs.make_dir(t.fs, "/home/empty")
+run("du")
+run("du proj")
+run("du proj/src/main.relic")
+run("du /home/empty")
+run("du missing")
+run("du proj/src/main.relic/")
+run("du a b")
+run("du -h")

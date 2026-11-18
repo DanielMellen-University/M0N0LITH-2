@@ -1390,17 +1390,18 @@ fun _term_cat(s, path)
         _term_reply(s, "cat: " + err.message)
 
 # wc: lines (newlines, as Unix counts them), words (runs of non-space) and
-# characters, then the path as given.
+# characters, then the path as given. Gives [lines, words, characters], or
+# none after an error.
 fun _term_wc(s, path)
     if _term_not_folder(s, "wc", path, false)
-        return
+        return none
     let p = _term_path(s, path)
     if not vfs.exists(s.fs, p)
         _term_reply(s, "wc: " + _term_missing(s, p))
-        return
+        return none
     if vfs.is_dir(s.fs, p)
         _term_reply(s, "wc: is a folder: " + p)
-        return
+        return none
     let text = vfs.read(s.fs, p)
     let words = 0
     let inside = false
@@ -1410,7 +1411,9 @@ fun _term_wc(s, path)
         else if not inside
             inside = true
             words = words + 1
-    _term_reply(s, "{strings.count(text, "\n")} {words} {len(text)} " + _term_name(path))   # quoted like ls when it has a space
+    let lines = strings.count(text, "\n")
+    _term_reply(s, "{lines} {words} {len(text)} " + _term_name(path))   # quoted like ls when it has a space
+    return [lines, words, len(text)]
 
 fun _term_cd(s, parts)
     let p = _term_optional_path(s, parts, "/home")
@@ -1721,6 +1724,160 @@ fun _term_find_in(s, dir, rel, word, out)
         if e[1]
             _term_find_in(s, paths.join(dir, e[0]), shown, word, out)
 
+# tree: a folder and everything under it, two spaces in per level, folders
+# with / after them as ls shows them, then how many of each there were.
+fun _term_tree_in(s, dir, depth, out, counts)
+    for e in vfs.entries(s.fs, dir)
+        let name = e[0]
+        if e[1]
+            name = name + "/"
+            counts.dirs = counts.dirs + 1
+        else
+            counts.files = counts.files + 1
+        append(out, strings.repeat("  ", depth) + _term_name(name))
+        if e[1]
+            _term_tree_in(s, paths.join(dir, e[0]), depth + 1, out, counts)
+
+fun _term_tree(s, parts)
+    if len(parts) > 1 and _term_not_folder(s, "tree", parts[1], false)
+        return
+    let p = _term_optional_path(s, parts, s.cwd)
+    if not vfs.exists(s.fs, p)
+        _term_reply(s, "tree: " + _term_missing(s, p))
+        return
+    if not vfs.is_dir(s.fs, p)
+        _term_reply(s, _term_name(paths.base(p)))
+        return
+    let out = [_term_name(p)]
+    let counts = {dirs: 0, files: 0}
+    _term_tree_in(s, p, 1, out, counts)
+    # the end of a big tree, as find keeps it, then the counts
+    for line in slice(out, math.max(0, len(out) - (term_history - 1)), len(out))
+        _term_reply(s, line)
+    let d = "folders"
+    if counts.dirs == 1
+        d = "folder"
+    let f = "files"
+    if counts.files == 1
+        f = "file"
+    _term_reply(s, "{counts.dirs} {d}, {counts.files} {f}")
+
+# The characters in a file, or in every file under a folder, and how many
+# files that is: [characters, files].
+fun _term_size_of(s, p)
+    if not vfs.is_dir(s.fs, p)
+        return [vfs.size(s.fs, p), 1]
+    let total = [0, 0]
+    for e in vfs.entries(s.fs, p)
+        let sub = _term_size_of(s, paths.join(p, e[0]))
+        total[0] = total[0] + sub[0]
+        total[1] = total[1] + sub[1]
+    return total
+
+# du: how much is in a folder (the current one without a path): one line per
+# name in it, the characters in that file or under that folder first, then
+# the total. On a file, that file's line alone.
+fun _term_du(s, parts)
+    if len(parts) > 1 and _term_not_folder(s, "du", parts[1], false)
+        return
+    let p = _term_optional_path(s, parts, s.cwd)
+    if not vfs.exists(s.fs, p)
+        _term_reply(s, "du: " + _term_missing(s, p))
+        return
+    if not vfs.is_dir(s.fs, p)
+        _term_reply(s, "{vfs.size(s.fs, p)} " + _term_name(paths.base(p)))
+        return
+    let rows = []
+    let total = [0, 0]
+    for e in vfs.entries(s.fs, p)
+        let sub = _term_size_of(s, paths.join(p, e[0]))
+        total[0] = total[0] + sub[0]
+        total[1] = total[1] + sub[1]
+        let name = e[0]
+        if e[1]
+            name = name + "/"
+        append(rows, [str(sub[0]), _term_name(name)])
+    let width = len(str(total[0]))
+    for r in slice(rows, math.max(0, len(rows) - (term_history - 1)), len(rows))
+        _term_reply(s, strings.pad_left(r[0], width, " ") + " " + r[1])
+    let f = "files"
+    if total[1] == 1
+        f = "file"
+    let c = "characters"
+    if total[0] == 1
+        c = "character"
+    _term_reply(s, "{total[0]} {c}, {total[1]} {f}")
+
+# The most line pairs diff compares after the lines both files start and end
+# with are taken off. Past that it names the first line that differs.
+let _diff_cells = 250000
+
+# The lines that differ between a and b, from a longest common run of lines:
+# "-N text" for line N of a that b does not have, "+N text" for line N of b.
+fun _diff_lines(a, b)
+    let start = 0
+    while start < len(a) and start < len(b) and a[start] == b[start]
+        start = start + 1
+    let ea = len(a)
+    let eb = len(b)
+    while ea > start and eb > start and a[ea - 1] == b[eb - 1]
+        ea = ea - 1
+        eb = eb - 1
+    let n = ea - start
+    let m = eb - start
+    if n * m > _diff_cells
+        return none
+    # left[i * (m + 1) + j]: the longest common run of a's middle from i and b's from j
+    let w = m + 1
+    let left = []
+    for k in 0..(n + 1) * w
+        append(left, 0)
+    let i = n - 1
+    while i >= 0
+        let j = m - 1
+        while j >= 0
+            if a[start + i] == b[start + j]
+                left[i * w + j] = left[(i + 1) * w + j + 1] + 1
+            else
+                left[i * w + j] = math.max(left[(i + 1) * w + j], left[i * w + j + 1])
+            j = j - 1
+        i = i - 1
+    let out = []
+    i = 0
+    let j = 0
+    while i < n or j < m
+        if i < n and j < m and a[start + i] == b[start + j]
+            i = i + 1
+            j = j + 1
+        else if j >= m or (i < n and left[(i + 1) * w + j] >= left[i * w + j + 1])
+            append(out, "-{start + i + 1} " + a[start + i])
+            i = i + 1
+        else
+            append(out, "+{start + j + 1} " + b[start + j])
+            j = j + 1
+    return out
+
+# diff: the lines that differ between two files, or that they are the same.
+fun _term_diff(s, pa, pb)
+    let a = _term_file_lines(s, "diff", pa)
+    if a == none
+        return
+    let b = _term_file_lines(s, "diff", pb)
+    if b == none
+        return
+    if a == b
+        _term_reply(s, "diff: same lines")
+        return
+    let out = _diff_lines(a, b)
+    if out == none
+        let k = 0
+        while k < len(a) and k < len(b) and a[k] == b[k]
+            k = k + 1
+        _term_reply(s, "diff: too long to compare; first difference at line {k + 1}")
+        return
+    for line in slice(out, math.max(0, len(out) - term_history), len(out))
+        _term_reply(s, line)
+
 fun _term_find(s, word)
     let out = []
     _term_find_in(s, s.cwd, "", word, out)
@@ -1798,7 +1955,7 @@ fun _split_words(line)
 
 
 # Commands whose words are all paths, so a word like -l or -r is a mistake, not a name.
-let _path_commands = ["cd", "ls", "cat", "mkdir", "touch", "rm", "mv", "cp", "wc", "head", "tail", "grep", "sort", "uniq", "nl"]
+let _path_commands = ["cd", "ls", "cat", "mkdir", "touch", "rm", "mv", "cp", "wc", "head", "tail", "grep", "sort", "uniq", "nl", "tree", "du", "diff"]
 
 fun _term_run(s, line)
     s.cwd = _existing_dir(s.fs, s.cwd)
@@ -1830,6 +1987,7 @@ fun _term_run(s, line)
         _term_reply(s, "pwd cd ls cat head tail")
         _term_reply(s, "mkdir touch write rm mv cp")
         _term_reply(s, "wc grep find sort uniq nl")
+        _term_reply(s, "tree du diff")
         _term_reply(s, "echo text > file, >> adds")
         _term_reply(s, "\"my file\": quotes keep spaces")
         _term_reply(s, "!! the last again, !N history N")
@@ -1918,9 +2076,33 @@ fun _term_run(s, line)
     else if cmd == "nl"
         if _term_args(s, parts, 1, "nl <path>")
             _term_nl(s, parts[1])
+    else if cmd == "tree"
+        if len(parts) > 2
+            _term_reply(s, "usage: tree [path]")
+        else
+            _term_tree(s, parts)
+    else if cmd == "diff"
+        if _term_args(s, parts, 2, "diff <path> <path>")
+            _term_diff(s, parts[1], parts[2])
+    else if cmd == "du"
+        if len(parts) > 2
+            _term_reply(s, "usage: du [path]")
+        else
+            _term_du(s, parts)
     else if cmd == "wc"
-        if _term_args(s, parts, 1, "wc <path>")
-            _term_wc(s, parts[1])
+        # several paths, one after another as for cat, then a total line
+        if len(parts) < 2
+            _term_reply(s, "usage: wc <path>...")
+        let total = [0, 0, 0]
+        let counted = 0
+        for path in slice(parts, 1, len(parts))
+            let c = _term_wc(s, path)
+            if c != none
+                counted = counted + 1
+                for k in 0..3
+                    total[k] = total[k] + c[k]
+        if len(parts) > 2 and counted > 0
+            _term_reply(s, "{total[0]} {total[1]} {total[2]} total")
     else if cmd == "rm"
         # several paths, one after another as for cat; an error for one does not stop the rest
         if len(parts) < 2
@@ -1943,7 +2125,7 @@ let _term_recall_keep = 50
 # with "/" after it, anything else with a space); several are taken as far as
 # they agree, and when that adds nothing they are listed. No match, or an
 # empty line: nothing.
-let _term_commands = ["apps", "cat", "cd", "clear", "cp", "date", "echo", "find", "grep", "head", "help", "history", "ls", "mkdir", "mv", "nl", "pwd", "rm", "sort", "tail", "touch", "uniq", "wc", "write"]
+let _term_commands = ["apps", "cat", "cd", "clear", "cp", "date", "diff", "du", "echo", "find", "grep", "head", "help", "history", "ls", "mkdir", "mv", "nl", "pwd", "rm", "sort", "tail", "touch", "tree", "uniq", "wc", "write"]
 
 fun _common_start(names)
     let out = names[0]

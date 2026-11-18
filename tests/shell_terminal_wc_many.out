@@ -1,0 +1,21 @@
+/home> wc a.txt
+2 3 14 a.txt
+/home> wc a.txt "b b.txt" empty.txt
+2 3 14 a.txt
+1 1 5 "b b.txt"
+0 0 0 empty.txt
+3 4 19 total
+/home> wc a.txt missing.txt /home
+2 3 14 a.txt
+wc: not found: /home/missing.txt
+wc: is a folder: /home
+2 3 14 total
+/home> wc missing.txt /home
+wc: not found: /home/missing.txt
+wc: is a folder: /home
+/home> wc a.txt a.txt
+2 3 14 a.txt
+2 3 14 a.txt
+4 6 28 total
+/home> wc
+usage: wc <path>...
