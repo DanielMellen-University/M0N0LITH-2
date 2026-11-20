@@ -76,7 +76,9 @@ Next work is maintenance of this list, the completed Editor addition above, and 
 
 ## Workspace store
 
-The shared vfs can be committed to a directory. `shell/desktop.relic` does that, and the same generation records the open windows: place, Terminal folder and history, Editor and IDE text including unsaved text, Notes, Clicker's count, and Paint's cells. A new process that opens the same directory gets the last committed generation, including a file removed on purpose. Undo, the clipboard, a running IDE program, and Snake's board are not in it. A kill before the next snapshot or quit drops keystrokes since the last one.
+The shared vfs can be committed to a directory. `shell/desktop.relic` does that, and the same generation records the open windows: place, Terminal folder and history, Editor and IDE text including unsaved text, Notes, Clicker's count, and Paint's cells. A new process that opens the same directory gets the last committed generation, including a file removed on purpose. Undo, the clipboard, a running IDE program, and Snake's board are not in it. Window input now gets one snapshot after 2000 ms of idle tick time, without saving buffer text into vfs files. A kill before that snapshot still drops input since the last successful one; continuous input postpones it, and a failed attempt waits for new input.
+
+Model tests `shell_workspace_idle`, `shell_workspace_idle_inputs` and `shell_workspace_idle_failures` pass. The GUI was not walked through; this does not extend the Nov 7 GUI pass.
 
 A torn or corrupt generation does not replace the last one that still parses. The notice says when a save failed or when the load recovered or ignored a file. There is no fsync in Relic 1.0.53, so a power loss is not covered. The rules, the file format and the fault stages are in [Workspace recovery](workspace-recovery.md).
 

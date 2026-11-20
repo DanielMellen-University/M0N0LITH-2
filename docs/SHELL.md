@@ -15,7 +15,7 @@ Input goes in through these calls, or through `handle(d, e)`, which takes one `g
 |---|---|
 | `click(d, x, y)` | a press: Start, a tab, a window's x, _ or ^ box, its title (starts a move), its corner (starts a resize), or the app inside. Gives a word for what it hit: `launch`, `start`, `overflow`, `tab`, `minimize`, `maximize`, `unmaximize`, `bar`, `close`, `title`, `resize`, `app`, `desktop` |
 | `motion(d, x, y)` | moves or resizes the window being dragged, if any, or passes the pointer to an app with `on_drag` after a press in it (Paint draws, the Editor and the IDE select) |
-| `tick(d, ms)` | the clock for the focused window's app, if it has `on_tick` (Snake) |
+| `tick(d, ms)` | the clock for the focused window's app, if it has `on_tick` (Snake), and a window snapshot after 2000 ms without new window input when a workspace is open and this desktop is bound |
 | `wheel(d, dy)` | a wheel turn (`dy` notches, up positive) for the top window under `pointer`, or the focused one before any pointer is seen, if its app has `on_wheel` (Terminal, Files). It does not raise the window. True if an app took it |
 | `release(d)` | ends a drag |
 | `dismiss(d)` | Escape: closes the Start menu and the hidden-windows list, or else passes Escape to the focused window's `on_escape` if its app has one (the IDE stops a run waiting for input). True if something took it; desktop.relic quits on an Escape that nothing took, unless the key is held down and repeating |

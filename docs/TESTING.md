@@ -394,6 +394,9 @@ Write `tests/shell_<topic>.relic`, run it, read its output, and save that as `te
 
 | Test | What it covers |
 |---|---|
+| `shell_workspace_idle` | first tick and 1999 ms write nothing, 2000 ms writes once; new input restarts the interval; a fresh desktop restores unsaved Editor text with the vfs file unchanged; explicit saves clear pending input; disabled workspaces and other desktops do not write |
+| `shell_workspace_idle_inputs` | Notes and IDE typing, Paint keys and held strokes, clicks, drags, wheel and Escape trigger idle snapshots; unused mouse motion does not postpone them; release and Terminal commands clear pending input; Snake still ticks without causing snapshots |
+| `shell_workspace_idle_failures` | a fault or held store fails once with its notice and waits for new input; releasing a hold does not retry by itself; failed Ctrl+S does not trigger an idle retry; reopening keeps the previous unsaved buffer and original vfs file |
 | `shell_workspace_byte_limit` | a Unicode image below the character caps but above the byte cap fails before writing; pointer, META and the recoverable files stay unchanged |
 | `shell_workspace_session_order` | file records after a session are rejected even with a valid checksum; files and windows recover together; unsorted file records before the session remain legal |
 | `shell_workspace_escapes` | all control escapes, spaces, backslashes and Unicode roundtrip; raw controls, raw directory spaces and noncanonical escapes reject the whole image; an unstorable vfs name cannot replace the commit |
