@@ -45,9 +45,10 @@ Flat directory. Unknown names are ignored and are not deleted.
 | `META` | two lines, `committed gN` or `committed none`, then `previous gP` or `previous none`, each ending in `\n`. At most 64 bytes. Written only after `COMMITTED` has been renamed and read back as the new id. It is a backup, not a commit. A readable `COMMITTED` wins over it. If this write fails after that readback, the save still committed |
 | `gN.m2ws` | generation N, N from 1 to 9 digits, no leading zeros |
 | `gN.m2ws.partial` | a write that did not finish. Never installed |
+| `gN.m2ws.damaged` | a bad or uncommitted generation kept by prune, with its bytes unchanged. Never installed. Its id still reserves a generation number |
 | `COMMITTED.next`, `META.next` | staged pointer and metadata. Never installed |
 
-At most 32 names matching the two generation patterns are accepted. More than that: nothing is installed, and the notice is `workspace: too many generation files; using defaults`.
+At most 32 names matching `gN.m2ws` or `gN.m2ws.partial` are accepted. More than that: nothing is installed, the store is held, and the notice is `workspace: too many generation files; store held; using defaults`. Damaged names do not count toward this limit or cause a hold. Prune keeps at most 4 damaged files, removing the lowest ids first. A held store touches none of them, even when there are more than 4.
 
 ## Generation file
 
@@ -160,15 +161,19 @@ Not in the snapshot: undo and redo, a find or a rename still being typed, the cl
 
 ## What a save does
 
-Each change made by Terminal, Files, the Editor, the IDE's Ctrl+S, Paint's save, or Snake writing its best score builds a new generation from the whole vfs. When a desktop is bound, that generation includes the window session above. Typing in the Editor is not, by itself, one of these changes. N is one past every generation id already in the directory and every id named by `COMMITTED` or `META`. An existing `gN.m2ws` is never rewritten.
+Each change made by Terminal, Files, the Editor, the IDE's Ctrl+S, Paint's save, or Snake writing its best score builds a new generation from the whole vfs. When a desktop is bound, that generation includes the window session above. Typing in the Editor is not, by itself, one of these changes. N is one past every generation id already in the directory, including partial and damaged files, and every id named by `COMMITTED` or `META`. An existing `gN.m2ws` is never rewritten.
 
 1. Write `gN.m2ws.partial` and read it back. A mismatch stops here. `COMMITTED` and `META` are unchanged.
 2. Rename that partial to `gN.m2ws`. This creates the image. It does not commit it. If that rename fails, stop. `COMMITTED` is unchanged.
 3. Write `COMMITTED.next` as `gN\n` and read it back. If this file cannot be written (it is a directory, for example), stop. `META` is unchanged. The new `gN.m2ws` is an uncommitted leftover.
 4. Rename `COMMITTED.next` onto `COMMITTED`. On Linux this replace is the publication: after `rename` returns, the new id is the commit even if this process has not read it back yet. On Windows, `std::filesystem::rename` will not replace, so the publisher removes `COMMITTED` and then renames. A crash in that gap leaves no pointer. `META` is still the previous success, so the load keeps that generation and does not install the leftover.
-5. Read `COMMITTED` back. If it is `gN\n`, write `META` (`committed gN`, `previous` the generation that was installed when the save started) and then prune. Prune removes partials and generation files other than gN and that previous generation. If that `META` write fails, the commit still stands: `save` returns success, the Editor says `saved`, and the notice is `workspace: saved; metadata backup not updated`. It does not say the save failed and it does not say the previous generation was kept. The next open follows `COMMITTED`.
+5. Read `COMMITTED` back. If it is `gN\n`, write `META` (`committed gN`, `previous` the generation that was installed when the save started) and then prune as below. If that `META` write fails, the commit still stands: `save` returns success, the Editor says `saved`, and the notice is `workspace: saved; metadata backup not updated`. It does not say the save failed and it does not say the previous generation was kept. The next open follows `COMMITTED`.
 6. If the readback does not match, the notice is `workspace: save failed; pointer publish uncertain` with no `kept` generation. The rename may already have published, so the previous id is not known to be what a new process will install. `META` is not updated.
 7. `save` returns success only when the readback matches. A crash after the rename and before the return can still leave `COMMITTED` naming gN.
+
+Prune keeps the new commit and the generation that was installed when the save started. For every other `gM.m2ws`, it renames the file to `gM.m2ws.damaged` if that generation failed to parse at the last load, or if M is newer than the installed generation. With defaults installed, every leftover complete generation is kept this way. Rename keeps the bytes exactly. If the destination already exists or the rename fails, the source stays. Old valid superseded generations and partials are removed. Prune also removes staged pointer and metadata files. It then removes the lowest damaged ids until at most 4 remain. A held store does not write, rename or prune anything.
+
+Each successful move adds a save notice such as `workspace: kept damaged g4 as g4.m2ws.damaged`. It follows the boot notice or metadata warning after ` | `, in the same style as other save notices. The next save replaces that save notice; reopening clears it. Damaged files are ignored quietly on load, even if `COMMITTED` or `META` names their id.
 
 `host_write_file` does not report a short write and does not fsync. A power loss before the operating system flushes is outside what Relic 1.0.53 can promise. `META` is a backup written after the pointer rename. It is not a commit. A readable `COMMITTED` wins over it. A torn pointer uses `META` only for a generation this desktop can parse; a wrong-version file named there holds the store and is not overwritten.
 
@@ -184,6 +189,7 @@ The vfs is replaced only after a generation has fully parsed.
 | valid, and that generation parses | a newer complete `gM.m2ws` | the named generation | `workspace: ignored uncommitted gM` (highest such M) |
 | valid, and that generation parses | a `gM.m2ws.partial` | the named generation | `workspace: ignored partial gM` (highest such M) |
 | both of those leftovers | | the named generation | `workspace: ignored uncommitted gM; ignored partial gK` |
+| any | `gM.m2ws.damaged` files | unchanged by those files; only ordinary generations can install | no notice about damaged files; their ids only reserve numbers for the next save |
 | valid, generation truncated or otherwise bad | an older valid generation, and maybe a newer complete file | the newest valid generation **older than the named one** | `workspace: committed image truncated; recovered gN` (or `invalid`). A newer file is `ignored uncommitted`, not installed |
 | valid, generation `M2WS` but not `M2WS1` | | defaults, or an older generation this desktop can parse | `workspace: committed image wrong version; store held; ...` The store is not written or deleted until `wm.workspace_release()` |
 | named generation missing or bad, and nothing older parses | | defaults | `workspace: no valid generation; using defaults` |
@@ -193,9 +199,9 @@ The vfs is replaced only after a generation has fully parsed.
 | more than 32 generation names | | defaults, store held | `workspace: too many generation files; store held; using defaults` |
 | the directory cannot be listed, or the path cannot be opened | | the vfs is left as it was, and the workspace is not enabled | `workspace: cannot open store` |
 
-A readable pointer that names a generation which parses wins. A newer complete file is an uncommitted save and is not installed, including when the named generation is truncated or otherwise bad: the fallback is an **older** generation, never a newer one. Partials do not install. A wrong version, too many generation names, or a torn pointer with more than one valid generation and no usable `META` holds the store. Saves then fail and do not say they were saved, and nothing in the directory is replaced or deleted until `wm.workspace_release()`. That call does not delete files. The next successful save may. An empty `workspace_open("")` is a session-only opt-out and is not a failure. A path that was requested and could not be opened is a failure, and Ctrl+S says so.
+A readable pointer that names a generation which parses wins. A newer complete file is an uncommitted save and is not installed, including when the named generation is truncated or otherwise bad: the fallback is an **older** generation, never a newer one. Partials and damaged files do not install. Damaged files do not count toward any hold rule. A wrong version, too many generation names, or a torn pointer with more than one valid generation and no usable `META` holds the store. Saves then fail and do not say they were saved, and nothing in the directory is replaced or deleted until `wm.workspace_release()`. That call does not delete files. The next successful save follows the prune rules above. An empty `workspace_open("")` is a session-only opt-out and is not a failure. A path that was requested and could not be opened is a failure, and Ctrl+S says so.
 
-The boot notice stays for the rest of the process, including after a later successful save. A failed save is appended after ` | ` until a save succeeds.
+The boot notice stays for the rest of the process, including after a later successful save. The latest save notice is appended after ` | ` until the next save replaces or clears it.
 
 ## Fault stages
 
@@ -215,7 +221,7 @@ One shot, then the arm clears. The save returns the notice and does not say it s
 
 Other save failures use `workspace: save failed; {reason}; kept gK` with reason `image too large`, `store readback mismatch`, or `cannot write store`.
 
-The next generation number is one past every id already stored or named. A failed save does not reuse the id of a truncated, wrong-version, or uncommitted file. After a confirmed pointer readback, prune keeps the new commit and the generation that was installed when the save started.
+The next generation number is one past every id already stored or named, including damaged files. A failed save does not reuse the id of a truncated, wrong-version, or uncommitted file. After a confirmed pointer readback, prune keeps the new commit and the generation that was installed when the save started, and keeps damaged or newer uncommitted leftovers under the separate 4-file limit.
 
 `wm.workspace_release()` is not a menu item. It is the explicit release of a hold.
 
@@ -226,7 +232,7 @@ The next generation number is one past every id already stored or named. A faile
 - On Windows, replacing `COMMITTED` is remove-then-rename. A crash in that gap can leave no pointer. `META` still names the previous confirmed commit, so that generation is what loads. The generation file written for the interrupted save is not installed.
 - A torn or missing pointer with a `META` whose committed id parses as this version installs that generation. A newer complete file is ignored and named in the notice. It is not treated as the commit. If that id is a wrong version, the store is held and the bytes stay.
 - A torn or missing pointer with no usable `META` and exactly one valid generation installs that one. With two or more, it installs none, holds the store, and does not delete those files.
-- A truncated or otherwise unreadable committed generation is not installed. The newest **older** generation that parses is installed. A newer complete generation is not. With no older generation, the defaults are installed and the notice says so. The bad bytes stay on disk.
+- A truncated or otherwise unreadable committed generation is not installed. The newest **older** generation that parses is installed. A newer complete generation is not. With no older generation, the defaults are installed and the notice says so. The next successful save renames the bad and newer uncommitted files as damaged, keeping their bytes under the 4-file limit.
 - A wrong-version committed file, more than 32 generation names, or an ambiguous torn pointer holds the store. Continued use does not overwrite or delete it. `workspace_release` then a later successful save may.
 - The first successful commit has no older generation. From the second on, the generation that was installed when the save started is kept until the save after next replaces it as the backup.
 - Two processes must not write one store. The format has no lock.

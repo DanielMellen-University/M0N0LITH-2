@@ -1,0 +1,183 @@
+# Recovery leftovers keep their bytes without becoming load candidates.
+use ../shell/workspace
+use std/files
+use std/vfs
+
+fun check(label, got, want)
+    if got != want
+        fail(label + ": " + str(got) + " != " + str(want))
+
+let dir = "ws-damaged"
+let old = "M2WS1\nF /marker old\n.\n"
+let newer = "M2WS1\nF /marker newest\n.\n"
+let fs = vfs.new()
+
+for kind in ["truncated", "invalid", "checksum"]
+    files.make_dir(dir)
+    let bad = "M2WS1\nF /marker unfinished"
+    let reason = "truncated"
+    if kind == "invalid"
+        bad = "M2WS1\nF /marker a\nF /marker b\n.\n"
+        reason = "invalid"
+    else if kind == "checksum"
+        bad = "M2WS1\nF /marker changed\nS -\nZ 0\n.\n"
+        reason = "invalid"
+    files.write(dir + "/g1.m2ws", old)
+    files.write(dir + "/g2.m2ws", bad)
+    files.write(dir + "/COMMITTED", "g2\n")
+    workspace.open(dir)
+    workspace.load(fs)
+    let boot = "workspace: committed image " + reason + "; recovered g1"
+    check("recovered notice", workspace.notice(), boot)
+    check("recovered image", vfs.read(fs, "/marker"), "old")
+    check("save", workspace.save(fs), "")
+    check("next commit", files.read(dir + "/COMMITTED"), "g3\n")
+    check("renamed", files.exists(dir + "/g2.m2ws"), false)
+    check("exact damaged bytes", files.read(dir + "/g2.m2ws.damaged"), bad)
+    check("backup bytes", files.read(dir + "/g1.m2ws"), old)
+    check("move appended", workspace.notice(), boot + " | workspace: kept damaged g2 as g2.m2ws.damaged")
+    workspace.open(dir)
+    workspace.load(fs)
+    check("later load quiet", workspace.notice(), "")
+    check("later image", vfs.read(fs, "/marker"), "old")
+    print(kind, "g2 bytes kept; g3 loads quietly")
+    files.remove_tree(dir)
+
+files.make_dir(dir)
+files.write(dir + "/g1.m2ws", old)
+files.write(dir + "/g3.m2ws", newer)
+files.write(dir + "/g5.m2ws", newer)
+files.write(dir + "/g4.m2ws.partial", "M2WS1\n")
+files.write(dir + "/COMMITTED", "g1\n")
+workspace.open(dir)
+workspace.load(fs)
+let boot = "workspace: ignored uncommitted g5; ignored partial g4"
+check("uncommitted notice", workspace.notice(), boot)
+check("uncommitted not installed", vfs.read(fs, "/marker"), "old")
+files.make_dir(dir + "/META.next")
+check("degraded save", workspace.save(fs), "")
+check("g6 committed", files.read(dir + "/COMMITTED"), "g6\n")
+check("uncommitted renamed", files.exists(dir + "/g5.m2ws"), false)
+check("uncommitted bytes", files.read(dir + "/g5.m2ws.damaged"), newer)
+check("other uncommitted bytes", files.read(dir + "/g3.m2ws.damaged"), newer)
+check("partial removed", files.exists(dir + "/g4.m2ws.partial"), false)
+check("metadata and move notices", workspace.notice(), boot + " | workspace: saved; metadata backup not updated | workspace: kept damaged g3 as g3.m2ws.damaged | workspace: kept damaged g5 as g5.m2ws.damaged")
+files.remove(dir + "/META.next")
+check("later success", workspace.save(fs), "")
+check("save notices cleared", workspace.notice(), boot)
+workspace.open(dir)
+workspace.load(fs)
+check("reopen quiet", workspace.notice(), "")
+check("newest work still kept", files.read(dir + "/g5.m2ws.damaged"), newer)
+print("uncommitted g5 kept; partial removed; save notices append and clear")
+files.remove_tree(dir)
+
+# A failed parse matters even below the installed id; an old valid image does not.
+files.make_dir(dir)
+files.write(dir + "/g1.m2ws", old)
+files.write(dir + "/g2.m2ws", "bad" + chr(13) + "\n")
+files.write(dir + "/g3.m2ws", old)
+files.write(dir + "/COMMITTED", "g3\n")
+workspace.open(dir)
+workspace.load(fs)
+check("good commit quiet", workspace.notice(), "")
+check("save g4", workspace.save(fs), "")
+check("older bad bytes kept", files.read(dir + "/g2.m2ws.damaged"), "bad" + chr(13) + "\n")
+check("old valid removed", files.exists(dir + "/g1.m2ws"), false)
+check("save g5", workspace.save(fs), "")
+check("superseded commit removed", files.exists(dir + "/g3.m2ws"), false)
+check("no extra damaged commit", files.exists(dir + "/g3.m2ws.damaged"), false)
+print("older bad image kept; valid superseded generations removed")
+files.remove_tree(dir)
+
+files.make_dir(dir)
+files.write(dir + "/g1.m2ws", old)
+files.write(dir + "/COMMITTED", "g1\n")
+for n in [2, 3, 10, 20, 30]
+    files.write(dir + "/g" + str(n) + ".m2ws.damaged", "bytes " + str(n))
+files.write(dir + "/g40.m2ws", newer)
+workspace.open(dir)
+workspace.load(fs)
+check("save with excess damaged", workspace.save(fs), "")
+check("numeric retention", files.list(dir), ["COMMITTED", "META", "g1.m2ws", "g10.m2ws.damaged", "g20.m2ws.damaged", "g30.m2ws.damaged", "g40.m2ws.damaged", "g41.m2ws"])
+check("new damaged bytes", files.read(dir + "/g40.m2ws.damaged"), newer)
+for n in [10, 20, 30]
+    check("retained bytes", files.read(dir + "/g" + str(n) + ".m2ws.damaged"), "bytes " + str(n))
+print("damaged retention keeps the four highest ids")
+files.remove_tree(dir)
+
+# Damaged names do not count toward the 32-name cap or a wrong-version hold.
+files.make_dir(dir)
+files.write(dir + "/g1.m2ws", old)
+files.write(dir + "/COMMITTED", "g1\n")
+for n in 2..36
+    files.write(dir + "/g" + str(n) + ".m2ws.damaged", "M2WS9\n.\n")
+files.write(dir + "/g90.m2ws.damaged", newer)
+for n in 40..71
+    files.write(dir + "/g" + str(n) + ".m2ws.partial", "M2WS1\n")
+workspace.open(dir)
+workspace.load(fs)
+check("32 active names accepted", workspace.notice(), "workspace: ignored partial g70")
+check("active image installed", vfs.read(fs, "/marker"), "old")
+check("damaged ids reserved", workspace.save(fs), "")
+check("next id past damaged", files.read(dir + "/COMMITTED"), "g91\n")
+check("cap without new moves", files.list(dir), ["COMMITTED", "META", "g1.m2ws", "g33.m2ws.damaged", "g34.m2ws.damaged", "g35.m2ws.damaged", "g90.m2ws.damaged", "g91.m2ws"])
+workspace.open(dir)
+workspace.load(fs)
+check("damaged wrong version ignored", workspace.notice(), "")
+print("damaged names do not hold or fill the name cap; next id skips to g91")
+files.remove_tree(dir)
+
+files.make_dir(dir)
+files.write(dir + "/g1.m2ws.damaged", old)
+files.write(dir + "/g2.m2ws.damaged", newer)
+workspace.open(dir)
+workspace.load(fs)
+check("damaged-only store quiet", workspace.notice(), "")
+check("damaged never installed", vfs.exists(fs, "/marker"), false)
+check("defaults installed", vfs.read(fs, "/home/welcome.txt"), "Welcome to Relic.\n")
+files.write(dir + "/COMMITTED", "g2\n")
+workspace.open(dir)
+workspace.load(fs)
+check("pointer cannot install damaged", workspace.notice(), "workspace: no valid generation; using defaults")
+check("still defaults", vfs.exists(fs, "/marker"), false)
+print("damaged-only store uses defaults, including when the pointer names its id")
+files.remove_tree(dir)
+
+files.make_dir(dir)
+files.write(dir + "/g9.m2ws", "M2WS9\n.\n")
+files.write(dir + "/COMMITTED", "g9\n")
+for n in 1..7
+    files.write(dir + "/g" + str(n) + ".m2ws.damaged", "held " + str(n))
+workspace.open(dir)
+workspace.load(fs)
+let names = files.list(dir)
+check("held save", workspace.save(fs), "workspace: save failed; store held (wrong-version); not written")
+check("held names unchanged", files.list(dir), names)
+check("held generation unchanged", files.read(dir + "/g9.m2ws"), "M2WS9\n.\n")
+check("held pointer unchanged", files.read(dir + "/COMMITTED"), "g9\n")
+for n in 1..7
+    check("held damaged bytes unchanged", files.read(dir + "/g" + str(n) + ".m2ws.damaged"), "held " + str(n))
+print("held store leaves excess damaged files and all bytes untouched")
+files.remove_tree(dir)
+
+# A blocked rename must not turn into deletion on a later save.
+files.make_dir(dir)
+files.write(dir + "/g1.m2ws", old)
+files.write(dir + "/COMMITTED", "g1\n")
+files.write(dir + "/g5.m2ws", newer)
+files.write(dir + "/g5.m2ws.damaged", "earlier damaged bytes")
+workspace.open(dir)
+workspace.load(fs)
+for n in [6, 7]
+    check("save with occupied destination", workspace.save(fs), "")
+    check("source kept", files.read(dir + "/g5.m2ws"), newer)
+    check("destination kept", files.read(dir + "/g5.m2ws.damaged"), "earlier damaged bytes")
+    check("no move notice", workspace.notice(), "workspace: ignored uncommitted g5")
+files.remove(dir + "/g5.m2ws.damaged")
+check("retry move", workspace.save(fs), "")
+check("retry bytes", files.read(dir + "/g5.m2ws.damaged"), newer)
+check("retry source gone", files.exists(dir + "/g5.m2ws"), false)
+check("retry move notice", workspace.notice(), "workspace: ignored uncommitted g5 | workspace: kept damaged g5 as g5.m2ws.damaged")
+print("occupied damaged destination preserves both copies until a rename succeeds")
+files.remove_tree(dir)
