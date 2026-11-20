@@ -41,7 +41,10 @@ for kind in ["partial", "truncated", "uncommitted", "wrong-version", "pointer-on
     check("retry", workspace.save(fs), "")
     check("retry id", files.read(dir + "/COMMITTED"), "g92\n")
     check("installed backup", files.read(dir + "/META"), "committed g92\nprevious g3\n")
-    check("exact prune", files.list(dir), ["COMMITTED", "META", "g3.m2ws", "g92.m2ws"])
+    let names = ["COMMITTED", "META", "g3.m2ws", "g91.m2ws.damaged", "g92.m2ws"]
+    if kind == "truncated" or kind == "uncommitted" or kind == "wrong-version"
+        append(names, "g90.m2ws.damaged")
+    check("exact prune", files.list(dir), host_sort(names))
     files.write(dir + "/g92.m2ws", "M2WS1\n")
     workspace.open(dir)
     workspace.load(fs)

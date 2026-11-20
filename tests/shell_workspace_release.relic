@@ -52,6 +52,10 @@ for kind in ["wrong-version", "wrong-version-older", "too-many", "ambiguous"]
     let names = ["COMMITTED", "META", "g" + str(next_id) + ".m2ws", "g01.m2ws", "notes.keep"]
     if previous == "g1"
         append(names, "g1.m2ws")
+    if kind != "too-many"
+        append(names, "g9.m2ws.damaged")
+        if kind == "ambiguous"
+            append(names, "g1.m2ws.damaged")
     check("exact prune", files.list(dir), host_sort(names))
     check("unknown file", files.read(dir + "/notes.keep"), "unknown")
     check("unknown spelling", files.read(dir + "/g01.m2ws"), "unknown generation spelling")

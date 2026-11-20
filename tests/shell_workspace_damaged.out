@@ -1,0 +1,10 @@
+truncated g2 bytes kept; g3 loads quietly
+invalid g2 bytes kept; g3 loads quietly
+checksum g2 bytes kept; g3 loads quietly
+uncommitted g5 kept; partial removed; save notices append and clear
+older bad image kept; valid superseded generations removed
+damaged retention keeps the four highest ids
+damaged names do not hold or fill the name cap; next id skips to g91
+damaged-only store uses defaults, including when the pointer names its id
+held store leaves excess damaged files and all bytes untouched
+occupied damaged destination preserves both copies until a rename succeeds

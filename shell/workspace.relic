@@ -11,6 +11,7 @@ let max_entries = 2000
 let max_path = 240
 let max_file = 262144
 let max_generation_files = 32
+let max_damaged_files = 4
 let max_store_path = 1024
 
 let _dir = none
@@ -18,6 +19,8 @@ let _fault = none
 let _boot = ""
 let _save = ""
 let _committed = none   # the generation installed, or none when the session is the defaults
+# Bad load images or uncommitted images still waiting for a rename.
+let _damaged_generations = {}
 let _hold = ""          # non-empty: do not write or delete the store until release()
 let _opt_out = false    # explicit session-only (empty path). Not a failed open.
 let _requested = false  # a store was asked for. Unset means the old one-run vfs.
@@ -127,6 +130,7 @@ fun _strip_slash(path)
 fun open(path)
     _dir = none
     _committed = none
+    _damaged_generations = {}
     _session = none
     _hold = ""
     _opt_out = false
@@ -164,6 +168,7 @@ fun open_default()
     if home == none or home == ""
         _dir = none
         _committed = none
+        _damaged_generations = {}
         _session = none
         _hold = ""
         _opt_out = false
@@ -780,6 +785,7 @@ fun load(fs)
     _boot = ""
     _save = ""
     _committed = none
+    _damaged_generations = {}
     _session = none
     _hold = ""
     if _dir == none
@@ -819,6 +825,7 @@ fun load(fs)
                 append(valid_nums, g.n)
             else
                 reasons[str(g.n)] = parsed.reason
+                _damaged_generations[str(g.n)] = true
     let partial_nums = []
     for g in gens
         if g.partial
@@ -1022,6 +1029,7 @@ fun _next_gen()
         for name in files.list(_dir)
             seen = _note_id(seen, _gen_of(name, ".m2ws.partial"))
             seen = _note_id(seen, _gen_of(name, ".m2ws"))
+            seen = _note_id(seen, _gen_of(name, ".m2ws.damaged"))
     catch err
         return none
     let pointer = _read_pointer()
@@ -1035,16 +1043,36 @@ fun _next_gen()
         return none
     return seen + 1
 
-# Keep the new commit and the generation it replaced. Everything else that
-# parses as a generation name is not part of that chain.
+# Bad images and newer uncommitted work may be the only copy of those bytes.
+# Keep them by renaming, with a separate cap on the saved damaged files.
 fun _prune(n, prev)
+    let damaged = []
     try
         for name in files.list(_dir)
+            let d = _gen_of(name, ".m2ws.damaged")
+            if d != none and not files.is_dir(_join(name))
+                append(damaged, d)
             if _gen_of(name, ".m2ws.partial") != none
                 _remove_quiet(_join(name))
             let g = _gen_of(name, ".m2ws")
             if g != none and g != n and g != prev
-                _remove_quiet(_join(name))
+                if str(g) in _damaged_generations or prev == none or g > prev
+                    _damaged_generations[str(g)] = true
+                    let dest = name + ".damaged"
+                    if not files.exists(_join(dest)) and not files.is_dir(_join(name))
+                        try
+                            files.rename(_join(name), _join(dest))
+                            append(damaged, g)
+                            if _save != ""
+                                _save = _save + " | "
+                            _save = _save + "workspace: kept damaged g" + str(g) + " as " + dest
+                        catch err
+                            none
+                else
+                    _remove_quiet(_join(name))
+        let ordered = host_sort(damaged)
+        for i in 0..len(ordered) - max_damaged_files
+            _remove_quiet(_join("g" + str(ordered[i]) + ".m2ws.damaged"))
     catch err
         none
     _remove_quiet(_join("COMMITTED.next"))
@@ -1220,8 +1248,8 @@ fun _commit(fs, extra)
     # not leave _wrote's "save failed; kept" notice in place.
     if not _publish_meta(n, prev)
         _committed = n
-        _prune(n, prev)
         _save = "workspace: saved; metadata backup not updated"
+        _prune(n, prev)
         _fault = none
         return ""
     _committed = n
