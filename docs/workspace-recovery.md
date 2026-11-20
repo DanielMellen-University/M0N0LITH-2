@@ -107,7 +107,7 @@ M2WS1
 .
 ```
 
-The first-run image is not that. With no `COMMITTED` and no generation names, the session keeps `vfs.new()`: `/home`, `/tmp`, and `/home/welcome.txt` holding `Welcome to Relic.\n`. `save` on its own writes a file when the vfs changes. The desktop also writes when a window opens, closes, moves, resizes, or is minimized, when a Terminal command finishes, and when the window quits.
+The first-run image is not that. With no `COMMITTED` and no generation names, the session keeps `vfs.new()`: `/home`, `/tmp`, and `/home/welcome.txt` holding `Welcome to Relic.\n`. `save` on its own writes a file when the vfs changes. The desktop also writes on window events, when a Terminal command finishes, after a pause in window input, and when the window quits. The timing is below.
 
 Example, after `echo hi > a.txt` on a fresh workspace (`Welcome to Relic.` is the default file):
 
@@ -149,7 +149,11 @@ The IDE rebuilds its diagnostics and error column from `out` on restore, and its
 
 `Z <checksum>` covers every character before that line, including the newline after the previous line. Start two integers, `running` and `weighted`, at zero. For each character in order, set `running = (running + code_point) % 1000000007`, then `weighted = (weighted + running) % 1000000007`. The checksum is the final `weighted` value: a position-weighted sum modulo the prime 1,000,000,007, always from 0 through 1,000,000,006, written with no leading zeros. The writer and reader use the same helper. Within the generation size limit, this detects a single changed code point, a swap of two different code points, or equal-and-opposite changes to two code points. Other changes can collide; this is not cryptographic and does not protect against deliberate tampering. A checksum that does not match is `invalid`, so the generation is not installed. A generation with no `S` line has no `Z` line.
 
-The desktop writes this snapshot when a window opens, closes, moves, resizes, or is minimized or restored, when a Terminal command finishes, when a file change is committed, and when the window quits. Typing in the Editor, the IDE, Notes, or Paint is included in the next one of those, and on quit. It is not its own commit. A kill between those keystrokes keeps the previous snapshot.
+The desktop writes this snapshot when a window opens, closes, moves, resizes, or is minimized or restored, when a Terminal command finishes, when a file change is committed, and when the window quits. It also writes once after a pause in window input, including typing in the Editor, the IDE and Notes, and drawing in Paint.
+
+With a workspace open and a desktop bound by `wm.workspace_bind`, key or mouse input sent to a window marks the session pending unless a snapshot or file commit already follows it. Input has no timestamp: it clears the idle start, and the first `wm.tick(d, ms)` after that input records `ms`. A tick at least 2000 ms later writes the normal window snapshot once. New input restarts that interval. Further ticks write nothing until more input arrives. A failed attempt keeps its failure notice and waits for new input instead of retrying every frame. Ticks on another desktop, an unbound desktop, or with no workspace enabled do not write. Snake moving on the clock does not mark input pending; its best score still commits as before.
+
+The idle snapshot records unsaved buffers with the current vfs. It does not save Editor or IDE text into a vfs file, or save Paint's cells into its picture file. Ctrl+S and the interrupted-save fallback rules below stay the same.
 
 Not in the snapshot: undo and redo, a find or a rename still being typed, the clipboard, an IDE run (including one that is waiting for a line), and Snake's board. After a restart, Ctrl+Z has nothing to undo until the next edit, and an IDE program does not keep running.
 
@@ -225,12 +229,13 @@ The next generation number is one past every id already stored or named. A faile
 - A wrong-version committed file, more than 32 generation names, or an ambiguous torn pointer holds the store. Continued use does not overwrite or delete it. `workspace_release` then a later successful save may.
 - The first successful commit has no older generation. From the second on, the generation that was installed when the save started is kept until the save after next replaces it as the backup.
 - Two processes must not write one store. The format has no lock.
-- Open windows are in the snapshot the desktop writes: place, size, minimized, maximized, the Terminal's folder, output and command history, Files' folder, Editor and IDE text (saved or not), Notes' line, Clicker's count, and Paint's cells. Undo, the clipboard, a running IDE program, and Snake's board are not. A files-only `save` does not write them. Keystrokes since the last snapshot are not on disk until the next snapshot or quit.
+- Open windows are in the snapshot the desktop writes: place, size, minimized, maximized, the Terminal's folder, output and command history, Files' folder, Editor and IDE text (saved or not), Notes' line, Clicker's count, and Paint's cells. Undo, the clipboard, a running IDE program, and Snake's board are not. A files-only `save` does not write them. Window input is included after 2000 ms of idle tick time, or at the next snapshot or quit. The idle snapshot leaves the vfs files unchanged.
 - A program run in the IDE still cannot write the host disk. The store is written by the desktop, not by that program.
 - There is no fsync. This is not a promise about power loss.
 
 ## Not promised
 
+- Recovery of input since the last successful snapshot. Continuous input postpones the idle snapshot, a stopped frame loop cannot write it, and a failed attempt waits for new input. A kill before a successful snapshot keeps the previous one.
 - Power-loss durability. There is no fsync in Relic 1.0.53. A commit that `save` has not yet published in `COMMITTED` is not durable across a kill, and a commit that has been published is still only as durable as the kernel's write-back.
 - A bound on host memory beyond refusing to install a generation `files.size` says is over the cap, and refusing one that parses over the caps.
 - Host mounts, extra apps, or a general operating system.
