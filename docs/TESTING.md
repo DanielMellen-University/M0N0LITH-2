@@ -122,6 +122,8 @@ Write `tests/shell_<topic>.relic`, run it, read its output, and save that as `te
 | `shell_terminal_cat_blank` | cat preserves blank lines in files |
 | `shell_terminal_cat_big` | cat of a 100,000-line file stays quick |
 | `shell_terminal_extra_words` | clear, apps, date and pwd reject extra words |
+| `shell_cmd_workspace` | `workspace` says persistence is off without a store, and arguments or options print usage |
+| `shell_workspace_command` | workspace status before the first commit, after two saves with its backup, a held store and its reason, notices, and no extra generation beyond the ordinary Terminal snapshot |
 | `shell_terminal_dash_paths` | write and echo > refuse paths starting with - |
 | `shell_terminal_why` | errors name the missing folder or the part that is a file |
 | `shell_terminal_slash` | a path ending in / must be a folder |
