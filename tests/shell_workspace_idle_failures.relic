@@ -1,0 +1,80 @@
+# Failed attempts keep the notice and wait for new input, including Ctrl+S.
+use ../shell/wm
+use std/files
+use std/vfs
+
+fun check(label, got, want)
+    if got != want
+        fail(label + ": " + str(got) + " != " + str(want))
+
+fun desktop() = wm.new_desktop(640, 480, wm.default_apps())
+fun pause(d)
+    wm.tick(d, 0)
+    wm.tick(d, 2000)
+
+wm.workspace_open("ws-idle-fault")
+let d = desktop()
+wm.workspace_bind(d)
+let ed = wm.launch(d, wm.editor)
+let disk = ed.state.text
+wm.key(d, "a")
+wm.workspace_fault("partial-generation")
+pause(d)
+let note = "workspace: save failed (partial-generation); kept g1"
+check("idle failure notice", wm.workspace_notice(), note)
+check("failed pointer", files.read("ws-idle-fault/COMMITTED"), "g1\n")
+check("one partial", files.read("ws-idle-fault/g2.m2ws.partial"), "M2WS1\n")
+wm.tick(d, 4000)
+wm.tick(d, 10000)
+check("fault not retried", files.read("ws-idle-fault/COMMITTED"), "g1\n")
+check("failure notice kept", wm.workspace_notice(), note)
+wm.key(d, "b")
+pause(d)
+check("new input retries once", files.read("ws-idle-fault/COMMITTED"), "g3\n")
+check("success clears failure", wm.workspace_notice(), "")
+
+wm.key(d, "c")
+wm.tick(d, 0)
+wm.workspace_fault("partial-generation")
+wm.key(d, "ctrl+s")
+check("Ctrl+S failure", ed.state.status, "workspace: save failed (partial-generation); kept g3")
+wm.tick(d, 2000)
+wm.tick(d, 10000)
+check("failed commit clears idle retry", files.read("ws-idle-fault/COMMITTED"), "g3\n")
+wm.workspace_open("ws-idle-fault")
+let restored = desktop()
+wm.workspace_bind(restored)
+check("fallback unsaved buffer", restored.windows[0].state.text, disk + "ab")
+check("fallback original file", vfs.read(restored.windows[0].state.fs, restored.windows[0].state.path), disk)
+
+files.make_dir("ws-idle-held")
+let held = "M2WS9\n.\n"
+files.write("ws-idle-held/g1.m2ws", held)
+files.write("ws-idle-held/COMMITTED", "g1\n")
+let h = desktop()
+wm.launch(h, wm.editor)
+wm.workspace_open("ws-idle-held")
+wm.workspace_bind(h)
+let boot = "workspace: committed image wrong version; store held; using defaults"
+check("held boot notice", wm.workspace_notice(), boot)
+wm.key(h, "h")
+pause(h)
+let failure = boot + " | workspace: save failed; store held (wrong-version); not written"
+check("held idle failure", wm.workspace_notice(), failure)
+wm.tick(h, 9000)
+check("held notice stays", wm.workspace_notice(), failure)
+check("held bytes stay", files.read("ws-idle-held/g1.m2ws"), held)
+# A released store would write if a failed idle attempt were still pending.
+wm.workspace_release()
+wm.tick(h, 10000)
+wm.tick(h, 14000)
+check("release does not retry", files.read("ws-idle-held/g1.m2ws"), held)
+check("release pointer stays", files.read("ws-idle-held/COMMITTED"), "g1\n")
+wm.key(h, "i")
+pause(h)
+check("input after release writes", files.read("ws-idle-held/COMMITTED"), "g2\n")
+wm.tick(h, 10000)
+check("retry only once", files.read("ws-idle-held/COMMITTED"), "g2\n")
+files.remove_tree("ws-idle-fault")
+files.remove_tree("ws-idle-held")
+print("fault and held store fail once; new input retries; interrupted save keeps fallback")

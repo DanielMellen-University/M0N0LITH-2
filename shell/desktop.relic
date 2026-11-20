@@ -161,7 +161,7 @@ else
             else
                 wm.handle(d, e)
             e = graphics.next_event()
-        wm.tick(d, graphics.ticks())   # Snake moves on the clock
+        wm.tick(d, graphics.ticks())   # Snake and the idle window snapshot
         draw(d)
         graphics.wait(16)
     wm.workspace_flush()

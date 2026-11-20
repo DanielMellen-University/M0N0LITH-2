@@ -65,6 +65,18 @@ let _shell_open = {path: "/home/welcome.txt"}
 let _shell_desk = none
 let _did_commit = false
 let _did_persist = false
+let _session_pending = false
+let _session_idle_start = none
+
+fun _clear_session_pending()
+    _session_pending = false
+    _session_idle_start = none
+
+# Input has no clock. The next tick starts the idle interval.
+fun _session_input(d)
+    if _shell_desk == d and workspace.enabled()
+        _session_pending = true
+        _session_idle_start = none
 
 # "" when the vfs change is durable, or when the caller asked for a session-only
 # workspace (empty path). A store that was requested and could not be opened,
@@ -84,10 +96,12 @@ fun _persist_desk(d)
     if _shell_desk != d or not workspace.enabled()
         return ""
     _did_persist = true
+    _clear_session_pending()   # a failed attempt waits for new input too
     return _commit_lines(_session_lines(d))
 
 fun _fs_commit()
     _did_commit = true
+    _clear_session_pending()
     if not workspace.requested()
         return ""
     if not workspace.enabled()
@@ -106,11 +120,13 @@ fun _fs_commit()
         return note
 
 fun workspace_open(path)
+    _clear_session_pending()
     workspace.open(path)
     if workspace.enabled()
         workspace.load(_shell_fs)
 
 fun workspace_open_default()
+    _clear_session_pending()
     workspace.open_default()
     if workspace.enabled()
         workspace.load(_shell_fs)
@@ -130,6 +146,7 @@ fun workspace_release()
 # Remember this desktop and open the windows the loaded generation recorded.
 # A generation with no snapshot leaves the desktop as it is.
 fun workspace_bind(d)
+    _clear_session_pending()
     _shell_desk = d
     let sess = workspace.session()
     if sess == none
@@ -554,6 +571,7 @@ fun _click_windows(d, x, y)
 
 # A press inside window w, already on top: its boxes first, then the app.
 fun _click_in(d, w, x, y)
+    _session_input(d)
     if _inside(close_box(w), x, y)
         close(d, w.id)
         return "close"
@@ -595,6 +613,8 @@ fun motion(d, x, y)
         d.drag = none
         return
     let w = d.windows[i]
+    if not w.minimized
+        _session_input(d)
     if d.drag.mode == "move"
         w.x = x - d.drag.ox
         w.y = y - d.drag.oy
@@ -610,12 +630,18 @@ fun motion(d, x, y)
             w.app.on_drag(w.state, x - w.x, y - w.y - title_height)
 
 # The clock for the focused window's app, if it has on_tick (Snake moves on
-# it). desktop.relic calls this every frame with graphics.ticks(); tests pass
-# their own times.
+# it), and the idle window snapshot. desktop.relic calls this every frame
+# with graphics.ticks(); tests pass their own times.
 fun tick(d, ms)
     let w = focused(d)
     if w != none and "on_tick" in w.app
         w.app.on_tick(w.state, ms)
+    if _shell_desk != d or not workspace.enabled() or not _session_pending
+        return
+    if _session_idle_start == none
+        _session_idle_start = ms
+    else if ms - _session_idle_start >= 2000
+        _persist_desk(d)
 
 # Mouse button up ends any drag or resize.
 fun release(d)
@@ -638,6 +664,7 @@ fun dismiss(d)
     # then the window on top, if its app takes Esc (the IDE stops a waiting run)
     let w = focused(d)
     if w != none and "on_escape" in w.app
+        _session_input(d)
         return w.app.on_escape(w.state)
     return false
 
@@ -648,11 +675,12 @@ fun dismiss(d)
 fun key(d, k)
     _did_commit = false
     _did_persist = false
+    if focused(d) != none and not (d.menu_open and (k == "up" or k == "down" or k == "return"))
+        _session_input(d)
     _key_do(d, k)
     # A finished Terminal command that did not touch a file (cd, ls, history)
-    # still has a folder and a history worth keeping. Typing in the Editor is
-    # not a commit: that waits for Ctrl+S or quit, so an interrupted save can
-    # still fall back to the previous file. Launching from the menu already saved.
+    # still has a folder and a history worth keeping. Idle snapshots keep
+    # Editor text separate from its vfs file. Launching from the menu already saved.
     if not _did_commit and not _did_persist and _shell_desk == d and (k == "return" or k == "enter")
         let w = focused(d)
         if w != none and w.app.name == "Terminal"
@@ -774,6 +802,7 @@ fun wheel(d, dy)
     let w = _wheel_window(d)
     if w == none or not "on_wheel" in w.app or dy == 0
         return false
+    _session_input(d)
     w.app.on_wheel(w.state, dy)
     return true
 
