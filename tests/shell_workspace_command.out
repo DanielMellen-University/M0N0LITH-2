@@ -1,0 +1,8 @@
+first ["Terminal. Type help.", "/home> workspace", "store: ws-command", "committed: none yet", "backup: none", "state: ok"]
+first pointer ["g1\n"]
+two saves ["g3\n"] true true
+status ["Terminal. Type help.", "/home> workspace", "store: ws-command", "committed: none yet", "backup: none", "state: ok", "/home> echo one > a.txt", "/home> echo two > a.txt", "/home> workspace", "store: ws-command", "committed: g3", "backup: g2", "state: ok"]
+after status ["g4\n"] true false
+notice ["Terminal. Type help.", "/home> workspace", "store: ws-command-notice", "committed: g1", "backup: none", "state: ok", "notice: workspace: pointer invalid; recovered g1"]
+held ["Terminal. Type help.", "/home> workspace", "store: ws-command-held", "committed: none yet", "backup: none", "state: held; ambiguous", "notice: workspace: pointer invalid; store held; using defaults; ignored uncommitted g2"]
+held files ["x"] false

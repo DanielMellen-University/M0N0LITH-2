@@ -140,6 +140,9 @@ fun workspace_notice()
 fun workspace_enabled()
     return workspace.enabled()
 
+fun workspace_status()
+    return workspace.status()
+
 fun workspace_release()
     workspace.release()
 
@@ -2013,7 +2016,7 @@ fun _term_run(s, line)
         return
     if cmd == "help"
         _term_reply(s, "help clear history echo apps date")
-        _term_reply(s, "pwd cd ls cat head tail")
+        _term_reply(s, "workspace pwd cd ls cat head tail")
         _term_reply(s, "mkdir touch write rm mv cp")
         _term_reply(s, "wc grep find sort uniq nl")
         _term_reply(s, "tree du diff")
@@ -2042,6 +2045,28 @@ fun _term_run(s, line)
     else if cmd == "date"
         if _term_args(s, parts, 0, "date")
             _term_reply(s, format_time(time.now()))
+    else if cmd == "workspace"
+        if _term_args(s, parts, 0, "workspace")
+            let status = workspace_status()
+            if status == none
+                _term_reply(s, "workspace: off; this run is not saved")
+            else
+                _term_reply(s, "store: " + status.directory)
+                if status.committed == none
+                    _term_reply(s, "committed: none yet")
+                else
+                    _term_reply(s, "committed: g" + str(status.committed))
+                if status.backup == none
+                    _term_reply(s, "backup: none")
+                else
+                    _term_reply(s, "backup: g" + str(status.backup))
+                if status.held == ""
+                    _term_reply(s, "state: ok")
+                else
+                    _term_reply(s, "state: held; " + status.held)
+                let notice = workspace_notice()
+                if notice != ""
+                    _term_reply(s, "notice: " + notice)
     else if cmd == "pwd"
         if _term_args(s, parts, 0, "pwd")
             _term_reply(s, s.cwd)
@@ -2154,7 +2179,7 @@ let _term_recall_keep = 50
 # with "/" after it, anything else with a space); several are taken as far as
 # they agree, and when that adds nothing they are listed. No match, or an
 # empty line: nothing.
-let _term_commands = ["apps", "cat", "cd", "clear", "cp", "date", "diff", "du", "echo", "find", "grep", "head", "help", "history", "ls", "mkdir", "mv", "nl", "pwd", "rm", "sort", "tail", "touch", "tree", "uniq", "wc", "write"]
+let _term_commands = ["apps", "cat", "cd", "clear", "cp", "date", "diff", "du", "echo", "find", "grep", "head", "help", "history", "ls", "mkdir", "mv", "nl", "pwd", "rm", "sort", "tail", "touch", "tree", "uniq", "wc", "workspace", "write"]
 
 fun _common_start(names)
     let out = names[0]

@@ -22,6 +22,7 @@ Commands split on spaces. A part in double or single quotes is one word with its
 | `echo text >> path` | adds the text and a newline to the end of the file |
 | `apps` | lists the apps the Start menu has |
 | `date` | the current time in UTC, as `2026-10-27 05:12:16 UTC` |
+| `workspace` | the open store directory, committed and backup generations, held state and any notice; with no store, says this run is not saved |
 | `pwd` | the current folder |
 | `cd [path]` | changes folder; without a path, goes to `/home` |
 | `ls [path]` | lists a folder (the current one without a path), folders with a `/` after them, packed into lines that fit the window; for a file, prints its name |
@@ -44,7 +45,9 @@ Commands split on spaces. A part in double or single quotes is one word with its
 | `rm path...` | removes each file or empty folder; an error for one (not found, not empty) does not stop the rest |
 | `mv from to` | renames, or moves into `to` when it is a folder; the file the next Editor opens goes along with it, and so does the Terminal when it is in the folder moved |
 
-`clear`, `history`, `apps`, `date` and `pwd` take no words, and a word too many is an error for every command but `cat`, `rm`, `mkdir` and `touch`, which take several paths and do each in turn (`rm a b` removes both); `head` and `tail` take a count after the path.
+`clear`, `history`, `apps`, `date`, `workspace` and `pwd` take no words, and a word too many is an error for every command but `cat`, `rm`, `mkdir` and `touch`, which take several paths and do each in turn (`rm a b` removes both); `head` and `tail` take a count after the path.
+
+`workspace` reads the store state and notice without changing either. A finished command still gets the usual desktop snapshot.
 
 ## Rules for paths
 

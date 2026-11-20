@@ -29,6 +29,7 @@ No `HOME` and no `USERPROFILE`, and the variable unset: persistence stays off an
 | `wm.workspace_open_default()` | the table above, then the same install when a directory was chosen |
 | `wm.workspace_enabled()` | true after a directory was opened |
 | `wm.workspace_notice()` | `""` when there is nothing to report, otherwise the text below |
+| `wm.workspace_status()` | read-only store directory, committed generation, META backup generation and hold reason, or `none` when no store is open |
 | `wm.workspace_fault(stage)` | the next save stops at `stage` and then the arm is cleared. `""` clears it. Any other string fails as `workspace: unknown fault {stage}` |
 | `wm.workspace_release()` | drop a hold. Does not delete files. The next successful save may replace them |
 
