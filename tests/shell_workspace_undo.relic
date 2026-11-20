@@ -1,0 +1,180 @@
+# Restart keeps the Editor and IDE's bounded edit steps and normal cursor moves.
+use ../shell/wm
+use std/files
+
+fun check(label, got, want)
+    if got != want
+        fail(label + ": " + str(got) + " != " + str(want))
+
+fun desktop() = wm.new_desktop(640, 480, wm.default_apps())
+
+fun reload(dir)
+    check("snapshot", wm.workspace_flush(), "")
+    wm.workspace_open(dir)
+    let d = desktop()
+    wm.workspace_bind(d)
+    check("load", wm.workspace_notice(), "")
+    return d
+
+fun state(s) = [s.text, s.back, s.mark, s.status, s.undo, s.redo]
+
+fun repeat(c, n)
+    let out = ""
+    for i in 0..n
+        out = out + c
+    return out
+
+fun copy(s, d, text)
+    s.text = text
+    s.back = 0
+    wm.key(d, "ctrl+a")
+    wm.key(d, "ctrl+c")
+    s.text = ""
+    s.back = 0
+    s.mark = none
+    s.undo = []
+    s.redo = []
+
+fun image(body)
+    let prefix = "M2WS1\n" + body
+    let sum = 0
+    let weight = len(prefix)
+    for c in prefix
+        sum = (sum + ord(c) * weight) % 1000000007
+        weight = weight - 1
+    return prefix + "Z " + str(sum) + "\n.\n"
+
+for app in [wm.editor, wm.ide]
+    let dir = "ws-undo-" + app.name
+    wm.workspace_open(dir)
+    let live = desktop()
+    wm.workspace_bind(live)
+    let w = wm.launch(live, app)
+    let s = w.state
+    s.text = "base\n\t\\ λ" + chr(0) + chr(13)
+    s.back = 0
+    let original = s.text
+    for k in ["ctrl+a", "X", "return", "\\", "λ", "ctrl+z", "shift+left"]
+        wm.key(live, k)
+    let restored = reload(dir)
+    let r = restored.windows[0].state
+    check("text and selection", [r.text, r.back, r.mark], [s.text, s.back, s.mark])
+    check("steps", [r.undo, r.redo], [s.undo, s.redo])
+    # Compare every result with the window that never restarted.
+    for k in ["ctrl+y", "ctrl+z", "ctrl+z", "ctrl+z", "ctrl+z", "ctrl+z", "ctrl+y", "ctrl+y", "ctrl+y", "ctrl+y", "ctrl+y"]
+        wm.key(live, k)
+        wm.key(restored, k)
+        check("same edit and cursor " + k, state(r), state(s))
+    for i in 0..4
+        wm.key(restored, "ctrl+z")
+    check("original special text", r.text, original)
+    wm.key(restored, "q")
+    check("new edit ends redo", r.redo, [])
+    print(app.name, "undo and redo match uninterrupted edits and cursor placement")
+
+    # Both stacks exceed the step limit. Snapshotting keeps the live stacks.
+    r.text = ""
+    r.back = 0
+    r.mark = none
+    r.undo = []
+    r.redo = []
+    for i in 0..205
+        wm.key(restored, "x")
+    for i in 0..102
+        wm.key(restored, "ctrl+z")
+    restored = reload(dir)
+    check("live stacks unchanged", [len(r.undo), len(r.redo)], [103, 102])
+    r = restored.windows[0].state
+    check("100 steps each", [len(r.undo), len(r.redo)], [100, 100])
+    check("oldest steps dropped", [r.undo[0].at, r.redo[0].at], [3, 202])
+    for i in 0..100
+        wm.key(restored, "ctrl+y")
+    check("retained redo", len(r.text), 203)
+    wm.key(restored, "ctrl+y")
+    check("redo limit", r.status, "nothing to redo")
+    for i in 0..200
+        wm.key(restored, "ctrl+z")
+    check("retained undo", r.text, "xxx")
+    wm.key(restored, "ctrl+z")
+    check("undo limit", r.status, "nothing to undo")
+    print(app.name, "newest 100 steps in each stack survive")
+
+    copy(r, restored, repeat("λ", 32768))
+    wm.key(restored, "ctrl+v")
+    wm.key(restored, "ctrl+v")
+    restored = reload(dir)
+    r = restored.windows[0].state
+    check("inclusive text cap", len(r.undo), 2)
+    wm.key(restored, "y")
+    wm.key(restored, "ctrl+z")
+    restored = reload(dir)
+    r = restored.windows[0].state
+    check("shared text cap drops oldest", [len(r.undo), len(r.redo), r.undo[0].at], [1, 1, 32768])
+    wm.key(restored, "ctrl+z")
+    check("text cap undo", len(r.text), 32768)
+    wm.key(restored, "ctrl+y")
+    wm.key(restored, "ctrl+y")
+    check("text cap redo", len(r.text), 65537)
+    copy(r, restored, repeat("x", 65537))
+    wm.key(restored, "ctrl+v")
+    restored = reload(dir)
+    r = restored.windows[0].state
+    check("oversized step dropped", r.undo, [])
+    check("oversized step text kept", len(r.text), 65537)
+    copy(r, restored, repeat("x", 32768))
+    for k in ["ctrl+v", "ctrl+v", "y", "ctrl+z", "ctrl+z", "ctrl+z"]
+        wm.key(restored, k)
+    restored = reload(dir)
+    r = restored.windows[0].state
+    check("redo text cap drops oldest", [len(r.undo), len(r.redo), r.redo[0].at], [0, 2, 32768])
+    wm.key(restored, "ctrl+y")
+    wm.key(restored, "ctrl+y")
+    check("retained redo text", len(r.text), 65536)
+    wm.key(restored, "ctrl+y")
+    check("dropped redo text", r.status, "nothing to redo")
+    print(app.name, "65536 character budget is shared and inclusive")
+
+    for step in [{at: 4, removed: "", added: ""}, {at: 0, removed: "old", added: "xyz"}, {at: 1, removed: "old", added: "bcx"}]
+        r.text = "abc"
+        r.back = 1
+        r.mark = 2
+        r.undo = [step]
+        r.redo = [{at: 0, removed: "", added: "r"}]
+        restored = reload(dir)
+        r = restored.windows[0].state
+        wm.key(restored, "ctrl+z")
+        check("bad undo unchanged", [r.text, r.back, r.mark], ["abc", 1, 2])
+        check("bad undo cleared", [r.status, r.undo, r.redo], ["nothing to undo", [], []])
+    for step in [{at: 4, removed: "", added: "x"}, {at: 0, removed: "wrong", added: "x"}]
+        r.redo = [step]
+        restored = reload(dir)
+        r = restored.windows[0].state
+        wm.key(restored, "ctrl+y")
+        check("bad redo unchanged", r.text, "abc")
+        check("bad redo cleared", [r.status, r.undo, r.redo], ["nothing to redo", [], []])
+    print(app.name, "mismatched and out of bounds steps leave text unchanged")
+    files.remove_tree(dir)
+
+    # A generation written before history fields existed still opens normally.
+    files.make_dir(dir)
+    let body = "S W " + app.name + " 1 40 30 320 200 0\n"
+    body = body + "S F path /home/old\nS F text abc\nS F back 1\nS F mark 2\nS F disk_set 0\nS F disk \n"
+    if app.name == "IDE"
+        body = body + "S F out \nS F err -\n"
+    files.write(dir + "/g1.m2ws", image(body))
+    files.write(dir + "/COMMITTED", "g1\n")
+    wm.workspace_open(dir)
+    restored = desktop()
+    wm.workspace_bind(restored)
+    check("old generation", wm.workspace_notice(), "")
+    r = restored.windows[0].state
+    check("old fields", [r.text, r.back, r.mark, r.undo, r.redo], ["abc", 1, 2, [], []])
+    wm.key(restored, "ctrl+z")
+    check("old undo", r.status, "nothing to undo")
+    wm.key(restored, "ctrl+y")
+    check("old redo", r.status, "nothing to redo")
+    wm.key(restored, "x")
+    wm.key(restored, "ctrl+z")
+    check("old accepts new edits", r.text, "abc")
+    files.remove_tree(dir)
+    print(app.name, "old snapshots start with empty history")

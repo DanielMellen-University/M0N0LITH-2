@@ -3135,6 +3135,12 @@ fun _editor_undo(s)
         s.status = "nothing to undo"
         return
     let u = s.undo[len(s.undo) - 1]
+    # A stored step may be well formed but belong to different text.
+    if u.at > len(s.text) or u.at + len(u.added) > len(s.text) or slice(s.text, u.at, u.at + len(u.added)) != u.added
+        s.undo = []
+        s.redo = []
+        s.status = "nothing to undo"
+        return
     remove(s.undo, len(s.undo) - 1)
     s.text = slice(s.text, 0, u.at) + u.removed + slice(s.text, u.at + len(u.added), len(s.text))
     _editor_set_pos(s, u.at + len(u.removed))
@@ -3148,6 +3154,11 @@ fun _editor_redo(s)
         s.status = "nothing to redo"
         return
     let u = s.redo[len(s.redo) - 1]
+    if u.at > len(s.text) or u.at + len(u.removed) > len(s.text) or slice(s.text, u.at, u.at + len(u.removed)) != u.removed
+        s.undo = []
+        s.redo = []
+        s.status = "nothing to redo"
+        return
     remove(s.redo, len(s.redo) - 1)
     s.text = slice(s.text, 0, u.at) + u.added + slice(s.text, u.at + len(u.removed), len(s.text))
     append(s.undo, u)
@@ -5236,6 +5247,26 @@ fun _sf_lines(lines, key, rows)
         return false
     return _sf(lines, key, packed)
 
+# Trim copies so taking a snapshot does not shorten this run's history.
+fun _sf_history(lines, s)
+    let undo = slice(s.undo, math.max(0, len(s.undo) - workspace.max_history_steps), len(s.undo))
+    let redo = slice(s.redo, math.max(0, len(s.redo) - workspace.max_history_steps), len(s.redo))
+    let size = 0
+    for steps in [undo, redo]
+        for step in steps
+            size = size + len(step.removed) + len(step.added)
+    # Undo holds the earlier edits. Drop its oldest steps before redo's.
+    for steps in [undo, redo]
+        while size > workspace.max_history_text and len(steps) > 0
+            let step = steps[0]
+            size = size - len(step.removed) - len(step.added)
+            remove(steps, 0)
+    let u = workspace.pack_steps(undo)
+    let r = workspace.pack_steps(redo)
+    if u == none or r == none
+        return false
+    return _sf(lines, "undo", u) and _sf(lines, "redo", r)
+
 fun _paint_digits(cells)
     if len(cells) != _paint_w * _paint_h
         return none
@@ -5281,6 +5312,8 @@ fun _fields_of(w, lines)
             if not _sf(lines, "disk_set", "0") or not _sf(lines, "disk", "")
                 return false
         else if not _sf(lines, "disk_set", "1") or not _sf(lines, "disk", s.disk)
+            return false
+        if not _sf_history(lines, s)
             return false
         if name == "IDE"
             let err = "-"
@@ -5334,7 +5367,13 @@ fun _restore_editor(f)
             status = why
     else if text != disk
         status = "edited"
-    return {fs: _shell_fs, path: f.path, text: text, status: status, rows: 0, disk: disk, overwrite: false, undo: [], redo: [], back: int(f.back), mark: mark}
+    let undo = []
+    let redo = []
+    if "undo" in f
+        undo = workspace.unpack_steps(f.undo)
+    if "redo" in f
+        redo = workspace.unpack_steps(f.redo)
+    return {fs: _shell_fs, path: f.path, text: text, status: status, rows: 0, disk: disk, overwrite: false, undo: undo, redo: redo, back: int(f.back), mark: mark}
 
 fun _restore_state(w)
     let f = w.fields

@@ -13,6 +13,8 @@ let max_file = 262144
 let max_generation_files = 32
 let max_damaged_files = 4
 let max_store_path = 1024
+let max_history_steps = 100
+let max_history_text = 65536
 
 let _dir = none
 let _fault = none
@@ -97,6 +99,31 @@ fun unpack_lines(value, limit)
         append(rows, slice(value, j, j + got.n))
         i = j + got.n
     return rows
+
+# Each step is three length-prefixed strings inside one packed record.
+fun pack_steps(steps)
+    let rows = []
+    for step in steps
+        let row = pack_lines([str(step.at), step.removed, step.added])
+        if row == none
+            return none
+        append(rows, row)
+    return pack_lines(rows)
+
+fun unpack_steps(value)
+    let rows = unpack_lines(value, max_history_steps)
+    if rows == none
+        return none
+    let steps = []
+    for row in rows
+        let parts = unpack_lines(row, 3)
+        if parts == none or len(parts) != 3
+            return none
+        let at = _parse_int(parts[0], 0, max_file)
+        if at == none or str(at) != parts[0]
+            return none
+        append(steps, {at: at, removed: parts[1], added: parts[2]})
+    return steps
 
 fun refuse(why)
     if type(why) != "string"
@@ -413,7 +440,17 @@ fun _editor_fields_ok(f)
     if not _valid_path(f.path) or not _disk_ok(f) or not _mark_ok(f.text, f.mark)
         return false
     let back = _parse_int(f.back, 0, max_file)
-    return back != none and back <= len(f.text)
+    if back == none or back > len(f.text)
+        return false
+    let size = 0
+    for key in ["undo", "redo"]
+        if key in f
+            let steps = unpack_steps(f[key])
+            if steps == none
+                return false
+            for step in steps
+                size = size + len(step.removed) + len(step.added)
+    return size <= max_history_text
 
 fun _session_values(win)
     let f = win.fields
@@ -502,7 +539,8 @@ fun _finish_window(win)
     let need = _session_need(win.app)
     let got = 0
     for k in win.fields
-        got = got + 1
+        if not ((win.app == "Editor" or win.app == "IDE") and (k == "undo" or k == "redo"))
+            got = got + 1
     if got != len(need)
         return false
     for k in need

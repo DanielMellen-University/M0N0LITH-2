@@ -1,0 +1,10 @@
+Editor undo and redo match uninterrupted edits and cursor placement
+Editor newest 100 steps in each stack survive
+Editor 65536 character budget is shared and inclusive
+Editor mismatched and out of bounds steps leave text unchanged
+Editor old snapshots start with empty history
+IDE undo and redo match uninterrupted edits and cursor placement
+IDE newest 100 steps in each stack survive
+IDE 65536 character budget is shared and inclusive
+IDE mismatched and out of bounds steps leave text unchanged
+IDE old snapshots start with empty history

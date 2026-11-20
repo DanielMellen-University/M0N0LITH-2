@@ -1,6 +1,6 @@
 # Editor
 
-A text editor for files in the desktop's filesystem. A new Editor window opens the file last opened in Files, or `/home/welcome.txt` if none was. Ctrl+O opens a file by a typed path in the same window (Cmd+O on macOS). Ctrl+S writes the vfs and, when a workspace is open, commits it. The status stays off `saved` when that commit fails. Text that was not saved is still in the desktop's snapshot, and comes back if that window was open at the last snapshot or at quit. Undo does not come back. See [Workspace recovery](../workspace-recovery.md).
+A text editor for files in the desktop's filesystem. A new Editor window opens the file last opened in Files, or `/home/welcome.txt` if none was. Ctrl+O opens a file by a typed path in the same window (Cmd+O on macOS). Ctrl+S writes the vfs and, when a workspace is open, commits it. The status stays off `saved` when that commit fails. Text that was not saved is still in the desktop's snapshot, and comes back if that window was open at the last snapshot or at quit. Undo and redo come back within the snapshot limits, in both the Editor and the IDE. See [Workspace recovery](../workspace-recovery.md).
 
 ## The title line
 
@@ -60,6 +60,10 @@ The selection is drawn as a light blue box behind its text.
 ## Undo
 
 Each typed character, Backspace, Delete, new line, or replaced or removed selection is one step. The last 500 steps are kept, and saving does not clear them. A step stores only the part that changed, not a copy of the file, so undo stays cheap on a big file.
+
+A workspace snapshot keeps the newest 100 undo steps and 100 redo steps per window, with at most 65,536 characters of removed plus added text across both. Older undo steps go first when the text cap is exceeded, then older redo steps. Ctrl+Z and Ctrl+Y work after a restart with their usual cursor placement and selection clearing. Older snapshots without history start with empty stacks. A restored step that does not match the buffer clears both stacks, keeps the text, and says `nothing to undo` or `nothing to redo`.
+
+Added Nov 20 2026. The model tests pass; the GUI was not walked through.
 
 ## Opening by path
 

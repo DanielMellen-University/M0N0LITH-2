@@ -92,6 +92,44 @@ for app in samples
     for row in invalid[app]
         reject(app + " invalid " + row[0], changed(app, fields, row[0], row[1]))
     print(app, "schema checked")
+
+# Only these two fields may be absent, independently, in Editor and IDE.
+let step = workspace.pack_steps([{at: 0, removed: "a", added: "b"}])
+let bad_steps = ["junk", "1\n", "01\nx", "2\nx", "-1\nx", "999999999999\nx"]
+for parts in [[], ["0"], ["0", "a"], ["0", "a", "b", "extra"], ["-1", "a", "b"], ["-0", "a", "b"], ["01", "a", "b"], ["+1", "a", "b"], ["1.0", "a", "b"], ["junk", "a", "b"], ["262145", "a", "b"], ["999999999999999999999", "a", "b"]]
+    append(bad_steps, workspace.pack_lines([workspace.pack_lines(parts)]))
+append(bad_steps, workspace.pack_lines(["1\n01\na2\nb"]))
+append(bad_steps, repeat(step, 101))
+append(bad_steps, workspace.pack_steps([{at: 0, removed: repeat("a", 65536), added: "b"}]))
+for app in ["Editor", "IDE"]
+    let body = session(app, samples[app])
+    let cases = [[["undo", ""]], [["redo", ""]], [["undo", step]], [["redo", step]]]
+    append(cases, [["undo", repeat(step, 100)], ["redo", repeat(step, 100)]])
+    let u = workspace.pack_steps([{at: 262144, removed: repeat("a", 32768), added: ""}])
+    let r = workspace.pack_steps([{at: 0, removed: "", added: repeat("b", 32768)}])
+    append(cases, [["undo", u], ["redo", r]])
+    for fields in cases
+        let extra = ""
+        for field in fields
+            extra = extra + "S F " + field[0] + " " + workspace.escape(field[1]) + "\n"
+        files.write(dir + "/g2.m2ws", image(body + extra))
+        workspace.open(dir)
+        workspace.load(fs)
+        check("optional history " + app, workspace.notice(), "")
+    for key in ["undo", "redo"]
+        for value in bad_steps
+            reject(app + " malformed " + key, body + "S F " + key + " " + workspace.escape(value) + "\n")
+        reject(app + " duplicate " + key, body + "S F " + key + " \nS F " + key + " \n")
+    let both = body + "S F undo \nS F redo \n"
+    for field in samples[app]
+        let line = "S F " + field[0] + " " + workspace.escape(field[1]) + "\n"
+        reject(app + " required with history", strings.replace(both, line, ""))
+    let large = workspace.pack_steps([{at: 0, removed: repeat("a", 32768), added: "b"}])
+    reject(app + " shared history text cap", body + "S F undo " + workspace.escape(large) + "\nS F redo " + workspace.escape(large) + "\n")
+    print(app, "optional history and strict step schema checked")
+for app in ["Terminal", "Files", "Notes", "Clicker", "Paint", "Snake"]
+    for key in ["undo", "redo"]
+        reject(app + " has no " + key, session(app, samples[app]) + "S F " + key + " \n")
 let clicker = session("Clicker", samples.Clicker)
 for pair in [["Clicker", "Unknown"], [" 2 ", " 0 "], [" 2 ", " 02 "], [" 2 ", " 1000001 "], [" 300 ", " 0 "], [" 200 ", " -1 "], [" 0\n", " 4\n"]]
     reject("window header", strings.replace(clicker, pair[0], pair[1]))
