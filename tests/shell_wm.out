@@ -42,7 +42,7 @@ Welcome to Relic.
 launch
 /home> help
 help clear history echo apps date
-pwd cd ls cat head tail
+workspace pwd cd ls cat head tail
 mkdir touch write rm mv cp
 wc grep find sort uniq nl
 tree du diff

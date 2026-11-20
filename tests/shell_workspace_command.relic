@@ -1,0 +1,71 @@
+# workspace reports the store without adding a save beyond the Terminal's
+# normal snapshot after a finished command.
+use ../shell/wm
+use std/files
+
+fun wipe(path)
+    try
+        files.remove_tree(path)
+    catch e
+        none
+
+fun run(d, line)
+    for c in line
+        if c == " "
+            wm.key(d, "space")
+        else
+            wm.key(d, c)
+    wm.key(d, "return")
+    return wm.focused(d).state.buf
+
+fun image()
+    return "M2WS1\nD /home\n.\n"
+
+for path in ["ws-command", "ws-command-notice", "ws-command-held"]
+    wipe(path)
+
+wm.workspace_open("ws-command")
+let d = wm.new_desktop(640, 480, wm.default_apps())
+wm.launch(d, wm.terminal)
+wm.workspace_bind(d)
+let t = wm.focused(d).state
+run(d, "workspace")
+print("first", t.buf)
+print("first pointer", [files.read("ws-command/COMMITTED")])
+
+run(d, "echo one > a.txt")
+run(d, "echo two > a.txt")
+print("two saves", [files.read("ws-command/COMMITTED")], files.exists("ws-command/g2.m2ws"), files.exists("ws-command/g3.m2ws"))
+run(d, "workspace")
+print("status", t.buf)
+print("after status", [files.read("ws-command/COMMITTED")], files.exists("ws-command/g4.m2ws"), files.exists("ws-command/g5.m2ws"))
+
+wipe("ws-command-notice")
+files.make_dir("ws-command-notice")
+files.write("ws-command-notice/g1.m2ws", image())
+files.write("ws-command-notice/COMMITTED", "x")
+files.write("ws-command-notice/META", "committed g1\nprevious none\n")
+wm.workspace_open("ws-command-notice")
+d = wm.new_desktop(640, 480, wm.default_apps())
+wm.launch(d, wm.terminal)
+wm.workspace_bind(d)
+t = wm.focused(d).state
+run(d, "workspace")
+print("notice", t.buf)
+
+wipe("ws-command-held")
+files.make_dir("ws-command-held")
+files.write("ws-command-held/g1.m2ws", image())
+files.write("ws-command-held/g2.m2ws", image())
+files.write("ws-command-held/COMMITTED", "x")
+wm.workspace_open("ws-command-held")
+d = wm.new_desktop(640, 480, wm.default_apps())
+wm.launch(d, wm.terminal)
+wm.workspace_bind(d)
+t = wm.focused(d).state
+run(d, "workspace")
+print("held", t.buf)
+print("held files", [files.read("ws-command-held/COMMITTED")], files.exists("ws-command-held/g3.m2ws"))
+
+for path in ["ws-command", "ws-command-notice", "ws-command-held"]
+    wipe(path)

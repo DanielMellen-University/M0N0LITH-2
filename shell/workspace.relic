@@ -1239,3 +1239,13 @@ fun save_with(fs, lines)
         if type(line) != "string" or strings.contains(line, "\n") or strings.contains(line, chr(13))
             fail("workspace.save_with(): bad session line")
     return _commit(fs, lines)
+
+# Read the store state without changing it. META supplies the backup name.
+fun status()
+    if _dir == none
+        return none
+    let backup = none
+    let meta = _read_meta()
+    if meta.ok
+        backup = meta.previous
+    return {directory: _dir, committed: _committed, backup: backup, held: _hold}
