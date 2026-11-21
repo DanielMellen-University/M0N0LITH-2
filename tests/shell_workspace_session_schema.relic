@@ -202,6 +202,32 @@ for row in snake_rows
     reject("Snake board alone " + row[0], session("Snake", [row]))
 reject("Snake board extra", snake + "S F extra x\n")
 print("Snake optional board and strict board schema checked")
+
+# An optional first C line is the clipboard, with or without windows.
+let notes = session("Notes", samples.Notes)
+let clip_ok = ["S C a\\nb\n" + notes, "S C x\n", "S C x\nS -\n", "S C " + workspace.escape(repeat("c", 65536)) + "\n" + notes]
+for body in clip_ok
+    files.write(dir + "/g2.m2ws", image(body))
+    workspace.open(dir)
+    workspace.load(fs)
+    check("valid clipboard", workspace.notice(), "")
+    check("clipboard read", workspace.clipboard() != none, true)
+files.write(dir + "/g2.m2ws", image("S C a\\nb\n" + notes))
+workspace.open(dir)
+workspace.load(fs)
+check("clipboard text", [workspace.clipboard(), workspace.session()[0].app], ["a\nb", "Notes"])
+files.write(dir + "/g2.m2ws", image(notes))
+workspace.open(dir)
+workspace.load(fs)
+check("no clipboard", workspace.clipboard(), none)
+reject("clipboard after a window", notes + "S C x\n")
+reject("two clipboards", "S C x\nS C y\n" + notes)
+reject("empty clipboard", "S C \n" + notes)
+reject("clipboard raw space", "S C a b\n" + notes)
+reject("clipboard bad escape", "S C a\\q\n" + notes)
+reject("clipboard over 65536", "S C " + repeat("c", 65537) + "\n" + notes)
+reject("clipboard then a bare field", "S C x\nS F text abc\n")
+print("optional clipboard line checked")
 for app in ["Terminal", "Files", "Notes", "Clicker", "Snake"]
     for key in ["undo", "redo"]
         reject(app + " has no " + key, session(app, samples[app]) + "S F " + key + " \n")

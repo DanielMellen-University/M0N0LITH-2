@@ -50,7 +50,7 @@ Already cloned without submodules? Run `git submodule update --init`.
 
 `-DRELIC_BUILD_HOST=ON` matters. Since Relic 1.0.7 the default Relic build is C only and makes `relicc` (the compiler to C), not the `relic` program the tests and `relic check` use. The flag builds the C++ host that provides `relic`.
 
-CMake discovers every `tests/*.relic` program and compares its standard output with the matching `.out` file (or empty output if there is no `.out`). It also runs `relic check` on the four shell files, 509 tests in all. CI runs the same steps on Linux, macOS and Windows. More in [Building](docs/BUILDING.md) and [Tests](docs/TESTING.md).
+CMake discovers every `tests/*.relic` program and compares its standard output with the matching `.out` file (or empty output if there is no `.out`). It also runs `relic check` on the four shell files, 510 tests in all. CI runs the same steps on Linux, macOS and Windows. More in [Building](docs/BUILDING.md) and [Tests](docs/TESTING.md).
 
 ## Run the desktop
 
@@ -88,7 +88,7 @@ The next start opens the same windows in the same places. That includes Terminal
 
 A save that is cut off keeps the previous snapshot. A workspace file that is cut short, no longer matches its checksum, or is a newer version than this desktop understands is not opened as if it were whole. The screen says so. A newer version is left on disk until you release it. When an older snapshot still reads, that one comes back. When nothing does, you get the first-run files, which are `/home`, `/tmp`, and `/home/welcome.txt`, and no windows.
 
-Undo and redo come back too, in the Editor and IDE (up to 100 steps) and in Paint (up to 20). Not kept: the clipboard, and an IDE program that was still running. Letters you typed after the last snapshot are written when you quit, and also when a file is saved, a Terminal command finishes, or a window is moved or closed. A kill before that keeps the last snapshot, not those letters. There is no fsync, so pulling the power is not covered. The rules are in [Workspace recovery](docs/workspace-recovery.md).
+Undo and redo come back too, in the Editor and IDE (up to 100 steps) and in Paint (up to 20). The clipboard comes back as well, up to 65,536 characters. Not kept: an IDE program that was still running. Letters you typed after the last snapshot are written when you quit, and also when a file is saved, a Terminal command finishes, or a window is moved or closed. A kill before that keeps the last snapshot, not those letters. There is no fsync, so pulling the power is not covered. The rules are in [Workspace recovery](docs/workspace-recovery.md).
 
 ## Find, replace, and errors
 
