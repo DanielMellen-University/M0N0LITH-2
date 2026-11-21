@@ -1,0 +1,4 @@
+eating commits the board, new food, score and shared best file together
+paused, minimized and queued turns restore with a fresh movement clock
+game over and ready restore and restart normally
+winning board and absent food restore from the best-score commit

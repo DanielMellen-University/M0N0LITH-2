@@ -1,0 +1,105 @@
+# Snake resumes from complete steps, with its queued turns and food generator.
+use ../shell/wm
+use std/vfs
+
+fun check(label, got, want)
+    if got != want
+        fail(label + ": " + str(got) + " != " + str(want))
+
+fun desktop() = wm.new_desktop(640, 480, wm.default_apps())
+fun game(s) = [s.body, s.dir, s.turns, s.food, s.score, s.state, s.seed]
+
+fun reload()
+    wm.workspace_open("ws-snake")
+    let d = desktop()
+    wm.workspace_bind(d)
+    check("load", wm.workspace_notice(), "")
+    return d
+
+wm.workspace_open("ws-snake")
+let d = desktop()
+wm.workspace_bind(d)
+let w = wm.launch(d, wm.snake)
+let s = w.state
+# Eat through the real step and best-score commit, without a later flush.
+s.food = [6, 8]
+wm.key(d, "right")
+wm.tick(d, 1000)
+wm.tick(d, 1150)
+check("ate", [s.score, len(s.body), s.best], [1, 4, 1])
+let rdesk = reload()
+let r = rdesk.windows[0].state
+check("best-score commit has completed step", game(r), game(s))
+check("best from file", [r.best, vfs.read(r.fs, "/home/snake-best.txt")], [1, "1\n"])
+check("fresh clock", [r.now, r.next_at], [0, none])
+print("eating commits the board, new food, score and shared best file together")
+
+# Two queued turns survive, including on a paused and minimized window.
+wm.key(rdesk, "up")
+wm.key(rdesk, "left")
+wm.key(rdesk, "p")
+wm.minimize(rdesk, rdesk.windows[0].id)
+let paused = game(r)
+rdesk = reload()
+r = rdesk.windows[0].state
+check("paused game", game(r), paused)
+check("minimized", rdesk.windows[0].minimized, true)
+wm.tick(rdesk, 50000)
+check("minimized does not move", game(r), paused)
+wm.restore(rdesk, rdesk.windows[0].id)
+wm.key(rdesk, "p")
+wm.tick(rdesk, 90000)
+check("first tick does not jump", r.body, paused[0])
+wm.tick(rdesk, 90145)
+check("first queued turn", [r.dir, r.turns], [[0, -1], [[-1, 0]]])
+wm.tick(rdesk, 90290)
+check("second queued turn", [r.dir, r.turns], [[-1, 0], []])
+# Move the uninterrupted copy by the same turns, then compare the next food.
+wm.snake.on_key(s, "up")
+wm.snake.on_key(s, "left")
+wm.snake.on_tick(s, 1295)
+wm.snake.on_tick(s, 1440)
+check("same continuation", game(r), game(s))
+print("paused, minimized and queued turns restore with a fresh movement clock")
+
+# Keep going to a wall, then restore the stopped board and reset normally.
+for i in 0..25
+    wm.tick(rdesk, 90435 + i * 145)
+check("wall", r.state, "over")
+check("flush over", wm.workspace_flush(), "")
+let ended = game(r)
+rdesk = reload()
+r = rdesk.windows[0].state
+check("over restored", game(r), ended)
+wm.tick(rdesk, 1)
+check("over stays", game(r), ended)
+wm.key(rdesk, "r")
+check("ready", [r.state, r.score, r.best], ["ready", 0, 1])
+check("flush ready", wm.workspace_flush(), "")
+let ready = game(r)
+rdesk = reload()
+check("ready restored", game(rdesk.windows[0].state), ready)
+print("game over and ready restore and restart normally")
+
+# A full board has no food. Its winning best-score commit is also complete.
+r = rdesk.windows[0].state
+r.body = []
+for y in 0..16
+    for x in 0..24
+        let cx = x
+        if y % 2 == 1
+            cx = 23 - x
+        if not (cx == 0 and y == 15)
+            append(r.body, [cx, y])
+r.food = [0, 15]
+r.dir = [-1, 0]
+r.turns = []
+r.score = 380
+r.state = "playing"
+wm.tick(rdesk, 1000)
+wm.tick(rdesk, 1070)
+check("won", [r.state, r.food, r.score], ["won", none, 381])
+let won = game(r)
+rdesk = reload()
+check("win committed", game(rdesk.windows[0].state), won)
+print("winning board and absent food restore from the best-score commit")

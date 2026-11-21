@@ -5130,6 +5130,10 @@ fun _snake_step(s)
     append(s.body, n)
     if eats
         s.score = s.score + 1
+        _snake_place_food(s)
+        if s.food == none
+            s.state = "won"
+        # Commit only after the whole step, including food and a possible win.
         if s.score > s.best
             s.best = s.score
             try
@@ -5139,9 +5143,6 @@ fun _snake_step(s)
                     s.save_note = saved
             catch e
                 none   # a best that cannot be saved still shows
-        _snake_place_food(s)
-        if s.food == none
-            s.state = "won"
 
 fun _snake_tick(s, ms)
     s.now = ms
@@ -5338,7 +5339,17 @@ fun _fields_of(w, lines)
             return false
         return _sf(lines, "tool", s.tool) and _sf(lines, "status", s.status) and _sf(lines, "foreign", foreign)
     if name == "Snake"
-        return true
+        let food = "-"
+        if s.food != none
+            food = str(s.food[1] * _snake_w + s.food[0])
+        let turns = []
+        for turn in s.turns
+            append(turns, str(turn[0]) + "," + str(turn[1]))
+        if not _sf(lines, "body", workspace.pack_snake_cells(s.body)) or not _sf(lines, "dir", str(s.dir[0]) + "," + str(s.dir[1]))
+            return false
+        if not _sf_lines(lines, "turns", turns) or not _sf(lines, "food", food)
+            return false
+        return _sf(lines, "score", str(s.score)) and _sf(lines, "state", s.state) and _sf(lines, "seed", str(s.seed))
     return false
 
 fun _session_lines(d)
@@ -5409,7 +5420,28 @@ fun _restore_state(w)
         for c in f.cells
             append(cells, ord(c) - 48)
         return {fs: _shell_fs, path: f.path, cells: cells, color: int(f.color), size: int(f.size), last: none, stroke: false, undo: [], redo: [], status: f.status, foreign: f.foreign == "1", tool: f.tool, anchor: none, base: none, naming: none, other: 0}
-    return _snake_init()
+    let s = _snake_init()
+    if "body" in f
+        s.body = workspace.unpack_snake_cells(f.body)
+        s.dir = _restore_snake_dir(f.dir)
+        s.turns = []
+        for turn in workspace.unpack_lines(f.turns, 2)
+            append(s.turns, _restore_snake_dir(turn))
+        s.food = none
+        if f.food != "-"
+            let n = int(f.food)
+            s.food = [n % _snake_w, int(n / _snake_w)]
+        s.score = int(f.score)
+        s.state = f.state
+        s.seed = int(f.seed)
+        # The process clock starts over. The first tick begins a fresh beat.
+        s.now = 0
+        s.next_at = none
+    return s
+
+fun _restore_snake_dir(value)
+    let parts = strings.split(value, ",")
+    return [int(parts[0]), int(parts[1])]
 
 fun _apply_session(d, sess)
     d.windows = []

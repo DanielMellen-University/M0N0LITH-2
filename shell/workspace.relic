@@ -452,6 +452,73 @@ fun _editor_fields_ok(f)
                 size = size + len(step.removed) + len(step.added)
     return size <= max_history_text
 
+# Snake stores cell indices tail first. The last cell is the head.
+fun pack_snake_cells(cells)
+    let rows = []
+    for cell in cells
+        append(rows, str(cell[1] * 24 + cell[0]))
+    return pack_lines(rows)
+
+fun unpack_snake_cells(value)
+    let rows = unpack_lines(value, 384)
+    if rows == none
+        return none
+    let cells = []
+    let seen = {}
+    for row in rows
+        let n = _parse_int(row, 0, 383)
+        if n == none or str(n) != row or row in seen
+            return none
+        seen[row] = true
+        append(cells, [n % 24, int(n / 24)])
+    return cells
+
+fun _snake_keys() = ["body", "dir", "turns", "food", "score", "state", "seed"]
+
+fun _snake_dir_ok(value)
+    return value == "1,0" or value == "0,1" or value == "-1,0" or value == "0,-1"
+
+fun _snake_fields_ok(f)
+    if len(f) == 0
+        return true   # snapshots from before Snake games were stored
+    if len(f) != len(_snake_keys())
+        return false
+    for key in _snake_keys()
+        if not key in f
+            return false
+    let body = unpack_snake_cells(f.body)
+    let score = _parse_int(f.score, 0, 381)
+    let seed = _parse_int(f.seed, 0, 2147483646)
+    if body == none or score == none or seed == none or str(score) != f.score or str(seed) != f.seed
+        return false
+    if len(body) != score + 3 or not _snake_dir_ok(f.dir)
+        return false
+    let turns = unpack_lines(f.turns, 2)
+    if turns == none
+        return false
+    let last = strings.split(f.dir, ",")
+    for turn in turns
+        if not _snake_dir_ok(turn)
+            return false
+        let turned = strings.split(turn, ",")
+        # A queued turn is perpendicular to the preceding direction.
+        if int(last[0]) * int(turned[0]) + int(last[1]) * int(turned[1]) != 0
+            return false
+        last = turned
+    if f.state != "ready" and f.state != "playing" and f.state != "paused" and f.state != "over" and f.state != "won"
+        return false
+    if f.state == "won"
+        return len(body) == 384 and f.food == "-"
+    if f.food == "-" or len(body) == 384
+        return false
+    let food = unpack_snake_cells(pack_lines([f.food]))
+    if food == none
+        return false
+    for cell in body
+        if cell == food[0]
+            return false
+    return true
+
 fun _session_values(win)
     let f = win.fields
     if win.app == "Terminal"
@@ -485,6 +552,8 @@ fun _session_values(win)
         return left != none and left <= len(f.text)
     if win.app == "Clicker"
         return _parse_int(f.count, 0, 1000000000) != none
+    if win.app == "Snake"
+        return _snake_fields_ok(f)
     if win.app == "Paint"
         if not _valid_path(f.path) or not _paint_tool_ok(f.tool)
             return false
@@ -536,6 +605,8 @@ fun _add_field(win, line)
     return true
 
 fun _finish_window(win)
+    if win.app == "Snake"
+        return _snake_fields_ok(win.fields)
     let need = _session_need(win.app)
     let got = 0
     for k in win.fields
