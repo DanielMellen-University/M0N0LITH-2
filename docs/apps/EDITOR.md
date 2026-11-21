@@ -93,4 +93,4 @@ Only the lines that fit the window are built each frame, so a file of thousands 
 
 `editor` in `shell/wm.relic`, `_editor_*`. The IDE reuses all of it. The line keys (Ctrl+L, Ctrl+D, Ctrl+K, Ctrl+J, Ctrl+Up and Ctrl+Down) go through `_editor_change` like typing, so each is one undo step. Tests: the `shell_editor_*` goldens, `shell_small_apps`, `shell_big_file` and `shell_last_lines*` (see [the test list](../TESTING.md)).
 
-The clipboard is the desktop's own, one for all its windows, not the system's: what the Editor or the IDE copies, Notes, the Terminal and an IDE run waiting for input can paste (its first line).
+The clipboard is the desktop's own, one for all its windows, not the system's: what the Editor or the IDE copies, Notes, the Terminal and an IDE run waiting for input can paste (its first line). With a workspace open it is saved with the window snapshot and comes back after a restart, up to 65,536 characters (see [Workspace recovery](../workspace-recovery.md)).

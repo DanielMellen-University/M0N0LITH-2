@@ -101,6 +101,7 @@ Caps, applied while parsing, before the session vfs is changed:
 | removed plus added text in that window's history | 65,536 characters across both stacks |
 | one Paint window's history | 20 undo canvases and 20 redo canvases |
 | that Paint history, packed | 32,768 characters across both stacks |
+| the clipboard in a snapshot | 65,536 characters; longer text is left out of the snapshot, which is still written |
 
 The reader checks the UTF-8 byte cap again after reading, in case the file grew after `files.size`. The writer checks the same cap before writing a partial. A Unicode image that would be too large to reload fails with `image too large`; the pointer and metadata stay unchanged.
 
@@ -134,7 +135,8 @@ A generation written by the desktop records the open windows in the same file as
 
 | Line | Meaning |
 |---|---|
-| `S -` | the desktop was saved with no windows. It is the only `S` line |
+| `S C <escaped text>` | optional, and only as the first `S` line: the desktop's clipboard, 1 to 65,536 characters, with the same escapes as a file and no raw space. It may be the only `S` line, for a desktop with no windows and something on the clipboard |
+| `S -` | the desktop was saved with no windows. It is the only `S` line, or comes only after `S C` |
 | `S W <App> <id> <x> <y> <width> <height> <0 to 3>` | one window, back to front. App is Clicker, Notes, Terminal, Files, Editor, IDE, Paint, or Snake. `1` means minimized, `2` maximized and `3` both. For a maximized window x to height are the place it goes back to, and a new desktop maximizes it again at its own size. id is unique, from 1 |
 | `S F <key> <escaped value>` | one field of the window started by the previous `W`. The value uses the same escapes as a file. No raw space |
 
@@ -171,7 +173,7 @@ With a workspace open and a desktop bound by `wm.workspace_bind`, key or mouse i
 
 The idle snapshot records unsaved buffers with the current vfs. It does not save Editor or IDE text into a vfs file, or save Paint's cells into its picture file. Ctrl+S and the interrupted-save fallback rules below stay the same.
 
-Not in the snapshot: a find or a rename still being typed, the clipboard, and an IDE run (including one that is waiting for a line). Editor, IDE and Paint undo and redo return within the history caps. An IDE program does not keep running after a restart. Snake's board returns, and a game that was moving comes back paused. Snake moving on the clock does not mark input pending, so a kill keeps the board as of the last snapshot, not the steps after it.
+Not in the snapshot: a find or a rename still being typed, clipboard text over 65,536 characters, and an IDE run (including one that is waiting for a line). Editor, IDE and Paint undo and redo return within the history caps. An IDE program does not keep running after a restart. The clipboard comes back when a desktop binds to the workspace (`wm.workspace_bind`); a snapshot with no `S C` line leaves the clipboard as it is. A build from before the `S C` line reads a generation that has one as `invalid` and falls back to the one before it. Snake's board returns, and a game that was moving comes back paused. Snake moving on the clock does not mark input pending, so a kill keeps the board as of the last snapshot, not the steps after it.
 
 ## What a save does
 
@@ -250,7 +252,7 @@ The next generation number is one past every id already stored or named, includi
 - A wrong-version committed file, more than 32 generation names, or an ambiguous torn pointer holds the store. Continued use does not overwrite or delete it. `workspace_release` then a later successful save may.
 - The first successful commit has no older generation. From the second on, the generation that was installed when the save started is kept until the save after next replaces it as the backup.
 - Two processes must not write one store. The format has no lock.
-- Open windows are in the snapshot the desktop writes: place, size, minimized, maximized, the Terminal's folder, output and command history, Files' folder, Editor and IDE text (saved or not) with bounded undo and redo, Notes' line, Clicker's count, and Paint's cells with bounded undo and redo, and Snake's board. The clipboard and a running IDE program are not. A files-only `save` does not write them. Window input is included after 2000 ms of idle tick time, or at the next snapshot or quit. The idle snapshot leaves the vfs files unchanged.
+- Open windows are in the snapshot the desktop writes: place, size, minimized, maximized, the Terminal's folder, output and command history, Files' folder, Editor and IDE text (saved or not) with bounded undo and redo, Notes' line, Clicker's count, and Paint's cells with bounded undo and redo, and Snake's board, and the clipboard up to 65,536 characters. A running IDE program is not. A files-only `save` does not write them. Window input is included after 2000 ms of idle tick time, or at the next snapshot or quit. The idle snapshot leaves the vfs files unchanged.
 - A program run in the IDE still cannot write the host disk. The store is written by the desktop, not by that program.
 - There is no fsync. This is not a promise about power loss.
 
