@@ -1,0 +1,19 @@
+new file: _
+new file: a note.txt_
+["Files: /tmp/n", "  ..", "> a note.txt", "  b.txt"] true a note.txt
+/tmp/n/a note.txt open
+new folder: _
+["Files: /tmp/n", "  ..", "  a note.txt", "  b.txt", "> plans/"] true plans
+["Files: /tmp/n/plans", "  ..", "> inner/"] true
+already there: b.txt keep
+already there: plans
+not made: not a name
+not made: not a name
+not made: not a name
+not made: not a name
+not made: not a name
+true Files: /tmp/n
+Files: /tmp/n plans
+Files: /tmp/n false
+new file: draft_
+c.md true

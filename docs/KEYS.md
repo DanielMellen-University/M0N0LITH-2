@@ -90,6 +90,8 @@ The commands are in [the Terminal doc](apps/TERMINAL.md).
 | A letter or digit | the next name that starts with it, any case, going round |
 | Return | opens the selected row |
 | F2 | renames the selected row: type the name, Return renames, Esc, a click or another key gives up |
+| Ctrl+N (Cmd+N on macOS) | a new empty file in the folder shown: type the name, Return makes it and selects it, and the next Editor opens it; Esc, a click or another key gives up |
+| Ctrl+Shift+N (Cmd+Shift+N) | a new empty folder there, the same way |
 | Backspace or Left | goes up a folder, with the folder you were in selected |
 | Right | goes into the selected folder (a file or `..` stays put) |
 | Ctrl+C | copies the selected row's full path to the clipboard (not for `..`) |
