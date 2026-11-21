@@ -161,6 +161,47 @@ for field in samples.Paint
     reject("Paint required with history", strings.replace(paint + "S F undo \nS F redo \n", line, ""))
 reject("Paint history size cap", paint + "S F undo " + workspace.escape(repeat(full, 3)) + "\nS F redo " + workspace.escape(full) + "\n")
 print("Paint optional history and strict canvas schema checked")
+
+# Snake's board is four fields that come together, or none for a new game.
+let snake_rows = [["body", "3,8;4,8;5,8;5,9"], ["food", "0,0"], ["state", "paused"], ["seed", "2147483646"]]
+let snake = session("Snake", snake_rows)
+let full_body = []
+for y in 0..16
+    for i in 0..24
+        let x = i
+        if y % 2 == 1
+            x = 23 - i
+        append(full_body, str(x) + "," + str(y))
+let won = strings.join(full_body, ";")
+let snake_ok = [snake_rows, [["body", "3,8;4,8;5,8"], ["food", "7,8"], ["state", "ready"], ["seed", "1"]]]
+append(snake_ok, [["body", "0,0;0,1;1,1"], ["food", "23,15"], ["state", "over"], ["seed", "48271"]])
+append(snake_ok, [["body", won], ["food", "-"], ["state", "won"], ["seed", "5"]])
+for rows in snake_ok
+    files.write(dir + "/g2.m2ws", image(session("Snake", rows)))
+    workspace.open(dir)
+    workspace.load(fs)
+    check("valid Snake board " + rows[2][1], workspace.notice(), "")
+let snake_bad = [["body", ""], ["body", "3,8;4,8"], ["body", "3,8;4,8;6,8"], ["body", "3,8;4,8;3,8"], ["body", "3,8;4,8;4,9;3,9;3,8"]]
+for value in ["24,0;23,0;22,0", "0,16;0,15;0,14", "-0,0;0,1;0,2", "03,8;4,8;5,8", "3,8;4,8;5,8;", "3,8,1;4,8;5,8", "a,8;4,8;5,8", "3 8;4,8;5,8", won + ";0,1"]
+    append(snake_bad, ["body", value])
+for value in ["", "3,8", "5,9", "24,0", "0,-1", "01,0", "0,0,0", "-"]
+    append(snake_bad, ["food", value])
+for value in ["playing", "won", "Ready", ""]
+    append(snake_bad, ["state", value])
+for value in ["0", "01", "-1", "2147483647", "99999999999", "1.0", "", "x"]
+    append(snake_bad, ["seed", value])
+for row in snake_bad
+    reject("Snake invalid " + row[0] + " " + row[1], changed("Snake", snake_rows, row[0], row[1]))
+reject("Snake ready off the start", changed("Snake", snake_rows, "state", "ready"))
+reject("Snake won with food", session("Snake", [["body", won], ["food", "0,0"], ["state", "won"], ["seed", "5"]]))
+reject("Snake full but over", session("Snake", [["body", won], ["food", "-"], ["state", "over"], ["seed", "5"]]))
+for row in snake_rows
+    let line = "S F " + row[0] + " " + workspace.escape(row[1]) + "\n"
+    reject("Snake board missing " + row[0], strings.replace(snake, line, ""))
+    reject("Snake board duplicate " + row[0], snake + line)
+    reject("Snake board alone " + row[0], session("Snake", [row]))
+reject("Snake board extra", snake + "S F extra x\n")
+print("Snake optional board and strict board schema checked")
 for app in ["Terminal", "Files", "Notes", "Clicker", "Snake"]
     for key in ["undo", "redo"]
         reject(app + " has no " + key, session(app, samples[app]) + "S F " + key + " \n")

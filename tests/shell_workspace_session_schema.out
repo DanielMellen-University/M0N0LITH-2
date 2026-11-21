@@ -9,4 +9,5 @@ Snake schema checked
 Editor optional history and strict step schema checked
 IDE optional history and strict step schema checked
 Paint optional history and strict canvas schema checked
-228 invalid sessions recover files and windows together
+Snake optional board and strict board schema checked
+278 invalid sessions recover files and windows together

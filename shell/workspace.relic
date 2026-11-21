@@ -18,6 +18,9 @@ let max_history_text = 65536
 let paint_cells = 2160
 let max_paint_steps = 20
 let max_paint_history = 32768
+let snake_w = 24
+let snake_h = 16
+let snake_seed_max = 2147483646
 
 let _dir = none
 let _fault = none
@@ -186,6 +189,83 @@ fun unpack_canvases(value)
             return none
         append(out, cells)
     return out
+
+fun _abs(n)
+    if n < 0
+        return -n
+    return n
+
+# A Snake cell as "x,y", or none when it is not one on the board.
+fun _snake_cell(s)
+    let parts = strings.split(s, ",")
+    if len(parts) != 2
+        return none
+    let x = _parse_int(parts[0], 0, snake_w - 1)
+    let y = _parse_int(parts[1], 0, snake_h - 1)
+    if x == none or y == none or parts[0][0] == "-" or parts[1][0] == "-"
+        return none
+    return [x, y]
+
+# Snake's body, tail first and head last: "x,y" cells joined by ";". Every
+# cell is on the board, none repeats, and each one touches the one before.
+fun unpack_snake_body(value)
+    if type(value) != "string" or value == ""
+        return none
+    let rows = strings.split(value, ";")
+    if len(rows) < 3 or len(rows) > snake_w * snake_h
+        return none
+    let body = []
+    let seen = {}
+    for row in rows
+        let c = _snake_cell(row)
+        if c == none or row in seen
+            return none
+        if len(body) > 0
+            let p = body[len(body) - 1]
+            if _abs(c[0] - p[0]) + _abs(c[1] - p[1]) != 1
+                return none
+        seen[row] = true
+        append(body, c)
+    return body
+
+fun pack_snake_body(body)
+    let rows = []
+    for c in body
+        append(rows, str(c[0]) + "," + str(c[1]))
+    return strings.join(rows, ";")
+
+# The LCG seed is 1 to 2147483646, past what _parse_int reads.
+fun parse_snake_seed(s)
+    if type(s) != "string" or s == "" or len(s) > 10 or s[0] == "0"
+        return none
+    let n = 0
+    for c in s
+        if c < "0" or c > "9"
+            return none
+        n = n * 10 + ord(c) - 48
+    if n > snake_seed_max
+        return none
+    return n
+
+fun _snake_fields_ok(f)
+    let body = unpack_snake_body(f.body)
+    if body == none or parse_snake_seed(f.seed) == none
+        return false
+    let state = f.state
+    if state != "ready" and state != "paused" and state != "over" and state != "won"
+        return false
+    if state == "ready" and f.body != "3,8;4,8;5,8"
+        return false
+    # The game is won exactly when the snake fills the board and no food is left.
+    let full = len(body) == snake_w * snake_h
+    if (state == "won") != full or (f.food == "-") != full
+        return false
+    if f.food == "-"
+        return true
+    let food = _snake_cell(f.food)
+    if food == none
+        return false
+    return not str(food[0]) + "," + str(food[1]) in strings.split(f.body, ";")
 
 fun refuse(why)
     if type(why) != "string"
@@ -566,6 +646,10 @@ fun _session_values(win)
                     return false
                 size = size + len(f[key])
         return size <= max_paint_history
+    if win.app == "Snake"
+        if not "body" in f
+            return true
+        return _snake_fields_ok(f)
     return true
 
 fun _start_window(line, ids)
@@ -609,6 +693,9 @@ fun _finish_window(win)
     for k in win.fields
         if not ((win.app == "Editor" or win.app == "IDE" or win.app == "Paint") and (k == "undo" or k == "redo"))
             got = got + 1
+    # Snake's board is optional, but its four fields come together.
+    if win.app == "Snake" and got > 0
+        need = ["body", "food", "state", "seed"]
     if got != len(need)
         return false
     for k in need
