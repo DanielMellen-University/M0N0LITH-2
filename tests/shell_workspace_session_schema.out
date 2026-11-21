@@ -8,4 +8,5 @@ Paint schema checked
 Snake schema checked
 Editor optional history and strict step schema checked
 IDE optional history and strict step schema checked
-188 invalid sessions recover files and windows together
+Paint optional history and strict canvas schema checked
+228 invalid sessions recover files and windows together

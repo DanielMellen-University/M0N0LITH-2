@@ -127,7 +127,41 @@ for app in ["Editor", "IDE"]
     let large = workspace.pack_steps([{at: 0, removed: repeat("a", 32768), added: "b"}])
     reject(app + " shared history text cap", body + "S F undo " + workspace.escape(large) + "\nS F redo " + workspace.escape(large) + "\n")
     print(app, "optional history and strict step schema checked")
-for app in ["Terminal", "Files", "Notes", "Clicker", "Paint", "Snake"]
+
+# Paint's undo and redo are optional too, each a packed list of whole canvases.
+let blank = []
+let busy = []
+for i in 0..2160
+    append(blank, 0)
+    append(busy, i % 9)
+let one = workspace.pack_canvases([blank])
+let full = workspace.pack_canvases([busy])
+let bad_canvases = ["junk", "1\n", "0\n", workspace.pack_lines(["0x2159"]), workspace.pack_lines(["0x2161"]), workspace.pack_lines(["9x2160"])]
+for row in ["0x2159,0x1", "0x02160", "0x0,0x2160", "0x-1,0x2161", "02160", "0x2160,", ",0x2160", "0y2160", "0x2160x"]
+    append(bad_canvases, workspace.pack_lines([row]))
+append(bad_canvases, repeat(one, 21))
+check("short list is no canvas", workspace.pack_canvas([]), none)
+let paint = session("Paint", samples.Paint)
+let paint_cases = [[["undo", ""]], [["redo", ""]], [["undo", one]], [["redo", one]], [["undo", repeat(one, 20)], ["redo", repeat(one, 20)]]]
+append(paint_cases, [["undo", repeat(full, 2)], ["redo", full]])
+for fields in paint_cases
+    let extra = ""
+    for field in fields
+        extra = extra + "S F " + field[0] + " " + workspace.escape(field[1]) + "\n"
+    files.write(dir + "/g2.m2ws", image(paint + extra))
+    workspace.open(dir)
+    workspace.load(fs)
+    check("optional history Paint", workspace.notice(), "")
+for key in ["undo", "redo"]
+    for value in bad_canvases
+        reject("Paint malformed " + key, paint + "S F " + key + " " + workspace.escape(value) + "\n")
+    reject("Paint duplicate " + key, paint + "S F " + key + " \nS F " + key + " \n")
+for field in samples.Paint
+    let line = "S F " + field[0] + " " + workspace.escape(field[1]) + "\n"
+    reject("Paint required with history", strings.replace(paint + "S F undo \nS F redo \n", line, ""))
+reject("Paint history size cap", paint + "S F undo " + workspace.escape(repeat(full, 3)) + "\nS F redo " + workspace.escape(full) + "\n")
+print("Paint optional history and strict canvas schema checked")
+for app in ["Terminal", "Files", "Notes", "Clicker", "Snake"]
     for key in ["undo", "redo"]
         reject(app + " has no " + key, session(app, samples[app]) + "S F " + key + " \n")
 let clicker = session("Clicker", samples.Clicker)
