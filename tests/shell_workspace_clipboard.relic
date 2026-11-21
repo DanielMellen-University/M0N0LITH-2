@@ -1,0 +1,113 @@
+# The desktop's clipboard is saved with the window snapshot and comes back
+# when a desktop binds to that workspace again, with or without windows.
+use ../shell/wm
+use std/files
+use std/strings
+
+fun check(label, got, want)
+    if got != want
+        fail(label + ": " + str(got) + " != " + str(want))
+
+fun desktop() = wm.new_desktop(640, 480, wm.default_apps())
+
+fun image(body)
+    let prefix = "M2WS1\n" + body
+    let sum = 0
+    let weight = len(prefix)
+    for c in prefix
+        sum = (sum + ord(c) * weight) % 1000000007
+        weight = weight - 1
+    return prefix + "Z " + str(sum) + "\n.\n"
+
+fun repeat(c, n)
+    let out = ""
+    for i in 0..n
+        out = out + c
+    return out
+
+# What the clipboard holds now: paste it into a new, empty Editor window.
+fun pasted(d)
+    let e = wm.launch(d, wm.editor)
+    e.state.text = ""
+    e.state.back = 0
+    wm.key(d, "ctrl+v")
+    let text = e.state.text
+    wm.key(d, "ctrl+w")
+    return text
+
+# Copy text with the Editor's Ctrl+A and Ctrl+C, then close that window.
+fun copy(d, text)
+    let e = wm.launch(d, wm.editor)
+    e.state.text = text
+    e.state.back = 0
+    wm.key(d, "ctrl+a")
+    wm.key(d, "ctrl+c")
+    wm.key(d, "ctrl+w")
+
+# Put something else on the clipboard without a snapshot after it, as a new
+# process starts with its own clipboard. A desktop that is not bound to the
+# workspace never writes a snapshot.
+fun overwrite()
+    let d = desktop()
+    wm.launch(d, wm.clicker)
+    wm.key(d, "ctrl+c")
+    check("clicker copied", pasted(d), "0")
+
+fun reopen(dir)
+    wm.workspace_open(dir)
+    let d = desktop()
+    wm.workspace_bind(d)
+    check("load", wm.workspace_notice(), "")
+    return d
+
+let dir = "ws-clipboard"
+wm.workspace_open(dir)
+let live = desktop()
+wm.workspace_bind(live)
+wm.launch(live, wm.notes)
+let text = "two lines\n\tand \\ λ" + chr(0) + " end"
+copy(live, text)
+check("flush", wm.workspace_flush(), "")
+let gen = ""
+for name in files.list(dir)
+    if strings.ends_with(name, ".m2ws")
+        gen = files.read(dir + "/" + name)
+check("clipboard line", strings.contains(gen, "\nS C two"), true)
+overwrite()
+let back = reopen(dir)
+check("windows", [len(back.windows), back.windows[0].app.name], [1, "Notes"])
+check("restored", pasted(back), text)
+print("copied text comes back with the windows, special characters and all")
+
+wm.key(back, "ctrl+w")
+check("no windows", len(back.windows), 0)
+check("flush empty", wm.workspace_flush(), "")
+overwrite()
+back = reopen(dir)
+check("still no windows", len(back.windows), 0)
+check("restored without windows", pasted(back), text)
+print("a desktop with no windows keeps its clipboard too")
+
+copy(back, repeat("x", 65536))
+check("flush at cap", wm.workspace_flush(), "")
+overwrite()
+back = reopen(dir)
+check("65536 kept", len(pasted(back)), 65536)
+copy(back, repeat("y", 65537))
+check("flush over cap", wm.workspace_flush(), "")
+overwrite()
+back = reopen(dir)
+check("over cap left out", pasted(back), "0")
+print("up to 65536 characters are kept; longer text is left out, the snapshot is not")
+copy(back, "kept")
+files.remove_tree(dir)
+
+# A generation written before the clipboard was saved leaves it as it is.
+files.make_dir(dir)
+files.write(dir + "/g1.m2ws", image("S W Clicker 1 40 30 180 60 0\nS F count 7\n"))
+files.write(dir + "/COMMITTED", "g1\n")
+back = reopen(dir)
+check("old generation clicker", back.windows[0].state.count, 7)
+check("old generation clipboard", pasted(back), "kept")
+files.remove_tree(dir)
+print("old snapshots leave the clipboard alone")

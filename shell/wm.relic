@@ -154,6 +154,9 @@ fun workspace_bind(d)
     let sess = workspace.session()
     if sess == none
         return
+    let clip = workspace.clipboard()
+    if clip != none
+        _clip.text = clip
     _apply_session(d, sess)
 
 # Quit, or a test standing in for it. Writes the open windows and unsaved text.
@@ -5448,6 +5451,9 @@ fun _fields_of(w, lines)
 
 fun _session_lines(d)
     let lines = []
+    # The clipboard goes first. Text too long to keep is left out, not the snapshot.
+    if _clip.text != "" and len(_clip.text) <= workspace.max_clipboard
+        append(lines, "C " + workspace.escape(_clip.text))
     for w in d.windows
         append(lines, _window_header(w))
         if not _fields_of(w, lines)
