@@ -18,6 +18,7 @@ let max_history_text = 65536
 let paint_cells = 2160
 let max_paint_steps = 20
 let max_paint_history = 32768
+let max_clipboard = 65536
 let snake_w = 24
 let snake_h = 16
 let snake_seed_max = 2147483646
@@ -33,6 +34,7 @@ let _hold = ""          # non-empty: do not write or delete the store until rele
 let _opt_out = false    # explicit session-only (empty path). Not a failed open.
 let _requested = false  # a store was asked for. Unset means the old one-run vfs.
 let _session = none     # none: installed generation has no window snapshot. A list: those windows.
+let _clipboard = none   # the desktop clipboard saved with that snapshot, or none
 
 fun enabled() = _dir != none
 
@@ -60,6 +62,10 @@ fun notice()
 # generation did not record one (a files-only save, or the defaults).
 fun session()
     return _session
+
+# The clipboard text saved with that snapshot, or none when it has none.
+fun clipboard()
+    return _clipboard
 
 fun escape(s)
     if type(s) != "string"
@@ -301,6 +307,7 @@ fun open(path)
     _committed = none
     _damaged_generations = {}
     _session = none
+    _clipboard = none
     _hold = ""
     _opt_out = false
     _requested = false
@@ -339,6 +346,7 @@ fun open_default()
         _committed = none
         _damaged_generations = {}
         _session = none
+        _clipboard = none
         _hold = ""
         _opt_out = false
         _requested = true
@@ -805,15 +813,29 @@ fun _parse(text)
         if up != "/" and (not up in seen or seen[up] != "D")
             return _bad("invalid")
     let session = none
+    let clip = none
     if len(raw_session) > 0
         if z_text == none
             return _bad("invalid")
-        session = _parse_session(raw_session)
+        # An optional first "S C <text>" is the desktop clipboard. It may be
+        # the only S line, for a desktop with no windows.
+        if strings.starts_with(raw_session[0], "C ")
+            let raw = slice(raw_session[0], 2, len(raw_session[0]))
+            if strings.contains(raw, " ")
+                return _bad("invalid")
+            clip = _unesc(raw)
+            if clip == none or clip == "" or len(clip) > max_clipboard
+                return _bad("invalid")
+            remove(raw_session, 0)
+        if len(raw_session) == 0
+            session = []
+        else
+            session = _parse_session(raw_session)
         if session == none or not _checksum_ok(lines, z_text)
             return _bad("invalid")
     else if z_text != none
         return _bad("invalid")
-    return {ok: true, dirs: dirs, files: files, session: session}
+    return {ok: true, dirs: dirs, files: files, session: session, clipboard: clip}
 
 # Position-weighted code points, reduced modulo a prime below _parse_int's cap.
 # The running sum makes each character's weight its distance from the end.
@@ -895,11 +917,13 @@ fun _reset_default(fs)
     vfs.make_dir(fs, "/tmp")
     vfs.write(fs, "/home/welcome.txt", "Welcome to Relic.\n")
     _session = none
+    _clipboard = none
 
 fun _use(fs, parsed, n)
     _install(fs, parsed)
     _committed = n
     _session = parsed.session
+    _clipboard = parsed.clipboard
 
 fun _install(fs, parsed)
     _clear(fs)
@@ -980,6 +1004,7 @@ fun load(fs)
     _committed = none
     _damaged_generations = {}
     _session = none
+    _clipboard = none
     _hold = ""
     if _dir == none
         return
