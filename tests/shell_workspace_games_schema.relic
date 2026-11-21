@@ -1,0 +1,100 @@
+# Bad game fields reject the entire generation, including its otherwise valid vfs.
+use ../shell/workspace
+use std/files
+use std/strings
+use std/vfs
+
+fun check(label, got, want)
+    if got != want
+        fail(label + ": " + str(got) + " != " + str(want))
+
+fun repeat(c, n)
+    let text = ""
+    for i in 0..n
+        text = text + c
+    return text
+
+fun image(body)
+    let prefix = "M2WS1\n" + body
+    let sum = 0
+    let weight = len(prefix)
+    for c in prefix
+        sum = (sum + ord(c) * weight) % 1000000007
+        weight = weight - 1
+    return prefix + "Z " + str(sum) + "\n.\n"
+
+fun session(app, fields)
+    let body = "S W " + app + " 1 20 20 256 190 0\n"
+    for pair in fields
+        body = body + "S F " + pair[0] + " " + workspace.escape(pair[1]) + "\n"
+    return body
+
+fun changed(app, fields, key, value)
+    let rows = []
+    for pair in fields
+        if pair[0] == key
+            if value != none
+                append(rows, [key, value])
+        else
+            append(rows, pair)
+    return session(app, rows)
+
+let snake = [["body", workspace.pack_snake_cells([[3, 8], [4, 8], [5, 8]])], ["dir", "1,0"], ["turns", workspace.pack_lines(["0,-1", "-1,0"])], ["food", "200"], ["score", "0"], ["state", "paused"], ["seed", "386168"]]
+let canvas = repeat("0", 2160)
+let step = workspace.pack_lines([canvas])
+let paint = [["path", "/home/kept.paint"], ["cells", canvas], ["color", "1"], ["size", "1"], ["tool", "brush"], ["status", "edited"], ["foreign", "0"], ["undo", step], ["redo", step]]
+let old_paint = strings.replace(session("Paint", paint), "S W Paint 1 ", "S W Paint 2 ")
+let dir = "ws-games-schema"
+files.make_dir(dir)
+files.write(dir + "/g1.m2ws", image("D /home\nF /home/kept old\n" + session("Snake", snake) + old_paint))
+files.write(dir + "/COMMITTED", "g2\n")
+let fs = vfs.new()
+let count = 0
+
+fun reject_text(label, text, why)
+    files.write(dir + "/g2.m2ws", text)
+    workspace.open(dir)
+    workspace.load(fs)
+    check(label, workspace.notice(), "workspace: committed image " + why + "; recovered g1")
+    check("old file", vfs.read(fs, "/home/kept"), "old")
+    check("new file never installed", vfs.exists(fs, "/new"), false)
+    check("older board", workspace.session()[0].fields.body, snake[0][1])
+    check("older Paint undo", workspace.session()[1].fields.undo, step)
+    check("older Paint redo", workspace.session()[1].fields.redo, step)
+    count = count + 1
+
+fun reject(label, body)
+    reject_text(label, image("F /new changed\n" + body), "invalid")
+
+for pair in snake
+    reject("missing Snake " + pair[0], changed("Snake", snake, pair[0], none))
+    reject("duplicate Snake " + pair[0], session("Snake", snake) + "S F " + pair[0] + " " + workspace.escape(pair[1]) + "\n")
+for pair in [["body", ""], ["body", "junk"], ["body", workspace.pack_lines(["195", "196", "196"])], ["body", workspace.pack_lines(["195", "196", "384"])], ["body", workspace.pack_lines(["195", "196", "0197"])], ["body", workspace.pack_lines(["195", "196", "-1"])], ["body", repeat("1\n0", 385)], ["dir", "0,0"], ["dir", "1,1"], ["dir", "01,0"], ["turns", "junk"], ["turns", workspace.pack_lines(["0,-1", "-1,0", "0,1"])], ["turns", workspace.pack_lines(["-1,0"])], ["turns", workspace.pack_lines(["1,0"])], ["turns", workspace.pack_lines(["1,1"])], ["food", "197"], ["food", "-"], ["food", "384"], ["food", "0200"], ["score", "1"], ["score", "-1"], ["score", "00"], ["state", "won"], ["state", "running"], ["seed", "-1"], ["seed", "2147483647"], ["seed", "0386168"]]
+    reject("bad Snake " + pair[0], changed("Snake", snake, pair[0], pair[1]))
+reject("unknown Snake field", session("Snake", snake) + "S F other 0\n")
+print("Snake rejects incomplete games, bad cells, directions, turns, food, score, state and seed")
+
+# Either Paint stack may be absent independently for older snapshots.
+for key in ["undo", "redo"]
+    files.write(dir + "/g2.m2ws", image(changed("Paint", paint, key, none)))
+    workspace.open(dir)
+    workspace.load(fs)
+    check("optional Paint " + key, workspace.notice(), "")
+    for value in ["junk", "1\n", "01\nx", workspace.pack_lines([repeat("0", 2159)]), workspace.pack_lines([canvas + "0"]), workspace.pack_lines([repeat("0", 2159) + "9"]), workspace.pack_lines([repeat("0", 2159) + "x"]), repeat(step, 101), repeat(step, 31)]
+        reject("bad Paint " + key, changed("Paint", paint, key, value))
+    reject("duplicate Paint " + key, session("Paint", paint) + "S F " + key + " \n")
+let thirty = repeat(step, 30)
+let only_undo = changed("Paint", paint, "redo", "")
+let old_undo = "S F undo " + workspace.escape(step) + "\n"
+let full_undo = "S F undo " + workspace.escape(thirty) + "\n"
+files.write(dir + "/g2.m2ws", image(strings.replace(only_undo, old_undo, full_undo)))
+workspace.open(dir)
+workspace.load(fs)
+check("30 full canvases accepted", workspace.notice(), "")
+reject("shared Paint cell cap", strings.replace(session("Paint", paint), old_undo, full_undo))
+print("Paint accepts optional stacks and 30 canvases, rejects bad records and shared cell overflow")
+
+let valid = image("F /new changed\n" + session("Snake", snake))
+reject_text("torn game generation", slice(valid, 0, len(valid) - 3), "truncated")
+reject_text("checksum changed game", strings.replace(valid, "S F state paused", "S F state playin"), "invalid")
+print(count, "damaged game generations recover older files, board and both Paint stacks together")

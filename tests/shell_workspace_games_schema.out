@@ -1,0 +1,3 @@
+Snake rejects incomplete games, bad cells, directions, turns, food, score, state and seed
+Paint accepts optional stacks and 30 canvases, rejects bad records and shared cell overflow
+65 damaged game generations recover older files, board and both Paint stacks together
