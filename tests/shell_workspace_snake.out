@@ -1,0 +1,6 @@
+a game not started comes back ready
+a game in play comes back paused with the same board, score and seed
+the restored game plays on like the one that never stopped
+a game that ended comes back ended, and r starts a new one
+a won board comes back won with score 381
+old snapshots start a new game

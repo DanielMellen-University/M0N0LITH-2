@@ -138,7 +138,7 @@ A generation written by the desktop records the open windows in the same file as
 | `S W <App> <id> <x> <y> <width> <height> <0 to 3>` | one window, back to front. App is Clicker, Notes, Terminal, Files, Editor, IDE, Paint, or Snake. `1` means minimized, `2` maximized and `3` both. For a maximized window x to height are the place it goes back to, and a new desktop maximizes it again at its own size. id is unique, from 1 |
 | `S F <key> <escaped value>` | one field of the window started by the previous `W`. The value uses the same escapes as a file. No raw space |
 
-A session has at most 64 windows. Only the Editor, IDE and Paint `undo` and `redo` fields are optional. A missing required field, an extra field, a bad number, a duplicate id, or anything else malformed in an `S` line is `invalid`. The vfs in that same file is not installed either.
+A session has at most 64 windows. Only the Editor, IDE and Paint `undo` and `redo` fields, and Snake's four board fields as a group, are optional. A missing required field, an extra field, a bad number, a duplicate id, or anything else malformed in an `S` line is `invalid`. The vfs in that same file is not installed either.
 
 | App | Fields |
 |---|---|
@@ -149,7 +149,7 @@ A session has at most 64 windows. Only the Editor, IDE and Paint `undo` and `red
 | Notes | `text`, `left` |
 | Clicker | `count` |
 | Paint | `path`, `cells` (2160 digits, each `0` to `8`), `color`, `size`, `tool`, `status`, `foreign` (`0` or `1`), optional `undo` and `redo` |
-| Snake | none. The window opens on a new game. The best score is the vfs file |
+| Snake | none, or all four of `body`, `food`, `state` and `seed`. With none the window opens on a new game. The best score is the vfs file either way |
 
 `undo` and `redo` are length-prefixed records, using the same packing as `buf`. Each record contains exactly three length-prefixed strings: `at` (a decimal character index from 0 through 262,144, with no sign or leading zeros), `removed`, and `added`. Records stay in stack order, oldest first. Missing fields restore as empty stacks. A bad length, number, record shape, or history over either cap makes the generation `invalid`.
 
@@ -158,6 +158,8 @@ Snapshots keep the newest 100 steps in each stack, then drop oldest undo steps f
 Paint's `undo` and `redo` use the same length-prefixed packing, one record per canvas, oldest first, at most 20 in each. A record is the canvas as runs of one color, left to right and top to bottom: `<digit>x<count>` joined by commas, for example `0x2100,1x60`. Each digit is `0` to `8`, each count is a whole number from 1 with no leading zero, two runs next to each other never have the same digit, and the counts add up to exactly 2160. So every canvas has one spelling. The packed `undo` and `redo` values together are at most 32,768 characters. Anything else makes the generation `invalid`, and missing fields restore as empty stacks.
 
 Snapshots keep the newest 20 canvases in each stack, then drop the oldest undo canvases followed by the oldest redo canvases until both fit 32,768 characters. A mostly blank picture packs to a few hundred characters a step, so all 20 usually fit. A picture where every cell differs from the one before it packs to about 8,600, and then only the newest three steps are kept. Taking a snapshot does not shorten the live history. Paint's live stack still stops at 20.
+
+Snake's `body` is the snake from tail to head as `x,y` cells joined by `;`, for example `3,8;4,8;5,8`. There are 3 to 384 cells, each on the 24 by 16 board (x 0 to 23, y 0 to 15, no sign or leading zero), none twice, and each one next to the one before it. `food` is one more cell, not on the body, or `-` when there is none. `state` is `ready`, `paused`, `over` or `won`: a game in play is written as `paused`, and `ready` only goes with the start body `3,8;4,8;5,8`. `won`, a body that fills all 384 cells, and `food` `-` go together. `seed` is the food picker's seed, 1 to 2147483646. The score is not written: it is the body length less 3, and the way the snake moves is from its head and the cell behind it. Turns pressed since the last step are not kept. Anything else, or only some of the four fields, makes the generation `invalid`. The best score still comes from its vfs file, and a restored window shows at least the restored score.
 
 The IDE rebuilds its diagnostics and error column from `out` on restore, and its error highlight on the first frame. If an older snapshot names an error line without a matching diagnostic, Ctrl+E uses column 1.
 
@@ -169,7 +171,7 @@ With a workspace open and a desktop bound by `wm.workspace_bind`, key or mouse i
 
 The idle snapshot records unsaved buffers with the current vfs. It does not save Editor or IDE text into a vfs file, or save Paint's cells into its picture file. Ctrl+S and the interrupted-save fallback rules below stay the same.
 
-Not in the snapshot: a find or a rename still being typed, the clipboard, an IDE run (including one that is waiting for a line), and Snake's board. Editor, IDE and Paint undo and redo return within the history caps. An IDE program does not keep running after a restart.
+Not in the snapshot: a find or a rename still being typed, the clipboard, and an IDE run (including one that is waiting for a line). Editor, IDE and Paint undo and redo return within the history caps. An IDE program does not keep running after a restart. Snake's board returns, and a game that was moving comes back paused. Snake moving on the clock does not mark input pending, so a kill keeps the board as of the last snapshot, not the steps after it.
 
 ## What a save does
 
@@ -248,7 +250,7 @@ The next generation number is one past every id already stored or named, includi
 - A wrong-version committed file, more than 32 generation names, or an ambiguous torn pointer holds the store. Continued use does not overwrite or delete it. `workspace_release` then a later successful save may.
 - The first successful commit has no older generation. From the second on, the generation that was installed when the save started is kept until the save after next replaces it as the backup.
 - Two processes must not write one store. The format has no lock.
-- Open windows are in the snapshot the desktop writes: place, size, minimized, maximized, the Terminal's folder, output and command history, Files' folder, Editor and IDE text (saved or not) with bounded undo and redo, Notes' line, Clicker's count, and Paint's cells with bounded undo and redo. The clipboard, a running IDE program, and Snake's board are not. A files-only `save` does not write them. Window input is included after 2000 ms of idle tick time, or at the next snapshot or quit. The idle snapshot leaves the vfs files unchanged.
+- Open windows are in the snapshot the desktop writes: place, size, minimized, maximized, the Terminal's folder, output and command history, Files' folder, Editor and IDE text (saved or not) with bounded undo and redo, Notes' line, Clicker's count, and Paint's cells with bounded undo and redo, and Snake's board. The clipboard and a running IDE program are not. A files-only `save` does not write them. Window input is included after 2000 ms of idle tick time, or at the next snapshot or quit. The idle snapshot leaves the vfs files unchanged.
 - A program run in the IDE still cannot write the host disk. The store is written by the desktop, not by that program.
 - There is no fsync. This is not a promise about power loss.
 
