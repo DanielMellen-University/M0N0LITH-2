@@ -1,0 +1,6 @@
+# Ctrl+Shift+N, and Cmd+Shift+N on macOS, come as ctrl+shift+n (Files makes a
+# folder with it); Ctrl+N alone stays ctrl+n.
+use ../shell/wm
+print(wm.key_of_event({type: "key_down", key: "n", ctrl: true, alt: false, shift: true}))
+print(wm.key_of_event({type: "key_down", key: "n", ctrl: false, alt: false, shift: true, gui: true}))
+print(wm.key_of_event({type: "key_down", key: "n", ctrl: true, alt: false, shift: false}))
