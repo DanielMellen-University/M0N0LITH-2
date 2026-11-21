@@ -1342,6 +1342,11 @@ fun _term_optional_path(s, parts, default)
         return _term_path(s, parts[1])
     return default
 
+# basename uses the path spelling the user supplied, after slash normalization;
+# it does not require that it name an existing file.
+fun _term_basename(s, path)
+    _term_reply(s, _term_name(paths.base(path)))
+
 # True when the command got exactly n words after it, else prints usage. A word
 # too many is an error too: `mv a b c` must not quietly move only a (cat, rm,
 # mkdir and touch take several paths instead).
@@ -1987,7 +1992,7 @@ fun _split_words(line)
 
 
 # Commands whose words are all paths, so a word like -l or -r is a mistake, not a name.
-let _path_commands = ["cd", "ls", "cat", "mkdir", "touch", "rm", "mv", "cp", "wc", "head", "tail", "grep", "sort", "uniq", "nl", "tree", "du", "diff"]
+let _path_commands = ["cd", "ls", "cat", "mkdir", "touch", "rm", "mv", "cp", "wc", "head", "tail", "grep", "sort", "uniq", "nl", "tree", "du", "diff", "basename"]
 
 fun _term_run(s, line)
     s.cwd = _existing_dir(s.fs, s.cwd)
@@ -2017,6 +2022,8 @@ fun _term_run(s, line)
     if cmd == "help"
         _term_reply(s, "help clear history echo apps date")
         _term_reply(s, "workspace pwd cd ls cat head tail")
+        _term_reply(s, "basename")
+        _term_reply(s, "tr FROM TO path")
         _term_reply(s, "mkdir touch write rm mv cp")
         _term_reply(s, "wc grep find sort uniq nl")
         _term_reply(s, "tree du diff")
@@ -2070,6 +2077,9 @@ fun _term_run(s, line)
     else if cmd == "pwd"
         if _term_args(s, parts, 0, "pwd")
             _term_reply(s, s.cwd)
+    else if cmd == "basename"
+        if _term_args(s, parts, 1, cmd + " <path>")
+            _term_basename(s, parts[1])
     else if cmd == "cd"
         if len(parts) > 2
             _term_reply(s, "usage: cd [path]")

@@ -1,0 +1,19 @@
+# basename uses normalized path text and accepts missing paths.
+use ../shell/wm
+let t = wm.terminal.init()
+fun run(line)
+    t.buf = []
+    for c in line
+        if c == " "
+            wm.terminal.on_key(t, "space")
+        else
+            wm.terminal.on_key(t, c)
+    wm.terminal.on_key(t, "return")
+    for l in t.buf
+        print(l)
+run("basename /home/notes.txt")
+run("basename a\\b")
+run("basename \"/home/my notes.txt\"")
+run("basename")
+run("basename a b")
+run("basename -x")

@@ -1,0 +1,12 @@
+/home> basename /home/notes.txt
+notes.txt
+/home> basename a\b
+b
+/home> basename "/home/my notes.txt"
+"my notes.txt"
+/home> basename
+usage: basename <path>
+/home> basename a b
+usage: basename <path>
+/home> basename -x
+basename: no options, not even -x
