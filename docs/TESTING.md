@@ -15,7 +15,7 @@ One test: `ctest --test-dir build -C Release -R golden_shell_ide`. Or run it str
 
 ## How they are checked
 
-CMake finds every `tests/*.relic` and adds it as `golden_<name>`. `tools/run_golden.cmake` runs it from `tests/`, and it passes when it exits with 0 and its standard output matches `<name>.out` exactly (Windows line endings are ignored). A test with no `.out` file must print nothing. One more test, `check_shell`, runs `relic check` on `wm.relic`, `workspace.relic`, `desktop.relic` and `ide_diag.relic`, which catches syntax errors and undefined names in the drawing code no test runs. That is 507 tests in all, and CI runs them on Linux, macOS and Windows. The 30 `shell_workspace_*` golden programs, `workspace_restart`, and `workspace_kill` cover the store. `workspace_restart` runs four relic processes against one directory. `workspace_kill` kills a process after it has written a partial and before it publishes.
+CMake finds every `tests/*.relic` and adds it as `golden_<name>`. `tools/run_golden.cmake` runs it from `tests/`, and it passes when it exits with 0 and its standard output matches `<name>.out` exactly (Windows line endings are ignored). A test with no `.out` file must print nothing. One more test, `check_shell`, runs `relic check` on `wm.relic`, `workspace.relic`, `desktop.relic` and `ide_diag.relic`, which catches syntax errors and undefined names in the drawing code no test runs. That is 509 tests in all, and CI runs them on Linux, macOS and Windows. The 30 `shell_workspace_*` golden programs, `workspace_restart`, and `workspace_kill` cover the store. `workspace_restart` runs four relic processes against one directory. `workspace_kill` kills a process after it has written a partial and before it publishes.
 
 None of them opens the SDL window. A passing run does not prove what the desktop draws. The Linux GUI pass, and what it did not try, is in the [roadmap](ROADMAP.md#accepted-nov-7-2026).
 
@@ -78,6 +78,7 @@ Write `tests/shell_<topic>.relic`, run it, read its output, and save that as `te
 | `shell_event_keys` | named keys, modifiers and ignored events |
 | `shell_altgr` | AltGr (Ctrl+Alt) typing is text, not Ctrl+S |
 | `shell_cmd_keys` | Cmd with a letter acts like Ctrl (Cmd+S, Cmd+Z, Cmd+A on macOS) |
+| `shell_ctrl_shift_n` | Ctrl+Shift+N and Cmd+Shift+N come as `ctrl+shift+n`, and Ctrl+N alone stays `ctrl+n` |
 | `shell_held_keys` | repeated key_down events from held keys, and key_up |
 | `shell_window_cycle` | Ctrl+Tab brings the lowest visible window to the front and goes round, skips minimized ones, does nothing with no windows, and no app sees the key; Ctrl+Shift+Tab going the other way and undoing a Ctrl+Tab; Ctrl+W closing the window with focus and leaving a minimized one; Ctrl+M minimizing it; Ctrl+1 to Ctrl+9 picking a window by its taskbar place |
 | `shell_window_digits` | Ctrl+9 picks by launch order after stacking changes and restores a minimized ninth window; Ctrl+0 changes nothing |
@@ -214,6 +215,7 @@ Write `tests/shell_<topic>.relic`, run it, read its output, and save that as `te
 | `shell_files_ancestor` | Files and Terminal recover after an ancestor folder moves |
 | `shell_files_selection` | Files keeps its selection across directory changes |
 | `shell_files_changed_click` | Files ignores a click on rows changed since drawing |
+| `shell_files_new` | Ctrl+N makes an empty file and Ctrl+Shift+N an empty folder in the folder shown, selected, the file picked for the next Editor; not over a name that is there, not an empty, `.`, `..` or / name; Esc, another key and a click give up; Backspace and Ctrl+U edit the name |
 | `shell_files_rename` | F2 renames a file or a folder (with what is in it) and keeps it selected; not over a name that is there, not to a name with /, Esc, the same name and ..; a long name showing its end, a click or another key giving up a rename, a click a Delete question; the next Editor's file follows a rename or a Terminal mv |
 | `shell_files_resize_click` | Files waits for a redraw after a resize before accepting a row click |
 | `shell_files_up_down` | Up and Down move one row at a time and stop at the first and last row |
