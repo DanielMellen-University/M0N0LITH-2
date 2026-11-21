@@ -1,0 +1,28 @@
+/home> cut -d , -f 1,3 "csv file"
+a,c
+1,3
+x,
+last,
+/home> cut -d , -f 2-4 "csv file"
+b,c,
+,3,
+y,,
+,,
+/home> cut -d , -f 3-1 "csv file"
+cut: bad fields: 3-1
+/home> cut -d xx -f 1 csv
+cut: delimiter must be one character
+/home> cut -d , -f 0 csv
+cut: bad fields: 0
+/home> cut -d , -f 1,,2 csv
+cut: bad fields: 1,,2
+/home> cut -d , -g 1 csv
+cut: unknown flag: -g
+/home> cut -x , -f 1 csv
+cut: unknown flag: -x
+/home> cut -d , -f 1 missing
+cut: not found: /home/missing
+/home> cut -d , -f 1 /home
+cut: is a folder: /home
+/home> cut -d , -f 1
+usage: cut -d <delimiter> -f <fields> <path>
