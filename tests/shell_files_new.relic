@@ -1,0 +1,78 @@
+# Files Ctrl+N and Ctrl+Shift+N: type a name in the title, Return makes an
+# empty file or folder in the folder shown and selects it. A new file is the
+# one the next Editor opens. Not over a name that is there, not a name with a
+# /, and Esc, a click or another key gives up.
+use ../shell/wm
+use std/vfs
+let d = wm.new_desktop(640, 480, wm.default_apps())
+let f = wm.launch(d, wm.files_app)
+let fs = f.state.fs
+vfs.make_dir(fs, "/tmp/n")
+vfs.write(fs, "/tmp/n/b.txt", "keep")
+f.state.path = "/tmp/n"
+fun title() = wm.visible_lines(f)[0]
+fun keys(list)
+    for k in list
+        wm.key(d, k)
+fun typed(t)
+    for ch in t
+        if ch == " "
+            wm.key(d, "space")
+        else
+            wm.key(d, ch)
+fun selected() = f.state.names[f.state.sel]
+keys(["ctrl+n"])
+print(title())
+typed("a note.txt")
+print(title())
+keys(["return"])
+print(wm.visible_lines(f), vfs.read(fs, "/tmp/n/a note.txt") == "", selected())
+let e = wm.launch(d, wm.editor)
+print(e.state.path, e.state.status)
+keys(["ctrl+tab"])   # Files to the front again
+keys(["ctrl+shift+n"])
+print(title())
+typed("plans")
+keys(["return"])
+print(wm.visible_lines(f), vfs.is_dir(fs, "/tmp/n/plans"), selected())
+keys(["return", "ctrl+shift+n"])
+typed("inner")
+keys(["return"])
+print(wm.visible_lines(f), vfs.is_dir(fs, "/tmp/n/plans/inner"))
+keys(["backspace"])
+# not over a name that is there, file or folder
+keys(["ctrl+n"])
+typed("b.txt")
+keys(["return"])
+print(title(), vfs.read(fs, "/tmp/n/b.txt"))
+keys(["ctrl+shift+n"])
+typed("plans")
+keys(["return"])
+print(title())
+# not a name: empty, spaces only, a /, . or ..
+for bad in ["", "  ", "x/y", ".", ".."]
+    keys(["ctrl+n"])
+    typed(bad)
+    keys(["return"])
+    print(title())
+# Esc gives up and is taken; a click and another key give up too
+keys(["ctrl+n"])
+typed("never")
+print(wm.dismiss(d), title())
+keys(["ctrl+n"])
+typed("never")
+keys(["down"])
+print(title(), selected())
+keys(["ctrl+shift+n"])
+typed("never")
+f.app.on_click(f.state, 8, 0)   # on the title line, so no row opens
+print(title(), vfs.exists(fs, "/tmp/n/never"))
+# Backspace and Ctrl+U edit the name being typed
+keys(["ctrl+n"])
+typed("draftt")
+keys(["backspace"])
+print(title())
+keys(["ctrl+u"])
+typed("c.md")
+keys(["return"])
+print(selected(), vfs.exists(fs, "/tmp/n/c.md"))

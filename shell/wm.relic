@@ -2495,7 +2495,10 @@ fun _files_lines(s)
         cols = s.cols
     let out = [_fit_path("Files: ", s.path, cols)]
     if "renaming" in s and s.renaming != none
-        out[0] = "rename: " + s.renaming.text + "_"
+        let label = "rename: "
+        if "kind" in s.renaming and s.renaming.kind != "rename"
+            label = "new " + s.renaming.kind + ": "
+        out[0] = label + s.renaming.text + "_"
         out[0] = _fit_typing(out[0], cols)   # a long name keeps its end
     else if s.confirm != none
         # a long name is cut, not the "Delete again" that says what to press
@@ -2566,9 +2569,46 @@ fun _files_click(s, x, y)
 # F2 renames the selected row: the title reads "rename: name_" with its
 # name to edit, Return renames it in the same folder (not over a name that
 # is there, and not to a name with a /), and Esc gives up.
+# Ctrl+N and Ctrl+Shift+N type a name the same way, and Return makes an empty
+# file or folder of that name in the folder shown, then selects it. A new file
+# is also the file the next Editor opens.
+fun _files_make(s, kind, text)
+    let name = strings.trim(text)
+    if name == "" or strings.contains(name, "/") or name == "." or name == ".."
+        s.note = "not made: not a name"
+        return
+    if not vfs.is_dir(s.fs, s.path)
+        s.note = "gone: " + s.path
+        return
+    let full = _files_full(s, name)
+    if vfs.exists(s.fs, full)
+        s.note = "already there: " + name
+        return
+    try
+        if kind == "folder"
+            vfs.make_dir(s.fs, full)
+        else
+            vfs.write(s.fs, full, "")
+    catch err
+        s.note = err.message
+        return
+    if kind == "file"
+        _shell_open.path = full
+    let saved = _fs_commit()
+    if saved != ""
+        s.note = saved
+    let names = _files_names(s)
+    for i in 0..len(names)
+        if names[i] == name
+            s.sel = i
+    s.stale = false
+
 fun _files_rename_key(s, k)
     let r = s.renaming
-    if k == "return" or k == "enter"
+    if (k == "return" or k == "enter") and "kind" in r and r.kind != "rename"
+        s.renaming = none
+        _files_make(s, r.kind, r.text)
+    else if k == "return" or k == "enter"
         s.renaming = none
         let name = strings.trim(r.text)
         let old = paths.base(r.from)
@@ -2651,7 +2691,13 @@ fun _files_key(s, k)
     if k == "f2"
         if len(names) > 0 and names[s.sel] != ".." and not s.stale
             let full = _files_full(s, names[s.sel])
-            s.renaming = {from: full, text: names[s.sel]}
+            s.renaming = {from: full, text: names[s.sel], kind: "rename"}
+        return
+    if k == "ctrl+n" or k == "ctrl+shift+n"
+        let kind = "file"
+        if k == "ctrl+shift+n"
+            kind = "folder"
+        s.renaming = {from: none, text: "", kind: kind}
         return
     if k == "delete"
         if len(names) == 0 or names[s.sel] == ".." or s.stale
