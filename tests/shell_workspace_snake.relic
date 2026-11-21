@@ -1,0 +1,125 @@
+# Restart keeps Snake's board: the body, the food, the seed and the state.
+# A game in play comes back paused and then plays on exactly as it would have.
+use ../shell/wm
+use std/files
+
+fun check(label, got, want)
+    if got != want
+        fail(label + ": " + str(got) + " != " + str(want))
+
+fun desktop() = wm.new_desktop(640, 480, wm.default_apps())
+
+fun reload(dir)
+    check("snapshot", wm.workspace_flush(), "")
+    wm.workspace_open(dir)
+    let d = desktop()
+    wm.workspace_bind(d)
+    check("load", wm.workspace_notice(), "")
+    return d
+
+fun image(body)
+    let prefix = "M2WS1\n" + body
+    let sum = 0
+    let weight = len(prefix)
+    for c in prefix
+        sum = (sum + ord(c) * weight) % 1000000007
+        weight = weight - 1
+    return prefix + "Z " + str(sum) + "\n.\n"
+
+fun board(s) = [s.body, s.food, s.dir, s.score, s.seed]
+
+# Tick every 10 ms from t until the snake has taken n steps or stopped.
+fun run(d, s, t, n)
+    let moves = 0
+    let last = len(s.body)
+    let head = s.body[len(s.body) - 1]
+    while moves < n and s.state == "playing"
+        t = t + 10
+        wm.tick(d, t)
+        let h = s.body[len(s.body) - 1]
+        if h != head
+            moves = moves + 1
+            head = h
+    return t
+
+let dir = "ws-snake"
+wm.workspace_open(dir)
+let live = desktop()
+wm.workspace_bind(live)
+let s = wm.launch(live, wm.snake).state
+check("new game", s.state, "ready")
+let fresh = reload(dir)
+check("ready comes back ready", [fresh.windows[0].state.state, fresh.windows[0].state.body], ["ready", s.body])
+print("a game not started comes back ready")
+
+wm.workspace_bind(live)   # binding again applies the snapshot to this desktop
+s = live.windows[0].state
+wm.key(live, "right")
+let t = run(live, s, 0, 4)
+s.food = [s.body[2][0] + 2, 8]   # two cells ahead, so it eats on the way
+t = run(live, s, t, 3)
+wm.key(live, "down")
+t = run(live, s, t, 2)
+check("ate once", [s.score, len(s.body), s.state], [1, 4, "playing"])
+let restored = reload(dir)
+let r = restored.windows[0].state
+check("paused on restart", r.state, "paused")
+check("same board", board(r), board(s))
+check("best counts the score", r.best >= 1, true)
+check("help line", wm.snake.lines(r)[1], "paused: space to go on")
+print("a game in play comes back paused with the same board, score and seed")
+
+wm.key(restored, "space")
+check("goes on", r.state, "playing")
+s.next_at = none
+r.next_at = none
+let steps = 0
+while s.state == "playing" and steps < 400
+    t = t + 10
+    wm.tick(live, t)
+    wm.tick(restored, t)
+    check("same step at " + str(t), board(r), board(s))
+    if s.body[len(s.body) - 1][1] >= 14 and s.dir == [0, 1]
+        wm.key(live, "left")
+        wm.key(restored, "left")
+    steps = steps + 1
+check("same end", [r.state, r.score], [s.state, s.score])
+check("it ended on a wall", s.state, "over")
+print("the restored game plays on like the one that never stopped")
+
+restored = reload(dir)
+r = restored.windows[0].state
+check("over comes back over", [r.state, board(r)], ["over", board(s)])
+wm.key(restored, "r")
+check("r starts again", [r.state, r.score, len(r.body)], ["ready", 0, 3])
+print("a game that ended comes back ended, and r starts a new one")
+
+# A won board fills every cell: rows left to right, then right to left.
+let body = []
+for y in 0..16
+    for i in 0..24
+        let x = i
+        if y % 2 == 1
+            x = 23 - i
+        append(body, [x, y])
+r.body = body
+r.food = none
+r.state = "won"
+r.score = 381
+restored = reload(dir)
+r = restored.windows[0].state
+check("won comes back won", [r.state, r.score, r.food, len(r.body)], ["won", 381, none, 384])
+print("a won board comes back won with score 381")
+files.remove_tree(dir)
+
+# A generation written before Snake's board was saved opens a new game.
+files.make_dir(dir)
+files.write(dir + "/g1.m2ws", image("S W Snake 1 40 30 210 170 0\n"))
+files.write(dir + "/COMMITTED", "g1\n")
+wm.workspace_open(dir)
+let old = desktop()
+wm.workspace_bind(old)
+check("old generation", wm.workspace_notice(), "")
+check("old snapshot new game", [old.windows[0].state.state, old.windows[0].state.score], ["ready", 0])
+files.remove_tree(dir)
+print("old snapshots start a new game")

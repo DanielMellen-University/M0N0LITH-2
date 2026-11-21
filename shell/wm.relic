@@ -5076,6 +5076,27 @@ fun _snake_init()
     _snake_reset(s)
     return s
 
+# A board from a workspace snapshot. The score is how much the snake grew,
+# and it moves the way its head last went.
+fun _snake_restore(f)
+    let body = workspace.unpack_snake_body(f.body)
+    let food = none
+    if f.food != "-"
+        let parts = strings.split(f.food, ",")
+        food = [int(parts[0]), int(parts[1])]
+    let h = body[len(body) - 1]
+    let neck = body[len(body) - 2]
+    let s = {now: 0, seed: workspace.parse_snake_seed(f.seed), fs: _shell_fs, best: 0}
+    s.body = body
+    s.dir = [h[0] - neck[0], h[1] - neck[1]]
+    s.turns = []
+    s.score = len(body) - 3
+    s.state = f.state
+    s.next_at = none
+    s.food = food
+    s.best = math.max(s.score, _snake_read_best(s.fs))
+    return s
+
 fun _snake_reset(s)
     # body runs from the tail to the head, which is last
     s.body = [[3, 8], [4, 8], [5, 8]]
@@ -5364,7 +5385,17 @@ fun _fields_of(w, lines)
             return false
         return _sf_paint_history(lines, s)
     if name == "Snake"
-        return true
+        # A game in play comes back paused, so it does not run on before the
+        # player is looking. Turns pressed since the last step are not kept.
+        let state = s.state
+        if state == "playing"
+            state = "paused"
+        let food = "-"
+        if s.food != none
+            food = str(s.food[0]) + "," + str(s.food[1])
+        if not _sf(lines, "body", workspace.pack_snake_body(s.body)) or not _sf(lines, "food", food)
+            return false
+        return _sf(lines, "state", state) and _sf(lines, "seed", str(s.seed))
     return false
 
 fun _session_lines(d)
@@ -5441,6 +5472,8 @@ fun _restore_state(w)
         if "redo" in f
             redo = workspace.unpack_canvases(f.redo)
         return {fs: _shell_fs, path: f.path, cells: cells, color: int(f.color), size: int(f.size), last: none, stroke: false, undo: undo, redo: redo, status: f.status, foreign: f.foreign == "1", tool: f.tool, anchor: none, base: none, naming: none, other: 0}
+    if "body" in f
+        return _snake_restore(f)
     return _snake_init()
 
 fun _apply_session(d, sess)
