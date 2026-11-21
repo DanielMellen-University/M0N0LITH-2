@@ -1,0 +1,20 @@
+# dirname returns a normalized path's folder, or a dot for a local name.
+use ../shell/wm
+let t = wm.terminal.init()
+fun run(line)
+    t.buf = []
+    for c in line
+        if c == " "
+            wm.terminal.on_key(t, "space")
+        else
+            wm.terminal.on_key(t, c)
+    wm.terminal.on_key(t, "return")
+    for l in t.buf
+        print(l)
+run("dirname /home/notes.txt")
+run("dirname notes.txt")
+run("dirname /")
+run("dirname \"my notes/file.txt\"")
+run("dirname")
+run("dirname a b")
+run("dirname -x")

@@ -1,0 +1,14 @@
+/home> dirname /home/notes.txt
+/home
+/home> dirname notes.txt
+.
+/home> dirname /
+/
+/home> dirname "my notes/file.txt"
+"my notes"
+/home> dirname
+usage: dirname <path>
+/home> dirname a b
+usage: dirname <path>
+/home> dirname -x
+dirname: no options, not even -x
