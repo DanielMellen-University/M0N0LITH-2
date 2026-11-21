@@ -10,6 +10,7 @@ The game. Its window is 210 by 170: a score line, a help line, and a board of 24
 - Running into a wall or into itself ends the game, with the snake left where it was. Filling the whole board wins.
 - Space or P pauses and goes on (either also starts a new game). R or Return starts again after a game ends, and N starts a new game at any time, giving up the one going on (its score still counts for the best if it beat it).
 - The best score is saved in `/home/snake-best.txt` in the desktop's files (one whole number) whenever it is beaten, and read when a Snake window opens and when a new game starts, so two Snake windows share it. A file that holds no whole number counts as 0. With a workspace open, that file is committed with the other files. The score line's second row becomes the save failure when the commit fails. Without a workspace it is still gone when the process ends.
+- With a workspace open, the board is in the window snapshot too: the snake, the food and the score come back in a new process. A game that was moving comes back paused (`paused: space to go on`), and a game that was over or won comes back that way. Turns pressed since the last step are not kept. See [Workspace recovery](../workspace-recovery.md).
 
 The score line reads `Snake  score N  best M`. The help line says what to press next.
 
