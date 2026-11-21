@@ -1,0 +1,84 @@
+# Paint keeps whole canvases in both stacks, independently of its picture file.
+use ../shell/wm
+use std/vfs
+
+fun check(label, got, want)
+    if got != want
+        fail(label + ": " + str(got) + " != " + str(want))
+
+fun desktop() = wm.new_desktop(640, 480, wm.default_apps())
+fun picture(s) = [s.cells, s.undo, s.redo, s.status]
+
+fun reload()
+    check("snapshot", wm.workspace_flush(), "")
+    wm.workspace_open("ws-paint-history")
+    let d = desktop()
+    wm.workspace_bind(d)
+    check("load", wm.workspace_notice(), "")
+    return d
+
+wm.workspace_open("ws-paint-history")
+let live = desktop()
+wm.workspace_bind(live)
+let w = wm.launch(live, wm.paint_app)
+let s = w.state
+# Brush, filled rectangle, fill and clear. Undo twice leaves both stacks used.
+wm.paint_app.on_click(s, 10, 44)
+wm.paint_app.on_drag(s, 26, 44)
+wm.key(live, "2")
+wm.key(live, "R")
+wm.paint_app.on_click(s, 46, 80)
+wm.paint_app.on_drag(s, 58, 88)
+wm.key(live, "f")
+wm.paint_app.on_click(s, 6, 40)
+wm.key(live, "c")
+wm.key(live, "ctrl+z")
+wm.key(live, "ctrl+z")
+let restored = reload()
+let r = restored.windows[0].state
+check("both stacks", [len(r.undo), len(r.redo)], [2, 2])
+check("whole state", picture(r), picture(s))
+check("file still unsaved", vfs.exists(r.fs, r.path), false)
+check("no active stroke", [r.stroke, r.anchor, r.last, r.base], [false, none, none, none])
+for k in ["ctrl+y", "ctrl+y", "ctrl+y", "ctrl+z", "ctrl+z", "ctrl+z", "ctrl+z", "ctrl+z", "ctrl+y", "ctrl+y"]
+    wm.key(live, k)
+    wm.key(restored, k)
+    check("same canvas and history " + k, picture(r), picture(s))
+wm.key(restored, "c")
+check("new change clears redo", r.redo, [])
+print("brush, shape, fill and clear undo and redo match uninterrupted Paint")
+
+# Bounds apply to copies, newest first retained. A full canvas is 2160 cells.
+# Populate oversized stacks to exercise the serializer independently of the
+# live app's existing 20-step drawing limit.
+r.undo = []
+r.redo = []
+for i in 0..102
+    let cells = slice(r.cells, 0, len(r.cells))
+    cells[0] = i % 9
+    append(r.undo, cells)
+    append(r.redo, slice(cells, 0, len(cells)))
+restored = reload()
+check("live history unchanged", [len(r.undo), len(r.redo)], [102, 102])
+r = restored.windows[0].state
+check("shared cell cap", [len(r.undo), len(r.redo)], [0, 30])
+check("newest redo retained", r.redo[0][0], 72 % 9)
+wm.key(restored, "ctrl+y")
+check("redo newest first", r.cells[0], 101 % 9)
+for i in 0..29
+    wm.key(restored, "ctrl+y")
+check("redo retained oldest last", r.cells[0], 72 % 9)
+print("snapshot copies retain at most 100 steps each and 65536 cells combined")
+
+# Exactly 30 canvases fit; the next canvas drops oldest undo before redo.
+r.undo = slice(r.undo, 0, 15)
+r.redo = slice(r.undo, 0, 15)
+restored = reload()
+r = restored.windows[0].state
+check("30 canvases fit", [len(r.undo), len(r.redo)], [15, 15])
+append(r.undo, slice(r.cells, 0, len(r.cells)))
+let oldest_kept = r.undo[1]
+restored = reload()
+r = restored.windows[0].state
+check("oldest undo dropped first", [len(r.undo), len(r.redo), r.undo[0]], [15, 15, oldest_kept])
+print("cell cap keeps 30 full canvases and drops oldest undo before redo")

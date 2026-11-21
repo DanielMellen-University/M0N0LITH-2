@@ -15,6 +15,7 @@ let max_damaged_files = 4
 let max_store_path = 1024
 let max_history_steps = 100
 let max_history_text = 65536
+let max_paint_history_cells = 65536
 
 let _dir = none
 let _fault = none
@@ -452,6 +453,39 @@ fun _editor_fields_ok(f)
                 size = size + len(step.removed) + len(step.added)
     return size <= max_history_text
 
+fun _paint_cells_ok(value)
+    if len(value) != 2160
+        return false
+    for c in value
+        if c < "0" or c > "8"
+            return false
+    return true
+
+# Paint's live undo steps are whole canvases, packed oldest first.
+fun unpack_paint_history(value)
+    let rows = unpack_lines(value, max_history_steps)
+    if rows == none
+        return none
+    let steps = []
+    for row in rows
+        if not _paint_cells_ok(row)
+            return none
+        let cells = []
+        for c in row
+            append(cells, ord(c) - 48)
+        append(steps, cells)
+    return steps
+
+fun _paint_history_ok(f)
+    let size = 0
+    for key in ["undo", "redo"]
+        if key in f
+            let steps = unpack_paint_history(f[key])
+            if steps == none
+                return false
+            size = size + len(steps) * 2160
+    return size <= max_paint_history_cells
+
 # Snake stores cell indices tail first. The last cell is the head.
 fun pack_snake_cells(cells)
     let rows = []
@@ -561,12 +595,7 @@ fun _session_values(win)
             return false
         if _parse_int(f.color, 0, 8) == none or _parse_int(f.size, 1, 4) == none
             return false
-        if len(f.cells) != 2160
-            return false
-        for c in f.cells
-            if c < "0" or c > "8"
-                return false
-        return true
+        return _paint_cells_ok(f.cells) and _paint_history_ok(f)
     return true
 
 fun _start_window(line, ids)
@@ -610,7 +639,7 @@ fun _finish_window(win)
     let need = _session_need(win.app)
     let got = 0
     for k in win.fields
-        if not ((win.app == "Editor" or win.app == "IDE") and (k == "undo" or k == "redo"))
+        if not ((win.app == "Editor" or win.app == "IDE" or win.app == "Paint") and (k == "undo" or k == "redo"))
             got = got + 1
     if got != len(need)
         return false

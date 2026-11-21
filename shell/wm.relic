@@ -5278,6 +5278,25 @@ fun _paint_digits(cells)
         out = out + str(c)
     return out
 
+fun _sf_paint_history(lines, s)
+    let undo = slice(s.undo, math.max(0, len(s.undo) - workspace.max_history_steps), len(s.undo))
+    let redo = slice(s.redo, math.max(0, len(s.redo) - workspace.max_history_steps), len(s.redo))
+    let size = (len(undo) + len(redo)) * _paint_w * _paint_h
+    for steps in [undo, redo]
+        while size > workspace.max_paint_history_cells and len(steps) > 0
+            remove(steps, 0)
+            size = size - _paint_w * _paint_h
+    let packed = []
+    for steps in [undo, redo]
+        let rows = []
+        for cells in steps
+            let digits = _paint_digits(cells)
+            if digits == none
+                return false
+            append(rows, digits)
+        append(packed, workspace.pack_lines(rows))
+    return _sf(lines, "undo", packed[0]) and _sf(lines, "redo", packed[1])
+
 # A maximized window is written at the place it goes back to, with 2 added to
 # the minimized flag, so a new process can maximize it again on its own desktop.
 fun _window_header(w)
@@ -5337,7 +5356,7 @@ fun _fields_of(w, lines)
             return false
         if not _sf(lines, "color", str(s.color)) or not _sf(lines, "size", str(s.size))
             return false
-        return _sf(lines, "tool", s.tool) and _sf(lines, "status", s.status) and _sf(lines, "foreign", foreign)
+        return _sf(lines, "tool", s.tool) and _sf(lines, "status", s.status) and _sf(lines, "foreign", foreign) and _sf_paint_history(lines, s)
     if name == "Snake"
         let food = "-"
         if s.food != none
@@ -5419,7 +5438,13 @@ fun _restore_state(w)
         let cells = []
         for c in f.cells
             append(cells, ord(c) - 48)
-        return {fs: _shell_fs, path: f.path, cells: cells, color: int(f.color), size: int(f.size), last: none, stroke: false, undo: [], redo: [], status: f.status, foreign: f.foreign == "1", tool: f.tool, anchor: none, base: none, naming: none, other: 0}
+        let undo = []
+        let redo = []
+        if "undo" in f
+            undo = workspace.unpack_paint_history(f.undo)
+        if "redo" in f
+            redo = workspace.unpack_paint_history(f.redo)
+        return {fs: _shell_fs, path: f.path, cells: cells, color: int(f.color), size: int(f.size), last: none, stroke: false, undo: undo, redo: redo, status: f.status, foreign: f.foreign == "1", tool: f.tool, anchor: none, base: none, naming: none, other: 0}
     let s = _snake_init()
     if "body" in f
         s.body = workspace.unpack_snake_cells(f.body)

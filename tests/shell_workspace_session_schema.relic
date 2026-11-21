@@ -127,7 +127,7 @@ for app in ["Editor", "IDE"]
     let large = workspace.pack_steps([{at: 0, removed: repeat("a", 32768), added: "b"}])
     reject(app + " shared history text cap", body + "S F undo " + workspace.escape(large) + "\nS F redo " + workspace.escape(large) + "\n")
     print(app, "optional history and strict step schema checked")
-for app in ["Terminal", "Files", "Notes", "Clicker", "Paint", "Snake"]
+for app in ["Terminal", "Files", "Notes", "Clicker", "Snake"]
     for key in ["undo", "redo"]
         reject(app + " has no " + key, session(app, samples[app]) + "S F " + key + " \n")
 let clicker = session("Clicker", samples.Clicker)

@@ -1,0 +1,3 @@
+brush, shape, fill and clear undo and redo match uninterrupted Paint
+snapshot copies retain at most 100 steps each and 65536 cells combined
+cell cap keeps 30 full canvases and drops oldest undo before redo
