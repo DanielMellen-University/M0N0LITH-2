@@ -99,6 +99,8 @@ Caps, applied while parsing, before the session vfs is changed:
 | one path | 240 characters |
 | one Editor or IDE window's history | 100 undo steps and 100 redo steps |
 | removed plus added text in that window's history | 65,536 characters across both stacks |
+| one Paint window's history | 20 undo canvases and 20 redo canvases |
+| that Paint history, packed | 32,768 characters across both stacks |
 
 The reader checks the UTF-8 byte cap again after reading, in case the file grew after `files.size`. The writer checks the same cap before writing a partial. A Unicode image that would be too large to reload fails with `image too large`; the pointer and metadata stay unchanged.
 
@@ -136,7 +138,7 @@ A generation written by the desktop records the open windows in the same file as
 | `S W <App> <id> <x> <y> <width> <height> <0 to 3>` | one window, back to front. App is Clicker, Notes, Terminal, Files, Editor, IDE, Paint, or Snake. `1` means minimized, `2` maximized and `3` both. For a maximized window x to height are the place it goes back to, and a new desktop maximizes it again at its own size. id is unique, from 1 |
 | `S F <key> <escaped value>` | one field of the window started by the previous `W`. The value uses the same escapes as a file. No raw space |
 
-A session has at most 64 windows. Only the Editor and IDE `undo` and `redo` fields are optional. A missing required field, an extra field, a bad number, a duplicate id, or anything else malformed in an `S` line is `invalid`. The vfs in that same file is not installed either.
+A session has at most 64 windows. Only the Editor, IDE and Paint `undo` and `redo` fields are optional. A missing required field, an extra field, a bad number, a duplicate id, or anything else malformed in an `S` line is `invalid`. The vfs in that same file is not installed either.
 
 | App | Fields |
 |---|---|
@@ -146,12 +148,16 @@ A session has at most 64 windows. Only the Editor and IDE `undo` and `redo` fiel
 | IDE | the Editor fields, plus `out` (length-prefixed lines, at most 200) and `err` (`-` or a line number) |
 | Notes | `text`, `left` |
 | Clicker | `count` |
-| Paint | `path`, `cells` (2160 digits, each `0` to `8`), `color`, `size`, `tool`, `status`, `foreign` (`0` or `1`) |
+| Paint | `path`, `cells` (2160 digits, each `0` to `8`), `color`, `size`, `tool`, `status`, `foreign` (`0` or `1`), optional `undo` and `redo` |
 | Snake | none. The window opens on a new game. The best score is the vfs file |
 
 `undo` and `redo` are length-prefixed records, using the same packing as `buf`. Each record contains exactly three length-prefixed strings: `at` (a decimal character index from 0 through 262,144, with no sign or leading zeros), `removed`, and `added`. Records stay in stack order, oldest first. Missing fields restore as empty stacks. A bad length, number, record shape, or history over either cap makes the generation `invalid`.
 
 Snapshots keep the newest 100 steps in each stack, then drop oldest undo steps followed by oldest redo steps until their combined removed and added text fits 65,536 characters. Taking a snapshot does not shorten the live history. Restored Ctrl+Z and Ctrl+Y use the usual cursor placement and clear the selection. If a step does not fit the buffer or the text it would remove does not match, both stacks clear and the text stays unchanged; the status is `nothing to undo` or `nothing to redo`.
+
+Paint's `undo` and `redo` use the same length-prefixed packing, one record per canvas, oldest first, at most 20 in each. A record is the canvas as runs of one color, left to right and top to bottom: `<digit>x<count>` joined by commas, for example `0x2100,1x60`. Each digit is `0` to `8`, each count is a whole number from 1 with no leading zero, two runs next to each other never have the same digit, and the counts add up to exactly 2160. So every canvas has one spelling. The packed `undo` and `redo` values together are at most 32,768 characters. Anything else makes the generation `invalid`, and missing fields restore as empty stacks.
+
+Snapshots keep the newest 20 canvases in each stack, then drop the oldest undo canvases followed by the oldest redo canvases until both fit 32,768 characters. A mostly blank picture packs to a few hundred characters a step, so all 20 usually fit. A picture where every cell differs from the one before it packs to about 8,600, and then only the newest three steps are kept. Taking a snapshot does not shorten the live history. Paint's live stack still stops at 20.
 
 The IDE rebuilds its diagnostics and error column from `out` on restore, and its error highlight on the first frame. If an older snapshot names an error line without a matching diagnostic, Ctrl+E uses column 1.
 
@@ -163,7 +169,7 @@ With a workspace open and a desktop bound by `wm.workspace_bind`, key or mouse i
 
 The idle snapshot records unsaved buffers with the current vfs. It does not save Editor or IDE text into a vfs file, or save Paint's cells into its picture file. Ctrl+S and the interrupted-save fallback rules below stay the same.
 
-Not in the snapshot: Paint undo and redo, a find or a rename still being typed, the clipboard, an IDE run (including one that is waiting for a line), and Snake's board. Editor and IDE undo and redo return within the history caps. An IDE program does not keep running after a restart.
+Not in the snapshot: a find or a rename still being typed, the clipboard, an IDE run (including one that is waiting for a line), and Snake's board. Editor, IDE and Paint undo and redo return within the history caps. An IDE program does not keep running after a restart.
 
 ## What a save does
 
@@ -242,7 +248,7 @@ The next generation number is one past every id already stored or named, includi
 - A wrong-version committed file, more than 32 generation names, or an ambiguous torn pointer holds the store. Continued use does not overwrite or delete it. `workspace_release` then a later successful save may.
 - The first successful commit has no older generation. From the second on, the generation that was installed when the save started is kept until the save after next replaces it as the backup.
 - Two processes must not write one store. The format has no lock.
-- Open windows are in the snapshot the desktop writes: place, size, minimized, maximized, the Terminal's folder, output and command history, Files' folder, Editor and IDE text (saved or not) with bounded undo and redo, Notes' line, Clicker's count, and Paint's cells. Paint undo, the clipboard, a running IDE program, and Snake's board are not. A files-only `save` does not write them. Window input is included after 2000 ms of idle tick time, or at the next snapshot or quit. The idle snapshot leaves the vfs files unchanged.
+- Open windows are in the snapshot the desktop writes: place, size, minimized, maximized, the Terminal's folder, output and command history, Files' folder, Editor and IDE text (saved or not) with bounded undo and redo, Notes' line, Clicker's count, and Paint's cells with bounded undo and redo. The clipboard, a running IDE program, and Snake's board are not. A files-only `save` does not write them. Window input is included after 2000 ms of idle tick time, or at the next snapshot or quit. The idle snapshot leaves the vfs files unchanged.
 - A program run in the IDE still cannot write the host disk. The store is written by the desktop, not by that program.
 - There is no fsync. This is not a promise about power loss.
 
