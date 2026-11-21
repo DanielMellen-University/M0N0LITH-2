@@ -1,0 +1,16 @@
+/home> tr abc XZY letters.txt
+YXZ
+XZY á
+/home> tr "á" "é" letters.txt
+cab
+abc é
+/home> tr ab X letters.txt
+tr: FROM and TO must have the same number of characters
+/home> tr abc XZY missing
+tr: not found: /home/missing
+/home> tr abc XZY /home
+tr: is a folder: /home
+/home> tr abc XZY -file
+tr: no options, not even -file
+/home> tr abc XZY
+usage: tr <from> <to> <path>

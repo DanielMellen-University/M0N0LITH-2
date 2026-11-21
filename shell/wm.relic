@@ -1807,6 +1807,38 @@ fun _term_cut(s, delim, spec, path)
                 append(chosen, "")
         _term_reply(s, strings.join(chosen, delim))
 
+# tr replaces each input character by the character at the same position in
+# TO. Relic strings iterate and count Unicode characters, not UTF-8 bytes.
+fun _term_tr(s, from, to, path)
+    if len(from) != len(to)
+        _term_reply(s, "tr: FROM and TO must have the same number of characters")
+        return
+    if _term_not_folder(s, "tr", path, false)
+        return
+    let p = _term_path(s, path)
+    if not vfs.exists(s.fs, p)
+        _term_reply(s, "tr: " + _term_missing(s, p))
+        return
+    if vfs.is_dir(s.fs, p)
+        _term_reply(s, "tr: is a folder: " + p)
+        return
+    let out = ""
+    for c in vfs.read(s.fs, p)
+        let at = 0
+        for source in from
+            if c == source
+                c = to[at]
+                break
+            at = at + 1
+        out = out + c
+    if out == ""
+        return
+    let lines = strings.lines(out)
+    if strings.ends_with(out, "\n") and len(lines) > 0 and lines[len(lines) - 1] == ""
+        lines = slice(lines, 0, len(lines) - 1)
+    for line in slice(lines, math.max(0, len(lines) - term_history), len(lines))
+        _term_reply(s, line)
+
 # find: every file and folder under the current folder whose name has the
 # text in it (the name, not the path), as paths from there, in the order ls
 # shows them, each folder followed by what is in it; as many as the output keeps.
@@ -2201,6 +2233,13 @@ fun _term_run(s, line)
             _term_reply(s, "cut: no options, not even " + parts[5])
         else
             _term_cut(s, parts[2], parts[4], parts[5])
+    else if cmd == "tr"
+        if len(parts) != 4
+            _term_reply(s, "usage: tr <from> <to> <path>")
+        else if strings.starts_with(parts[3], "-")
+            _term_reply(s, "tr: no options, not even " + parts[3])
+        else
+            _term_tr(s, parts[1], parts[2], parts[3])
     else if cmd == "find"
         if _term_args(s, parts, 1, "find <text>")
             _term_find(s, parts[1])

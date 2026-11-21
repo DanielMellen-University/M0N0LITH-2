@@ -1,0 +1,22 @@
+# tr maps characters by position, including Unicode characters.
+use ../shell/wm
+use std/vfs
+let t = wm.terminal.init()
+fun run(line)
+    t.buf = []
+    for c in line
+        if c == " "
+            wm.terminal.on_key(t, "space")
+        else
+            wm.terminal.on_key(t, c)
+    wm.terminal.on_key(t, "return")
+    for l in t.buf
+        print(l)
+vfs.write(t.fs, "/home/letters.txt", "cab\nabc á\n")
+run("tr abc XZY letters.txt")
+run("tr \"á\" \"é\" letters.txt")
+run("tr ab X letters.txt")
+run("tr abc XZY missing")
+run("tr abc XZY /home")
+run("tr abc XZY -file")
+run("tr abc XZY")
