@@ -11,6 +11,10 @@ The game. Its window is 210 by 170: a score line, a help line, and a board of 24
 - Space or P pauses and goes on (either also starts a new game). R or Return starts again after a game ends, and N starts a new game at any time, giving up the one going on (its score still counts for the best if it beat it).
 - The best score is saved in `/home/snake-best.txt` in the desktop's files (one whole number) whenever it is beaten, and read when a Snake window opens and when a new game starts, so two Snake windows share it. A file that holds no whole number counts as 0. With a workspace open, that file is committed with the other files. The score line's second row becomes the save failure when the commit fails. Without a workspace it is still gone when the process ends.
 
+With a workspace open, the last committed window snapshot restores the board, head, direction, queued turns, food, score, food generator and ready, playing, paused, game over or won state. The first focused tick starts a fresh beat instead of catching up across the restart. The best score still comes from `/home/snake-best.txt`. Older snapshots without game fields open a new ready game. Clock movement alone does not request snapshots; window input uses the existing 2 s idle snapshot, and best-score saves include the completed eating step. See [Workspace recovery](../workspace-recovery.md).
+
+This recovery addition has model tests only. The GUI was not walked through; this does not extend the Nov 7 GUI pass.
+
 The score line reads `Snake  score N  best M`. The help line says what to press next.
 
 ## Design calls
@@ -21,4 +25,4 @@ The score line reads `Snake  score N  best M`. The help line says what to press 
 - Walls end the game (no wrapping), which keeps the rules plain.
 - Parked with the Nov 7 2026 acceptance, not scheduled: levels or obstacles, and sound.
 
-Tests: the `shell_snake*` goldens, and `shell_events_fuzz` for random input (see [the test list](../TESTING.md)).
+Tests: the `shell_snake*` goldens, `shell_workspace_snake`, `shell_workspace_games_restart`, `shell_workspace_games_schema`, and `shell_events_fuzz` for random input (see [the test list](../TESTING.md)).

@@ -18,6 +18,10 @@ The status line reads `Paint [status] color tool file` (the tool is the brush si
 - With Shift or Caps Lock a letter key works as its small one (`F` the fill tool, `E` the eraser), except `R` and `O`.
 - `c` clears the canvas. Ctrl+Z undoes the last stroke, fill, shape or clear, up to 20, and Ctrl+Y puts back what it took, newest first, until the next change. A fill that would change nothing is not an undo step, and nor is `c` on a blank canvas. A key pressed while the button is still held ends the stroke or shape, so a Ctrl+Z in the middle of one is not drawn over by the next move.
 
+Workspace snapshots restore the canvas with undo and redo. The snapshot keeps the newest 100 steps per stack, then drops oldest undo steps followed by oldest redo steps until both stacks fit 65,536 canvas cells, at most 30 full canvases. Snapshotting does not shorten live history or change the existing 20-step drawing limit. Older snapshots without history start with empty stacks. An active stroke or shape drag ends at restart; the restored canvas can still be undone. The existing 2 s idle snapshot includes history without writing the picture file.
+
+This recovery addition has model tests only. The GUI was not walked through; this does not extend the Nov 7 GUI pass.
+
 ## Files
 
 A picture is a text file in the desktop's shared files: a line `paint 60 36`, then 36 lines of 60 digits, one per cell (`0` white, `1` to `8` the colors in swatch order).
@@ -33,4 +37,4 @@ A picture is a text file in the desktop's shared files: a line `paint 60 36`, th
 - The app draws through two hooks any app can use: `paint(state)` gives colored boxes, and `on_drag(state, x, y)` gets the pointer while the button is held after a press inside the window (see [SHELL.md](../SHELL.md#an-app)).
 - Parked with the Nov 7 2026 acceptance, not scheduled: more colors, and a bigger or resizable canvas.
 
-Tests: the `shell_paint*` goldens, and `shell_events_fuzz` for random input (see [the test list](../TESTING.md)).
+Tests: the `shell_paint*` goldens, `shell_workspace_paint_history`, `shell_workspace_games_restart`, `shell_workspace_games_schema`, and `shell_events_fuzz` for random input (see [the test list](../TESTING.md)).
