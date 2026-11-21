@@ -1,0 +1,5 @@
+canvases pack as runs and read back the same
+undo and redo match the window that never restarted
+the newest 20 steps survive
+busy canvases keep what fits in 32768 characters
+old snapshots start with empty history

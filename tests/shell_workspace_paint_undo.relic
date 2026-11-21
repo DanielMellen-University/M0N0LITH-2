@@ -1,0 +1,134 @@
+# Restart keeps Paint's undo and redo canvases, within the step and size caps.
+use ../shell/wm
+use ../shell/workspace
+use std/files
+
+fun check(label, got, want)
+    if got != want
+        fail(label + ": " + str(got) + " != " + str(want))
+
+fun desktop() = wm.new_desktop(640, 480, wm.default_apps())
+
+fun reload(dir)
+    check("snapshot", wm.workspace_flush(), "")
+    wm.workspace_open(dir)
+    let d = desktop()
+    wm.workspace_bind(d)
+    check("load", wm.workspace_notice(), "")
+    return d
+
+fun image(body)
+    let prefix = "M2WS1\n" + body
+    let sum = 0
+    let weight = len(prefix)
+    for c in prefix
+        sum = (sum + ord(c) * weight) % 1000000007
+        weight = weight - 1
+    return prefix + "Z " + str(sum) + "\n.\n"
+
+fun repeat(c, n)
+    let out = ""
+    for i in 0..n
+        out = out + c
+    return out
+
+# Content point of a canvas cell, inside the window.
+fun cell(cx, cy) = [6 + cx * 4 + 2, 40 + cy * 4 + 2]
+
+fun stroke(w, i)
+    let p = cell(i % 60, int(i / 60))
+    w.app.on_click(w.state, p[0], p[1])
+
+# Every neighbour differs, so this canvas packs to one run per cell.
+fun noisy(k)
+    let cells = []
+    for i in 0..2160
+        append(cells, (i + k) % 9)
+    return cells
+
+check("blank canvas", workspace.pack_canvas(wm.paint_app.init().cells), "0x2160")
+let mixed = noisy(0)
+check("round trip", workspace.unpack_canvas(workspace.pack_canvas(mixed)), mixed)
+print("canvases pack as runs and read back the same")
+
+let dir = "ws-paint-undo"
+wm.workspace_open(dir)
+let live = desktop()
+wm.workspace_bind(live)
+let lw = wm.launch(live, wm.paint_app)
+let s = lw.state
+wm.key(live, "3")
+for i in 0..5
+    stroke(lw, i * 7)
+wm.key(live, "ctrl+z")
+wm.key(live, "ctrl+z")
+let restored = reload(dir)
+let rw = restored.windows[0]
+let r = rw.state
+check("cells", r.cells, s.cells)
+check("stacks", [r.undo, r.redo], [s.undo, s.redo])
+check("stack sizes", [len(r.undo), len(r.redo)], [3, 2])
+for k in ["ctrl+y", "ctrl+z", "ctrl+z", "ctrl+z", "ctrl+z", "ctrl+z", "ctrl+y", "ctrl+y", "ctrl+y", "ctrl+y", "ctrl+y", "ctrl+y"]
+    wm.key(live, k)
+    wm.key(restored, k)
+    check("same canvas after " + k, [r.cells, len(r.undo), len(r.redo)], [s.cells, len(s.undo), len(s.redo)])
+check("all strokes back", r.cells[7], 3)
+wm.key(restored, "ctrl+z")
+stroke(rw, 100)
+check("new stroke ends redo", r.redo, [])
+print("undo and redo match the window that never restarted")
+
+r.undo = []
+r.redo = []
+for i in 0..22
+    stroke(rw, 200 + i)
+check("live keeps 20", len(r.undo), 20)
+restored = reload(dir)
+rw = restored.windows[0]
+let r2 = rw.state
+check("restored keeps 20", len(r2.undo), 20)
+for i in 0..20
+    wm.key(restored, "ctrl+z")
+check("oldest kept step", r2.cells[200], 3)
+check("oldest kept step, next cell", r2.cells[202], 0)
+wm.key(restored, "ctrl+z")
+check("no 21st step", r2.cells[202], 0)
+print("the newest 20 steps survive")
+
+let undo = []
+for k in 0..10
+    append(undo, noisy(k))
+r2.undo = undo
+r2.redo = [noisy(1), noisy(2)]
+restored = reload(dir)
+check("live undo untouched", len(r2.undo), 10)
+let r3 = restored.windows[0].state
+check("undo dropped first", [r3.undo, r3.redo], [[noisy(9)], [noisy(1), noisy(2)]])
+r3.undo = [noisy(3), noisy(4)]
+r3.redo = []
+for k in 0..5
+    append(r3.redo, noisy(k))
+restored = reload(dir)
+let r4 = restored.windows[0].state
+check("then oldest redo", [r4.undo, r4.redo], [[], [noisy(2), noisy(3), noisy(4)]])
+wm.key(restored, "ctrl+y")
+check("newest redo first", r4.cells, noisy(4))
+print("busy canvases keep what fits in 32768 characters")
+files.remove_tree(dir)
+
+# A generation written before Paint history existed still opens normally.
+files.make_dir(dir)
+let body = "S W Paint 1 40 30 256 190 0\nS F path /home/picture.paint\nS F cells " + repeat("1", 2160) + "\n"
+body = body + "S F color 1\nS F size 1\nS F tool brush\nS F status edited\nS F foreign 0\n"
+files.write(dir + "/g1.m2ws", image(body))
+files.write(dir + "/COMMITTED", "g1\n")
+wm.workspace_open(dir)
+restored = desktop()
+wm.workspace_bind(restored)
+check("old generation", wm.workspace_notice(), "")
+let r5 = restored.windows[0].state
+check("old stacks", [r5.undo, r5.redo], [[], []])
+wm.key(restored, "ctrl+z")
+check("old undo changes nothing", r5.cells[0], 1)
+files.remove_tree(dir)
+print("old snapshots start with empty history")

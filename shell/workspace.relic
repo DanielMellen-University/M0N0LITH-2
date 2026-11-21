@@ -15,6 +15,9 @@ let max_damaged_files = 4
 let max_store_path = 1024
 let max_history_steps = 100
 let max_history_text = 65536
+let paint_cells = 2160
+let max_paint_steps = 20
+let max_paint_history = 32768
 
 let _dir = none
 let _fault = none
@@ -124,6 +127,65 @@ fun unpack_steps(value)
             return none
         append(steps, {at: at, removed: parts[1], added: parts[2]})
     return steps
+
+# A Paint canvas as runs of one color: "0x2100,1x60". Neighbouring runs have
+# different colors, so each canvas has exactly one spelling.
+fun pack_canvas(cells)
+    if type(cells) != "list" or len(cells) != paint_cells
+        return none
+    let runs = []
+    let i = 0
+    while i < len(cells)
+        let c = cells[i]
+        if type(c) != "int" or c < 0 or c > 8
+            return none
+        let j = i + 1
+        while j < len(cells) and cells[j] == c
+            j = j + 1
+        append(runs, str(c) + "x" + str(j - i))
+        i = j
+    return strings.join(runs, ",")
+
+fun unpack_canvas(value)
+    if type(value) != "string" or value == ""
+        return none
+    let cells = []
+    let last = -1
+    for run in strings.split(value, ",")
+        if len(run) < 3 or run[1] != "x" or run[0] < "0" or run[0] > "8"
+            return none
+        let c = ord(run[0]) - 48
+        let n = _parse_int(slice(run, 2, len(run)), 1, paint_cells)
+        if n == none or c == last or len(cells) + n > paint_cells
+            return none
+        for k in 0..n
+            append(cells, c)
+        last = c
+    if len(cells) != paint_cells
+        return none
+    return cells
+
+# A Paint undo or redo stack: one packed canvas per step, oldest first.
+fun pack_canvases(stack)
+    let rows = []
+    for cells in stack
+        let row = pack_canvas(cells)
+        if row == none
+            return none
+        append(rows, row)
+    return pack_lines(rows)
+
+fun unpack_canvases(value)
+    let rows = unpack_lines(value, max_paint_steps)
+    if rows == none
+        return none
+    let out = []
+    for row in rows
+        let cells = unpack_canvas(row)
+        if cells == none
+            return none
+        append(out, cells)
+    return out
 
 fun refuse(why)
     if type(why) != "string"
@@ -492,12 +554,18 @@ fun _session_values(win)
             return false
         if _parse_int(f.color, 0, 8) == none or _parse_int(f.size, 1, 4) == none
             return false
-        if len(f.cells) != 2160
+        if len(f.cells) != paint_cells
             return false
         for c in f.cells
             if c < "0" or c > "8"
                 return false
-        return true
+        let size = 0
+        for key in ["undo", "redo"]
+            if key in f
+                if unpack_canvases(f[key]) == none
+                    return false
+                size = size + len(f[key])
+        return size <= max_paint_history
     return true
 
 fun _start_window(line, ids)
@@ -539,7 +607,7 @@ fun _finish_window(win)
     let need = _session_need(win.app)
     let got = 0
     for k in win.fields
-        if not ((win.app == "Editor" or win.app == "IDE") and (k == "undo" or k == "redo"))
+        if not ((win.app == "Editor" or win.app == "IDE" or win.app == "Paint") and (k == "undo" or k == "redo"))
             got = got + 1
     if got != len(need)
         return false

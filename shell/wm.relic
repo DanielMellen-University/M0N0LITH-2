@@ -5267,6 +5267,30 @@ fun _sf_history(lines, s)
         return false
     return _sf(lines, "undo", u) and _sf(lines, "redo", r)
 
+# Paint keeps whole canvases. Keep the newest steps in each stack, then drop
+# the oldest undo steps, then the oldest redo steps, until both fit the budget.
+fun _sf_paint_history(lines, s)
+    let stacks = []
+    let size = 0
+    for stack in [s.undo, s.redo]
+        let rows = []
+        for cells in slice(stack, math.max(0, len(stack) - workspace.max_paint_steps), len(stack))
+            let row = workspace.pack_canvas(cells)
+            if row == none
+                return false
+            append(rows, row)
+            size = size + len(str(len(row))) + 1 + len(row)
+        append(stacks, rows)
+    for rows in stacks
+        while size > workspace.max_paint_history and len(rows) > 0
+            let row = remove(rows, 0)
+            size = size - len(str(len(row))) - 1 - len(row)
+    let u = workspace.pack_lines(stacks[0])
+    let r = workspace.pack_lines(stacks[1])
+    if u == none or r == none
+        return false
+    return _sf(lines, "undo", u) and _sf(lines, "redo", r)
+
 fun _paint_digits(cells)
     if len(cells) != _paint_w * _paint_h
         return none
@@ -5336,7 +5360,9 @@ fun _fields_of(w, lines)
             return false
         if not _sf(lines, "color", str(s.color)) or not _sf(lines, "size", str(s.size))
             return false
-        return _sf(lines, "tool", s.tool) and _sf(lines, "status", s.status) and _sf(lines, "foreign", foreign)
+        if not _sf(lines, "tool", s.tool) or not _sf(lines, "status", s.status) or not _sf(lines, "foreign", foreign)
+            return false
+        return _sf_paint_history(lines, s)
     if name == "Snake"
         return true
     return false
@@ -5408,7 +5434,13 @@ fun _restore_state(w)
         let cells = []
         for c in f.cells
             append(cells, ord(c) - 48)
-        return {fs: _shell_fs, path: f.path, cells: cells, color: int(f.color), size: int(f.size), last: none, stroke: false, undo: [], redo: [], status: f.status, foreign: f.foreign == "1", tool: f.tool, anchor: none, base: none, naming: none, other: 0}
+        let undo = []
+        let redo = []
+        if "undo" in f
+            undo = workspace.unpack_canvases(f.undo)
+        if "redo" in f
+            redo = workspace.unpack_canvases(f.redo)
+        return {fs: _shell_fs, path: f.path, cells: cells, color: int(f.color), size: int(f.size), last: none, stroke: false, undo: undo, redo: redo, status: f.status, foreign: f.foreign == "1", tool: f.tool, anchor: none, base: none, naming: none, other: 0}
     return _snake_init()
 
 fun _apply_session(d, sess)

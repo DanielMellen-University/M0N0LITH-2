@@ -76,12 +76,14 @@ Next work is maintenance of this list, the completed Editor addition above, and 
 
 ## Workspace store
 
-The shared vfs can be committed to a directory. `shell/desktop.relic` does that, and the same generation records the open windows: place, Terminal folder and history, Editor and IDE text including unsaved text and bounded undo and redo, Notes, Clicker's count, and Paint's cells. A new process that opens the same directory gets the last committed generation, including a file removed on purpose. Paint undo, the clipboard, a running IDE program, and Snake's board are not in it. Window input now gets one snapshot after 2000 ms of idle tick time, without saving buffer text into vfs files. A kill before that snapshot still drops input since the last successful one; continuous input postpones it, and a failed attempt waits for new input.
+The shared vfs can be committed to a directory. `shell/desktop.relic` does that, and the same generation records the open windows: place, Terminal folder and history, Editor and IDE text including unsaved text and bounded undo and redo, Notes, Clicker's count, and Paint's cells with bounded undo and redo. A new process that opens the same directory gets the last committed generation, including a file removed on purpose. The clipboard, a running IDE program, and Snake's board are not in it. Window input now gets one snapshot after 2000 ms of idle tick time, without saving buffer text into vfs files. A kill before that snapshot still drops input since the last successful one; continuous input postpones it, and a failed attempt waits for new input.
 
 Model tests `shell_workspace_idle`, `shell_workspace_idle_inputs` and `shell_workspace_idle_failures` pass. The GUI was not walked through; this does not extend the Nov 7 GUI pass.
 
 A torn or corrupt generation does not replace the last one that still parses. The notice says when a save failed or when the load recovered or ignored a file. There is no fsync in Relic 1.0.53, so a power loss is not covered. The rules, the file format and the fault stages are in [Workspace recovery](workspace-recovery.md).
 
 Editor and IDE undo and redo restore from the snapshot, up to 100 steps each and 65,536 characters of changed text per window. Older snapshots start with empty history. Model tests pass; the GUI was not walked through for this addition.
+
+Paint undo and redo restore from the snapshot too (Nov 21 2026): up to 20 canvases each, packed as runs of one color, within 32,768 characters per window. Test `shell_workspace_paint_undo`. Model tests pass; the GUI was not walked through for this addition.
 
 This does not reopen the Nov 7 acceptance. That pass saw the files disappear, which is still what happens when no workspace is opened.
