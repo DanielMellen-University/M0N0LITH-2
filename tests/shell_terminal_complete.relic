@@ -38,7 +38,10 @@ t.input = ""
 let shown = len(t.buf)
 typed("help")
 wm.terminal.on_key(t, "return")
-let listed = slice(t.buf, shown + 1, len(t.buf) - 3)
+let listed = []
+for line in slice(t.buf, shown + 1, len(t.buf) - 3)
+    if not strings.starts_with(line, "flags:")
+        append(listed, line)
 print(len(listed), "help lines of commands")
 let missing = []
 for line in listed

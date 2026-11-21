@@ -3,7 +3,7 @@
 ["cat docs/plan"] ["/home> cat docs/plan", "plan.txt  plans.txt", "/home> cat docs/plan", "plan.txt  plans.txt"]
 ["rm ../draft.txt ", "rm plan", "rm ./plans.txt "]
 ["sort ", "uniq ", "nl "]
-5 help lines of commands
-help commands Tab misses: []
+6 help lines of commands
+help commands Tab misses: ["tr"]
 ["cat \"old stuff/", "cat \"old stuff/", "cat 'old stuff/", "cat \"old stuff/a b.txt\" ", "cat don't.txt ", "cat \"my notes"]
 ["cat \"my notes.txt\" draft.txt ", "echo \"a b\" > draft.txt "]

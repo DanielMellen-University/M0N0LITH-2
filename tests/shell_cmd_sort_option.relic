@@ -1,4 +1,4 @@
-# sort -n is refused, and the file is left as it was.
+# sort rejects flags outside its small supported set, and leaves the file as it was.
 use ../shell/wm
 use std/vfs
 let t = wm.terminal.init()

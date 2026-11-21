@@ -2133,11 +2133,12 @@ fun _term_run(s, line)
     if cmd == "help"
         _term_reply(s, "help clear history echo apps date")
         _term_reply(s, "workspace pwd cd ls cat head tail")
-        _term_reply(s, "basename dirname")
-        _term_reply(s, "tr FROM TO path")
+        _term_reply(s, "basename dirname cut tr")
         _term_reply(s, "mkdir touch write rm mv cp")
-        _term_reply(s, "wc grep [-i] [-n] find sort [-r] uniq nl")
+        _term_reply(s, "wc grep find sort uniq nl")
         _term_reply(s, "tree du diff")
+        _term_reply(s, "flags: cut -d -f; grep -i -n")
+        _term_reply(s, "flags: sort -r")
         _term_reply(s, "echo text > file, >> adds")
         _term_reply(s, "\"my file\": quotes keep spaces")
         _term_reply(s, "!! the last again, !N history N")
@@ -2352,7 +2353,7 @@ let _term_recall_keep = 50
 # with "/" after it, anything else with a space); several are taken as far as
 # they agree, and when that adds nothing they are listed. No match, or an
 # empty line: nothing.
-let _term_commands = ["apps", "cat", "cd", "clear", "cp", "date", "diff", "du", "echo", "find", "grep", "head", "help", "history", "ls", "mkdir", "mv", "nl", "pwd", "rm", "sort", "tail", "touch", "tree", "uniq", "wc", "workspace", "write"]
+let _term_commands = ["apps", "basename", "cat", "cd", "clear", "cp", "cut", "date", "diff", "dirname", "du", "echo", "find", "grep", "head", "help", "history", "ls", "mkdir", "mv", "nl", "pwd", "rm", "sort", "tail", "touch", "tr", "tree", "uniq", "wc", "workspace", "write"]
 
 fun _common_start(names)
     let out = names[0]

@@ -1,4 +1,4 @@
-# grep -i and grep -n are refused, so no line is printed.
+# grep rejects flags outside its small supported set.
 use ../shell/wm
 use std/vfs
 let t = wm.terminal.init()
@@ -12,6 +12,6 @@ fun run(line)
     wm.terminal.on_key(t, "return")
     print(t.buf)
 vfs.write(t.fs, "/tmp/g.txt", "Apple\napple")
-run("grep -i apple /tmp/g.txt")
-run("grep -n apple /tmp/g.txt")
+run("grep -x apple /tmp/g.txt")
+run("grep -z apple /tmp/g.txt")
 run("grep apple /tmp/g.txt")

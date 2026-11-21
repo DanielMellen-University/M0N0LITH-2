@@ -172,7 +172,7 @@
 > grep x nope.txt
   grep: not found: /home/nope.txt
 > grep apple
-  usage: grep <text> <path>
+  usage: grep [-i] [-n] <text> <path>
 > rm g.txt
 > mkdir fd/notes
 > touch fd/notes/todo.txt

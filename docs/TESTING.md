@@ -15,7 +15,7 @@ One test: `ctest --test-dir build -C Release -R golden_shell_ide`. Or run it str
 
 ## How they are checked
 
-CMake finds every `tests/*.relic` and adds it as `golden_<name>`. `tools/run_golden.cmake` runs it from `tests/`, and it passes when it exits with 0 and its standard output matches `<name>.out` exactly (Windows line endings are ignored). A test with no `.out` file must print nothing. One more test, `check_shell`, runs `relic check` on `wm.relic`, `workspace.relic`, `desktop.relic` and `ide_diag.relic`, which catches syntax errors and undefined names in the drawing code no test runs. That is 505 tests in all, and CI runs them on Linux, macOS and Windows. The 28 `shell_workspace_*` golden programs, `workspace_restart`, and `workspace_kill` cover the store. `workspace_restart` runs four relic processes against one directory. `workspace_kill` kills a process after it has written a partial and before it publishes.
+CMake finds every `tests/*.relic` and adds it as `golden_<name>`. `tools/run_golden.cmake` runs it from `tests/`, and it passes when it exits with 0 and its standard output matches `<name>.out` exactly (Windows line endings are ignored). A test with no `.out` file must print nothing. One more test, `check_shell`, runs `relic check` on `wm.relic`, `workspace.relic`, `desktop.relic` and `ide_diag.relic`, which catches syntax errors and undefined names in the drawing code no test runs. That is 511 tests in all, and CI runs them on Linux, macOS and Windows. The 28 `shell_workspace_*` golden programs, `workspace_restart`, and `workspace_kill` cover the store. `workspace_restart` runs four relic processes against one directory. `workspace_kill` kills a process after it has written a partial and before it publishes.
 
 None of them opens the SDL window. A passing run does not prove what the desktop draws. The Linux GUI pass, and what it did not try, is in the [roadmap](ROADMAP.md#accepted-nov-7-2026).
 
@@ -172,6 +172,7 @@ Write `tests/shell_<topic>.relic`, run it, read its output, and save that as `te
 | `shell_terminal_rm_full` | rm refuses a folder that is not empty, then removes it once it is empty |
 | `shell_terminal_mkdir_deep` | mkdir creates missing parent folders, and a second time says the folder is already there |
 | `shell_terminal_grep_dot` | grep matches characters as written: a dot is not a pattern, and case counts |
+| `shell_terminal_grep_flags` | grep `-i` ignores case, `-n` prefixes matching lines with numbers, combined flags work in either order, unknown flags and path errors are reported |
 | `shell_terminal_tree` | tree of the current folder, a path, an empty folder, `..`, and a file; quoted names; a missing path, a file with `/`, two words and an option are errors |
 | `shell_terminal_du` | du of the current folder, a path, a file and an empty folder, sizes lined up and quoted names; a missing path, a file with `/`, two words and an option are errors |
 | `shell_terminal_diff` | diff of a changed, added and removed line both ways, the same file, an empty file, a quoted name and a moved line; usage, missing, folder and option errors; two long files that differ all through give the first difference, one change in a long file is still found |
@@ -185,6 +186,11 @@ Write `tests/shell_<topic>.relic`, run it, read its output, and save that as `te
 | `shell_terminal_cat_mix` | cat reports a folder and still prints a file named after it |
 | `shell_terminal_wc_tab` | wc treats a tab as a break between words |
 | `shell_terminal_sort_file` | sort orders by character, digits before letters, and does not change the file |
+| `shell_terminal_sort_reverse` | sort `-r` reverses character order; unknown flags, missing files, folders and usage errors |
+| `shell_terminal_basename` | basename path results, slash normalization, quoted names with spaces, missing operand, extra operand and refused options |
+| `shell_terminal_dirname` | dirname path results, slash normalization, a quoted path with spaces, missing operand, extra operand and refused options |
+| `shell_terminal_cut` | cut field lists and ranges, empty and missing fields, bad delimiter and field syntax, unknown flag, missing file, folder and usage errors |
+| `shell_terminal_tr` | tr replacement by corresponding characters including Unicode, unequal lengths, missing file, folder, refused path option and usage errors |
 | `shell_terminal_uniq_case` | uniq drops only a line equal to the one just before it, so A and a both stay |
 | `shell_terminal_nl_blank` | nl numbers a blank line |
 | `shell_terminal_cd_stay` | cd of a file says it is not a folder and stays put |
