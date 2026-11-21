@@ -25,6 +25,21 @@ if(name MATCHES "^shell_workspace_io_")
 endif()
 if(name STREQUAL "shell_workspace_environment")
   include(${CMAKE_CURRENT_LIST_DIR}/run_workspace_environment.cmake)
+elseif(name STREQUAL "shell_workspace_games_restart")
+  set(out "")
+  set(err "")
+  set(code 0)
+  foreach(phase write read legacy-write legacy-read)
+    execute_process(COMMAND ${RELIC} ${run_test} ${phase}
+      WORKING_DIRECTORY ${run_dir}
+      OUTPUT_VARIABLE part ERROR_VARIABLE part_err RESULT_VARIABLE part_code)
+    string(APPEND out "${part}")
+    if(NOT part_code EQUAL 0)
+      set(code "${part_code}")
+      set(err "${phase}: ${part_err}")
+      break()
+    endif()
+  endforeach()
 else()
   execute_process(
     COMMAND ${RELIC} ${run_test}

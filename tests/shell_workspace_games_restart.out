@@ -1,0 +1,4 @@
+wrote paused Snake after eating and Paint with undo and redo
+new process restores Snake board, turns, food, score and Paint undo and redo
+wrote older snapshot without Snake fields or Paint history
+new process loads old Snake ready with shared best and Paint with empty history

@@ -1,0 +1,115 @@
+# The golden runner starts a fresh process for each phase on the same store.
+use ../shell/wm
+use ../shell/workspace
+use std/files
+use std/os
+use std/vfs
+
+fun check(label, got, want)
+    if got != want
+        fail(label + ": " + str(got) + " != " + str(want))
+
+fun desktop() = wm.new_desktop(640, 480, wm.default_apps())
+
+fun image(body)
+    let prefix = "M2WS1\n" + body
+    let sum = 0
+    let weight = len(prefix)
+    for c in prefix
+        sum = (sum + ord(c) * weight) % 1000000007
+        weight = weight - 1
+    return prefix + "Z " + str(sum) + "\n.\n"
+
+fun repeat(c, n)
+    let text = ""
+    for i in 0..n
+        text = text + c
+    return text
+
+let phase = os.args()[0]
+if phase == "write"
+    wm.workspace_open("store")
+    let d = desktop()
+    wm.workspace_bind(d)
+    let snake = wm.launch(d, wm.snake)
+    snake.state.food = [6, 8]
+    wm.key(d, "right")
+    wm.tick(d, 1000)
+    wm.tick(d, 1150)
+    wm.key(d, "up")
+    wm.key(d, "left")
+    wm.key(d, "p")
+    let paint = wm.launch(d, wm.paint_app)
+    wm.paint_app.on_click(paint.state, 6, 40)
+    wm.key(d, "2")
+    wm.paint_app.on_click(paint.state, 10, 40)
+    wm.key(d, "3")
+    wm.paint_app.on_click(paint.state, 14, 40)
+    wm.key(d, "ctrl+z")
+    check("flush", wm.workspace_flush(), "")
+    print("wrote paused Snake after eating and Paint with undo and redo")
+else if phase == "read"
+    wm.workspace_open("store")
+    let d = desktop()
+    wm.workspace_bind(d)
+    check("notice", wm.workspace_notice(), "")
+    check("apps", [d.windows[0].app.name, d.windows[1].app.name], ["Snake", "Paint"])
+    let sw = d.windows[0]
+    let s = sw.state
+    check("board and head", s.body, [[3, 8], [4, 8], [5, 8], [6, 8]])
+    check("run state", [s.state, s.dir, s.turns, s.score, s.best], ["paused", [1, 0], [[0, -1], [-1, 0]], 1, 1])
+    # The LCG is reproducible, including the next food after a later meal.
+    check("food and generator", [s.food, s.seed], [[0, 8], 1460846352])
+    check("clock reset", [s.now, s.next_at], [0, none])
+    check("best file", vfs.read(s.fs, "/home/snake-best.txt"), "1\n")
+    let p = d.windows[1].state
+    check("cells", slice(p.cells, 0, 4), [1, 2, 0, 0])
+    check("history", [len(p.undo), len(p.redo)], [2, 1])
+    check("picture not written", vfs.exists(p.fs, "/home/picture.paint"), false)
+    wm.key(d, "ctrl+y")
+    check("redo", slice(p.cells, 0, 4), [1, 2, 3, 0])
+    for i in 0..3
+        wm.key(d, "ctrl+z")
+    check("undo", slice(p.cells, 0, 4), [0, 0, 0, 0])
+    for i in 0..3
+        wm.key(d, "ctrl+y")
+    check("redo all", slice(p.cells, 0, 4), [1, 2, 3, 0])
+    wm.close(d, d.windows[1].id)
+    wm.key(d, "p")
+    wm.tick(d, 10)
+    wm.tick(d, 155)
+    check("first turn", [s.dir, s.body[3]], [[0, -1], [6, 7]])
+    wm.tick(d, 300)
+    check("second turn", [s.dir, s.body[3]], [[-1, 0], [5, 7]])
+    for i in 0..5
+        wm.tick(d, 445 + i * 145)
+    wm.key(d, "down")
+    wm.tick(d, 1170)
+    check("same next meal", [s.score, s.seed, s.food], [2, 1741224500, [8, 14]])
+    print("new process restores Snake board, turns, food, score and Paint undo and redo")
+else if phase == "legacy-write"
+    files.make_dir("legacy")
+    # Old M2WS1 session, with no Snake fields or Paint history fields.
+    let body = "D /home\nF /home/snake-best.txt 7\\n\n"
+    body = body + "S W Snake 1 20 20 210 170 0\nS W Paint 2 40 40 256 190 0\n"
+    for pair in [["path", "/home/old.paint"], ["cells", "2" + repeat("0", 2159)], ["color", "2"], ["size", "1"], ["tool", "brush"], ["status", "edited"], ["foreign", "0"]]
+        body = body + "S F " + pair[0] + " " + workspace.escape(pair[1]) + "\n"
+    files.write("legacy/g1.m2ws", image(body))
+    files.write("legacy/COMMITTED", "g1\n")
+    print("wrote older snapshot without Snake fields or Paint history")
+else if phase == "legacy-read"
+    wm.workspace_open("legacy")
+    let d = desktop()
+    wm.workspace_bind(d)
+    check("legacy notice", wm.workspace_notice(), "")
+    let s = d.windows[0].state
+    check("old Snake starts ready", [s.body, s.state, s.score, s.best], [[[3, 8], [4, 8], [5, 8]], "ready", 0, 7])
+    let p = d.windows[1].state
+    check("old Paint canvas and history", [p.cells[0], p.undo, p.redo], [2, [], []])
+    wm.key(d, "ctrl+z")
+    wm.key(d, "ctrl+y")
+    check("empty old history leaves canvas", p.cells[0], 2)
+    check("legacy upgrades", wm.workspace_flush(), "")
+    print("new process loads old Snake ready with shared best and Paint with empty history")
+else
+    fail("unknown restart phase")
