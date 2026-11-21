@@ -1,0 +1,21 @@
+/home> grep cat words.txt
+cat nap
+/home> grep -i cat words.txt
+Cat
+cat nap
+/home> grep -n cat words.txt
+  3  cat nap
+/home> grep -in cat words.txt
+  1  Cat
+  3  cat nap
+/home> grep -ni CAT words.txt
+  1  Cat
+  3  cat nap
+/home> grep -x cat words.txt
+grep: unknown flag: -x
+/home> grep -in missing
+usage: grep [-i] [-n] <text> <path>
+/home> grep cat absent
+grep: not found: /home/absent
+/home> grep cat /home
+grep: is a folder: /home

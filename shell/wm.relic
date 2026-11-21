@@ -1689,7 +1689,7 @@ fun _term_tail(s, path, count)
 
 # grep: the lines of a file that have the text in them (plain text, case
 # counts, no patterns), as many as the output keeps.
-fun _term_grep(s, word, path)
+fun _term_grep(s, word, path, insensitive, numbered)
     if _term_not_folder(s, "grep", path, false)
         return
     let p = _term_path(s, path)
@@ -1700,9 +1700,17 @@ fun _term_grep(s, word, path)
         _term_reply(s, "grep: is a folder: " + p)
         return
     let found = []
-    for line in strings.lines(vfs.read(s.fs, p))
-        if strings.contains(line, word)
-            append(found, line)
+    let lines = strings.lines(vfs.read(s.fs, p))
+    for i in 0..len(lines)
+        let line = lines[i]
+        let match = strings.contains(line, word)
+        if insensitive
+            match = strings.contains(strings.lower(line), strings.lower(word))
+        if match
+            if numbered
+                append(found, strings.pad_left(str(i + 1), 3, " ") + "  " + line)
+            else
+                append(found, line)
     for line in slice(found, math.max(0, len(found) - term_history), len(found))
         _term_reply(s, line)
 
@@ -2086,7 +2094,7 @@ fun _split_words(line)
 
 
 # Commands whose words are all paths, so a word like -l or -r is a mistake, not a name.
-let _path_commands = ["cd", "ls", "cat", "mkdir", "touch", "rm", "mv", "cp", "wc", "head", "tail", "grep", "sort", "uniq", "nl", "tree", "du", "diff", "basename", "dirname"]
+let _path_commands = ["cd", "ls", "cat", "mkdir", "touch", "rm", "mv", "cp", "wc", "head", "tail", "sort", "uniq", "nl", "tree", "du", "diff", "basename", "dirname"]
 
 fun _term_run(s, line)
     s.cwd = _existing_dir(s.fs, s.cwd)
@@ -2119,7 +2127,7 @@ fun _term_run(s, line)
         _term_reply(s, "basename dirname")
         _term_reply(s, "tr FROM TO path")
         _term_reply(s, "mkdir touch write rm mv cp")
-        _term_reply(s, "wc grep find sort uniq nl")
+        _term_reply(s, "wc grep [-i] [-n] find sort [-r] uniq nl")
         _term_reply(s, "tree du diff")
         _term_reply(s, "echo text > file, >> adds")
         _term_reply(s, "\"my file\": quotes keep spaces")
@@ -2220,8 +2228,26 @@ fun _term_run(s, line)
             else if count != none
                 _term_tail(s, parts[1], count)
     else if cmd == "grep"
-        if _term_args(s, parts, 2, "grep <text> <path>")
-            _term_grep(s, parts[1], parts[2])
+        let at = 1
+        let insensitive = false
+        let numbered = false
+        while at < len(parts) and strings.starts_with(parts[at], "-")
+            let flags = slice(parts[at], 1, len(parts[at]))
+            for flag in flags
+                if flag == "i"
+                    insensitive = true
+                else if flag == "n"
+                    numbered = true
+                else
+                    _term_reply(s, "grep: unknown flag: -" + flag)
+                    return
+            at = at + 1
+        if len(parts) - at != 2
+            _term_reply(s, "usage: grep [-i] [-n] <text> <path>")
+        else if strings.starts_with(parts[at + 1], "-")
+            _term_reply(s, "grep: no options, not even " + parts[at + 1])
+        else
+            _term_grep(s, parts[at], parts[at + 1], insensitive, numbered)
     else if cmd == "cut"
         if len(parts) != 6
             _term_reply(s, "usage: cut -d <delimiter> -f <fields> <path>")

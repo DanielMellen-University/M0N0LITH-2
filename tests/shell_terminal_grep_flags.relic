@@ -1,0 +1,24 @@
+# grep accepts combined case-insensitive and numbered flags before its text.
+use ../shell/wm
+use std/vfs
+let t = wm.terminal.init()
+fun run(line)
+    t.buf = []
+    for c in line
+        if c == " "
+            wm.terminal.on_key(t, "space")
+        else
+            wm.terminal.on_key(t, c)
+    wm.terminal.on_key(t, "return")
+    for l in t.buf
+        print(l)
+vfs.write(t.fs, "/home/words.txt", "Cat\ndog\ncat nap\n")
+run("grep cat words.txt")
+run("grep -i cat words.txt")
+run("grep -n cat words.txt")
+run("grep -in cat words.txt")
+run("grep -ni CAT words.txt")
+run("grep -x cat words.txt")
+run("grep -in missing")
+run("grep cat absent")
+run("grep cat /home")
