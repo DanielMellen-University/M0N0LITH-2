@@ -10,6 +10,7 @@ Every key and click the desktop and its apps act on, checked against `shell/wm.r
 | Click a Start menu row | launches that app |
 | Up, Down, Return (menu open) | move the marked row of the Start menu, going round at the ends, and launch it; the first row is marked each time it opens |
 | Drag a title bar | moves the window (not a maximized one) |
+| Let go of a title drag on the desktop's left or right edge | snaps the window to that half of the desktop; on the top edge it maximizes; dragging a snapped window away gives back its size |
 | Double-click a title bar | maximizes the window, or puts a maximized one back |
 | Drag the bottom-right corner | resizes the window (not a maximized one) |
 | Click the _ box | minimizes the window |
