@@ -1730,13 +1730,22 @@ fun _term_file_lines(s, cmd, path)
 
 # sort: the lines of a file in order (by character, so capitals come first),
 # the file left as it is; as many as the output keeps, from the end.
-fun _term_sort(s, path)
+fun _term_sort(s, path, reverse)
     let lines = _term_file_lines(s, "sort", path)
     if lines == none
         return
     let sorted = lists.sort(lines)
-    for line in slice(sorted, math.max(0, len(sorted) - term_history), len(sorted))
-        _term_reply(s, line)
+    let start = math.max(0, len(sorted) - term_history)
+    if reverse
+        let i = len(sorted) - 1
+        let kept = 0
+        while i >= start and kept < term_history
+            _term_reply(s, sorted[i])
+            i = i - 1
+            kept = kept + 1
+    else
+        for line in slice(sorted, start, len(sorted))
+            _term_reply(s, line)
 
 # uniq: the lines of a file with a line the same as the one just before it
 # left out, as Unix uniq (so sort first to drop every repeat).
@@ -2094,7 +2103,7 @@ fun _split_words(line)
 
 
 # Commands whose words are all paths, so a word like -l or -r is a mistake, not a name.
-let _path_commands = ["cd", "ls", "cat", "mkdir", "touch", "rm", "mv", "cp", "wc", "head", "tail", "sort", "uniq", "nl", "tree", "du", "diff", "basename", "dirname"]
+let _path_commands = ["cd", "ls", "cat", "mkdir", "touch", "rm", "mv", "cp", "wc", "head", "tail", "uniq", "nl", "tree", "du", "diff", "basename", "dirname"]
 
 fun _term_run(s, line)
     s.cwd = _existing_dir(s.fs, s.cwd)
@@ -2273,8 +2282,21 @@ fun _term_run(s, line)
         if _term_args(s, parts, 2, "cp <from> <to>")
             _term_cp(s, parts[1], parts[2])
     else if cmd == "sort"
-        if _term_args(s, parts, 1, "sort <path>")
-            _term_sort(s, parts[1])
+        let reverse = false
+        let at = 1
+        if len(parts) > 1 and strings.starts_with(parts[1], "-")
+            if parts[1] == "-r"
+                reverse = true
+                at = 2
+            else
+                _term_reply(s, "sort: unknown flag: " + parts[1])
+                return
+        if len(parts) - at != 1
+            _term_reply(s, "usage: sort [-r] <path>")
+        else if strings.starts_with(parts[at], "-")
+            _term_reply(s, "sort: no options, not even " + parts[at])
+        else
+            _term_sort(s, parts[at], reverse)
     else if cmd == "uniq"
         if _term_args(s, parts, 1, "uniq <path>")
             _term_uniq(s, parts[1])

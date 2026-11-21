@@ -1,0 +1,21 @@
+# sort -r reverses the order of sort's character-sorted lines.
+use ../shell/wm
+use std/vfs
+let t = wm.terminal.init()
+fun run(line)
+    t.buf = []
+    for c in line
+        if c == " "
+            wm.terminal.on_key(t, "space")
+        else
+            wm.terminal.on_key(t, c)
+    wm.terminal.on_key(t, "return")
+    for l in t.buf
+        print(l)
+vfs.write(t.fs, "/home/order.txt", "b\nA\na\n2\n")
+run("sort order.txt")
+run("sort -r order.txt")
+run("sort -x order.txt")
+run("sort -r missing")
+run("sort -r /home")
+run("sort -r")

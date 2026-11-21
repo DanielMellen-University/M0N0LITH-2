@@ -1,0 +1,18 @@
+/home> sort order.txt
+2
+A
+a
+b
+/home> sort -r order.txt
+b
+a
+A
+2
+/home> sort -x order.txt
+sort: unknown flag: -x
+/home> sort -r missing
+sort: not found: /home/missing
+/home> sort -r /home
+sort: is a folder: /home
+/home> sort -r
+usage: sort [-r] <path>
