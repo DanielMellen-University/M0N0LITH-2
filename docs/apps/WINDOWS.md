@@ -30,6 +30,7 @@ The window on top that is not minimized has focus: its title bar is blue, and it
 ## Moving and resizing
 
 - Drag the title bar to move a window. At least 40 pixels of the title bar stay on the desktop, so a window can always be grabbed again. Off the left edge, the part that stays also holds the ^, _ and x boxes.
+- Let go of a title drag with the pointer on the outer two pixels of the desktop's left or right side, and the window snaps to that half of the desktop above the taskbar: 320 by 440 under its title bar. Let go on the top two rows and it is maximized, and the ^ box puts it back where it was before the drag. Dragging a snapped window away gives it back the size it had before the snap, with the pointer still on its title bar. Resizing a snapped window keeps the new size. A drag let go outside the desktop (a windowed desktop can report that), on the taskbar, or short of the edge, only moves the window, as before. The snap is a place and a size: with a workspace open a snapped window comes back at its half, and dragging it away after a restart keeps that size.
 - Drag the 12 pixel box at the bottom-right corner to resize. Windows are at least 80 by 40, and resizing keeps the right and bottom edges inside the desktop and above the taskbar where that size allows. Resizing never moves the top-left corner.
 - A press that comes after a lost mouse-up (the button let go outside the window) ends the old drag first.
 
@@ -45,4 +46,4 @@ The _ box minimizes a window: it keeps its taskbar button but is not drawn, take
 
 Escape quits the desktop when nothing else takes it (see [the keys](../KEYS.md)). Everything in the in-memory filesystem is lost then. The desktop stays 640 by 480. Following the real window's size is parked with the Nov 7 2026 acceptance, not scheduled. Maximize was added on Nov 18 2026; its model tests pass, and it was not walked through in the GUI.
 
-Tests: `shell_wm`, `shell_lifecycle`, `shell_minimize`, `shell_maximize`, `shell_maximize_drag`, `shell_maximize_keys`, `shell_workspace_maximized`, `shell_start_menu`, `shell_menu_*`, `shell_drag_resize`, `shell_resize_offset`, `shell_launch_small`, `shell_cascade_gaps`, `shell_missed_release`, `shell_outside_click`, `shell_title`, `shell_fuzz` and `shell_window_cycle` (Ctrl+Tab, Ctrl+Shift+Tab, Ctrl+W).
+Tests: `shell_wm`, `shell_lifecycle`, `shell_minimize`, `shell_maximize`, `shell_maximize_drag`, `shell_maximize_keys`, `shell_workspace_maximized`, `shell_start_menu`, `shell_menu_*`, `shell_drag_resize`, `shell_window_snap`, `shell_resize_offset`, `shell_launch_small`, `shell_cascade_gaps`, `shell_missed_release`, `shell_outside_click`, `shell_title`, `shell_fuzz` and `shell_window_cycle` (Ctrl+Tab, Ctrl+Shift+Tab, Ctrl+W).

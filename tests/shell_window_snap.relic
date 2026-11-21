@@ -1,0 +1,68 @@
+# Letting go of a title drag on the left or right edge of the desktop snaps
+# the window to that half, above the taskbar; on the top edge it maximizes.
+# Dragging a snapped window away gives back its size. Let go outside the
+# desktop, on the taskbar, or short of the edge, it is only moved, as before.
+use ../shell/wm
+let d = wm.new_desktop(640, 480, wm.default_apps())
+let w = wm.launch(d, wm.notes)
+fun place() = [w.x, w.y, w.width, w.height]
+# Grab the title 20 pixels in from the window's left edge.
+fun drag(tx, ty)
+    print(wm.click(d, w.x + 20, w.y + 5))
+    wm.motion(d, tx, ty)
+    wm.release(d)
+fun reset()
+    w.x = 40
+    w.y = 30
+print("start", place(), wm.bar_top(d))
+drag(0, 200)
+print("left", place(), wm.is_maximized(w))
+print(wm.click(d, w.x + 100, w.y + 5))
+wm.motion(d, 300, 200)
+wm.release(d)
+print("dragged away", place())
+drag(639, 100)
+print("right", place())
+drag(1, 300)
+print("right to left", place())
+drag(320, 150)
+print("away again", place())
+drag(300, 0)
+print("top", place(), wm.is_maximized(w))
+wm.toggle_maximize(d, w.id)
+print("put back", place(), wm.is_maximized(w))
+
+reset()
+drag(-50, 100)
+print("let go outside", place())
+reset()
+drag(0, wm.bar_top(d) + 4)
+print("let go on the taskbar", place())
+reset()
+drag(2, 200)
+print("short of the edge", place())
+reset()
+print(wm.click(d, w.x + 20, w.y + 5))
+wm.release(d)
+print("click only", place())
+
+# A resized snapped window keeps its new size when dragged.
+reset()
+drag(639, 200)
+print("right again", place())
+print(wm.click(d, w.x + w.width - 2, w.y + 16 + w.height - 2))
+wm.motion(d, w.x + 200, w.y + 16 + 150)
+wm.release(d)
+print("resized", place())
+drag(200, 200)
+print("dragged after resize", place())
+
+# A maximized snapped window goes back to its half, and then away.
+reset()
+drag(0, 100)
+wm.toggle_maximize(d, w.id)
+print("maximized", place())
+wm.toggle_maximize(d, w.id)
+print("back to the half", place())
+drag(300, 300)
+print("and away", place())

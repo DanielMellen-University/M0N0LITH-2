@@ -15,7 +15,7 @@ One test: `ctest --test-dir build -C Release -R golden_shell_ide`. Or run it str
 
 ## How they are checked
 
-CMake finds every `tests/*.relic` and adds it as `golden_<name>`. `tools/run_golden.cmake` runs it from `tests/`, and it passes when it exits with 0 and its standard output matches `<name>.out` exactly (Windows line endings are ignored). A test with no `.out` file must print nothing. One more test, `check_shell`, runs `relic check` on `wm.relic`, `workspace.relic`, `desktop.relic` and `ide_diag.relic`, which catches syntax errors and undefined names in the drawing code no test runs. That is 510 tests in all, and CI runs them on Linux, macOS and Windows. The 31 `shell_workspace_*` golden programs, `workspace_restart`, and `workspace_kill` cover the store. `workspace_restart` runs four relic processes against one directory. `workspace_kill` kills a process after it has written a partial and before it publishes.
+CMake finds every `tests/*.relic` and adds it as `golden_<name>`. `tools/run_golden.cmake` runs it from `tests/`, and it passes when it exits with 0 and its standard output matches `<name>.out` exactly (Windows line endings are ignored). A test with no `.out` file must print nothing. One more test, `check_shell`, runs `relic check` on `wm.relic`, `workspace.relic`, `desktop.relic` and `ide_diag.relic`, which catches syntax errors and undefined names in the drawing code no test runs. That is 511 tests in all, and CI runs them on Linux, macOS and Windows. The 31 `shell_workspace_*` golden programs, `workspace_restart`, and `workspace_kill` cover the store. `workspace_restart` runs four relic processes against one directory. `workspace_kill` kills a process after it has written a partial and before it publishes.
 
 None of them opens the SDL window. A passing run does not prove what the desktop draws. The Linux GUI pass, and what it did not try, is in the [roadmap](ROADMAP.md#accepted-nov-7-2026).
 
@@ -34,6 +34,7 @@ Write `tests/shell_<topic>.relic`, run it, read its output, and save that as `te
 | `shell_wm` | drives wm.relic with fake clicks and keys; output must match shell_wm.out |
 | `shell_lifecycle` | window ids, focus and tab order through lifecycle changes |
 | `shell_minimize` | minimize and restore from the taskbar and the _ box |
+| `shell_window_snap` | a title drag let go on the left or right edge snaps to that half, on the top edge maximizes (and the ^ box puts back the place before the drag); dragging away gives back the size; right to left directly; outside the desktop, on the taskbar, short of the edge and a click only do not snap; a resized snapped window keeps its size; a maximized snapped window goes back to its half |
 | `shell_maximize` | the ^ box maximizes to the desktop above the taskbar and puts the window back; maximize and unmaximize called twice; a maximized window minimized and restored; a place fitted to a smaller desktop; the title leaving room for three boxes |
 | `shell_maximize_drag` | a double-click on the title maximizes and puts back; a maximized window's title and corner do not drag it; a double-click in the text stays the app's; maximizing ends a drag that was going |
 | `shell_maximize_keys` | F11 maximizes and puts back the window with focus and no app sees it; nothing with no window; a minimized window is skipped |

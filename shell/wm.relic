@@ -490,7 +490,7 @@ fun tabs(d)
     return out
 
 fun _begin_drag(d, w, mode, x, y)
-    d.drag = {id: w.id, mode: mode, ox: x - w.x, oy: y - w.y}
+    d.drag = {id: w.id, mode: mode, ox: x - w.x, oy: y - w.y, sx: w.x, sy: w.y, px: none, py: none}
     if mode == "resize"
         d.drag.ox = x - (w.x + w.width)
         d.drag.oy = y - (w.y + title_height + w.height)
@@ -622,6 +622,17 @@ fun motion(d, x, y)
     if not w.minimized
         _session_input(d)
     if d.drag.mode == "move"
+        d.drag.px = x
+        d.drag.py = y
+        # Dragging a snapped window away gives it back the size it had, with
+        # the pointer still on its title bar.
+        if "snap_from" in w and w.snap_from != none
+            w.width = w.snap_from[2]
+            w.height = w.snap_from[3]
+            w.snap_from = none
+            d.drag.ox = math.max(0, math.min(d.drag.ox, w.width - 40))
+            d.drag.sx = x - d.drag.ox
+            d.drag.sy = y - d.drag.oy
         w.x = x - d.drag.ox
         w.y = y - d.drag.oy
         _clamp_pos(d, w)
@@ -629,6 +640,8 @@ fun motion(d, x, y)
         w.width = x - w.x - d.drag.ox
         w.height = y - w.y - title_height - d.drag.oy
         _clamp_size(d, w)
+        if "snap_from" in w
+            w.snap_from = none   # a resized window keeps its new size
     else if d.drag.mode == "app"
         if w.minimized
             d.drag = none
@@ -649,10 +662,55 @@ fun tick(d, ms)
     else if ms - _session_idle_start >= 2000
         _persist_desk(d)
 
-# Mouse button up ends any drag or resize.
+# Where a title drag let go: "left" or "right" on the outer two pixels of the
+# desktop's sides, "top" on the top two rows, or none. A pointer let go
+# outside the desktop (a windowed desktop reports that during a drag) does not
+# snap, so a window flung past an edge is only kept on screen, as before.
+fun snap_edge(d, x, y)
+    if x < 0 or y < 0 or x >= d.width or y >= bar_top(d)
+        return none
+    if x <= 1
+        return "left"
+    if x >= d.width - 2
+        return "right"
+    if y <= 1
+        return "top"
+    return none
+
+# Let go at the left or right edge: the window fills that half of the desktop
+# above the taskbar. At the top edge it is maximized. snap_from keeps the size
+# it had, for when it is dragged away again.
+fun _snap(d, w, edge, sx, sy)
+    if edge == "top"
+        w.x = sx
+        w.y = sy
+        _fill_desktop(d, w)
+        return
+    let from = [sx, sy, w.width, w.height]
+    if "snap_from" in w and w.snap_from != none
+        from = w.snap_from
+    let half = int(d.width / 2)
+    w.snap_from = from
+    w.y = 0
+    w.height = math.max(min_height, bar_top(d) - title_height)
+    if edge == "left"
+        w.x = 0
+        w.width = half
+    else
+        w.x = half
+        w.width = d.width - half
+
+# Mouse button up ends any drag or resize. A title drag let go at an edge of
+# the desktop snaps the window there.
 fun release(d)
     let dragging = d.drag != none
+    let drag = d.drag
     d.drag = none
+    if dragging and drag.mode == "move" and "px" in drag and drag.px != none
+        let edge = snap_edge(d, drag.px, drag.py)
+        let i = _index_of(d, drag.id)
+        if edge != none and i >= 0 and not d.windows[i].minimized and not is_maximized(d.windows[i])
+            _snap(d, d.windows[i], edge, drag.sx, drag.sy)
     if dragging
         _persist_desk(d)
 

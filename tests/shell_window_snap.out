@@ -1,0 +1,33 @@
+start [40, 30, 220, 60] 456
+title
+left [0, 0, 320, 440] false
+title
+dragged away [200, 195, 220, 60]
+title
+right [320, 0, 320, 440]
+title
+right to left [0, 0, 320, 440]
+title
+away again [300, 145, 220, 60]
+title
+top [0, 0, 640, 440] true
+put back [300, 145, 220, 60] false
+title
+let go outside [-70, 95, 220, 60]
+title
+let go on the taskbar [-20, 440, 220, 60]
+title
+short of the edge [-18, 195, 220, 60]
+title
+click only [40, 30, 220, 60]
+title
+right again [320, 0, 320, 440]
+resize
+resized [320, 0, 202, 152]
+title
+dragged after resize [180, 195, 202, 152]
+title
+maximized [0, 0, 640, 440]
+back to the half [0, 0, 320, 440]
+title
+and away [280, 295, 202, 152]
