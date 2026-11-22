@@ -1,0 +1,7 @@
+["/home> wc a.txt", "1 2 8 a.txt"]
+["/home> wc docs", "0 1 1 /home/docs/b.txt", "1 1 3 \"/home/docs/my notes.txt\"", "1 2 4 total"]
+["/home> wc none", "0 0 0 total"]
+["/home> wc docs a.txt", "0 1 1 /home/docs/b.txt", "1 1 3 \"/home/docs/my notes.txt\"", "1 2 8 a.txt", "2 4 12 total"]
+["/home> wc missing docs", "wc: not found: /home/missing", "0 1 1 /home/docs/b.txt", "1 1 3 \"/home/docs/my notes.txt\"", "1 2 4 total"]
+["/home> wc docs/", "0 1 1 /home/docs/b.txt", "1 1 3 \"/home/docs/my notes.txt\"", "1 2 4 total"]
+["/home> wc a.txt/", "wc: not a folder: /home/a.txt"]

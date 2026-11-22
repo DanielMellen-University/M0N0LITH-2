@@ -57,7 +57,10 @@
 > wc nothing.txt
   wc: not found: /home/nothing.txt
 > wc /home
-  wc: is a folder: /home
+  0 0 0 /home/e.txt
+  2 3 14 /home/w.txt
+  1 3 18 /home/welcome.txt
+  3 6 32 total
 > wc
   usage: wc <path>...
 > wc a b

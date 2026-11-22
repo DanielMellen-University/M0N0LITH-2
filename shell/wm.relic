@@ -1487,17 +1487,7 @@ fun _term_cat(s, path)
 # wc: lines (newlines, as Unix counts them), words (runs of non-space) and
 # characters, then the path as given. Gives [lines, words, characters], or
 # none after an error.
-fun _term_wc(s, path)
-    if _term_not_folder(s, "wc", path, false)
-        return none
-    let p = _term_path(s, path)
-    if not vfs.exists(s.fs, p)
-        _term_reply(s, "wc: " + _term_missing(s, p))
-        return none
-    if vfs.is_dir(s.fs, p)
-        _term_reply(s, "wc: is a folder: " + p)
-        return none
-    let text = vfs.read(s.fs, p)
+fun _term_wc_count(text)
     let words = 0
     let inside = false
     for c in text
@@ -1506,9 +1496,40 @@ fun _term_wc(s, path)
         else if not inside
             inside = true
             words = words + 1
-    let lines = strings.count(text, "\n")
-    _term_reply(s, "{lines} {words} {len(text)} " + _term_name(path))   # quoted like ls when it has a space
-    return [lines, words, len(text)]
+    return [strings.count(text, "\n"), words, len(text)]
+
+fun _term_wc_say(s, shown, counts)
+    _term_reply(s, "{counts[0]} {counts[1]} {counts[2]} " + _term_name(shown))
+
+# Every file under dir, in the order ls shows. Adds each file into total.
+fun _term_wc_tree(s, dir, total)
+    let n = 0
+    for e in vfs.entries(s.fs, dir)
+        let child = paths.join(dir, e[0])
+        if e[1]
+            n = n + _term_wc_tree(s, child, total)
+        else
+            let counts = _term_wc_count(vfs.read(s.fs, child))
+            _term_wc_say(s, child, counts)
+            for k in 0..3
+                total[k] = total[k] + counts[k]
+            n = n + 1
+    return n
+
+fun _term_wc(s, path)
+    if _term_not_folder(s, "wc", path, false)
+        return none
+    let p = _term_path(s, path)
+    if not vfs.exists(s.fs, p)
+        _term_reply(s, "wc: " + _term_missing(s, p))
+        return none
+    if vfs.is_dir(s.fs, p)
+        let total = [0, 0, 0]
+        let n = _term_wc_tree(s, p, total)
+        return {counts: total, files: n, dir: true}
+    let counts = _term_wc_count(vfs.read(s.fs, p))
+    _term_wc_say(s, path, counts)   # the path as typed, quoted like ls when it has a space
+    return {counts: counts, files: 1, dir: false}
 
 fun _term_cd(s, parts)
     let p = _term_optional_path(s, parts, "/home")
@@ -2350,14 +2371,19 @@ fun _term_run(s, line)
         if len(parts) < 2
             _term_reply(s, "usage: wc <path>...")
         let total = [0, 0, 0]
-        let counted = 0
+        let files = 0
+        let saw_dir = false
         for path in slice(parts, 1, len(parts))
             let c = _term_wc(s, path)
             if c != none
-                counted = counted + 1
+                if c.dir
+                    saw_dir = true
+                files = files + c.files
                 for k in 0..3
-                    total[k] = total[k] + c[k]
-        if len(parts) > 2 and counted > 0
+                    total[k] = total[k] + c.counts[k]
+        # A folder lists its files and then a total, as several paths do.
+        # One file on its own has no total line.
+        if saw_dir or files > 1
             _term_reply(s, "{total[0]} {total[1]} {total[2]} total")
     else if cmd == "rm"
         # several paths, one after another as for cat; an error for one does not stop the rest
