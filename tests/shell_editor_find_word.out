@@ -1,0 +1,8 @@
+word find: one one one 13 16
+marks true
+two find: two two
+selection find: two two
+before space find: one one
+leading space find: nothing
+any find: one false one
+ide find: print print

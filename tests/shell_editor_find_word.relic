@@ -1,0 +1,52 @@
+# Ctrl+F3 finds the word at the cursor, or the selection when it is on
+# one line, and highlights every match. A space finds nothing. The IDE
+# uses the same key.
+use ../shell/wm
+let d = wm.new_desktop(640, 480, wm.default_apps())
+let w = wm.launch(d, wm.editor)
+let s = w.state
+s.text = "one two one\nTwo\n"
+s.disk = s.text
+s.back = len(s.text) - 0
+# cursor on the first "one": the text starts at back = len - 0 is the end.
+# Put the cursor on the 'o' of the first one, index 0.
+s.back = len(s.text) - 0
+fun at(index)
+    s.back = len(s.text) - index
+    s.mark = none
+at(0)
+wm.key(d, "ctrl+f3")
+print("word", s.status, s.last_find, s.hl, s.back, s.mark)
+wm.visible_lines(w)
+print("marks", len(s.marks) > 0)
+at(4)
+wm.key(d, "ctrl+f3")
+print("two", s.status, s.last_find)
+# a selection on one line is the text, not just the word
+s.mark = len(s.text) - 4
+s.back = len(s.text) - 7
+wm.key(d, "ctrl+f3")
+print("selection", s.status, s.last_find)
+# a space uses the word just before it
+at(3)
+wm.key(d, "ctrl+f3")
+print("before space", s.status, s.last_find)
+s.text = " one"
+s.disk = s.text
+at(0)
+wm.key(d, "ctrl+f3")
+print("leading space", s.status)
+# case off still matches the word, and the mode is any
+s.text = "one two one\nTwo\n"
+s.disk = s.text
+wm.key(d, "ctrl+i")
+at(0)
+wm.key(d, "ctrl+f3")
+print("any", s.status, s.find_case, s.last_find)
+# the IDE
+let ide = wm.launch(d, wm.ide)
+ide.state.text = "print(1)\nprint(2)\n"
+ide.state.disk = ide.state.text
+ide.state.back = len(ide.state.text) - 0
+wm.key(d, "ctrl+f3")
+print("ide", ide.state.status, ide.state.last_find)
