@@ -113,3 +113,17 @@ g1`, so opening this store recovers g2, the generation META names.
 
 COMMITTED and META are both absent, and g1 is the only generation
 file. Opening this store recovers g1, the one valid generation.
+
+## case20
+
+COMMITTED names g2, and g2.m2ws is not in the directory. g1 is complete
+and holds the first version. g3 is a complete files-only generation
+holding a third version; it was never committed. Opening this store
+recovers g1, says the committed image is missing, and names g3 as an
+ignored uncommitted generation. The open does not recreate g2.
+
+## case21
+
+COMMITTED names g2, and g2.m2ws is the second version. META is the
+text `not a meta file` and a newline, not a metadata file. Opening
+this store installs g2 and does not rewrite META.

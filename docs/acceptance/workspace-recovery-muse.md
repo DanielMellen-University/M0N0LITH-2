@@ -806,8 +806,10 @@ META and exactly one valid generation installs that one.
 | 17 | Open alone writes nothing on a too-many-generations held store | PASS |
 | 18 | Missing pointer with a usable META recovers the named generation | PASS |
 | 19 | Missing pointer with one valid generation installs it | PASS |
+| 20 | Pointer names a generation file that is not there | PASS |
+| 21 | Corrupt META does not override a readable pointer | PASS |
 
-Specified cases: 21. Executed cases: 21.
+Specified cases: 23. Executed cases: 23.
 
 ## Wording changes (Nov 9 2026)
 
@@ -1132,3 +1134,51 @@ cases 20-21); power loss (there is no fsync), and two desktops
 writing one store at once (there is no lock). The open-alone gap the
 D0141 note named for cases 10, 12 and 13 is now closed by cases 15,
 16 and 17.
+
+## Cases 20 and 21
+
+### Case 20: The pointer names a generation file that is not there
+
+Status: PASS (Nov 22 2026), model harness only. The GUI was not walked through.
+
+Setup: Two committed generations, the older one whole. After the process exits, the file the pointer names is deleted, and a newer complete generation that was never committed is added.
+
+Action: Open the store. No save is attempted.
+
+Expected visible outcome: The desktop says the committed image is missing and that it recovered the older generation. It does not show the newer generation's text.
+
+Data-preservation assertions:
+
+- The file shows the older generation's text.
+- The newer generation is named as ignored and is not installed.
+- The open does not recreate the missing file and does not rewrite the store.
+
+### Case 21: A corrupt META does not override a readable pointer
+
+Status: PASS (Nov 22 2026), model harness only. The GUI was not walked through.
+
+Setup: Two committed generations. After the process exits, META is replaced with text that is not a metadata file. The pointer still names the newer generation, and that file still parses.
+
+Action: Open the store. No save is attempted.
+
+Expected visible outcome: The desktop is quiet and restores the generation the pointer names. It does not repair META.
+
+Data-preservation assertions:
+
+- The newer text is what comes back.
+- META is still the corrupt text after the open, and the pointer is unchanged.
+- The open writes nothing.
+
+## Results (Nov 22 2026)
+
+Run on Linux with:
+
+```console
+python3 tools/workspace-recovery-muse/run_cases.py --live --replay
+```
+
+Result: `RESULT: PASS, all sixteen cases`. The GUI was not walked through. This is not a display pass.
+
+Cases 20 and 21 passed live and from the committed fixtures. A readable pointer whose generation file is gone reports `workspace: committed image missing; recovered g1; ignored uncommitted g3`, and note.txt reads `first version`. A META file replaced with `not a meta file` leaves the notice empty, note.txt reads `second version`, and the open does not rewrite the store.
+
+Cases 10, 12 and 13 now expect the damaged files the prune keeps, up to 4, which is what a save after a release has done since damaged generations were kept. The earlier results sections record what those runs saw before that. The Nov 22 harness run is the one that checks the current prune. Power loss and two desktops writing one store are still not covered.
