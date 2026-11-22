@@ -1,0 +1,151 @@
+# The Editor's last find comes back, and so do its highlights and the case
+# mode. A find still being typed does not. A query past 4096 characters is
+# left out. A bad find field rejects the generation. The IDE uses the same
+# fields.
+use ../shell/wm
+use ../shell/workspace
+use std/files
+use std/strings
+use std/vfs
+
+fun wipe(path)
+    try
+        files.remove_tree(path)
+    catch e
+        none
+
+fun keys(d, list)
+    for k in list
+        wm.key(d, k)
+
+fun image(body)
+    let prefix = "M2WS1\n" + body
+    let sum = 0
+    let weight = len(prefix)
+    for c in prefix
+        sum = (sum + ord(c) * weight) % 1000000007
+        weight = weight - 1
+    return prefix + "Z " + str(sum) + "\n.\n"
+
+fun editor_body(extra)
+    let body = "S W Editor 1 24 20 320 200 0\n"
+    let fields = [["path", "/home/n.txt"], ["text", "one two one\nTwo\n"], ["back", "0"], ["mark", "-"], ["disk_set", "1"], ["disk", "one two one\nTwo\n"]]
+    for row in fields
+        body = body + "S F " + row[0] + " " + workspace.escape(row[1]) + "\n"
+    for row in extra
+        body = body + "S F " + row[0] + " " + workspace.escape(row[1]) + "\n"
+    return body
+
+fun case_of(s)
+    if not "find_case" in s
+        return "exact"
+    if s.find_case
+        return "exact"
+    return "any"
+
+fun hl_of(s)
+    if not "hl" in s or s.hl == none
+        return ""
+    return s.hl
+
+fun last_of(s)
+    if not "last_find" in s
+        return ""
+    return s.last_find
+
+let dir = "ws-find"
+wipe(dir)
+let d = wm.new_desktop(640, 480, wm.default_apps())
+wm.workspace_open(dir)
+wm.workspace_bind(d)
+let w = wm.launch(d, wm.editor)
+w.state.text = "one two one\nTwo\n"
+w.state.disk = w.state.text
+w.state.back = 0
+keys(d, ["ctrl+f", "o", "n", "e", "return"])
+print("found", w.state.status, hl_of(w.state), case_of(w.state))
+wm.workspace_flush()
+let gen = files.read(dir + "/" + strings.trim(files.read(dir + "/COMMITTED")) + ".m2ws")
+print("stored", strings.contains(gen, "S F query one"), strings.contains(gen, "S F hl 1"), strings.contains(gen, "S F case "))
+let again = wm.new_desktop(640, 480, wm.default_apps())
+wm.workspace_open(dir)
+wm.workspace_bind(again)
+let e = again.windows[0]
+wm.visible_lines(e)
+print("back", last_of(e.state), hl_of(e.state), case_of(e.state), len(e.state.marks) > 0, e.state.back, e.state.mark)
+let before = e.state.back
+wm.key(again, "f3")
+print("f3", e.state.back != before, hl_of(e.state))
+
+# An edit clears the highlights. The query stays, so F3 still has it.
+wm.key(again, "x")
+wm.workspace_flush()
+wm.workspace_open(dir)
+wm.workspace_bind(again)
+e = again.windows[0]
+print("edited", last_of(e.state), hl_of(e.state))
+wm.key(again, "f3")
+print("f3 after edit", hl_of(e.state) != "")
+
+# Case off is stored. A prompt that was still open is not.
+wipe(dir)
+d = wm.new_desktop(640, 480, wm.default_apps())
+wm.workspace_open(dir)
+wm.workspace_bind(d)
+w = wm.launch(d, wm.editor)
+w.state.text = "one two One\n"
+w.state.disk = w.state.text
+keys(d, ["ctrl+i"])
+keys(d, ["ctrl+f", "o", "n", "e"])
+wm.workspace_flush()
+gen = files.read(dir + "/" + strings.trim(files.read(dir + "/COMMITTED")) + ".m2ws")
+print("prompt", strings.contains(gen, "S F query "), strings.contains(gen, "S F case any"))
+wm.workspace_open(dir)
+wm.workspace_bind(again)
+e = again.windows[0]
+print("case back", case_of(e.state), last_of(e.state), e.state.status)
+
+# The IDE writes the same fields.
+wipe(dir)
+d = wm.new_desktop(640, 480, wm.default_apps())
+wm.workspace_open(dir)
+wm.workspace_bind(d)
+w = wm.launch(d, wm.ide)
+w.state.text = "print(1)\n"
+w.state.disk = w.state.text
+keys(d, ["ctrl+f", "p", "r", "return"])
+wm.workspace_flush()
+wm.workspace_open(dir)
+wm.workspace_bind(again)
+print("ide", last_of(again.windows[0].state), hl_of(again.windows[0].state))
+
+# A long query is left out and the snapshot still commits.
+wipe(dir)
+d = wm.new_desktop(640, 480, wm.default_apps())
+wm.workspace_open(dir)
+wm.workspace_bind(d)
+w = wm.launch(d, wm.editor)
+w.state.text = "z"
+w.state.disk = "z"
+w.state.last_find = ""
+for i in 0..4097
+    w.state.last_find = w.state.last_find + "q"
+w.state.hl = w.state.last_find
+wm.workspace_flush()
+print("long", [wm.workspace_notice()], strings.contains(files.read(dir + "/g2.m2ws"), "S F query "))
+
+wipe(dir)
+files.make_dir(dir)
+files.write(dir + "/g1.m2ws", image("F /kept old\nS W Notes 1 20 30 220 60 0\nS F text older\nS F left 0\n"))
+files.write(dir + "/COMMITTED", "g2\n")
+files.write(dir + "/g2.m2ws", image("F /kept kept\n" + editor_body([["query", "one"], ["hl", "1"], ["case", "any"]])))
+wm.workspace_open(dir)
+wm.workspace_bind(again)
+e = again.windows[0]
+print("hand", [wm.workspace_notice()], e.state.last_find, hl_of(e.state), case_of(e.state))
+for bad in [[["query", ""]], [["case", "maybe"]], [["hl", "1"]], [["hl", "2"], ["query", "one"]], [["query", "one"], ["case", "ANY"]]]
+    files.write(dir + "/g2.m2ws", image("F /kept kept\n" + editor_body(bad)))
+    wm.workspace_open(dir)
+    print("bad", [wm.workspace_notice()], vfs.read(wm.terminal.init().fs, "/kept"))
+
+wipe(dir)

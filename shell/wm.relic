@@ -5472,6 +5472,18 @@ fun _fields_of(w, lines)
             return false
         if not _sf_history(lines, s)
             return false
+        let query = ""
+        if "last_find" in s and s.last_find != none
+            query = s.last_find
+        # A find still being typed is s.find, and is not stored. A query past
+        # this cap is left out; the snapshot is still written.
+        if query != "" and len(query) <= 4096
+            if not _sf(lines, "query", query)
+                return false
+            if "hl" in s and s.hl != none and s.hl != "" and not _sf(lines, "hl", "1")
+                return false
+        if "find_case" in s and not s.find_case and not _sf(lines, "case", "any")
+            return false
         if name == "IDE"
             let err = "-"
             if s.err_line != none
@@ -5545,7 +5557,14 @@ fun _restore_editor(f)
         undo = workspace.unpack_steps(f.undo)
     if "redo" in f
         redo = workspace.unpack_steps(f.redo)
-    return {fs: _shell_fs, path: f.path, text: text, status: status, rows: 0, disk: disk, overwrite: false, undo: undo, redo: redo, back: int(f.back), mark: mark}
+    let restored = {fs: _shell_fs, path: f.path, text: text, status: status, rows: 0, disk: disk, overwrite: false, undo: undo, redo: redo, back: int(f.back), mark: mark}
+    if "query" in f
+        restored.last_find = f.query
+        if "hl" in f
+            restored.hl = f.query
+    if "case" in f and f.case == "any"
+        restored.find_case = false
+    return restored
 
 fun _restore_state(w)
     let f = w.fields

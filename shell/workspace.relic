@@ -592,6 +592,12 @@ fun _editor_fields_ok(f)
     let back = _parse_int(f.back, 0, max_file)
     if back == none or back > len(f.text)
         return false
+    if "query" in f and (f.query == "" or len(f.query) > 4096)
+        return false
+    if "case" in f and f.case != "any" and f.case != "exact"
+        return false
+    if "hl" in f and (f.hl != "1" or not "query" in f)
+        return false
     let size = 0
     for key in ["undo", "redo"]
         if key in f
@@ -703,6 +709,8 @@ fun _field_optional(app, key)
     if key == "undo" or key == "redo"
         return app == "Editor" or app == "IDE" or app == "Paint"
     if app == "Terminal" and key == "scroll"
+        return true
+    if (app == "Editor" or app == "IDE") and (key == "query" or key == "case" or key == "hl")
         return true
     return false
 
