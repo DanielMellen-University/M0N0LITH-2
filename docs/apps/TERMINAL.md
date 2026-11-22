@@ -35,6 +35,10 @@ Commands split on spaces. A part in double or single quotes is one word with its
 | `tree [path]` | the folder (the current one without a path) and everything under it, two spaces in per level, names as `ls` shows them, in the order `ls` gives; then how many folders and files, as `2 folders, 5 files`. A big tree keeps its end, as `find` does. On a file it gives the file's name |
 | `du [path]` | for each name in the folder (the current one without a path), the characters in that file or in all the files under that folder, lined up on the right, in the order `ls` gives; then the total and the number of files, as `1221 characters, 3 files`. On a file, its count and name |
 | `diff path path` | the lines that differ between two files: `-N text` for line N of the first that the second does not have, `+N text` for line N of the second, from a longest run of lines both share; `diff: same lines` when there are none. Past 250,000 line pairs (after the lines both start and end with) it gives only the first line that differs |
+| `cmp path path` | `cmp: same` when the lines are the same, or `cmp: line N` for the first line that differs. When one file ends first, N is the next line |
+| `stat path` | `file, N characters` (or `character`), or `folder, N entries` (or `entry`) for the names in that folder. The file is not changed |
+| `basename path` | the last part of the path, as written. The file does not have to exist. `/` stays `/` |
+| `dirname path` | the folder part of the path. A name with no folder is `.`, and `/` stays `/`. The file does not have to exist |
 | `grep text [path]` | the lines that have `text` in them: plain text, not a pattern, and case counts; quote it to look for words with spaces (`grep "old pond" poem.txt`). A file prints those lines. A folder, or no path, searches every file under that folder (the current one when the path is left out), in the order `ls` gives, and each line is `path:line` with the path quoted when it has a space. A folder with no match prints nothing |
 | `sort path` | the lines of a file in order, by character (capitals before small letters); the file is not changed |
 | `uniq path` | the lines of a file, leaving out a line the same as the one just before it (so a repeat further on stays, as in Unix) |
@@ -51,7 +55,7 @@ Commands split on spaces. A part in double or single quotes is one word with its
 
 ## Rules for paths
 
-- No command has options. `cd`, `ls`, `cat`, `head`, `tail`, `wc`, `grep`, `sort`, `uniq`, `nl`, `tree`, `du`, `diff`, `mkdir`, `touch`, `rm`, `mv` and `cp` refuse any word starting with `-`, and so do the paths of `write` and `echo >`. To name such a file, write `./-x`.
+- No command has options. `cd`, `ls`, `cat`, `head`, `tail`, `wc`, `grep`, `sort`, `uniq`, `nl`, `tree`, `du`, `diff`, `cmp`, `stat`, `basename`, `dirname`, `mkdir`, `touch`, `rm`, `mv` and `cp` refuse any word starting with `-`, and so do the paths of `write` and `echo >`. To name such a file, write `./-x`.
 - A path ending in `/` must be a folder: `cat notes.txt/` and `rm notes.txt/` are errors, and `touch new/` makes nothing.
 - Errors say which part is wrong: `not found: /home/x`, `not a folder: /home/notes.txt` when a part of the path is a file, `no folder: /home/missing` when the folder to write into is not there.
 - If another app removes or moves the folder a Terminal is in, it moves up to the nearest folder that still exists.

@@ -191,7 +191,10 @@ Write `tests/shell_<topic>.relic`, run it, read its output, and save that as `te
 | `shell_terminal_sort_file` | sort orders by character, digits before letters, and does not change the file |
 | `shell_terminal_uniq_case` | uniq drops only a line equal to the one just before it, so A and a both stay |
 | `shell_terminal_nl_blank` | nl numbers a blank line |
+| `shell_terminal_basename` | basename and dirname read the path as written, including `/`, a relative name, a quoted space and a missing file; an option is refused |
 | `shell_terminal_cd_stay` | cd of a file says it is not a folder and stays put |
+| `shell_terminal_cmp` | cmp says the lines are the same or names the first line that differs, including a file that ends first; a folder, a missing file, a trailing slash and an option are errors, and the files stay as they were |
+| `shell_terminal_stat` | stat says a file's length and how many names a folder holds, including an empty folder and `/`; a missing path, a trailing slash and an option are errors |
 | `shell_terminal_recall_dups` | a command repeated immediately is kept once, and the same command later is kept again |
 | `shell_terminal_up_none` | Up and Down with an empty history leave the line being typed |
 | `shell_terminal_delete_end` | Delete at the end of the Terminal line changes nothing, and in the middle removes the next character |
