@@ -1,0 +1,17 @@
+["/home> cmp a.txt b.txt", "cmp: same"]
+["/home> cmp a.txt c.txt", "cmp: line 2"]
+["/home> cmp a.txt d.txt", "cmp: line 3"]
+["/home> cmp d.txt a.txt", "cmp: line 3"]
+["/home> cmp a.txt e.txt", "cmp: line 4"]
+["/home> cmp a.txt a.txt", "cmp: same"]
+["/home> cmp \"my notes.txt\" a.txt", "cmp: line 2"]
+["/home> cmp a.txt", "usage: cmp <path> <path>"]
+["/home> cmp a.txt b.txt c.txt", "usage: cmp <path> <path>"]
+["/home> cmp -a b.txt", "cmp: no options, not even -a"]
+["/home> cmp missing b.txt", "cmp: not found: /home/missing"]
+["/home> cmp /home b.txt", "cmp: is a folder: /home"]
+["/home> cmp a.txt/ b.txt", "cmp: not a folder: /home/a.txt"]
+untouched one
+two
+three
+

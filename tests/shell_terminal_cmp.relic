@@ -1,0 +1,33 @@
+# cmp names the first line that differs, or says the files have the same lines.
+use ../shell/wm
+use std/vfs
+let t = wm.terminal.init()
+fun run(line)
+    t.buf = []
+    for c in line
+        if c == " "
+            wm.terminal.on_key(t, "space")
+        else
+            wm.terminal.on_key(t, c)
+    wm.terminal.on_key(t, "return")
+    print(t.buf)
+vfs.write(t.fs, "/home/a.txt", "one\ntwo\nthree\n")
+vfs.write(t.fs, "/home/b.txt", "one\ntwo\nthree\n")
+vfs.write(t.fs, "/home/c.txt", "one\nTWO\nthree\n")
+vfs.write(t.fs, "/home/d.txt", "one\ntwo\n")
+vfs.write(t.fs, "/home/e.txt", "one\ntwo\nthree\nfour\n")
+vfs.write(t.fs, "/home/my notes.txt", "one\n")
+run("cmp a.txt b.txt")
+run("cmp a.txt c.txt")
+run("cmp a.txt d.txt")
+run("cmp d.txt a.txt")
+run("cmp a.txt e.txt")
+run("cmp a.txt a.txt")
+run("cmp \"my notes.txt\" a.txt")
+run("cmp a.txt")
+run("cmp a.txt b.txt c.txt")
+run("cmp -a b.txt")
+run("cmp missing b.txt")
+run("cmp /home b.txt")
+run("cmp a.txt/ b.txt")
+print("untouched", vfs.read(t.fs, "/home/a.txt"))

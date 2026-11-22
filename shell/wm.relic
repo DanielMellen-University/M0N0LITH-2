@@ -1972,6 +1972,66 @@ fun _diff_lines(a, b)
             j = j + 1
     return out
 
+# cmp: whether two files have the same lines, or the first line that differs.
+# A file that ends first differs on the next line.
+fun _term_cmp(s, pa, pb)
+    let a = _term_file_lines(s, "cmp", pa)
+    if a == none
+        return
+    let b = _term_file_lines(s, "cmp", pb)
+    if b == none
+        return
+    let n = len(a)
+    if len(b) < n
+        n = len(b)
+    for i in 0..n
+        if a[i] != b[i]
+            _term_reply(s, "cmp: line " + str(i + 1))
+            return
+    if len(a) != len(b)
+        _term_reply(s, "cmp: line " + str(n + 1))
+        return
+    _term_reply(s, "cmp: same")
+
+# stat: a file's length, or how many names are in a folder.
+fun _term_stat(s, path)
+    if _term_not_folder(s, "stat", path, false)
+        return
+    let p = _term_path(s, path)
+    if not vfs.exists(s.fs, p)
+        _term_reply(s, "stat: " + _term_missing(s, p))
+        return
+    if vfs.is_dir(s.fs, p)
+        let n = len(vfs.entries(s.fs, p))
+        let word = "entries"
+        if n == 1
+            word = "entry"
+        _term_reply(s, "folder, " + str(n) + " " + word)
+        return
+    let n = len(vfs.read(s.fs, p))
+    let word = "characters"
+    if n == 1
+        word = "character"
+    _term_reply(s, "file, " + str(n) + " " + word)
+
+# basename and dirname use the path as written. The file does not have to be there.
+fun _term_base(s, path)
+    let p = paths.normalize(path)
+    if p == "/"
+        _term_reply(s, "/")
+        return
+    _term_reply(s, paths.base(p))
+
+fun _term_dir(s, path)
+    let p = paths.normalize(path)
+    if p == "/"
+        _term_reply(s, "/")
+        return
+    let up = paths.dir(p)
+    if up == ""
+        up = "."
+    _term_reply(s, up)
+
 # diff: the lines that differ between two files, or that they are the same.
 fun _term_diff(s, pa, pb)
     let a = _term_file_lines(s, "diff", pa)
@@ -2112,7 +2172,7 @@ fun _split_words(line)
 
 
 # Commands whose words are all paths, so a word like -l or -r is a mistake, not a name.
-let _path_commands = ["cd", "ls", "cat", "mkdir", "touch", "rm", "mv", "cp", "wc", "head", "tail", "grep", "sort", "uniq", "nl", "tree", "du", "diff"]
+let _path_commands = ["cd", "ls", "cat", "mkdir", "touch", "rm", "mv", "cp", "wc", "head", "tail", "grep", "sort", "uniq", "nl", "tree", "du", "diff", "cmp", "stat", "basename", "dirname"]
 
 fun _term_run(s, line)
     s.cwd = _existing_dir(s.fs, s.cwd)
@@ -2144,7 +2204,8 @@ fun _term_run(s, line)
         _term_reply(s, "workspace pwd cd ls cat head tail")
         _term_reply(s, "mkdir touch write rm mv cp")
         _term_reply(s, "wc grep find sort uniq nl")
-        _term_reply(s, "tree du diff")
+        _term_reply(s, "tree du diff cmp stat")
+        _term_reply(s, "basename dirname")
         _term_reply(s, "echo text > file, >> adds")
         _term_reply(s, "\"my file\": quotes keep spaces")
         _term_reply(s, "!! the last again, !N history N")
@@ -2267,6 +2328,18 @@ fun _term_run(s, line)
     else if cmd == "diff"
         if _term_args(s, parts, 2, "diff <path> <path>")
             _term_diff(s, parts[1], parts[2])
+    else if cmd == "cmp"
+        if _term_args(s, parts, 2, "cmp <path> <path>")
+            _term_cmp(s, parts[1], parts[2])
+    else if cmd == "stat"
+        if _term_args(s, parts, 1, "stat <path>")
+            _term_stat(s, parts[1])
+    else if cmd == "basename"
+        if _term_args(s, parts, 1, "basename <path>")
+            _term_base(s, parts[1])
+    else if cmd == "dirname"
+        if _term_args(s, parts, 1, "dirname <path>")
+            _term_dir(s, parts[1])
     else if cmd == "du"
         if len(parts) > 2
             _term_reply(s, "usage: du [path]")
@@ -2308,7 +2381,7 @@ let _term_recall_keep = 50
 # with "/" after it, anything else with a space); several are taken as far as
 # they agree, and when that adds nothing they are listed. No match, or an
 # empty line: nothing.
-let _term_commands = ["apps", "cat", "cd", "clear", "cp", "date", "diff", "du", "echo", "find", "grep", "head", "help", "history", "ls", "mkdir", "mv", "nl", "pwd", "rm", "sort", "tail", "touch", "tree", "uniq", "wc", "workspace", "write"]
+let _term_commands = ["apps", "basename", "cat", "cd", "clear", "cmp", "cp", "date", "diff", "dirname", "du", "echo", "find", "grep", "head", "help", "history", "ls", "mkdir", "mv", "nl", "pwd", "rm", "sort", "stat", "tail", "touch", "tree", "uniq", "wc", "workspace", "write"]
 
 fun _common_start(names)
     let out = names[0]
