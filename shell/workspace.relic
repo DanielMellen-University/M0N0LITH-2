@@ -615,6 +615,8 @@ fun _session_values(win)
         let past = unpack_lines(f.past, 51)
         if buf == none or past == none or len(buf) > 200 or len(past) > 50 or back > len(past)
             return false
+        if "scroll" in f and _parse_int(f.scroll, 0, 1000000) == none
+            return false
         return true
     if win.app == "Files"
         let sel = _parse_int(f.sel, 0, 100000)
@@ -695,11 +697,20 @@ fun _add_field(win, line)
     win.fields[key] = value
     return true
 
+# Absent on a snapshot from before the field existed. A present value is
+# still checked, and any other extra key is not optional.
+fun _field_optional(app, key)
+    if key == "undo" or key == "redo"
+        return app == "Editor" or app == "IDE" or app == "Paint"
+    if app == "Terminal" and key == "scroll"
+        return true
+    return false
+
 fun _finish_window(win)
     let need = _session_need(win.app)
     let got = 0
     for k in win.fields
-        if not ((win.app == "Editor" or win.app == "IDE" or win.app == "Paint") and (k == "undo" or k == "redo"))
+        if not _field_optional(win.app, k)
             got = got + 1
     # Snake's board is optional, but its four fields come together.
     if win.app == "Snake" and got > 0

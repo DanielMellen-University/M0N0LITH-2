@@ -1,0 +1,80 @@
+# The Terminal's scroll comes back. At the prompt it is left out of the
+# snapshot, which is what an older file already means. A bad scroll value
+# rejects the generation.
+use ../shell/wm
+use ../shell/workspace
+use std/files
+use std/strings
+use std/vfs
+
+fun wipe(path)
+    try
+        files.remove_tree(path)
+    catch e
+        none
+
+fun type_line(d, line)
+    for ch in line
+        if ch == " "
+            wm.key(d, "space")
+        else
+            wm.key(d, ch)
+    wm.key(d, "return")
+
+fun image(body)
+    let prefix = "M2WS1\n" + body
+    let sum = 0
+    let weight = len(prefix)
+    for c in prefix
+        sum = (sum + ord(c) * weight) % 1000000007
+        weight = weight - 1
+    return prefix + "Z " + str(sum) + "\n.\n"
+
+fun term_body(scroll)
+    let fields = [["cwd", "/home"], ["input", ""], ["draft", ""], ["buf", workspace.pack_lines(["one", "two"])], ["past", workspace.pack_lines([])], ["left", "0"], ["back", "0"]]
+    if scroll != none
+        append(fields, ["scroll", scroll])
+    let body = "S W Terminal 1 24 20 280 120 0\n"
+    for row in fields
+        body = body + "S F " + row[0] + " " + workspace.escape(row[1]) + "\n"
+    return body
+
+let dir = "ws-scroll"
+wipe(dir)
+let d = wm.new_desktop(640, 480, wm.default_apps())
+wm.workspace_open(dir)
+wm.workspace_bind(d)
+let w = wm.launch(d, wm.terminal)
+for i in 1..12
+    type_line(d, "echo line " + str(i))
+wm.visible_lines(w)
+let gen = files.read(dir + "/" + strings.trim(files.read(dir + "/COMMITTED")) + ".m2ws")
+print("prompt", w.state.scroll, strings.contains(gen, "S F scroll "))
+wm.key(d, "pageup")
+wm.visible_lines(w)
+print("scrolled", w.state.scroll)
+wm.workspace_flush()
+gen = files.read(dir + "/" + strings.trim(files.read(dir + "/COMMITTED")) + ".m2ws")
+print("saved field", strings.contains(gen, "S F scroll " + str(w.state.scroll)))
+let again = wm.new_desktop(640, 480, wm.default_apps())
+wm.workspace_open(dir)
+wm.workspace_bind(again)
+let back = again.windows[0]
+print("restored raw", back.state.scroll)
+let lines = wm.visible_lines(back)
+print("restored", back.state.scroll, lines[len(lines) - 1])
+
+wipe(dir)
+files.make_dir(dir)
+files.write(dir + "/g1.m2ws", image("F /kept old\nS W Notes 1 20 30 220 60 0\nS F text older\nS F left 0\n"))
+files.write(dir + "/COMMITTED", "g2\n")
+files.write(dir + "/g2.m2ws", image("F /kept old\n" + term_body("4")))
+wm.workspace_open(dir)
+wm.workspace_bind(again)
+print("hand", [wm.workspace_notice()], again.windows[0].state.scroll)
+for bad in ["-1", "01", "x", "1000001"]
+    files.write(dir + "/g2.m2ws", image("F /kept old\n" + term_body(bad)))
+    wm.workspace_open(dir)
+    print("bad " + bad, [wm.workspace_notice()], vfs.read(wm.terminal.init().fs, "/kept"))
+
+wipe(dir)

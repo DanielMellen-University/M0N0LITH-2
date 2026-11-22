@@ -1,0 +1,10 @@
+prompt 0 false
+scrolled 6
+saved field true
+restored raw 6
+restored 6 -- 6 more below: pagedown --
+hand [""] 4
+bad -1 ["workspace: committed image invalid; recovered g1"] old
+bad 01 ["workspace: committed image invalid; recovered g1"] old
+bad x ["workspace: committed image invalid; recovered g1"] old
+bad 1000001 ["workspace: committed image invalid; recovered g1"] old

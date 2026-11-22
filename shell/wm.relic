@@ -5451,6 +5451,9 @@ fun _fields_of(w, lines)
             return false
         if not _sf(lines, "left", str(_term_left(s))) or not _sf(lines, "back", str(s.back))
             return false
+        # 0 is what a snapshot from before scroll was stored already means.
+        if _term_scroll(s) != 0 and not _sf(lines, "scroll", str(_term_scroll(s)))
+            return false
         return _sf_lines(lines, "buf", s.buf) and _sf_lines(lines, "past", s.past)
     if name == "Files"
         return _sf(lines, "path", s.path) and _sf(lines, "sel", str(s.sel))
@@ -5547,7 +5550,10 @@ fun _restore_editor(f)
 fun _restore_state(w)
     let f = w.fields
     if w.app == "Terminal"
-        return {buf: workspace.unpack_lines(f.buf, 201), input: f.input, left: int(f.left), cwd: f.cwd, fs: _shell_fs, cols: term_width, past: workspace.unpack_lines(f.past, 51), back: int(f.back), draft: f.draft, scroll: 0}
+        let scroll = 0
+        if "scroll" in f
+            scroll = int(f.scroll)
+        return {buf: workspace.unpack_lines(f.buf, 201), input: f.input, left: int(f.left), cwd: f.cwd, fs: _shell_fs, cols: term_width, past: workspace.unpack_lines(f.past, 51), back: int(f.back), draft: f.draft, scroll: scroll}
     if w.app == "Files"
         return {fs: _shell_fs, path: f.path, sel: int(f.sel), first: 1, rows: 0, names: [], dirs: [], names_path: "", stale: false, recovered: false, confirm: none, note: none}
     if w.app == "Editor"
