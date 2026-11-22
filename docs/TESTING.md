@@ -182,6 +182,7 @@ Write `tests/shell_<topic>.relic`, run it, read its output, and save that as `te
 | `shell_terminal_wc_many` | wc of several files with a total, a quoted name, errors that do not stop the rest, no total when nothing was counted, and the usage |
 | `shell_terminal_find_own` | find matches an entry's own name, shows a folder with a slash, and does not match text only in a parent path |
 | `shell_terminal_history_keep` | history keeps the last 50 commands, the oldest falls off, and !1 runs whatever is now first |
+| `shell_terminal_bang_prefix` | !text runs the newest command that starts with that text; a miss is not kept; !! and !N are unchanged; a bare ! is an unknown command and is kept |
 | `shell_terminal_bang_zero` | !0 is not in history, and !001 runs command 1 |
 | `shell_terminal_case_kept` | Echo is unknown, it is kept, and !! runs that same failure again without keeping it twice |
 | `shell_terminal_two` | two Terminals share the files and each keeps its own folder |
