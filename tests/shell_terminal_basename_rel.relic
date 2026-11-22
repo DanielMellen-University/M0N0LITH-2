@@ -1,0 +1,23 @@
+# basename and dirname of a relative path, a path with .., and a repeated slash.
+# The file does not have to exist.
+use ../shell/wm
+let t = wm.terminal.init()
+fun run(line)
+    t.buf = []
+    for c in line
+        if c == " "
+            wm.terminal.on_key(t, "space")
+        else
+            wm.terminal.on_key(t, c)
+    wm.terminal.on_key(t, "return")
+    print(t.buf)
+run("basename docs/a.txt")
+run("dirname docs/a.txt")
+run("basename a/b/c")
+run("dirname a/b/c")
+run("basename ../a.txt")
+run("dirname ../a.txt")
+run("basename //home//a.txt")
+run("dirname //home//a.txt")
+run("basename docs/")
+run("dirname docs/")
