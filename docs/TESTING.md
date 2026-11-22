@@ -173,6 +173,7 @@ Write `tests/shell_<topic>.relic`, run it, read its output, and save that as `te
 | `shell_terminal_cp_bytes` | cp copies the exact bytes, adds no newline, and will not write over that copy |
 | `shell_terminal_rm_full` | rm refuses a folder that is not empty, then removes it once it is empty |
 | `shell_terminal_mkdir_deep` | mkdir creates missing parent folders, and a second time says the folder is already there |
+| `shell_terminal_grep_dir` | grep of a folder, and grep with no path, searches the files under it and names each file; a file is still just its lines; a missing path, a file with /, too many words and an option are errors |
 | `shell_terminal_grep_dot` | grep matches characters as written: a dot is not a pattern, and case counts |
 | `shell_terminal_tree` | tree of the current folder, a path, an empty folder, `..`, and a file; quoted names; a missing path, a file with `/`, two words and an option are errors |
 | `shell_terminal_du` | du of the current folder, a path, a file and an empty folder, sizes lined up and quoted names; a missing path, a file with `/`, two words and an option are errors |
