@@ -144,9 +144,9 @@ A session has at most 64 windows. Only the Editor, IDE and Paint `undo` and `red
 
 | App | Fields |
 |---|---|
-| Terminal | `cwd`, `input`, `draft`, `buf`, `past`, `left`, `back`. `buf` and `past` are length-prefixed lines (a decimal length, a newline, then that many characters), at most 200 and 50 |
+| Terminal | `cwd`, `input`, `draft`, `buf`, `past`, `left`, `back`, and optional `scroll`. `buf` and `past` are length-prefixed lines (a decimal length, a newline, then that many characters), at most 200 and 50. `scroll` is how many rows the output is paged back, 0 to 1,000,000, with no sign or leading zero. It is left out when it is 0, and a snapshot from before this field opens at the prompt. A bad value rejects the generation. On restore it is cut to the rows the window can actually scroll |
 | Files | `path`, `sel` |
-| Editor | `path`, `text`, `back`, `mark` (`-` or a count from the end of the text), `disk_set` (`0` or `1`), `disk`, optional `undo` and `redo` |
+| Editor | `path`, `text`, `back`, `mark` (`-` or a count from the end of the text), `disk_set` (`0` or `1`), `disk`, optional `undo` and `redo`, and optional `query`, `hl` and `case`. `query` is the last text found, 1 to 4,096 characters. It is left out when there is none, and a longer one is left out of the snapshot, which is still written. `hl` is `1` when those matches are still highlighted, and only with a `query`. `case` is `any` when find ignores case, and is left out when case counts. A find or replace still being typed is not one of these |
 | IDE | the Editor fields, plus `out` (length-prefixed lines, at most 200) and `err` (`-` or a line number) |
 | Notes | `text`, `left` |
 | Clicker | `count` |
@@ -173,7 +173,7 @@ With a workspace open and a desktop bound by `wm.workspace_bind`, key or mouse i
 
 The idle snapshot records unsaved buffers with the current vfs. It does not save Editor or IDE text into a vfs file, or save Paint's cells into its picture file. Ctrl+S and the interrupted-save fallback rules below stay the same.
 
-Not in the snapshot: a find or a rename still being typed, clipboard text over 65,536 characters, and an IDE run (including one that is waiting for a line). Editor, IDE and Paint undo and redo return within the history caps. An IDE program does not keep running after a restart. The clipboard comes back when a desktop binds to the workspace (`wm.workspace_bind`); a snapshot with no `S C` line leaves the clipboard as it is. A build from before the `S C` line reads a generation that has one as `invalid` and falls back to the one before it. Snake's board returns, and a game that was moving comes back paused. Snake moving on the clock does not mark input pending, so a kill keeps the board as of the last snapshot, not the steps after it.
+Not in the snapshot: a find, replace, go-to or rename still being typed, clipboard text over 65,536 characters, and an IDE run (including one that is waiting for a line). The last find, whether its matches are still highlighted, and a case-insensitive search do come back, in the Editor and the IDE. Editor, IDE and Paint undo and redo return within the history caps. An IDE program does not keep running after a restart. The clipboard comes back when a desktop binds to the workspace (`wm.workspace_bind`); a snapshot with no `S C` line leaves the clipboard as it is. A build from before the `S C` line reads a generation that has one as `invalid` and falls back to the one before it. Snake's board returns, and a game that was moving comes back paused. Snake moving on the clock does not mark input pending, so a kill keeps the board as of the last snapshot, not the steps after it.
 
 ## What a save does
 
@@ -191,7 +191,7 @@ Prune keeps the new commit and the generation that was installed when the save s
 
 Each successful move adds a save notice such as `workspace: kept damaged g4 as g4.m2ws.damaged`. It follows the boot notice or metadata warning after ` | `, in the same style as other save notices. The next save replaces that save notice; reopening clears it. Damaged files are ignored quietly on load, even if `COMMITTED` or `META` names their id.
 
-`host_write_file` does not report a short write and does not fsync. A power loss before the operating system flushes is outside what Relic 1.0.53 can promise. `META` is a backup written after the pointer rename. It is not a commit. A readable `COMMITTED` wins over it. A torn pointer uses `META` only for a generation this desktop can parse; a wrong-version file named there holds the store and is not overwritten.
+`host_write_file` does not report a short write and does not fsync. A power loss before the operating system flushes is outside what Relic 1.0.53 can promise. `META` is a backup written after the pointer rename. It is not a commit. A readable `COMMITTED` wins over it, including when `META` is garbage, contains a raw CR, is a directory, or names a different generation. Opening does not rewrite that file. The next successful save writes a fresh one, and an empty directory standing in for `META` is replaced by that save. A torn pointer uses `META` only for a generation this desktop can parse; a wrong-version file named there holds the store and is not overwritten.
 
 The session vfs keeps the change even when the save fails. The notice says the save failed. The next process installs the store, not that unsaved session. Editor, IDE, and Paint do not say `saved` when the store did not commit. Terminal prints the notice. Files puts it in the title line until the next key. The desktop draws `wm.workspace_notice()` under the title when it is not empty.
 
@@ -206,9 +206,9 @@ The vfs is replaced only after a generation has fully parsed.
 | valid, and that generation parses | a `gM.m2ws.partial` | the named generation | `workspace: ignored partial gM` (highest such M) |
 | both of those leftovers | | the named generation | `workspace: ignored uncommitted gM; ignored partial gK` |
 | any | `gM.m2ws.damaged` files | unchanged by those files; only ordinary generations can install | no notice about damaged files; their ids only reserve numbers for the next save |
-| valid, generation truncated or otherwise bad | an older valid generation, and maybe a newer complete file | the newest valid generation **older than the named one** | `workspace: committed image truncated; recovered gN` (or `invalid`). A newer file is `ignored uncommitted`, not installed |
+| valid, generation truncated, missing or otherwise bad | an older valid generation, and maybe a newer complete file | the newest valid generation **older than the named one** | `workspace: committed image truncated; recovered gN` (or `invalid`, or `missing` when the named file is not there). A newer file is `ignored uncommitted`, not installed |
 | valid, generation `M2WS` but not `M2WS1` | | defaults, or an older generation this desktop can parse | `workspace: committed image wrong version; store held; ...` The store is not written or deleted until `wm.workspace_release()` |
-| named generation missing or bad, and nothing older parses | | defaults | `workspace: no valid generation; using defaults` |
+| named generation missing or bad, and nothing older parses | | defaults | `workspace: no valid generation; using defaults`, or `committed image missing; using defaults` when the pointer names a file that is not there and a newer complete file is ignored |
 | missing or invalid | `META` names a generation that parses | that generation, not a newer one | `workspace: pointer missing; recovered gN` or `pointer invalid` |
 | missing or invalid | exactly one valid generation and no `META` | that generation | the same recovered notice |
 | missing or invalid | two or more valid generations and no usable `META` | defaults, store held | `workspace: pointer invalid; store held; using defaults; ignored uncommitted gN` |

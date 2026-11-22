@@ -1,0 +1,6 @@
+["/home> diff a b", "differ: changed.txt", "only in first: \"my file.txt\"", "only in second: sub.txt"]
+["/home> diff a a", "diff: same lines"]
+["/home> diff a same.txt", "diff: is a folder: /home/a"]
+["/home> diff missing b", "diff: not found: /home/missing"]
+["/home> diff a.txt b", "diff: not found: /home/a.txt"]
+["/home> diff /tmp/p.txt /tmp/q.txt", "-2 two", "+2 no"]

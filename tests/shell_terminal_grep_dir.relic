@@ -1,0 +1,33 @@
+# grep of a folder searches the files under it and names each one. A file
+# is still just its lines. With no path, the current folder is searched.
+use ../shell/wm
+use std/vfs
+let t = wm.terminal.init()
+fun run(line)
+    t.buf = []
+    for c in line
+        if c == " "
+            wm.terminal.on_key(t, "space")
+        else
+            wm.terminal.on_key(t, c)
+    wm.terminal.on_key(t, "return")
+    print(t.buf)
+vfs.write(t.fs, "/home/a.txt", "alpha\nbeta\n")
+vfs.write(t.fs, "/home/b.txt", "beta\n")
+vfs.make_dir(t.fs, "/home/docs")
+vfs.write(t.fs, "/home/docs/c.txt", "alpha\n")
+vfs.write(t.fs, "/home/docs/my notes.txt", "alpha note\n")
+vfs.make_dir(t.fs, "/home/empty")
+run("grep alpha a.txt")
+run("grep alpha /home")
+run("grep beta")
+run("grep missing /home")
+run("grep alpha empty")
+run("grep alpha missing")
+run("grep alpha a.txt/")
+run("grep alpha")
+run("grep")
+run("grep alpha a.txt extra")
+run("grep -n a.txt")
+run("cd docs")
+run("grep note")

@@ -1487,17 +1487,7 @@ fun _term_cat(s, path)
 # wc: lines (newlines, as Unix counts them), words (runs of non-space) and
 # characters, then the path as given. Gives [lines, words, characters], or
 # none after an error.
-fun _term_wc(s, path)
-    if _term_not_folder(s, "wc", path, false)
-        return none
-    let p = _term_path(s, path)
-    if not vfs.exists(s.fs, p)
-        _term_reply(s, "wc: " + _term_missing(s, p))
-        return none
-    if vfs.is_dir(s.fs, p)
-        _term_reply(s, "wc: is a folder: " + p)
-        return none
-    let text = vfs.read(s.fs, p)
+fun _term_wc_count(text)
     let words = 0
     let inside = false
     for c in text
@@ -1506,9 +1496,40 @@ fun _term_wc(s, path)
         else if not inside
             inside = true
             words = words + 1
-    let lines = strings.count(text, "\n")
-    _term_reply(s, "{lines} {words} {len(text)} " + _term_name(path))   # quoted like ls when it has a space
-    return [lines, words, len(text)]
+    return [strings.count(text, "\n"), words, len(text)]
+
+fun _term_wc_say(s, shown, counts)
+    _term_reply(s, "{counts[0]} {counts[1]} {counts[2]} " + _term_name(shown))
+
+# Every file under dir, in the order ls shows. Adds each file into total.
+fun _term_wc_tree(s, dir, total)
+    let n = 0
+    for e in vfs.entries(s.fs, dir)
+        let child = paths.join(dir, e[0])
+        if e[1]
+            n = n + _term_wc_tree(s, child, total)
+        else
+            let counts = _term_wc_count(vfs.read(s.fs, child))
+            _term_wc_say(s, child, counts)
+            for k in 0..3
+                total[k] = total[k] + counts[k]
+            n = n + 1
+    return n
+
+fun _term_wc(s, path)
+    if _term_not_folder(s, "wc", path, false)
+        return none
+    let p = _term_path(s, path)
+    if not vfs.exists(s.fs, p)
+        _term_reply(s, "wc: " + _term_missing(s, p))
+        return none
+    if vfs.is_dir(s.fs, p)
+        let total = [0, 0, 0]
+        let n = _term_wc_tree(s, p, total)
+        return {counts: total, files: n, dir: true}
+    let counts = _term_wc_count(vfs.read(s.fs, p))
+    _term_wc_say(s, path, counts)   # the path as typed, quoted like ls when it has a space
+    return {counts: counts, files: 1, dir: false}
 
 fun _term_cd(s, parts)
     let p = _term_optional_path(s, parts, "/home")
@@ -1738,22 +1759,42 @@ fun _term_tail(s, path, count)
     for line in last_lines(text, count)
         _term_reply(s, line)
 
-# grep: the lines of a file that have the text in them (plain text, case
-# counts, no patterns), as many as the output keeps.
+# One file's matching lines. A folder search names the file, so the same
+# line in two files can be told apart; a single file stays as it was.
+fun _term_grep_file(s, word, path, show_path, found)
+    for line in strings.lines(vfs.read(s.fs, path))
+        if strings.contains(line, word)
+            if show_path
+                append(found, _term_name(path) + ":" + line)
+            else
+                append(found, line)
+
+fun _term_grep_tree(s, word, dir, found)
+    for e in vfs.entries(s.fs, dir)
+        let child = paths.join(dir, e[0])
+        if e[1]
+            _term_grep_tree(s, word, child, found)
+        else
+            _term_grep_file(s, word, child, true, found)
+
+# grep: the lines that have the text in them (plain text, case counts, no
+# patterns). A file is that file. A folder is every file under it, in the
+# order ls shows, each folder followed by what is in it. No path searches
+# the current folder. As many lines as the output keeps, from the end.
 fun _term_grep(s, word, path)
-    if _term_not_folder(s, "grep", path, false)
+    if path != none and _term_not_folder(s, "grep", path, false)
         return
-    let p = _term_path(s, path)
+    let p = s.cwd
+    if path != none
+        p = _term_path(s, path)
     if not vfs.exists(s.fs, p)
         _term_reply(s, "grep: " + _term_missing(s, p))
         return
-    if vfs.is_dir(s.fs, p)
-        _term_reply(s, "grep: is a folder: " + p)
-        return
     let found = []
-    for line in strings.lines(vfs.read(s.fs, p))
-        if strings.contains(line, word)
-            append(found, line)
+    if vfs.is_dir(s.fs, p)
+        _term_grep_tree(s, word, p, found)
+    else
+        _term_grep_file(s, word, p, false, found)
     for line in slice(found, math.max(0, len(found) - term_history), len(found))
         _term_reply(s, line)
 
@@ -1792,6 +1833,25 @@ fun _term_uniq(s, path)
         if len(kept) == 0 or kept[len(kept) - 1] != line
             append(kept, line)
     for line in slice(kept, math.max(0, len(kept) - term_history), len(kept))
+        _term_reply(s, line)
+
+# tac: the lines of a file last to first. A final newline is not an extra blank
+# line. Only as many as the output keeps, from the end of the file, so a long
+# file still shows its end.
+fun _term_tac(s, path)
+    let lines = _term_file_lines(s, "tac", path)
+    if lines == none
+        return
+    # strings.lines keeps an empty place after a final newline. Drop that
+    # place, but keep a file that is only a newline as one blank line.
+    if len(lines) > 1 and lines[len(lines) - 1] == ""
+        lines = slice(lines, 0, len(lines) - 1)
+    let out = []
+    let i = len(lines) - 1
+    while i >= 0 and len(out) < term_history
+        append(out, lines[i])
+        i = i - 1
+    for line in out
         _term_reply(s, line)
 
 # nl: the lines of a file numbered from 1, the way history numbers commands;
@@ -1952,8 +2012,114 @@ fun _diff_lines(a, b)
             j = j + 1
     return out
 
+# cmp: whether two files have the same lines, or the first line that differs.
+# A file that ends first differs on the next line.
+fun _term_cmp(s, pa, pb)
+    let a = _term_file_lines(s, "cmp", pa)
+    if a == none
+        return
+    let b = _term_file_lines(s, "cmp", pb)
+    if b == none
+        return
+    let n = len(a)
+    if len(b) < n
+        n = len(b)
+    for i in 0..n
+        if a[i] != b[i]
+            _term_reply(s, "cmp: line " + str(i + 1))
+            return
+    if len(a) != len(b)
+        _term_reply(s, "cmp: line " + str(n + 1))
+        return
+    _term_reply(s, "cmp: same")
+
+# stat: a file's length, or how many names are in a folder.
+fun _term_stat(s, path)
+    if _term_not_folder(s, "stat", path, false)
+        return
+    let p = _term_path(s, path)
+    if not vfs.exists(s.fs, p)
+        _term_reply(s, "stat: " + _term_missing(s, p))
+        return
+    if vfs.is_dir(s.fs, p)
+        let n = len(vfs.entries(s.fs, p))
+        let word = "entries"
+        if n == 1
+            word = "entry"
+        _term_reply(s, "folder, " + str(n) + " " + word)
+        return
+    let n = len(vfs.read(s.fs, p))
+    let word = "characters"
+    if n == 1
+        word = "character"
+    _term_reply(s, "file, " + str(n) + " " + word)
+
+# basename and dirname use the path as written. The file does not have to be there.
+fun _term_base(s, path)
+    let p = paths.normalize(path)
+    if p == "/"
+        _term_reply(s, "/")
+        return
+    _term_reply(s, paths.base(p))
+
+fun _term_dir(s, path)
+    let p = paths.normalize(path)
+    if p == "/"
+        _term_reply(s, "/")
+        return
+    let up = paths.dir(p)
+    if up == ""
+        up = "."
+    _term_reply(s, up)
+
+fun _term_files_under(s, dir, rel, out)
+    for e in vfs.entries(s.fs, dir)
+        let name = e[0]
+        if rel != ""
+            name = rel + "/" + e[0]
+        if e[1]
+            _term_files_under(s, paths.join(dir, e[0]), name, out)
+        else
+            append(out, name)
+
+# diff of two folders: files only in one, and files whose bytes differ.
+# Same lines when every file under both is the same.
+fun _term_diff_dirs(s, a, b)
+    let left = []
+    let right = []
+    _term_files_under(s, a, "", left)
+    _term_files_under(s, b, "", right)
+    let in_right = {}
+    for name in right
+        in_right[name] = true
+    let in_left = {}
+    for name in left
+        in_left[name] = true
+    let out = []
+    for name in left
+        if not name in in_right
+            append(out, "only in first: " + _term_name(name))
+        else if vfs.read(s.fs, paths.join(a, name)) != vfs.read(s.fs, paths.join(b, name))
+            append(out, "differ: " + _term_name(name))
+    for name in right
+        if not name in in_left
+            append(out, "only in second: " + _term_name(name))
+    if len(out) == 0
+        _term_reply(s, "diff: same lines")
+        return
+    for line in slice(out, math.max(0, len(out) - term_history), len(out))
+        _term_reply(s, line)
+
 # diff: the lines that differ between two files, or that they are the same.
+# Two folders compare the files under them instead.
 fun _term_diff(s, pa, pb)
+    if _term_not_folder(s, "diff", pa, false) or _term_not_folder(s, "diff", pb, false)
+        return
+    let a_path = _term_path(s, pa)
+    let b_path = _term_path(s, pb)
+    if vfs.is_dir(s.fs, a_path) and vfs.is_dir(s.fs, b_path)
+        _term_diff_dirs(s, a_path, b_path)
+        return
     let a = _term_file_lines(s, "diff", pa)
     if a == none
         return
@@ -1981,8 +2147,33 @@ fun _term_find(s, word)
     for line in slice(out, math.max(0, len(out) - term_history), len(out))
         _term_reply(s, line)
 
-# cp copies a file (not a folder) to a new name, or into a folder; like mv it
-# does not write over a file that is already there.
+# True when path is parent or a file inside it. Used so a folder is not
+# copied into itself.
+fun _term_inside(parent, path)
+    return path == parent or strings.starts_with(path, parent + "/")
+
+fun _term_cp_tree(fs, src, dst)
+    try
+        vfs.make_dir(fs, dst)
+    catch err
+        return err.message
+    for e in vfs.entries(fs, src)
+        let from = paths.join(src, e[0])
+        let to = paths.join(dst, e[0])
+        if e[1]
+            let why = _term_cp_tree(fs, from, to)
+            if why != none
+                return why
+        else
+            try
+                vfs.write(fs, to, vfs.read(fs, from))
+            catch err
+                return err.message
+    return none
+
+# cp copies a file or a folder to a new name, or into a folder; like mv it
+# does not write over a name that is already there. A folder is not copied
+# into itself. A copy that fails part way is removed, and nothing is committed.
 fun _term_cp(s, a, b)
     if _term_not_folder(s, "cp", a, false) or _term_not_folder(s, "cp", b, true)
         return
@@ -1993,7 +2184,24 @@ fun _term_cp(s, a, b)
     if not vfs.exists(s.fs, src)
         _term_reply(s, "cp: " + _term_missing(s, src))
     else if vfs.is_dir(s.fs, src)
-        _term_reply(s, "cp: is a folder: " + src)
+        if _term_inside(src, dst)
+            _term_reply(s, "cp: cannot copy a folder into itself")
+        else if vfs.exists(s.fs, dst)
+            _term_reply(s, "cp: already there: " + dst)
+        else if _why_not_new(s.fs, dst) != none
+            _term_reply(s, "cp: " + _why_not_new(s.fs, dst))
+        else
+            let why = _term_cp_tree(s.fs, src, dst)
+            if why != none
+                try
+                    vfs.remove_tree(s.fs, dst)
+                catch err
+                    none
+                _term_reply(s, "cp: " + why)
+                return
+            let saved = _fs_commit()
+            if saved != ""
+                _term_reply(s, saved)
     else if vfs.exists(s.fs, dst)
         _term_reply(s, "cp: already there: " + dst)
     else if _why_not_new(s.fs, dst) != none
@@ -2050,7 +2258,7 @@ fun _split_words(line)
 
 
 # Commands whose words are all paths, so a word like -l or -r is a mistake, not a name.
-let _path_commands = ["cd", "ls", "cat", "mkdir", "touch", "rm", "mv", "cp", "wc", "head", "tail", "grep", "sort", "uniq", "nl", "tree", "du", "diff"]
+let _path_commands = ["cd", "ls", "cat", "mkdir", "touch", "rm", "mv", "cp", "wc", "head", "tail", "grep", "sort", "uniq", "nl", "tree", "du", "diff", "cmp", "stat", "basename", "dirname", "tac"]
 
 fun _term_run(s, line)
     s.cwd = _existing_dir(s.fs, s.cwd)
@@ -2082,10 +2290,11 @@ fun _term_run(s, line)
         _term_reply(s, "workspace pwd cd ls cat head tail")
         _term_reply(s, "mkdir touch write rm mv cp")
         _term_reply(s, "wc grep find sort uniq nl")
-        _term_reply(s, "tree du diff")
+        _term_reply(s, "tree du diff cmp stat tac")
+        _term_reply(s, "basename dirname")
         _term_reply(s, "echo text > file, >> adds")
         _term_reply(s, "\"my file\": quotes keep spaces")
-        _term_reply(s, "!! the last again, !N history N")
+        _term_reply(s, "!! last, !N number, !text")
     else if cmd == "clear"
         if _term_args(s, parts, 0, "clear")
             s.buf = []
@@ -2176,8 +2385,12 @@ fun _term_run(s, line)
             else if count != none
                 _term_tail(s, parts[1], count)
     else if cmd == "grep"
-        if _term_args(s, parts, 2, "grep <text> <path>")
+        if len(parts) == 2
+            _term_grep(s, parts[1], none)
+        else if len(parts) == 3
             _term_grep(s, parts[1], parts[2])
+        else
+            _term_reply(s, "usage: grep <text> [path]")
     else if cmd == "find"
         if _term_args(s, parts, 1, "find <text>")
             _term_find(s, parts[1])
@@ -2193,6 +2406,9 @@ fun _term_run(s, line)
     else if cmd == "nl"
         if _term_args(s, parts, 1, "nl <path>")
             _term_nl(s, parts[1])
+    else if cmd == "tac"
+        if _term_args(s, parts, 1, "tac <path>")
+            _term_tac(s, parts[1])
     else if cmd == "tree"
         if len(parts) > 2
             _term_reply(s, "usage: tree [path]")
@@ -2201,6 +2417,18 @@ fun _term_run(s, line)
     else if cmd == "diff"
         if _term_args(s, parts, 2, "diff <path> <path>")
             _term_diff(s, parts[1], parts[2])
+    else if cmd == "cmp"
+        if _term_args(s, parts, 2, "cmp <path> <path>")
+            _term_cmp(s, parts[1], parts[2])
+    else if cmd == "stat"
+        if _term_args(s, parts, 1, "stat <path>")
+            _term_stat(s, parts[1])
+    else if cmd == "basename"
+        if _term_args(s, parts, 1, "basename <path>")
+            _term_base(s, parts[1])
+    else if cmd == "dirname"
+        if _term_args(s, parts, 1, "dirname <path>")
+            _term_dir(s, parts[1])
     else if cmd == "du"
         if len(parts) > 2
             _term_reply(s, "usage: du [path]")
@@ -2211,14 +2439,19 @@ fun _term_run(s, line)
         if len(parts) < 2
             _term_reply(s, "usage: wc <path>...")
         let total = [0, 0, 0]
-        let counted = 0
+        let files = 0
+        let saw_dir = false
         for path in slice(parts, 1, len(parts))
             let c = _term_wc(s, path)
             if c != none
-                counted = counted + 1
+                if c.dir
+                    saw_dir = true
+                files = files + c.files
                 for k in 0..3
-                    total[k] = total[k] + c[k]
-        if len(parts) > 2 and counted > 0
+                    total[k] = total[k] + c.counts[k]
+        # A folder lists its files and then a total, as several paths do.
+        # One file on its own has no total line.
+        if saw_dir or files > 1
             _term_reply(s, "{total[0]} {total[1]} {total[2]} total")
     else if cmd == "rm"
         # several paths, one after another as for cat; an error for one does not stop the rest
@@ -2242,7 +2475,7 @@ let _term_recall_keep = 50
 # with "/" after it, anything else with a space); several are taken as far as
 # they agree, and when that adds nothing they are listed. No match, or an
 # empty line: nothing.
-let _term_commands = ["apps", "cat", "cd", "clear", "cp", "date", "diff", "du", "echo", "find", "grep", "head", "help", "history", "ls", "mkdir", "mv", "nl", "pwd", "rm", "sort", "tail", "touch", "tree", "uniq", "wc", "workspace", "write"]
+let _term_commands = ["apps", "basename", "cat", "cd", "clear", "cmp", "cp", "date", "diff", "dirname", "du", "echo", "find", "grep", "head", "help", "history", "ls", "mkdir", "mv", "nl", "pwd", "rm", "sort", "stat", "tac", "tail", "touch", "tree", "uniq", "wc", "workspace", "write"]
 
 fun _common_start(names)
     let out = names[0]
@@ -2344,6 +2577,34 @@ fun _term_paste(s)
     if strings.contains(text, "\"")
         return "'" + text + "'"
     return "\"" + text + "\""
+
+# The text after "!text", or none for !!, !N, or a bare !.
+fun _term_bang_prefix(t)
+    if len(t) < 2 or t[0] != "!" or t == "!!"
+        return none
+    if _term_bang_number(t) != none
+        return none
+    let rest = strings.trim(slice(t, 1, len(t)))
+    if rest == ""
+        return none
+    # A line of digits is !N, including one too long to be a history number.
+    # That one stays an unknown command, as it did before !text.
+    let digits = true
+    for c in rest
+        if c < "0" or c > "9"
+            digits = false
+    if digits
+        return none
+    return rest
+
+# The newest remembered command that starts with prefix, or none.
+fun _term_bang_match(s, prefix)
+    let i = len(s.past) - 1
+    while i >= 0
+        if strings.starts_with(s.past[i], prefix)
+            return s.past[i]
+        i = i - 1
+    return none
 
 # The N of "!N" (a ! and digits), or none for any other line.
 fun _term_bang_number(t)
@@ -2449,6 +2710,16 @@ fun _term_edit(s, k)
                 s.input = ""
                 return
             line = s.past[n - 1]
+        else if _term_bang_prefix(strings.trim(line)) != none
+            # !text: the newest command that starts with that text
+            let prefix = _term_bang_prefix(strings.trim(line))
+            let found = _term_bang_match(s, prefix)
+            if found == none
+                _term_reply(s, s.cwd + "> " + line)
+                _term_reply(s, strings.trim(line) + ": not in history")
+                s.input = ""
+                return
+            line = found
         if strings.trim(line) != "" and (len(s.past) == 0 or s.past[len(s.past) - 1] != line)
             append(s.past, line)
             if len(s.past) > _term_recall_keep
@@ -3646,6 +3917,42 @@ fun _editor_select_match(s, at, n)
     _editor_set_pos(s, at + n)
     s.hl = slice(s.text, at, at + n)
 
+# The word the cursor is in, or the selection when it stays on one line.
+fun _editor_query_at(s)
+    let sel = _editor_selection(s)
+    if sel != none
+        let text = slice(s.text, sel[0], sel[1])
+        if text != "" and not strings.contains(text, "\n")
+            return text
+        return ""
+    let pos = _editor_pos(s)
+    let at = pos
+    if at > 0 and (at == len(s.text) or not _word_char(s.text[at]))
+        at = at - 1
+    if at < 0 or at >= len(s.text) or not _word_char(s.text[at])
+        return ""
+    let start = _word_left(s.text, at + 1)
+    let stop = _word_right(s.text, start)
+    return slice(s.text, start, stop)
+
+# Ctrl+F3: the word at the cursor becomes the find text, and the next match
+# is selected. Highlights follow, as after Ctrl+F.
+fun _editor_find_word(s)
+    let word = _editor_query_at(s)
+    if word == ""
+        s.status = "find: nothing"
+        return
+    s.last_find = word
+    s.hl = word
+    if "find" in s
+        s.find = none
+    if "replacing" in s
+        s.replacing = none
+    if not _editor_find_next(s, word)
+        s.status = "not found: " + word
+    else
+        s.status = "find: " + word
+
 fun _editor_find_next(s, what)
     if what == ""
         return false
@@ -3903,6 +4210,13 @@ fun _editor_key(s, k)
     s.press = none   # a key ends a drag: the text or the cursor may have moved under it
     if _editor_opening(s)
         _editor_open_key(s, k)
+        return
+    if k == "ctrl+f3"
+        if "find" in s and s.find != none
+            _editor_find_end(s)
+        if "goto" in s and s.goto != none
+            s.goto = none
+        _editor_find_word(s)
         return
     if k == "ctrl+o"
         s.overwrite = false
@@ -5451,6 +5765,9 @@ fun _fields_of(w, lines)
             return false
         if not _sf(lines, "left", str(_term_left(s))) or not _sf(lines, "back", str(s.back))
             return false
+        # 0 is what a snapshot from before scroll was stored already means.
+        if _term_scroll(s) != 0 and not _sf(lines, "scroll", str(_term_scroll(s)))
+            return false
         return _sf_lines(lines, "buf", s.buf) and _sf_lines(lines, "past", s.past)
     if name == "Files"
         return _sf(lines, "path", s.path) and _sf(lines, "sel", str(s.sel))
@@ -5468,6 +5785,18 @@ fun _fields_of(w, lines)
         else if not _sf(lines, "disk_set", "1") or not _sf(lines, "disk", s.disk)
             return false
         if not _sf_history(lines, s)
+            return false
+        let query = ""
+        if "last_find" in s and s.last_find != none
+            query = s.last_find
+        # A find still being typed is s.find, and is not stored. A query past
+        # this cap is left out; the snapshot is still written.
+        if query != "" and len(query) <= 4096
+            if not _sf(lines, "query", query)
+                return false
+            if "hl" in s and s.hl != none and s.hl != "" and not _sf(lines, "hl", "1")
+                return false
+        if "find_case" in s and not s.find_case and not _sf(lines, "case", "any")
             return false
         if name == "IDE"
             let err = "-"
@@ -5542,12 +5871,22 @@ fun _restore_editor(f)
         undo = workspace.unpack_steps(f.undo)
     if "redo" in f
         redo = workspace.unpack_steps(f.redo)
-    return {fs: _shell_fs, path: f.path, text: text, status: status, rows: 0, disk: disk, overwrite: false, undo: undo, redo: redo, back: int(f.back), mark: mark}
+    let restored = {fs: _shell_fs, path: f.path, text: text, status: status, rows: 0, disk: disk, overwrite: false, undo: undo, redo: redo, back: int(f.back), mark: mark}
+    if "query" in f
+        restored.last_find = f.query
+        if "hl" in f
+            restored.hl = f.query
+    if "case" in f and f.case == "any"
+        restored.find_case = false
+    return restored
 
 fun _restore_state(w)
     let f = w.fields
     if w.app == "Terminal"
-        return {buf: workspace.unpack_lines(f.buf, 201), input: f.input, left: int(f.left), cwd: f.cwd, fs: _shell_fs, cols: term_width, past: workspace.unpack_lines(f.past, 51), back: int(f.back), draft: f.draft, scroll: 0}
+        let scroll = 0
+        if "scroll" in f
+            scroll = int(f.scroll)
+        return {buf: workspace.unpack_lines(f.buf, 201), input: f.input, left: int(f.left), cwd: f.cwd, fs: _shell_fs, cols: term_width, past: workspace.unpack_lines(f.past, 51), back: int(f.back), draft: f.draft, scroll: scroll}
     if w.app == "Files"
         return {fs: _shell_fs, path: f.path, sel: int(f.sel), first: 1, rows: 0, names: [], dirs: [], names_path: "", stale: false, recovered: false, confirm: none, note: none}
     if w.app == "Editor"

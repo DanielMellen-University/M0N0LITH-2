@@ -1,0 +1,65 @@
+# COMMITTED can name a generation file that is not there. That is not a
+# torn pointer: the pointer still parses, the named image is missing, and
+# the newest older generation that parses comes back. A newer complete
+# file is not installed. META does not choose for a readable pointer.
+use ../shell/wm
+use std/files
+use std/vfs
+
+fun wipe(path)
+    try
+        files.remove_tree(path)
+    catch e
+        none
+
+fun image(text)
+    return "M2WS1\nD /home\nF /home/note.txt " + text + "\nD /tmp\n.\n"
+
+fun open_case(dir)
+    wipe(dir)
+    files.make_dir(dir)
+
+fun note()
+    let fs = wm.terminal.init().fs
+    if not vfs.exists(fs, "/home/note.txt")
+        return "absent"
+    return vfs.read(fs, "/home/note.txt")
+
+let dir = "ws-missing"
+let first = image("first\\sversion\\n")
+let third = image("third\\sversion\\n")
+
+open_case(dir)
+files.write(dir + "/g1.m2ws", first)
+files.write(dir + "/COMMITTED", "g2\n")
+files.write(dir + "/META", "committed g1\nprevious none\n")
+wm.workspace_open(dir)
+print("older", [wm.workspace_notice()], [note()], files.exists(dir + "/g2.m2ws"), [files.read(dir + "/META")])
+
+open_case(dir)
+files.write(dir + "/g1.m2ws", first)
+files.write(dir + "/g3.m2ws", third)
+files.write(dir + "/COMMITTED", "g2\n")
+wm.workspace_open(dir)
+print("newer left", [wm.workspace_notice()], [note()], files.exists(dir + "/g3.m2ws"))
+
+open_case(dir)
+files.write(dir + "/g3.m2ws", third)
+files.write(dir + "/COMMITTED", "g2\n")
+wm.workspace_open(dir)
+print("only newer", [wm.workspace_notice()], [note()], vfs.read(wm.terminal.init().fs, "/home/welcome.txt"))
+
+open_case(dir)
+files.write(dir + "/COMMITTED", "g2\n")
+files.write(dir + "/g4.m2ws.partial", "M2WS1\n")
+wm.workspace_open(dir)
+print("only partial", [wm.workspace_notice()], vfs.read(wm.terminal.init().fs, "/home/welcome.txt") == "Welcome to Relic.\n", files.exists(dir + "/g4.m2ws.partial"))
+
+open_case(dir)
+files.write(dir + "/g1.m2ws", first)
+files.write(dir + "/g4.m2ws.partial", "M2WS1\n")
+files.write(dir + "/COMMITTED", "g2\n")
+wm.workspace_open(dir)
+print("older and partial", [wm.workspace_notice()], [note()])
+
+wipe(dir)

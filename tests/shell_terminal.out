@@ -57,7 +57,10 @@
 > wc nothing.txt
   wc: not found: /home/nothing.txt
 > wc /home
-  wc: is a folder: /home
+  0 0 0 /home/e.txt
+  2 3 14 /home/w.txt
+  1 3 18 /home/welcome.txt
+  3 6 32 total
 > wc
   usage: wc <path>...
 > wc a b
@@ -76,7 +79,6 @@
 > cp c.txt c2.txt
   cp: already there: /home/c2.txt
 > cp cd x
-  cp: is a folder: /home/cd
 > cp nope.txt y
   cp: not found: /home/nope.txt
 > cp c.txt
@@ -168,11 +170,10 @@
   plum
 > grep kiwi g.txt
 > grep x /home
-  grep: is a folder: /home
 > grep x nope.txt
   grep: not found: /home/nope.txt
 > grep apple
-  usage: grep <text> <path>
+  /home/g.txt:apple tart
 > rm g.txt
 > mkdir fd/notes
 > touch fd/notes/todo.txt

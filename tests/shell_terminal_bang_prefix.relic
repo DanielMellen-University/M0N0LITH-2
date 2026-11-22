@@ -1,0 +1,24 @@
+# !text runs the newest remembered command that starts with that text.
+# !! and !N are unchanged. A miss is not kept.
+use ../shell/wm
+let t = wm.terminal.init()
+fun run(line)
+    t.buf = []
+    for c in line
+        if c == " "
+            wm.terminal.on_key(t, "space")
+        else
+            wm.terminal.on_key(t, c)
+    wm.terminal.on_key(t, "return")
+    print(t.buf)
+run("echo alpha")
+run("echo beta")
+run("pwd")
+run("!ec")
+run("!echo b")
+run("!p")
+run("!nope")
+run("!!")
+run("!2")
+run("!")
+print("history", t.past)

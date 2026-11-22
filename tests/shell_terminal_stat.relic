@@ -1,0 +1,32 @@
+# stat says how long a file is, or how many names a folder holds.
+use ../shell/wm
+use std/vfs
+let t = wm.terminal.init()
+fun run(line)
+    t.buf = []
+    for c in line
+        if c == " "
+            wm.terminal.on_key(t, "space")
+        else
+            wm.terminal.on_key(t, c)
+    wm.terminal.on_key(t, "return")
+    print(t.buf)
+vfs.write(t.fs, "/home/a.txt", "hello")
+vfs.write(t.fs, "/home/empty.txt", "")
+vfs.make_dir(t.fs, "/home/docs")
+vfs.write(t.fs, "/home/docs/b.txt", "x")
+vfs.make_dir(t.fs, "/home/none")
+vfs.write(t.fs, "/home/my notes.txt", "ab")
+run("stat a.txt")
+run("stat empty.txt")
+run("stat docs")
+run("stat none")
+run("stat /")
+run("stat \"my notes.txt\"")
+run("stat")
+run("stat a.txt b.txt")
+run("stat -l")
+run("stat missing")
+run("stat a.txt/")
+run("stat docs/b.txt")
+print("untouched", vfs.read(t.fs, "/home/a.txt"))

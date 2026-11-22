@@ -1,0 +1,69 @@
+# A readable COMMITTED wins over META. Garbage, a raw CR, a directory, or a
+# META that names another generation does not change what is installed, and
+# opening does not rewrite the store. A later save writes a fresh META. An
+# empty directory standing in for META is left in place by the open and
+# replaced when that save succeeds. No desktop is bound, so the saves are
+# the files only and a command cannot be mixed into a restored input line.
+use ../shell/wm
+use std/files
+use std/vfs
+
+fun wipe(path)
+    try
+        files.remove_tree(path)
+    catch e
+        none
+
+fun type_line(t, line)
+    for ch in line
+        if ch == " "
+            wm.terminal.on_key(t, "space")
+        else
+            wm.terminal.on_key(t, ch)
+    wm.terminal.on_key(t, "return")
+
+fun note()
+    let fs = wm.terminal.init().fs
+    if not vfs.exists(fs, "/home/note.txt")
+        return "absent"
+    return vfs.read(fs, "/home/note.txt")
+
+fun build(dir)
+    wipe(dir)
+    wm.workspace_open(dir)
+    let t = wm.terminal.init()
+    type_line(t, "echo first version > note.txt")
+    type_line(t, "echo second version > note.txt")
+
+let dir = "ws-meta"
+build(dir)
+print("built", [files.read(dir + "/COMMITTED")], [files.read(dir + "/META")])
+
+let g1 = files.read(dir + "/g1.m2ws")
+let g2 = files.read(dir + "/g2.m2ws")
+files.write(dir + "/META", "not a meta file\n")
+wm.workspace_open(dir)
+print("garbage", [wm.workspace_notice()], [note()], [files.read(dir + "/META")], [files.read(dir + "/COMMITTED")], files.read(dir + "/g1.m2ws") == g1, files.read(dir + "/g2.m2ws") == g2)
+type_line(wm.terminal.init(), "echo third version > note.txt")
+print("repaired", [wm.workspace_notice()], [note()], [files.read(dir + "/COMMITTED")], [files.read(dir + "/META")])
+
+build(dir)
+let cr = "committed g2" + chr(13) + "\nprevious g1\n"
+files.write(dir + "/META", cr)
+wm.workspace_open(dir)
+print("cr", [wm.workspace_notice()], [note()], files.read(dir + "/META") == cr, [files.read(dir + "/COMMITTED")])
+
+build(dir)
+files.write(dir + "/META", "committed g1\nprevious none\n")
+wm.workspace_open(dir)
+print("other id", [wm.workspace_notice()], [note()], [files.read(dir + "/META")], [files.read(dir + "/COMMITTED")])
+
+build(dir)
+files.remove(dir + "/META")
+files.make_dir(dir + "/META")
+wm.workspace_open(dir)
+print("dir open", [wm.workspace_notice()], [note()], files.is_dir(dir + "/META"), [files.read(dir + "/COMMITTED")])
+type_line(wm.terminal.init(), "echo third version > note.txt")
+print("dir save", [wm.workspace_notice()], [note()], files.is_dir(dir + "/META"), [files.read(dir + "/COMMITTED")], [files.read(dir + "/META")])
+
+wipe(dir)

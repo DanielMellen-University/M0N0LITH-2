@@ -1,4 +1,5 @@
-# grep of a folder or a missing file is an error and prints no line.
+# grep of an empty folder prints no line. A missing file is an error, and so
+# is a path through a file.
 use ../shell/wm
 use std/vfs
 let t = wm.terminal.init()

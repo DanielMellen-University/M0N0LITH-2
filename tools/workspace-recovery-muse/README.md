@@ -1,6 +1,6 @@
 # Workspace recovery harness (D0122)
 
-Runs acceptance cases 6 to 9 for real, against the implementation in
+Runs acceptance cases 6 to 21 for real, against the implementation in
 `shell/workspace.relic`. Separate `relic` processes share one store
 directory per case, and the driver damages files by hand between
 processes, the way the Results section of
@@ -53,4 +53,4 @@ python3 tools/workspace-recovery-muse/run_cases.py --replay
 
 Stores live under `/tmp` and are removed on success. Pass `--keep` to
 leave them for inspection after a failure. Exit code is 0 only when
-all four cases pass.
+every case passes. `run_cases.py --live --replay` runs both.

@@ -50,6 +50,7 @@ The status is one of:
 | Ctrl+G | goes to a line: type its number (`line: N_`, digits only, at most 7), and Return puts the cursor at its start, or on the last line when the number is past the end; the title then says `line N`. A colon and a column (`line: N:C_`) land on that character, or at the end of the line when the column is past it; the title then says `line N:C`. Esc, another key or a click gives up |
 | Ctrl+I | toggles whether find and replace count case. Outside a prompt the title says `case: any` or `case: exact` |
 | F3, Shift+F3 | the last text found again: the next place, or with Shift the one before (both go round); `not found: text` when it is gone |
+| Ctrl+F3 | the word at the cursor, or the selection when it stays on one line, becomes the text to find. Every match is highlighted and the next one is selected. A space uses the word just before it. On a space at the start of the text, the title says `find: nothing` |
 
 On macOS, Cmd with a letter works as Ctrl with it.
 
@@ -75,7 +76,7 @@ Return opens an existing file. A missing path says `no such file: path`; a direc
 
 Text different from the last read or save is unsaved, including an undo after saving. In a new buffer with no saved file, any nonempty text is unsaved. Opening then says `unsaved: return again`. Press Return again on the unchanged path to discard those edits and open. Any intervening key or click cancels that confirmation, even editing the path back to the same name. A held Return cannot confirm it. The path is checked again on confirmation; if it disappeared or became a folder, nothing is discarded. Esc keeps the edits. Reloading the current path follows the same rule.
 
-A successful open uses the same buffer load as a new Editor opened from Files: the cursor starts at the end, selection, undo, redo and search highlights clear, and Ctrl+S uses the new filename and disk baseline. Undo cannot reach the previous file. The file chosen in Files for the next window stays as it was. The IDE also clears the previous run's output and diagnostics. While a run waits for input, Ctrl+O waits like the other Editor keys; stop the run with Esc first. An open prompt and its confirmation are not restored from a workspace snapshot.
+A successful open uses the same buffer load as a new Editor opened from Files: the cursor starts at the end, selection, undo, redo and search highlights clear, and Ctrl+S uses the new filename and disk baseline. Undo cannot reach the previous file. The file chosen in Files for the next window stays as it was. The IDE also clears the previous run's output and diagnostics. While a run waits for input, Ctrl+O waits like the other Editor keys; stop the run with Esc first. An open prompt and its confirmation are not restored from a workspace snapshot. The last text found is, and so is whether its matches were still highlighted, and whether case counts. F3 works after a restart. A text longer than 4,096 characters is left out of the snapshot. A find or a replace that was still being typed is not kept.
 
 Added Nov 11 2026. The model tests cover this behavior; the GUI was not walked through.
 

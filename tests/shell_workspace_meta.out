@@ -1,0 +1,7 @@
+built ["g2\n"] ["committed g2\nprevious g1\n"]
+garbage [""] ["second version\n"] ["not a meta file\n"] ["g2\n"] true true
+repaired [""] ["third version\n"] ["g3\n"] ["committed g3\nprevious g2\n"]
+cr [""] ["second version\n"] true ["g2\n"]
+other id [""] ["second version\n"] ["committed g1\nprevious none\n"] ["g2\n"]
+dir open [""] ["second version\n"] true ["g2\n"]
+dir save [""] ["third version\n"] false ["g3\n"] ["committed g3\nprevious g2\n"]

@@ -592,6 +592,12 @@ fun _editor_fields_ok(f)
     let back = _parse_int(f.back, 0, max_file)
     if back == none or back > len(f.text)
         return false
+    if "query" in f and (f.query == "" or len(f.query) > 4096)
+        return false
+    if "case" in f and f.case != "any" and f.case != "exact"
+        return false
+    if "hl" in f and (f.hl != "1" or not "query" in f)
+        return false
     let size = 0
     for key in ["undo", "redo"]
         if key in f
@@ -614,6 +620,8 @@ fun _session_values(win)
         let buf = unpack_lines(f.buf, 201)
         let past = unpack_lines(f.past, 51)
         if buf == none or past == none or len(buf) > 200 or len(past) > 50 or back > len(past)
+            return false
+        if "scroll" in f and _parse_int(f.scroll, 0, 1000000) == none
             return false
         return true
     if win.app == "Files"
@@ -695,11 +703,22 @@ fun _add_field(win, line)
     win.fields[key] = value
     return true
 
+# Absent on a snapshot from before the field existed. A present value is
+# still checked, and any other extra key is not optional.
+fun _field_optional(app, key)
+    if key == "undo" or key == "redo"
+        return app == "Editor" or app == "IDE" or app == "Paint"
+    if app == "Terminal" and key == "scroll"
+        return true
+    if (app == "Editor" or app == "IDE") and (key == "query" or key == "case" or key == "hl")
+        return true
+    return false
+
 fun _finish_window(win)
     let need = _session_need(win.app)
     let got = 0
     for k in win.fields
-        if not ((win.app == "Editor" or win.app == "IDE" or win.app == "Paint") and (k == "undo" or k == "redo"))
+        if not _field_optional(win.app, k)
             got = got + 1
     # Snake's board is optional, but its four fields come together.
     if win.app == "Snake" and got > 0
@@ -1092,6 +1111,8 @@ fun load(fs)
             _hold = "wrong-version"
         else if reason == "truncated"
             why = "committed image truncated"
+        else if reason == "missing"
+            why = "committed image missing"
         # Older than the named generation only. A newer complete file is an
         # uncommitted save and must not replace a corrupt commit.
         let older = _highest_below(valid_nums, pointer.n)

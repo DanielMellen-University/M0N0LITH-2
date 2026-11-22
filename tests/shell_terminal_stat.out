@@ -1,0 +1,13 @@
+["/home> stat a.txt", "file, 5 characters"]
+["/home> stat empty.txt", "file, 0 characters"]
+["/home> stat docs", "folder, 1 entry"]
+["/home> stat none", "folder, 0 entries"]
+["/home> stat /", "folder, 2 entries"]
+["/home> stat \"my notes.txt\"", "file, 2 characters"]
+["/home> stat", "usage: stat <path>"]
+["/home> stat a.txt b.txt", "usage: stat <path>"]
+["/home> stat -l", "stat: no options, not even -l"]
+["/home> stat missing", "stat: not found: /home/missing"]
+["/home> stat a.txt/", "stat: not a folder: /home/a.txt"]
+["/home> stat docs/b.txt", "file, 1 character"]
+untouched hello

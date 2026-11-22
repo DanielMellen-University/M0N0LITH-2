@@ -1,0 +1,27 @@
+# wc of a folder counts every file under it, then a total. One file is
+# unchanged: no total line. A missing path does not stop the rest.
+use ../shell/wm
+use std/vfs
+let t = wm.terminal.init()
+fun run(line)
+    t.buf = []
+    for c in line
+        if c == " "
+            wm.terminal.on_key(t, "space")
+        else
+            wm.terminal.on_key(t, c)
+    wm.terminal.on_key(t, "return")
+    print(t.buf)
+vfs.write(t.fs, "/home/a.txt", "one two\n")
+vfs.make_dir(t.fs, "/home/docs")
+vfs.write(t.fs, "/home/docs/b.txt", "x")
+vfs.write(t.fs, "/home/docs/my notes.txt", "hi\n")
+vfs.make_dir(t.fs, "/home/docs/empty")
+vfs.make_dir(t.fs, "/home/none")
+run("wc a.txt")
+run("wc docs")
+run("wc none")
+run("wc docs a.txt")
+run("wc missing docs")
+run("wc docs/")
+run("wc a.txt/")
