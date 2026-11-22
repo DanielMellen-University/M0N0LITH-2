@@ -43,6 +43,7 @@ Commands split on spaces. A part in double or single quotes is one word with its
 | `sort path` | the lines of a file in order, by character (capitals before small letters); the file is not changed |
 | `uniq path` | the lines of a file, leaving out a line the same as the one just before it (so a repeat further on stays, as in Unix) |
 | `nl path` | the lines of a file, each after its number from 1, as `history` numbers commands |
+| `tac path` | the lines of a file, last to first. A final newline is not an extra blank line. A file that is only a newline prints one blank line. A long file keeps its end, the last lines of the file |
 | `mkdir path...` | makes each folder, and any missing folders above it |
 | `touch path...` | makes each an empty file; an existing file or folder is left as it is |
 | `write path text` | replaces the file with the text and a newline |
@@ -55,7 +56,7 @@ Commands split on spaces. A part in double or single quotes is one word with its
 
 ## Rules for paths
 
-- No command has options. `cd`, `ls`, `cat`, `head`, `tail`, `wc`, `grep`, `sort`, `uniq`, `nl`, `tree`, `du`, `diff`, `cmp`, `stat`, `basename`, `dirname`, `mkdir`, `touch`, `rm`, `mv` and `cp` refuse any word starting with `-`, and so do the paths of `write` and `echo >`. To name such a file, write `./-x`.
+- No command has options. `cd`, `ls`, `cat`, `head`, `tail`, `wc`, `grep`, `sort`, `uniq`, `nl`, `tree`, `du`, `diff`, `cmp`, `stat`, `basename`, `dirname`, `tac`, `mkdir`, `touch`, `rm`, `mv` and `cp` refuse any word starting with `-`, and so do the paths of `write` and `echo >`. To name such a file, write `./-x`.
 - A path ending in `/` must be a folder: `cat notes.txt/` and `rm notes.txt/` are errors, and `touch new/` makes nothing.
 - Errors say which part is wrong: `not found: /home/x`, `not a folder: /home/notes.txt` when a part of the path is a file, `no folder: /home/missing` when the folder to write into is not there.
 - If another app removes or moves the folder a Terminal is in, it moves up to the nearest folder that still exists.
