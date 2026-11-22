@@ -1,0 +1,19 @@
+["/home> cp docs docs2"]
+tree print(1)
+ hello true
+source print(1)
+
+["/home> cp empty /tmp/empty"]
+empty true 0
+["/home> cp docs /tmp"]
+into print(1)
+
+["/home> cp docs docs2"]
+still hello
+["/home> cp docs docs/src", "cp: cannot copy a folder into itself"]
+inside false
+["/home> cp docs docs", "cp: cannot copy a folder into itself"]
+["/home> cp \"docs/my notes.txt\" \"docs2/my notes.txt\"", "cp: already there: /home/docs2/my notes.txt"]
+file kept hello
+["/home> cp missing /tmp/out", "cp: not found: /home/missing"]
+["/home> cp docs /tmp/nope/out", "cp: no folder: /tmp/nope"]

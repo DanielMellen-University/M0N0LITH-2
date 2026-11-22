@@ -1,4 +1,4 @@
-# cp copies an empty file as empty, and does not copy a folder.
+# cp copies an empty file as empty, and copies a folder to a new name.
 use ../shell/wm
 use std/vfs
 let t = wm.terminal.init()
@@ -15,4 +15,4 @@ run("touch /tmp/empty.txt")
 run("cp /tmp/empty.txt /tmp/empty2.txt")
 print("empty", vfs.exists(t.fs, "/tmp/empty2.txt") and vfs.read(t.fs, "/tmp/empty2.txt") == "")
 run("cp /tmp /tmp/tmp2")
-print("no dir copy", not vfs.exists(t.fs, "/tmp/tmp2"))
+print("dir copy", vfs.is_dir(t.fs, "/tmp/tmp2") and vfs.read(t.fs, "/tmp/tmp2/empty.txt") == "" and vfs.read(t.fs, "/tmp/tmp2/empty2.txt") == "")

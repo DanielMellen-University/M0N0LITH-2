@@ -1,0 +1,35 @@
+# cp copies a folder and what is in it. It does not write over a name that
+# is already there, and it will not copy a folder into itself.
+use ../shell/wm
+use std/vfs
+let t = wm.terminal.init()
+fun run(line)
+    t.buf = []
+    for c in line
+        if c == " "
+            wm.terminal.on_key(t, "space")
+        else
+            wm.terminal.on_key(t, c)
+    wm.terminal.on_key(t, "return")
+    print(t.buf)
+vfs.make_dir(t.fs, "/home/docs")
+vfs.make_dir(t.fs, "/home/docs/src")
+vfs.write(t.fs, "/home/docs/src/main.relic", "print(1)\n")
+vfs.write(t.fs, "/home/docs/my notes.txt", "hello")
+vfs.make_dir(t.fs, "/home/empty")
+run("cp docs docs2")
+print("tree", vfs.read(t.fs, "/home/docs2/src/main.relic"), vfs.read(t.fs, "/home/docs2/my notes.txt"), vfs.is_dir(t.fs, "/home/docs2/src"))
+print("source", vfs.read(t.fs, "/home/docs/src/main.relic"))
+run("cp empty /tmp/empty")
+print("empty", vfs.is_dir(t.fs, "/tmp/empty"), len(vfs.list(t.fs, "/tmp/empty")))
+run("cp docs /tmp")
+print("into", vfs.read(t.fs, "/tmp/docs/src/main.relic"))
+run("cp docs docs2")
+print("still", vfs.read(t.fs, "/home/docs2/my notes.txt"))
+run("cp docs docs/src")
+print("inside", vfs.exists(t.fs, "/home/docs/src/docs"))
+run("cp docs docs")
+run("cp \"docs/my notes.txt\" \"docs2/my notes.txt\"")
+print("file kept", vfs.read(t.fs, "/home/docs2/my notes.txt"))
+run("cp missing /tmp/out")
+run("cp docs /tmp/nope/out")

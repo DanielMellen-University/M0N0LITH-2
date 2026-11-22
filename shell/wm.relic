@@ -2001,8 +2001,33 @@ fun _term_find(s, word)
     for line in slice(out, math.max(0, len(out) - term_history), len(out))
         _term_reply(s, line)
 
-# cp copies a file (not a folder) to a new name, or into a folder; like mv it
-# does not write over a file that is already there.
+# True when path is parent or a file inside it. Used so a folder is not
+# copied into itself.
+fun _term_inside(parent, path)
+    return path == parent or strings.starts_with(path, parent + "/")
+
+fun _term_cp_tree(fs, src, dst)
+    try
+        vfs.make_dir(fs, dst)
+    catch err
+        return err.message
+    for e in vfs.entries(fs, src)
+        let from = paths.join(src, e[0])
+        let to = paths.join(dst, e[0])
+        if e[1]
+            let why = _term_cp_tree(fs, from, to)
+            if why != none
+                return why
+        else
+            try
+                vfs.write(fs, to, vfs.read(fs, from))
+            catch err
+                return err.message
+    return none
+
+# cp copies a file or a folder to a new name, or into a folder; like mv it
+# does not write over a name that is already there. A folder is not copied
+# into itself. A copy that fails part way is removed, and nothing is committed.
 fun _term_cp(s, a, b)
     if _term_not_folder(s, "cp", a, false) or _term_not_folder(s, "cp", b, true)
         return
@@ -2013,7 +2038,24 @@ fun _term_cp(s, a, b)
     if not vfs.exists(s.fs, src)
         _term_reply(s, "cp: " + _term_missing(s, src))
     else if vfs.is_dir(s.fs, src)
-        _term_reply(s, "cp: is a folder: " + src)
+        if _term_inside(src, dst)
+            _term_reply(s, "cp: cannot copy a folder into itself")
+        else if vfs.exists(s.fs, dst)
+            _term_reply(s, "cp: already there: " + dst)
+        else if _why_not_new(s.fs, dst) != none
+            _term_reply(s, "cp: " + _why_not_new(s.fs, dst))
+        else
+            let why = _term_cp_tree(s.fs, src, dst)
+            if why != none
+                try
+                    vfs.remove_tree(s.fs, dst)
+                catch err
+                    none
+                _term_reply(s, "cp: " + why)
+                return
+            let saved = _fs_commit()
+            if saved != ""
+                _term_reply(s, saved)
     else if vfs.exists(s.fs, dst)
         _term_reply(s, "cp: already there: " + dst)
     else if _why_not_new(s.fs, dst) != none
