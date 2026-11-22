@@ -1,0 +1,33 @@
+# tac prints a file's lines last to first. A final newline is not an extra
+# blank line. The file is not changed.
+use ../shell/wm
+use std/vfs
+let t = wm.terminal.init()
+fun run(line)
+    t.buf = []
+    for c in line
+        if c == " "
+            wm.terminal.on_key(t, "space")
+        else
+            wm.terminal.on_key(t, c)
+    wm.terminal.on_key(t, "return")
+    print(t.buf)
+vfs.write(t.fs, "/home/a.txt", "one\ntwo\nthree\n")
+vfs.write(t.fs, "/home/b.txt", "one\ntwo")
+vfs.write(t.fs, "/home/blank.txt", "one\n\nthree\n")
+vfs.write(t.fs, "/home/empty.txt", "")
+vfs.write(t.fs, "/home/nl.txt", "\n")
+vfs.write(t.fs, "/home/my notes.txt", "a\nb\n")
+run("tac a.txt")
+run("tac b.txt")
+run("tac blank.txt")
+run("tac empty.txt")
+run("tac nl.txt")
+run("tac \"my notes.txt\"")
+run("tac")
+run("tac a.txt b.txt")
+run("tac -r a.txt")
+run("tac missing")
+run("tac /home")
+run("tac a.txt/")
+print("untouched", vfs.read(t.fs, "/home/a.txt"))

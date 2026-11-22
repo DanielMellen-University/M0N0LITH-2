@@ -1,0 +1,16 @@
+["/home> tac a.txt", "three", "two", "one"]
+["/home> tac b.txt", "two", "one"]
+["/home> tac blank.txt", "three", "", "one"]
+["/home> tac empty.txt"]
+["/home> tac nl.txt", ""]
+["/home> tac \"my notes.txt\"", "b", "a"]
+["/home> tac", "usage: tac <path>"]
+["/home> tac a.txt b.txt", "usage: tac <path>"]
+["/home> tac -r a.txt", "tac: no options, not even -r"]
+["/home> tac missing", "tac: not found: /home/missing"]
+["/home> tac /home", "tac: is a folder: /home"]
+["/home> tac a.txt/", "tac: not a folder: /home/a.txt"]
+untouched one
+two
+three
+
