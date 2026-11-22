@@ -135,6 +135,7 @@ The commands are in [the Terminal doc](apps/TERMINAL.md).
 | Ctrl+F | find: type the text, Return selects the next match after the cursor (going round to the start); every match on screen is highlighted. Esc, another key or a click stops. With a selection on one line it starts with that, and typing replaces it |
 | Ctrl+I | toggles case for find and replace (`case: any` or `case: exact`; during the prompt the title says `(any)`) |
 | F3, Shift+F3 | finds the last text again, the next or the one before |
+| Ctrl+F3 | the word at the cursor (or a one-line selection) becomes the find text; matches are highlighted |
 | Ctrl+G | go to a line, or `line:column` after a colon |
 | Ctrl+H | replace: the text, Return, what goes in its place. Return replaces every one, Alt+Return the next one; each is one undo step. Starts with a selection on one line, as Ctrl+F does |
 

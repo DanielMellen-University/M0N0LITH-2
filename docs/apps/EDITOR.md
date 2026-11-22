@@ -50,6 +50,7 @@ The status is one of:
 | Ctrl+G | goes to a line: type its number (`line: N_`, digits only, at most 7), and Return puts the cursor at its start, or on the last line when the number is past the end; the title then says `line N`. A colon and a column (`line: N:C_`) land on that character, or at the end of the line when the column is past it; the title then says `line N:C`. Esc, another key or a click gives up |
 | Ctrl+I | toggles whether find and replace count case. Outside a prompt the title says `case: any` or `case: exact` |
 | F3, Shift+F3 | the last text found again: the next place, or with Shift the one before (both go round); `not found: text` when it is gone |
+| Ctrl+F3 | the word at the cursor, or the selection when it stays on one line, becomes the text to find. Every match is highlighted and the next one is selected. A space uses the word just before it. On a space at the start of the text, the title says `find: nothing` |
 
 On macOS, Cmd with a letter works as Ctrl with it.
 

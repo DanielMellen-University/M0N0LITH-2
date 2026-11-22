@@ -15,7 +15,7 @@ One test: `ctest --test-dir build -C Release -R golden_shell_ide`. Or run it str
 
 ## How they are checked
 
-CMake finds every `tests/*.relic` and adds it as `golden_<name>`. `tools/run_golden.cmake` runs it from `tests/`, and it passes when it exits with 0 and its standard output matches `<name>.out` exactly (Windows line endings are ignored). A test with no `.out` file must print nothing. One more test, `check_shell`, runs `relic check` on `wm.relic`, `workspace.relic`, `desktop.relic` and `ide_diag.relic`, which catches syntax errors and undefined names in the drawing code no test runs. That is 511 tests in all, and CI runs them on Linux, macOS and Windows. The 35 `shell_workspace_*` golden programs, `workspace_restart`, and `workspace_kill` cover the store. `workspace_restart` runs four relic processes against one directory. `workspace_kill` kills a process after it has written a partial and before it publishes.
+CMake finds every `tests/*.relic` and adds it as `golden_<name>`. `tools/run_golden.cmake` runs it from `tests/`, and it passes when it exits with 0 and its standard output matches `<name>.out` exactly (Windows line endings are ignored). A test with no `.out` file must print nothing. One more test, `check_shell`, runs `relic check` on `wm.relic`, `workspace.relic`, `desktop.relic` and `ide_diag.relic`, which catches syntax errors and undefined names in the drawing code no test runs. That is 524 tests in all, and CI runs them on Linux, macOS and Windows. The 35 `shell_workspace_*` golden programs, `workspace_restart`, and `workspace_kill` cover the store. `workspace_restart` runs four relic processes against one directory. `workspace_kill` kills a process after it has written a partial and before it publishes.
 
 None of them opens the SDL window. A passing run does not prove what the desktop draws. The Linux GUI pass, and what it did not try, is in the [roadmap](ROADMAP.md#accepted-nov-7-2026).
 
@@ -179,6 +179,7 @@ Write `tests/shell_<topic>.relic`, run it, read its output, and save that as `te
 | `shell_terminal_tree` | tree of the current folder, a path, an empty folder, `..`, and a file; quoted names; a missing path, a file with `/`, two words and an option are errors |
 | `shell_terminal_du` | du of the current folder, a path, a file and an empty folder, sizes lined up and quoted names; a missing path, a file with `/`, two words and an option are errors |
 | `shell_terminal_diff` | diff of a changed, added and removed line both ways, the same file, an empty file, a quoted name and a moved line; usage, missing, folder and option errors; two long files that differ all through give the first difference, one change in a long file is still found |
+| `shell_terminal_diff_dir` | diff of two folders names a file only in one and a file whose bytes differ, and says the lines are the same when every file matches; one folder and one file is still an error |
 | `shell_terminal_wc_dir` | wc of a folder counts every file under it and prints a total, including an empty folder and a folder named with /; one file has no total; a missing path does not stop the rest |
 | `shell_terminal_wc_many` | wc of several files with a total, a quoted name, a folder among the paths, errors that do not stop the rest, no total when nothing was counted, and the usage |
 | `shell_terminal_find_own` | find matches an entry's own name, shows a folder with a slash, and does not match text only in a parent path |
@@ -267,6 +268,7 @@ Write `tests/shell_<topic>.relic`, run it, read its output, and save that as `te
 | `shell_editor_save_newfile_warn` | A new file saved once is then guarded like any other file against changes by another app |
 | `shell_editor_find` | Ctrl+F and Return select the next match after the cursor and go round, case counts, not found, Esc and other keys stop finding, in the IDE too; F3 and Shift+F3 again, both ways round; a selection on one line as the text to find, replaced by typing; Ctrl+H replacing every match in one undo step, with nothing, not found, Esc halfway, and starting with a selection; Return with no text waits; a long text showing its end; a click giving up a find or a line number |
 | `shell_editor_find_marks` | every match is highlighted; Ctrl+I toggles case so `two` finds `Two`, and an edit clears the highlights |
+| `shell_editor_find_word` | Ctrl+F3 finds the word at the cursor or a one-line selection, highlights matches, uses the word before a space, and does nothing on a leading space; the IDE uses it |
 | `shell_editor_goto` | Ctrl+G and a number go to the start of that line, the last past the end, 0 as 1; digits only, Esc and other keys give up, a selection goes |
 | `shell_editor_goto_col` | Ctrl+G with `line:column` lands on that character, clamps a column past the end, and a bare line number stays on column 1 |
 | `shell_editor_indent` | Return keeps leading spaces up to the cursor, the IDE adds a level after a block line but not after `fun f() = ...`, undo |
