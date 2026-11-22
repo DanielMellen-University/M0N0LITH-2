@@ -1738,22 +1738,42 @@ fun _term_tail(s, path, count)
     for line in last_lines(text, count)
         _term_reply(s, line)
 
-# grep: the lines of a file that have the text in them (plain text, case
-# counts, no patterns), as many as the output keeps.
+# One file's matching lines. A folder search names the file, so the same
+# line in two files can be told apart; a single file stays as it was.
+fun _term_grep_file(s, word, path, show_path, found)
+    for line in strings.lines(vfs.read(s.fs, path))
+        if strings.contains(line, word)
+            if show_path
+                append(found, _term_name(path) + ":" + line)
+            else
+                append(found, line)
+
+fun _term_grep_tree(s, word, dir, found)
+    for e in vfs.entries(s.fs, dir)
+        let child = paths.join(dir, e[0])
+        if e[1]
+            _term_grep_tree(s, word, child, found)
+        else
+            _term_grep_file(s, word, child, true, found)
+
+# grep: the lines that have the text in them (plain text, case counts, no
+# patterns). A file is that file. A folder is every file under it, in the
+# order ls shows, each folder followed by what is in it. No path searches
+# the current folder. As many lines as the output keeps, from the end.
 fun _term_grep(s, word, path)
-    if _term_not_folder(s, "grep", path, false)
+    if path != none and _term_not_folder(s, "grep", path, false)
         return
-    let p = _term_path(s, path)
+    let p = s.cwd
+    if path != none
+        p = _term_path(s, path)
     if not vfs.exists(s.fs, p)
         _term_reply(s, "grep: " + _term_missing(s, p))
         return
-    if vfs.is_dir(s.fs, p)
-        _term_reply(s, "grep: is a folder: " + p)
-        return
     let found = []
-    for line in strings.lines(vfs.read(s.fs, p))
-        if strings.contains(line, word)
-            append(found, line)
+    if vfs.is_dir(s.fs, p)
+        _term_grep_tree(s, word, p, found)
+    else
+        _term_grep_file(s, word, p, false, found)
     for line in slice(found, math.max(0, len(found) - term_history), len(found))
         _term_reply(s, line)
 
@@ -2176,8 +2196,12 @@ fun _term_run(s, line)
             else if count != none
                 _term_tail(s, parts[1], count)
     else if cmd == "grep"
-        if _term_args(s, parts, 2, "grep <text> <path>")
+        if len(parts) == 2
+            _term_grep(s, parts[1], none)
+        else if len(parts) == 3
             _term_grep(s, parts[1], parts[2])
+        else
+            _term_reply(s, "usage: grep <text> [path]")
     else if cmd == "find"
         if _term_args(s, parts, 1, "find <text>")
             _term_find(s, parts[1])

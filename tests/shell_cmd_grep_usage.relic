@@ -1,4 +1,5 @@
-# grep needs both the text and a path.
+# grep needs the text. The path is optional and then the current folder is
+# searched. A word too many is still an error, and the file is not written.
 use ../shell/wm
 use std/vfs
 let t = wm.terminal.init()
