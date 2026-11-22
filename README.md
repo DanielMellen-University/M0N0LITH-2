@@ -84,7 +84,7 @@ On macOS, Cmd with a letter works as Ctrl with it. Escape closes the Start menu 
 
 Quitting writes the shared files and the open windows to `$HOME/.m0n0lith2/workspace` (or `$USERPROFILE/.m0n0lith2/workspace` when `HOME` is unset). Set `M0N0LITH_WORKSPACE` to another directory, or to an empty value to keep nothing between runs.
 
-The next start opens the same windows in the same places. That includes Terminal's folder, output, command history, and how far that output is scrolled; the folder Files was in; Editor and IDE text, including text not yet saved with Ctrl+S; Notes' line; Clicker's count; Paint's picture, including a stroke not yet saved, and its undo; and Snake's board and best score. A Snake game that was moving comes back paused, so press Space to go on.
+The next start opens the same windows in the same places. That includes Terminal's folder, output, command history, and how far that output is scrolled; the folder Files was in; Editor and IDE text, including text not yet saved with Ctrl+S, and the last find; Notes' line; Clicker's count; Paint's picture, including a stroke not yet saved, and its undo; and Snake's board and best score. A Snake game that was moving comes back paused, so press Space to go on.
 
 A save that is cut off keeps the previous snapshot. A workspace file that is cut short, no longer matches its checksum, or is a newer version than this desktop understands is not opened as if it were whole. The screen says so. A newer version is left on disk until you release it. When an older snapshot still reads, that one comes back. When nothing does, you get the first-run files, which are `/home`, `/tmp`, and `/home/welcome.txt`, and no windows.
 

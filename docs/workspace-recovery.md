@@ -146,7 +146,7 @@ A session has at most 64 windows. Only the Editor, IDE and Paint `undo` and `red
 |---|---|
 | Terminal | `cwd`, `input`, `draft`, `buf`, `past`, `left`, `back`, and optional `scroll`. `buf` and `past` are length-prefixed lines (a decimal length, a newline, then that many characters), at most 200 and 50. `scroll` is how many rows the output is paged back, 0 to 1,000,000, with no sign or leading zero. It is left out when it is 0, and a snapshot from before this field opens at the prompt. A bad value rejects the generation. On restore it is cut to the rows the window can actually scroll |
 | Files | `path`, `sel` |
-| Editor | `path`, `text`, `back`, `mark` (`-` or a count from the end of the text), `disk_set` (`0` or `1`), `disk`, optional `undo` and `redo` |
+| Editor | `path`, `text`, `back`, `mark` (`-` or a count from the end of the text), `disk_set` (`0` or `1`), `disk`, optional `undo` and `redo`, and optional `query`, `hl` and `case`. `query` is the last text found, 1 to 4,096 characters. It is left out when there is none, and a longer one is left out of the snapshot, which is still written. `hl` is `1` when those matches are still highlighted, and only with a `query`. `case` is `any` when find ignores case, and is left out when case counts. A find or replace still being typed is not one of these |
 | IDE | the Editor fields, plus `out` (length-prefixed lines, at most 200) and `err` (`-` or a line number) |
 | Notes | `text`, `left` |
 | Clicker | `count` |
@@ -173,7 +173,7 @@ With a workspace open and a desktop bound by `wm.workspace_bind`, key or mouse i
 
 The idle snapshot records unsaved buffers with the current vfs. It does not save Editor or IDE text into a vfs file, or save Paint's cells into its picture file. Ctrl+S and the interrupted-save fallback rules below stay the same.
 
-Not in the snapshot: a find or a rename still being typed, clipboard text over 65,536 characters, and an IDE run (including one that is waiting for a line). Editor, IDE and Paint undo and redo return within the history caps. An IDE program does not keep running after a restart. The clipboard comes back when a desktop binds to the workspace (`wm.workspace_bind`); a snapshot with no `S C` line leaves the clipboard as it is. A build from before the `S C` line reads a generation that has one as `invalid` and falls back to the one before it. Snake's board returns, and a game that was moving comes back paused. Snake moving on the clock does not mark input pending, so a kill keeps the board as of the last snapshot, not the steps after it.
+Not in the snapshot: a find, replace, go-to or rename still being typed, clipboard text over 65,536 characters, and an IDE run (including one that is waiting for a line). The last find, whether its matches are still highlighted, and a case-insensitive search do come back, in the Editor and the IDE. Editor, IDE and Paint undo and redo return within the history caps. An IDE program does not keep running after a restart. The clipboard comes back when a desktop binds to the workspace (`wm.workspace_bind`); a snapshot with no `S C` line leaves the clipboard as it is. A build from before the `S C` line reads a generation that has one as `invalid` and falls back to the one before it. Snake's board returns, and a game that was moving comes back paused. Snake moving on the clock does not mark input pending, so a kill keeps the board as of the last snapshot, not the steps after it.
 
 ## What a save does
 
