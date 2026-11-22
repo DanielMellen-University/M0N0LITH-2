@@ -144,7 +144,7 @@ A session has at most 64 windows. Only the Editor, IDE and Paint `undo` and `red
 
 | App | Fields |
 |---|---|
-| Terminal | `cwd`, `input`, `draft`, `buf`, `past`, `left`, `back`. `buf` and `past` are length-prefixed lines (a decimal length, a newline, then that many characters), at most 200 and 50 |
+| Terminal | `cwd`, `input`, `draft`, `buf`, `past`, `left`, `back`, and optional `scroll`. `buf` and `past` are length-prefixed lines (a decimal length, a newline, then that many characters), at most 200 and 50. `scroll` is how many rows the output is paged back, 0 to 1,000,000, with no sign or leading zero. It is left out when it is 0, and a snapshot from before this field opens at the prompt. A bad value rejects the generation. On restore it is cut to the rows the window can actually scroll |
 | Files | `path`, `sel` |
 | Editor | `path`, `text`, `back`, `mark` (`-` or a count from the end of the text), `disk_set` (`0` or `1`), `disk`, optional `undo` and `redo` |
 | IDE | the Editor fields, plus `out` (length-prefixed lines, at most 200) and `err` (`-` or a line number) |
