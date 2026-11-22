@@ -206,9 +206,9 @@ The vfs is replaced only after a generation has fully parsed.
 | valid, and that generation parses | a `gM.m2ws.partial` | the named generation | `workspace: ignored partial gM` (highest such M) |
 | both of those leftovers | | the named generation | `workspace: ignored uncommitted gM; ignored partial gK` |
 | any | `gM.m2ws.damaged` files | unchanged by those files; only ordinary generations can install | no notice about damaged files; their ids only reserve numbers for the next save |
-| valid, generation truncated or otherwise bad | an older valid generation, and maybe a newer complete file | the newest valid generation **older than the named one** | `workspace: committed image truncated; recovered gN` (or `invalid`). A newer file is `ignored uncommitted`, not installed |
+| valid, generation truncated, missing or otherwise bad | an older valid generation, and maybe a newer complete file | the newest valid generation **older than the named one** | `workspace: committed image truncated; recovered gN` (or `invalid`, or `missing` when the named file is not there). A newer file is `ignored uncommitted`, not installed |
 | valid, generation `M2WS` but not `M2WS1` | | defaults, or an older generation this desktop can parse | `workspace: committed image wrong version; store held; ...` The store is not written or deleted until `wm.workspace_release()` |
-| named generation missing or bad, and nothing older parses | | defaults | `workspace: no valid generation; using defaults` |
+| named generation missing or bad, and nothing older parses | | defaults | `workspace: no valid generation; using defaults`, or `committed image missing; using defaults` when the pointer names a file that is not there and a newer complete file is ignored |
 | missing or invalid | `META` names a generation that parses | that generation, not a newer one | `workspace: pointer missing; recovered gN` or `pointer invalid` |
 | missing or invalid | exactly one valid generation and no `META` | that generation | the same recovered notice |
 | missing or invalid | two or more valid generations and no usable `META` | defaults, store held | `workspace: pointer invalid; store held; using defaults; ignored uncommitted gN` |
