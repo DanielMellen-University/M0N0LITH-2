@@ -1092,6 +1092,8 @@ fun load(fs)
             _hold = "wrong-version"
         else if reason == "truncated"
             why = "committed image truncated"
+        else if reason == "missing"
+            why = "committed image missing"
         # Older than the named generation only. A newer complete file is an
         # uncommitted save and must not replace a corrupt commit.
         let older = _highest_below(valid_nums, pointer.n)

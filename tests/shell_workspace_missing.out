@@ -1,0 +1,6 @@
+older ["workspace: committed image missing; recovered g1"] ["first version\n"] false ["committed g1\nprevious none\n"]
+newer left ["workspace: committed image missing; recovered g1; ignored uncommitted g3"] ["first version\n"] true
+only newer ["workspace: committed image missing; using defaults; ignored uncommitted g3"] ["absent"] Welcome to Relic.
+
+only partial ["workspace: no valid generation; using defaults; ignored partial g4"] true true
+older and partial ["workspace: committed image missing; recovered g1; ignored partial g4"] ["first version\n"]
