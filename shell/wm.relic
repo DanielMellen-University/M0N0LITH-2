@@ -2053,8 +2053,54 @@ fun _term_dir(s, path)
         up = "."
     _term_reply(s, up)
 
+fun _term_files_under(s, dir, rel, out)
+    for e in vfs.entries(s.fs, dir)
+        let name = e[0]
+        if rel != ""
+            name = rel + "/" + e[0]
+        if e[1]
+            _term_files_under(s, paths.join(dir, e[0]), name, out)
+        else
+            append(out, name)
+
+# diff of two folders: files only in one, and files whose bytes differ.
+# Same lines when every file under both is the same.
+fun _term_diff_dirs(s, a, b)
+    let left = []
+    let right = []
+    _term_files_under(s, a, "", left)
+    _term_files_under(s, b, "", right)
+    let in_right = {}
+    for name in right
+        in_right[name] = true
+    let in_left = {}
+    for name in left
+        in_left[name] = true
+    let out = []
+    for name in left
+        if not name in in_right
+            append(out, "only in first: " + _term_name(name))
+        else if vfs.read(s.fs, paths.join(a, name)) != vfs.read(s.fs, paths.join(b, name))
+            append(out, "differ: " + _term_name(name))
+    for name in right
+        if not name in in_left
+            append(out, "only in second: " + _term_name(name))
+    if len(out) == 0
+        _term_reply(s, "diff: same lines")
+        return
+    for line in slice(out, math.max(0, len(out) - term_history), len(out))
+        _term_reply(s, line)
+
 # diff: the lines that differ between two files, or that they are the same.
+# Two folders compare the files under them instead.
 fun _term_diff(s, pa, pb)
+    if _term_not_folder(s, "diff", pa, false) or _term_not_folder(s, "diff", pb, false)
+        return
+    let a_path = _term_path(s, pa)
+    let b_path = _term_path(s, pb)
+    if vfs.is_dir(s.fs, a_path) and vfs.is_dir(s.fs, b_path)
+        _term_diff_dirs(s, a_path, b_path)
+        return
     let a = _term_file_lines(s, "diff", pa)
     if a == none
         return

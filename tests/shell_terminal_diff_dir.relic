@@ -1,0 +1,34 @@
+# diff of two folders names files only in one and files whose bytes differ.
+# Two files still compare line by line.
+use ../shell/wm
+use std/vfs
+let t = wm.terminal.init()
+fun run(line)
+    t.buf = []
+    for c in line
+        if c == " "
+            wm.terminal.on_key(t, "space")
+        else
+            wm.terminal.on_key(t, c)
+    wm.terminal.on_key(t, "return")
+    print(t.buf)
+vfs.make_dir(t.fs, "/home/a")
+vfs.make_dir(t.fs, "/home/b")
+vfs.make_dir(t.fs, "/home/a/sub")
+vfs.write(t.fs, "/home/a/same.txt", "one\n")
+vfs.write(t.fs, "/home/b/same.txt", "one\n")
+vfs.write(t.fs, "/home/a/sub/n.txt", "x")
+vfs.write(t.fs, "/home/b/sub.txt", "x")
+vfs.write(t.fs, "/home/a/changed.txt", "old\n")
+vfs.write(t.fs, "/home/b/changed.txt", "new\n")
+vfs.make_dir(t.fs, "/home/b/sub")
+vfs.write(t.fs, "/home/b/sub/n.txt", "x")
+vfs.write(t.fs, "/home/a/my file.txt", "q")
+run("diff a b")
+run("diff a a")
+run("diff a same.txt")
+run("diff missing b")
+run("diff a.txt b")
+vfs.write(t.fs, "/tmp/p.txt", "one\ntwo\n")
+vfs.write(t.fs, "/tmp/q.txt", "one\nno\n")
+run("diff /tmp/p.txt /tmp/q.txt")
