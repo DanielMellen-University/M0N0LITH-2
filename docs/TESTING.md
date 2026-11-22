@@ -179,7 +179,8 @@ Write `tests/shell_<topic>.relic`, run it, read its output, and save that as `te
 | `shell_terminal_tree` | tree of the current folder, a path, an empty folder, `..`, and a file; quoted names; a missing path, a file with `/`, two words and an option are errors |
 | `shell_terminal_du` | du of the current folder, a path, a file and an empty folder, sizes lined up and quoted names; a missing path, a file with `/`, two words and an option are errors |
 | `shell_terminal_diff` | diff of a changed, added and removed line both ways, the same file, an empty file, a quoted name and a moved line; usage, missing, folder and option errors; two long files that differ all through give the first difference, one change in a long file is still found |
-| `shell_terminal_wc_many` | wc of several files with a total, a quoted name, errors that do not stop the rest, no total when nothing was counted, and the usage |
+| `shell_terminal_wc_dir` | wc of a folder counts every file under it and prints a total, including an empty folder and a folder named with /; one file has no total; a missing path does not stop the rest |
+| `shell_terminal_wc_many` | wc of several files with a total, a quoted name, a folder among the paths, errors that do not stop the rest, no total when nothing was counted, and the usage |
 | `shell_terminal_find_own` | find matches an entry's own name, shows a folder with a slash, and does not match text only in a parent path |
 | `shell_terminal_history_keep` | history keeps the last 50 commands, the oldest falls off, and !1 runs whatever is now first |
 | `shell_terminal_bang_prefix` | !text runs the newest command that starts with that text; a miss is not kept; !! and !N are unchanged; a bare ! is an unknown command and is kept |
