@@ -49,7 +49,7 @@ tree du diff cmp stat
 basename dirname
 echo text > file, >> adds
 "my file": quotes keep spaces
-!! the last again, !N history N
+!! last, !N number, !text
 /home> pwd
 /home
 /home> ls

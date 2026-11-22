@@ -2208,7 +2208,7 @@ fun _term_run(s, line)
         _term_reply(s, "basename dirname")
         _term_reply(s, "echo text > file, >> adds")
         _term_reply(s, "\"my file\": quotes keep spaces")
-        _term_reply(s, "!! the last again, !N history N")
+        _term_reply(s, "!! last, !N number, !text")
     else if cmd == "clear"
         if _term_args(s, parts, 0, "clear")
             s.buf = []
@@ -2484,6 +2484,34 @@ fun _term_paste(s)
         return "'" + text + "'"
     return "\"" + text + "\""
 
+# The text after "!text", or none for !!, !N, or a bare !.
+fun _term_bang_prefix(t)
+    if len(t) < 2 or t[0] != "!" or t == "!!"
+        return none
+    if _term_bang_number(t) != none
+        return none
+    let rest = strings.trim(slice(t, 1, len(t)))
+    if rest == ""
+        return none
+    # A line of digits is !N, including one too long to be a history number.
+    # That one stays an unknown command, as it did before !text.
+    let digits = true
+    for c in rest
+        if c < "0" or c > "9"
+            digits = false
+    if digits
+        return none
+    return rest
+
+# The newest remembered command that starts with prefix, or none.
+fun _term_bang_match(s, prefix)
+    let i = len(s.past) - 1
+    while i >= 0
+        if strings.starts_with(s.past[i], prefix)
+            return s.past[i]
+        i = i - 1
+    return none
+
 # The N of "!N" (a ! and digits), or none for any other line.
 fun _term_bang_number(t)
     if len(t) < 2 or len(t) > 6 or t[0] != "!"
@@ -2588,6 +2616,16 @@ fun _term_edit(s, k)
                 s.input = ""
                 return
             line = s.past[n - 1]
+        else if _term_bang_prefix(strings.trim(line)) != none
+            # !text: the newest command that starts with that text
+            let prefix = _term_bang_prefix(strings.trim(line))
+            let found = _term_bang_match(s, prefix)
+            if found == none
+                _term_reply(s, s.cwd + "> " + line)
+                _term_reply(s, strings.trim(line) + ": not in history")
+                s.input = ""
+                return
+            line = found
         if strings.trim(line) != "" and (len(s.past) == 0 or s.past[len(s.past) - 1] != line)
             append(s.past, line)
             if len(s.past) > _term_recall_keep
