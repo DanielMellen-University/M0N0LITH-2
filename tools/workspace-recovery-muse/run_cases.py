@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """D0142 workspace-recovery harness driver.
 
-Runs cases 6-19 for real: separate relic processes share one store
+Runs cases 6-21 for real: separate relic processes share one store
 directory per case, the driver damages files by hand between processes
 (exactly as a user-facing fault would), and every expected line is
 asserted against the actual program output. Nothing here edits an
@@ -212,8 +212,8 @@ def expect_case10_check(out):
     check("case10", "save after release says saved", out, 'save2 ["saved"]')
     check("case10", "new generation committed", out, 'committed ["g3\\n"]')
     check("case10", "metadata names the new commit", out, 'meta ["committed g3\\nprevious g1\\n"]')
-    check_names("case10", "prune keeps the new commit and the older generation", out,
-                ["COMMITTED", "META", "g1.m2ws", "g3.m2ws"])
+    check_names("case10", "prune keeps the new commit, the older generation and the damaged file", out,
+                ["COMMITTED", "META", "g1.m2ws", "g2.m2ws.damaged", "g3.m2ws"])
 
 
 def expect_case10_verify(out):
@@ -245,8 +245,8 @@ def expect_case12_check(out):
     check("case12", "new generation committed", out, 'committed ["g3\\n"]')
     check("case12", "metadata names no previous generation", out,
           'meta ["committed g3\\nprevious none\\n"]')
-    check_names("case12", "prune keeps only the new commit", out,
-                ["COMMITTED", "META", "g3.m2ws"])
+    check_names("case12", "prune keeps the new commit and the damaged generations", out,
+                ["COMMITTED", "META", "g1.m2ws.damaged", "g2.m2ws.damaged", "g3.m2ws"])
 
 
 def expect_case12_verify(out):
@@ -276,8 +276,8 @@ def expect_case13_check(out):
     check("case13", "new generation committed", out, 'committed ["g34\\n"]')
     check("case13", "metadata names no previous generation", out,
           'meta ["committed g34\\nprevious none\\n"]')
-    check_names("case13", "prune keeps only the new commit", out,
-                ["COMMITTED", "META", "g34.m2ws"])
+    check_names("case13", "prune keeps the new commit and the four newest damaged generations", out,
+                ["COMMITTED", "META", "g30.m2ws.damaged", "g31.m2ws.damaged", "g32.m2ws.damaged", "g33.m2ws.damaged", "g34.m2ws"])
 
 
 def expect_case13_verify(out):
@@ -328,6 +328,24 @@ def expect_case19_check(out):
     check("case19", "notice", out, 'notice ["workspace: pointer missing; recovered g1"]')
     check("case19", "older text restored", out, 'note ["first version\\n"]')
     check("case19", "welcome file still shows original text", out, 'welcome ["Welcome to Relic.\\n"]')
+
+
+def expect_case20_check(out):
+    check("case20", "notice", out,
+          'notice ["workspace: committed image missing; recovered g1; ignored uncommitted g3"]')
+    check("case20", "older text restored", out, 'note ["first version\\n"]')
+    check("case20", "welcome file still shows original text", out, 'welcome ["Welcome to Relic.\\n"]')
+    if "third version" in out:
+        print("  FAIL: third version appeared in the check output")
+        FAILURES.append("case20: third version installed")
+    else:
+        print("  ok: third version does not appear")
+
+
+def expect_case21_check(out):
+    check("case21", "notice stays quiet", out, 'notice [""]')
+    check("case21", "committed text restored", out, 'note ["second version\\n"]')
+    check("case21", "welcome file still shows original text", out, 'welcome ["Welcome to Relic.\\n"]')
 
 
 def live_case6(tmp):
@@ -690,12 +708,90 @@ def replay_case18(tmp):
     print("case18 replay done")
 
 
+def live_case20(tmp):
+    print("== case 20: pointer names a generation file that is not there ==")
+    store = Path(tmp) / "case20"
+    store.mkdir()
+    out = run("case6_setup.relic", store)
+    check("case20", "v1 save quiet", out, 'after v1 [""]')
+    check("case20", "v2 save quiet", out, 'after v2 [""]')
+    assert (store / "COMMITTED").read_text() == "g2\n", "COMMITTED is not g2"
+    (store / "g2.m2ws").unlink()
+    (store / "g3.m2ws").write_text(g3_uncommitted())
+    before = snapshot(store)
+    expect_case20_check(run("check_store.relic", store))
+    after = snapshot(store)
+    if before == after:
+        print("  ok: the open wrote nothing")
+    else:
+        print("  FAIL: the open rewrote the store")
+        FAILURES.append("case20: open rewrote the store")
+    if (store / "g2.m2ws").exists():
+        print("  FAIL: the missing generation was recreated")
+        FAILURES.append("case20: g2 recreated")
+    else:
+        print("  ok: the missing generation was not recreated")
+    print("case20 done")
+
+
+def live_case21(tmp):
+    print("== case 21: a corrupt META does not override a readable pointer ==")
+    store = Path(tmp) / "case21"
+    store.mkdir()
+    out = run("case6_setup.relic", store)
+    check("case21", "v2 save quiet", out, 'after v2 [""]')
+    assert (store / "COMMITTED").read_text() == "g2\n", "COMMITTED is not g2"
+    (store / "META").write_text("not a meta file\n")
+    before = snapshot(store)
+    expect_case21_check(run("check_store.relic", store))
+    after = snapshot(store)
+    if before == after:
+        print("  ok: the open left the corrupt META in place")
+    else:
+        print("  FAIL: the open rewrote the store")
+        FAILURES.append("case21: open rewrote the store")
+    if (store / "META").read_text() == "not a meta file\n" and (store / "COMMITTED").read_text() == "g2\n":
+        print("  ok: META stayed corrupt and COMMITTED stayed g2")
+    else:
+        print("  FAIL: META or COMMITTED changed")
+        FAILURES.append("case21: pointer or META changed")
+    print("case21 done")
+
+
 def replay_case19(tmp):
     print("== replay case 19 from the committed fixture ==")
     store = Path(tmp) / "replay-case19"
     shutil.copytree(FIXTURES / "case19", store)
     expect_case19_check(run("check_store.relic", store))
     print("case19 replay done")
+
+
+def replay_case20(tmp):
+    print("== replay case 20 from the committed fixture ==")
+    store = Path(tmp) / "replay-case20"
+    shutil.copytree(FIXTURES / "case20", store)
+    before = snapshot(store)
+    expect_case20_check(run("check_store.relic", store))
+    if snapshot(store) == before and not (store / "g2.m2ws").exists():
+        print("  ok: replay open wrote nothing and did not recreate g2")
+    else:
+        print("  FAIL: replay open changed the store")
+        FAILURES.append("case20 replay: store changed")
+    print("case20 replay done")
+
+
+def replay_case21(tmp):
+    print("== replay case 21 from the committed fixture ==")
+    store = Path(tmp) / "replay-case21"
+    shutil.copytree(FIXTURES / "case21", store)
+    before = snapshot(store)
+    expect_case21_check(run("check_store.relic", store))
+    if snapshot(store) == before and (store / "META").read_text() == "not a meta file\n":
+        print("  ok: replay open left the corrupt META in place")
+    else:
+        print("  FAIL: replay open changed the store")
+        FAILURES.append("case21 replay: store changed")
+    print("case21 replay done")
 
 
 def main():
@@ -725,10 +821,13 @@ def main():
             live_case17(tmp)
             live_case18(tmp)
             live_case19(tmp)
+            live_case20(tmp)
+            live_case21(tmp)
         if replay:
             for fixture in ("case6", "case7", "case8", "case9-bad-store",
                             "case10", "case11", "case12", "case13", "case14",
-                            "case15", "case16", "case17", "case18", "case19"):
+                            "case15", "case16", "case17", "case18", "case19",
+                            "case20", "case21"):
                 assert (FIXTURES / fixture).exists(), f"missing fixture: {fixture}"
             replay_case6(tmp)
             replay_case7(tmp)
@@ -744,6 +843,8 @@ def main():
             replay_case17(tmp)
             replay_case18(tmp)
             replay_case19(tmp)
+            replay_case20(tmp)
+            replay_case21(tmp)
     except (RuntimeError, AssertionError) as exc:
         print(f"ERROR: {exc}")
         FAILURES.append(str(exc))
@@ -753,7 +854,7 @@ def main():
         for failure in FAILURES:
             print(" - " + failure)
         return 1
-    print("RESULT: PASS, all fourteen cases")
+    print("RESULT: PASS, all sixteen cases")
     if "--keep" not in sys.argv:
         shutil.rmtree(tmp, ignore_errors=True)
         print(f"stores under {tmp} removed")

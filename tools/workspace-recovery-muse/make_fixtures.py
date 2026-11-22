@@ -125,9 +125,23 @@ def main():
     (c19 / "COMMITTED").unlink()
     (c19 / "META").unlink()
 
+    # Case 20: COMMITTED names g2, but g2.m2ws is gone. g3 is newer and
+    # uncommitted. g1 is the older valid generation.
+    c20 = work / "case20"
+    c20.mkdir()
+    run("case6_setup.relic", c20)
+    (c20 / "g2.m2ws").unlink()
+    (c20 / "g3.m2ws").write_text(g3_uncommitted())
+
+    # Case 21: COMMITTED names a valid g2. META is not a metadata file.
+    c21 = work / "case21"
+    c21.mkdir()
+    run("case6_setup.relic", c21)
+    (c21 / "META").write_text("not a meta file\n")
+
     FIXTURES.mkdir(parents=True, exist_ok=True)
     for name in ("case6", "case7", "case8", "case10", "case11", "case12", "case13", "case14",
-                 "case15", "case16", "case17", "case18", "case19"):
+                 "case15", "case16", "case17", "case18", "case19", "case20", "case21"):
         dest = FIXTURES / name
         shutil.rmtree(dest, ignore_errors=True)
         shutil.copytree(work / name, dest)
