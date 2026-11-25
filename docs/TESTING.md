@@ -15,7 +15,7 @@ One test: `ctest --test-dir build -C Release -R golden_shell_ide`. Or run it str
 
 ## How they are checked
 
-CMake finds every `tests/*.relic` and adds it as `golden_<name>`. `tools/run_golden.cmake` runs it from `tests/`, and it passes when it exits with 0 and its standard output matches `<name>.out` exactly (Windows line endings are ignored). A test with no `.out` file must print nothing. One more test, `check_shell`, runs `relic check` on `wm.relic`, `workspace.relic`, `desktop.relic` and `ide_diag.relic`, which catches syntax errors and undefined names in the drawing code no test runs. That is 530 tests in all, and CI runs them on Linux, macOS and Windows. The 35 `shell_workspace_*` golden programs, `workspace_restart`, and `workspace_kill` cover the store. `workspace_restart` runs four relic processes against one directory. `workspace_kill` kills a process after it has written a partial and before it publishes.
+CMake finds every `tests/*.relic` and adds it as `golden_<name>`. `tools/run_golden.cmake` runs it from `tests/`, and it passes when it exits with 0 and its standard output matches `<name>.out` exactly (Windows line endings are ignored). A test with no `.out` file must print nothing. One more test, `check_shell`, runs `relic check` on `wm.relic`, `workspace.relic`, `desktop.relic` and `ide_diag.relic`, which catches syntax errors and undefined names in the drawing code no test runs. That is 531 tests in all, and CI runs them on Linux, macOS and Windows. The 35 `shell_workspace_*` golden programs, `workspace_restart`, and `workspace_kill` cover the store. `workspace_restart` runs four relic processes against one directory. `workspace_kill` kills a process after it has written a partial and before it publishes.
 
 None of them opens the SDL window. A passing run does not prove what the desktop draws. The Linux GUI pass, and what it did not try, is in the [roadmap](ROADMAP.md#accepted-nov-7-2026).
 
@@ -248,6 +248,7 @@ Write `tests/shell_<topic>.relic`, run it, read its output, and save that as `te
 | `shell_files_paste` | Ctrl+V pastes a copy of the file, and then the folder with what is in it, that Ctrl+C copied into the folder shown and selects it; the originals stay; a folder pastes at `/` |
 | `shell_files_paste_refused` | Ctrl+V pastes nothing and says why for an empty clipboard, text that is not a path, a missing path, a folder into itself or one inside it, and `/`; the next key puts the title back |
 | `shell_files_paste_free_name` | Ctrl+V onto a name that is taken pastes `x copy.txt`, then `x copy 2.txt`, and `b copy` for a folder; a name with no dot, one starting with a dot and one with two dots; a copy of a copy; a freed name is used again |
+| `shell_files_duplicate` | Ctrl+D duplicates a file, a copy and a folder with what is in it under a free name and selects the copy; nothing on `..` or on a row removed since the last draw; the clipboard is not set |
 | `shell_files_right_stay` | Right enters a folder and does nothing on a file or on .. |
 | `shell_files_left_root` | Left at / does not move |
 | `shell_files_f2_up` | F2 on .. does not start a rename |

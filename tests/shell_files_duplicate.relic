@@ -1,0 +1,42 @@
+# Files Ctrl+D duplicates the selected file or folder in the folder shown,
+# under a free name, selects the copy and leaves the clipboard alone. On ..,
+# an empty root, or a row another app removed since the last draw, it does
+# nothing.
+use ../shell/wm
+use std/vfs
+let d = wm.new_desktop(640, 480, wm.default_apps())
+let f = wm.launch(d, wm.files_app)
+let fs = f.state.fs
+vfs.make_dir(fs, "/tmp/d/docs")
+vfs.write(fs, "/tmp/d/docs/plan.txt", "plan\n")
+vfs.write(fs, "/tmp/d/notes.txt", "n\n")
+f.state.path = "/tmp/d"
+fun selected() = f.state.names[f.state.sel]
+fun pick(name)
+    wm.visible_lines(f)
+    for i in 0..len(f.state.names)
+        if f.state.names[i] == name
+            f.state.sel = i
+pick("notes.txt")
+wm.key(d, "ctrl+d")
+print(wm.visible_lines(f))
+wm.key(d, "ctrl+d")   # the copy is selected, so this copies the copy
+print(selected())
+pick("notes.txt")
+wm.key(d, "ctrl+d")
+print(selected(), vfs.read(fs, "/tmp/d/notes copy 2.txt"))
+pick("docs")
+wm.key(d, "ctrl+d")
+print(selected(), vfs.read(fs, "/tmp/d/docs copy/plan.txt"), vfs.list(fs, "/tmp/d/docs"))
+let before = vfs.list(fs, "/tmp/d")
+pick("..")
+wm.key(d, "ctrl+d")
+print("on ..", vfs.list(fs, "/tmp/d") == before, vfs.list(fs, "/tmp") == ["d"])
+# the clipboard was never set: Ctrl+V still has no path
+wm.key(d, "ctrl+v")
+print(wm.visible_lines(f)[0])
+# another app removes the selected file; Ctrl+D before a draw copies nothing
+pick("notes.txt")
+vfs.remove(fs, "/tmp/d/notes.txt")
+wm.key(d, "ctrl+d")
+print(vfs.list(fs, "/tmp/d"))

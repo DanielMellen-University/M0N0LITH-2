@@ -2987,7 +2987,18 @@ fun _files_paste(s)
     if not strings.starts_with(from, "/")
         s.note = "no path to paste"
         return
-    from = paths.normalize(from)
+    _files_copy_in(s, paths.normalize(from))
+
+# Ctrl+D duplicates the selected row in the folder shown, under a free name,
+# and selects the copy; the clipboard is left as it is. Not on .., and not on
+# a row that changed since the last draw.
+fun _files_duplicate(s, names)
+    if len(names) == 0 or names[s.sel] == ".." or s.stale
+        return
+    _files_copy_in(s, _files_full(s, names[s.sel]))
+
+# A copy of from (a full path) in the folder shown, for paste and duplicate.
+fun _files_copy_in(s, from)
     let name = paths.base(from)
     if not vfs.exists(s.fs, from)
         s.note = "not found: " + name
@@ -3148,6 +3159,8 @@ fun _files_key(s, k)
             _clip.text = _files_full(s, names[s.sel])
     else if k == "ctrl+v"
         _files_paste(s)
+    else if k == "ctrl+d"
+        _files_duplicate(s, names)
     else if k == "home" or k == "ctrl+home"
         s.sel = 0
     else if k == "end" or k == "ctrl+end"
