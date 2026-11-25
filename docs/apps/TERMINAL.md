@@ -69,4 +69,4 @@ The Terminal keeps the last 200 lines of output; older ones fall off the top. Pa
 
 ## In the code
 
-`terminal` in `shell/wm.relic`, with `_term_run` dispatching the commands to `_term_*` helpers (one each for `ls`, `cat`, `head`, `tail`, `grep`, `sort`, `uniq`, `nl`, `wc`, `cp` and the rest) and `_term_key` handling the keys, `!!` included. Tests: the `shell_terminal*` goldens, `shell_help`, `shell_date` and `shell_apps_fuzz` (see [the test list](../TESTING.md)).
+`terminal` in `shell/wm.relic`, with `_term_run` dispatching the commands to `_term_*` helpers (one each for `ls`, `cat`, `head`, `tail`, `grep`, `sort`, `uniq`, `nl`, `wc`, `cp` and the rest) and `_term_key` handling the keys, `!!` included. `cp` copies through `_copy_path`, which Files' paste and duplicate share. With several paths, `cp` and `mv` check the folder named last with `_term_into`, then do each path in turn. Tests: the `shell_terminal*` goldens, `shell_help`, `shell_date` and `shell_apps_fuzz` (see [the test list](../TESTING.md)).

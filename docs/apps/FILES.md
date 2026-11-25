@@ -43,4 +43,4 @@ Files reads the folder again on every frame and every key, so it follows changes
 
 ## In the code
 
-`files_app` in `shell/wm.relic`, `_files_*`. The folder flags come from `vfs.entries` (Relic 1.0.42), so a big folder is read once per frame. Left, Right and Ctrl+C reuse `_files_up`, `_files_open` and `_files_full`, so they behave as Backspace, Return and the Editor's path do. Tests: the `shell_files_*` goldens (see [the test list](../TESTING.md)).
+`files_app` in `shell/wm.relic`, `_files_*`. The folder flags come from `vfs.entries` (Relic 1.0.42), so a big folder is read once per frame. Left, Right and Ctrl+C reuse `_files_up`, `_files_open` and `_files_full`, so they behave as Backspace, Return and the Editor's path do. Ctrl+V and Ctrl+D both go through `_files_copy_in`, which picks a free name with `_copy_name` and copies with `_copy_path`, the same copy the Terminal's `cp` uses (a folder copy that fails part way is removed). A paste, a duplicate and a new file or folder all end in `_files_added`, which commits the workspace and selects the new row. Tests: the `shell_files_*` goldens (see [the test list](../TESTING.md)).
