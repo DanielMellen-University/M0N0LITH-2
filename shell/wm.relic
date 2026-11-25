@@ -2148,8 +2148,11 @@ fun _term_find(s, word)
         _term_reply(s, line)
 
 # True when path is parent or a file inside it. Used so a folder is not
-# copied into itself.
+# copied into itself. Every path is inside /, so `cp / /tmp/x` is refused
+# instead of copying /tmp/x into itself until the calls run out.
 fun _term_inside(parent, path)
+    if parent == "/"
+        return true
     return path == parent or strings.starts_with(path, parent + "/")
 
 fun _copy_tree(fs, src, dst)
