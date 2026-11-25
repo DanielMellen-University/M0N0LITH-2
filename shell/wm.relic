@@ -2954,10 +2954,34 @@ fun _files_added(s, name)
             s.sel = i
     s.stale = false
 
+# A name for a copy of name in dir that is not taken: "notes copy.txt", then
+# "notes copy 2.txt" and on. A folder, and a file whose only dot is its first
+# character (.profile), get the words at the end: "docs copy".
+fun _copy_name(fs, dir, name, folder)
+    let stem = name
+    let ext = ""
+    if not folder
+        let i = len(name) - 1
+        while i > 0 and name[i] != "."
+            i = i - 1
+        if i > 0
+            stem = slice(name, 0, i)
+            ext = slice(name, i, len(name))
+    let n = 1
+    while true
+        let words = " copy"
+        if n > 1
+            words = " copy " + str(n)
+        let candidate = stem + words + ext
+        if not vfs.exists(fs, paths.join(dir, candidate))
+            return candidate
+        n = n + 1
+
 # Ctrl+V pastes a copy of the file or folder whose full path is on the
 # desktop's clipboard (Files' Ctrl+C puts it there) into the folder shown,
 # and selects the new row. A folder comes with everything in it, and is not
-# pasted into itself or a folder inside it.
+# pasted into itself or a folder inside it. When the name is taken (pasting
+# back into the same folder, say) the copy gets a free name from _copy_name.
 fun _files_paste(s)
     let from = _clip_line()
     if not strings.starts_with(from, "/")
@@ -2977,8 +3001,7 @@ fun _files_paste(s)
         s.note = "not into itself: " + name
         return
     if vfs.exists(s.fs, _files_full(s, name))
-        s.note = "already there: " + name
-        return
+        name = _copy_name(s.fs, s.path, name, vfs.is_dir(s.fs, from))
     let why = _copy_path(s.fs, from, _files_full(s, name))
     if why != none
         s.note = why

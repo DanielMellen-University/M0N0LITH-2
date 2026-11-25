@@ -96,7 +96,7 @@ The commands are in [the Terminal doc](apps/TERMINAL.md).
 | Backspace or Left | goes up a folder, with the folder you were in selected |
 | Right | goes into the selected folder (a file or `..` stays put) |
 | Ctrl+C | copies the selected row's full path to the clipboard (not for `..`) |
-| Ctrl+V | pastes a copy of the file or folder whose path is on the clipboard into the folder shown and selects it; not over a name that is there, and not a folder into itself |
+| Ctrl+V | pastes a copy of the file or folder whose path is on the clipboard into the folder shown and selects it; a name that is taken becomes `name copy.txt`, then `name copy 2.txt`; not a folder into itself |
 | Delete, Delete | removes the selected file or empty folder: the first asks in the title, the second removes, any other key gives up |
 
 ## Editor

@@ -1,7 +1,6 @@
 # Files Ctrl+V pastes nothing, and says why in the title, when the clipboard
-# has no path, the path is gone, a folder would go into itself or a folder
-# inside it, or the name is already in the folder shown. Any key after puts
-# the title back.
+# has no path, the path is gone, or a folder would go into itself or a folder
+# inside it. Any key after puts the title back.
 use ../shell/wm
 use std/vfs
 let d = wm.new_desktop(640, 480, wm.default_apps())
@@ -42,10 +41,7 @@ print(title())
 clip("/")
 wm.key(d, "ctrl+v")
 print(title())
-clip("/tmp/a/x.txt")
 go("/tmp/a")
-wm.key(d, "ctrl+v")
-print(title(), vfs.read(fs, "/tmp/a/x.txt"))
 wm.key(d, "down")
 print(title())
 print(vfs.list(fs, "/tmp/a"), vfs.list(fs, "/tmp/a/b"))
