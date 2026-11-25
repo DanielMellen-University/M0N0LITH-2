@@ -31,6 +31,8 @@ t.cwd = "/home/docs"
 print([tab("rm ../dr"), tab("rm p"), tab("rm ./plans")])
 # the commands added later complete too: sort, uniq and nl
 print([tab("so"), tab("un"), tab("n")])
+# a command that starts another lists both; one more letter picks it
+print([tab("rm")], t.buf[len(t.buf) - 1], [tab("rmd")])
 # every command help lists completes to itself, so a new command cannot be
 # left out of the Tab list again (the last three help lines are about >, quotes and !)
 t.cwd = "/home"
@@ -43,7 +45,11 @@ print(len(listed), "help lines of commands")
 let missing = []
 for line in listed
     for word in strings.split(line, " ")
-        if tab(word) != word + " "
+        let got = tab(word)
+        # rm is the start of rmdir too, so its Tab lists both, as a shell
+        # does; rm must be in that list
+        let listed_too = got == word and word in strings.split(t.buf[len(t.buf) - 1], "  ")
+        if got != word + " " and not listed_too
             append(missing, word)
 print("help commands Tab misses:", missing)
 # a name with a space goes in quotes (open for a folder), and a word begun

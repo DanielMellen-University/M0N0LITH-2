@@ -1,0 +1,5 @@
+["/home> cp / /tmp/x", "cp: cannot copy a folder into itself"]
+["/home> cp / /tmp", "cp: cannot copy a folder into itself"]
+["/home> cp .. /home/up", "cp: cannot copy a folder into itself"]
+["/home> ls /tmp"]
+home ["welcome.txt"]

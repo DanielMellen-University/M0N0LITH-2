@@ -1,0 +1,32 @@
+# rmdir removes empty folders only. A file, a folder with anything in it, a
+# missing path and a path through a file are errors that do not stop the
+# rest. An option is refused, and with no path it prints its usage. A
+# Terminal in a folder that goes moves up, as for rm.
+use ../shell/wm
+use std/vfs
+let t = wm.terminal.init()
+fun run(line)
+    t.buf = []
+    for c in line
+        if c == " "
+            wm.terminal.on_key(t, "space")
+        else
+            wm.terminal.on_key(t, c)
+    wm.terminal.on_key(t, "return")
+    print(t.buf)
+run("mkdir a b/c \"my dir\"")
+run("touch f.txt")
+run("rmdir a \"my dir\"")
+run("ls")
+run("rmdir b f.txt missing f.txt/x b/c/")
+run("ls b")
+run("rmdir b/c b")
+run("ls")
+run("rmdir")
+run("rmdir -p x")
+run("mkdir gone")
+run("cd gone")
+run("rmdir .")
+run("pwd")
+run("rmdir / ..")
+print("welcome", vfs.read(t.fs, "/home/f.txt") == "", vfs.exists(t.fs, "/home/welcome.txt"))

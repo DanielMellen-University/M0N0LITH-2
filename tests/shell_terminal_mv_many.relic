@@ -1,0 +1,40 @@
+# mv with several paths moves each into the folder named last, in turn. An
+# error for one (missing, already there, a folder into itself) does not stop
+# the rest. The last word must be a folder that is there; else nothing
+# moves. A Terminal in a folder moved goes along.
+use ../shell/wm
+use std/vfs
+let t = wm.terminal.init()
+fun run(line)
+    t.buf = []
+    for c in line
+        if c == " "
+            wm.terminal.on_key(t, "space")
+        else
+            wm.terminal.on_key(t, c)
+    wm.terminal.on_key(t, "return")
+    print(t.buf)
+run("mkdir out docs/inner")
+run("write a.txt alpha")
+run("write \"b c.txt\" beta")
+run("write docs/inner/x.txt x")
+run("mv a.txt \"b c.txt\" docs out")
+run("tree out")
+run("ls")
+run("write out/b.txt old")
+run("write b.txt new")
+run("mv missing.txt b.txt out out/docs welcome.txt out")
+run("ls")
+run("cat out/b.txt b.txt")
+run("mv welcome.txt b.txt nofolder")
+run("mv welcome.txt b.txt out/a.txt")
+run("ls")
+run("mv")
+run("mv a.txt")
+run("mv a.txt b.txt -f")
+# a Terminal in a folder moved goes with it
+run("mkdir w/sub")
+run("cd w/sub")
+run("mv /home/w /home/b.txt /tmp")
+run("pwd")
+print(vfs.list(t.fs, "/tmp"), vfs.read(t.fs, "/tmp/b.txt"))

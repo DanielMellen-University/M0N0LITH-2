@@ -43,9 +43,9 @@ launch
 /home> help
 help clear history echo apps date
 workspace pwd cd ls cat head tail
-mkdir touch write rm mv cp
+mkdir touch write rm rmdir mv cp
 wc grep find sort uniq nl
-tree du diff cmp stat tac
+tree du diff cmp stat tac rev
 basename dirname
 echo text > file, >> adds
 "my file": quotes keep spaces
@@ -100,7 +100,7 @@ mv: already there: /home/notes/todo.txt
 /home> cat
 usage: cat <path>...
 /home> mv a
-usage: mv <from> <to>
+usage: mv <from>... <to>
 /home> frob
 unknown: frob
 /home> rm notes/old/empty.txt

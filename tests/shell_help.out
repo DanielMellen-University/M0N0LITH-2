@@ -1,5 +1,5 @@
-["Terminal. Type help.", "help clear history echo apps date", "workspace pwd cd ls cat head tail", "mkdir touch write rm mv cp", "wc grep find sort uniq nl", "tree du diff cmp stat tac", "basename dirname", "echo text > file, >> adds", "\"my file\": quotes keep spaces", "!! last, !N number, !text"]
-33 commands in help
+["Terminal. Type help.", "help clear history echo apps date", "workspace pwd cd ls cat head tail", "mkdir touch write rm rmdir mv cp", "wc grep find sort uniq nl", "tree du diff cmp stat tac rev", "basename dirname", "echo text > file, >> adds", "\"my file\": quotes keep spaces", "!! last, !N number, !text"]
+35 commands in help
 unknown commands in help: []
 true Clicker, Notes, Terminal, Files, Editor, IDE, Paint, Snake
 true

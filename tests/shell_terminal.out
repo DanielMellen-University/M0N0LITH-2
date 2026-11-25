@@ -42,7 +42,7 @@
 > touch
   usage: touch <path>...
 > mv x
-  usage: mv <from> <to>
+  usage: mv <from>... <to>
 > nope
   unknown: nope
 > echo one two > w.txt
@@ -82,7 +82,7 @@
 > cp nope.txt y
   cp: not found: /home/nope.txt
 > cp c.txt
-  usage: cp <from> <to>
+  usage: cp <from>... <to>
 > cp c.txt nope/y.txt
   cp: no folder: /home/nope
 > rm cd/c.txt

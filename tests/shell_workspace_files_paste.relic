@@ -1,0 +1,47 @@
+# Files' Ctrl+V and Ctrl+D, sent as the key events the desktop gets (Ctrl on
+# Linux and Windows, Cmd on macOS), commit what they copy: a second open of
+# the store reads the pasted file and the duplicated folder back.
+use ../shell/wm
+use std/files
+use std/vfs
+
+fun wipe(path)
+    try
+        files.remove_tree(path)
+    catch e
+        none
+
+fun press(d, key, ctrl, gui)
+    let k = wm.key_of_event({type: "key_down", key: key, ctrl: ctrl, gui: gui, shift: false, alt: false})
+    print(key, "comes as", k)
+    wm.key(d, k)
+
+wipe("ws-paste")
+wm.workspace_open("ws-paste")
+let d = wm.new_desktop(640, 480, wm.default_apps())
+let f = wm.launch(d, wm.files_app)
+let fs = f.state.fs
+vfs.make_dir(fs, "/home/docs")
+vfs.write(fs, "/home/docs/plan.txt", "plan\n")
+f.state.path = "/home"
+fun pick(name)
+    wm.visible_lines(f)
+    for i in 0..len(f.state.names)
+        if f.state.names[i] == name
+            f.state.sel = i
+pick("welcome.txt")
+press(d, "c", true, false)
+press(d, "v", false, true)    # Cmd+V
+pick("docs")
+press(d, "d", true, false)    # Ctrl+D
+print(wm.visible_lines(f))
+let before = wm.workspace_status().committed
+press(d, "d", false, true)    # Cmd+D on the copy just made
+print("a commit for it", wm.workspace_status().committed == before + 1)
+# a fresh vfs, then the same store opened again
+vfs.remove_tree(fs, "/home/docs copy")
+wm.workspace_open("ws-paste")
+print(vfs.list(fs, "/home"))
+print([vfs.read(fs, "/home/welcome copy.txt"), vfs.read(fs, "/home/docs copy/plan.txt"), vfs.read(fs, "/home/docs copy copy/plan.txt")])
+wm.workspace_release()
+wipe("ws-paste")

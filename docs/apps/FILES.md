@@ -1,6 +1,6 @@
 # Files
 
-A file browser over the desktop's filesystem, the same one the Terminal, the Editor and the IDE use. A new Files window opens `/home`. A rename, a new file or folder, or a delete is committed with the workspace when one is open. A failed commit replaces the title line until the next key, and the desktop notice stays up. See [Workspace recovery](../workspace-recovery.md).
+A file browser over the desktop's filesystem, the same one the Terminal, the Editor and the IDE use. A new Files window opens `/home`. A rename, a new file or folder, a paste or a duplicate, or a delete is committed with the workspace when one is open. A failed commit replaces the title line until the next key, and the desktop notice stays up. See [Workspace recovery](../workspace-recovery.md).
 
 ## What it shows
 
@@ -24,6 +24,8 @@ A long list scrolls just far enough to keep the selected row in view; the title 
 | Backspace or Left | goes up a folder, with the folder you were in selected, so going back down is one key (Right) |
 | Delete | asks first, in the title (`Delete notes.txt? Delete again`, a long name cut with `...`); a second Delete removes the file, or the folder if it is empty (a folder with anything in it says `not empty`), and any other key, Escape, or a click, gives up. `..` cannot be removed. After a removal the selection stays on its line, now the next name (the one before when it was the last) |
 | Ctrl+C | copies the selected row's full path, such as `/home/docs/plan.txt`, to the desktop's clipboard, to paste into the Terminal or Notes; on `..` it copies nothing |
+| Ctrl+V | pastes a copy of the file or folder whose full path is on the clipboard (what Ctrl+C copied here) into the folder shown, and selects the new row; a folder comes with everything in it and the original stays. When the name is taken, as when pasting back into the same folder, the copy gets a free name: `notes copy.txt`, then `notes copy 2.txt` and on (the words go before the last dot; a folder, or a name like `.profile`, gets them at the end: `docs copy`). The title says why when nothing is pasted: `no path to paste` (the clipboard does not start with `/`), `not found: name`, or `not into itself: name` (a folder into itself or a folder inside it, `/` included). Cmd+V on macOS |
+| Ctrl+D | duplicates the selected file or folder in the folder shown under a free name, as a paste onto a taken name does (`notes copy.txt`), and selects the copy. The clipboard is left as it is. On `..`, or on a row another app changed since the last draw, it does nothing. Cmd+D on macOS |
 | Right | goes into the selected folder, as in a folder tree; on a file or `..` it does nothing |
 | Click a row | selects and opens it |
 
@@ -41,4 +43,4 @@ Files reads the folder again on every frame and every key, so it follows changes
 
 ## In the code
 
-`files_app` in `shell/wm.relic`, `_files_*`. The folder flags come from `vfs.entries` (Relic 1.0.42), so a big folder is read once per frame. Left, Right and Ctrl+C reuse `_files_up`, `_files_open` and `_files_full`, so they behave as Backspace, Return and the Editor's path do. Tests: the `shell_files_*` goldens (see [the test list](../TESTING.md)).
+`files_app` in `shell/wm.relic`, `_files_*`. The folder flags come from `vfs.entries` (Relic 1.0.42), so a big folder is read once per frame. Left, Right and Ctrl+C reuse `_files_up`, `_files_open` and `_files_full`, so they behave as Backspace, Return and the Editor's path do. Ctrl+V and Ctrl+D both go through `_files_copy_in`, which picks a free name with `_copy_name` and copies with `_copy_path`, the same copy the Terminal's `cp` uses (a folder copy that fails part way is removed). A paste, a duplicate and a new file or folder all end in `_files_added`, which commits the workspace and selects the new row. Tests: the `shell_files_*` goldens (see [the test list](../TESTING.md)).

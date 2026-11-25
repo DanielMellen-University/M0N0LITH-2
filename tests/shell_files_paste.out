@@ -1,0 +1,8 @@
+["Files: /tmp/dst", "  ..", "> doc.txt"]
+copy hello
+ original hello
+
+["Files: /tmp/dst", "  ..", "  doc.txt", "> docs/"]
+folder a
+ true
+["Files: /", "> docs/", "  home/", "  tmp/"] true

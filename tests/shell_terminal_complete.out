@@ -3,6 +3,7 @@
 ["cat docs/plan"] ["/home> cat docs/plan", "plan.txt  plans.txt", "/home> cat docs/plan", "plan.txt  plans.txt"]
 ["rm ../draft.txt ", "rm plan", "rm ./plans.txt "]
 ["sort ", "uniq ", "nl "]
+["rm"] rm  rmdir ["rmdir "]
 6 help lines of commands
 help commands Tab misses: []
 ["cat \"old stuff/", "cat \"old stuff/", "cat 'old stuff/", "cat \"old stuff/a b.txt\" ", "cat don't.txt ", "cat \"my notes"]

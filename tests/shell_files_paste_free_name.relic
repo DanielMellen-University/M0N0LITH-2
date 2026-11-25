@@ -1,0 +1,45 @@
+# Files Ctrl+V when the name is taken: the copy gets a free name, "x copy.txt"
+# then "x copy 2.txt", and a folder "b copy". A name with no extension, a
+# name whose only dot is its first character, and a name with two dots.
+use ../shell/wm
+use std/vfs
+let d = wm.new_desktop(640, 480, wm.default_apps())
+let f = wm.launch(d, wm.files_app)
+let fs = f.state.fs
+vfs.make_dir(fs, "/tmp/a/b")
+vfs.write(fs, "/tmp/a/b/in.txt", "in")
+vfs.write(fs, "/tmp/a/x.txt", "x")
+vfs.write(fs, "/tmp/a/README", "r")
+vfs.write(fs, "/tmp/a/.profile", "p")
+vfs.write(fs, "/tmp/a/data.tar.gz", "z")
+f.state.path = "/tmp/a"
+fun selected() = f.state.names[f.state.sel]
+fun pick(name)
+    wm.visible_lines(f)
+    for i in 0..len(f.state.names)
+        if f.state.names[i] == name
+            f.state.sel = i
+fun paste_twice(name)
+    pick(name)
+    wm.key(d, "ctrl+c")
+    wm.key(d, "ctrl+v")
+    let first = selected()
+    wm.key(d, "ctrl+v")
+    print(name, "->", first, "then", selected())
+paste_twice("x.txt")
+paste_twice("b")
+paste_twice("README")
+paste_twice(".profile")
+paste_twice("data.tar.gz")
+print(vfs.read(fs, "/tmp/a/x copy 2.txt"), vfs.read(fs, "/tmp/a/b copy/in.txt"), vfs.list(fs, "/tmp/a/b"))
+# a copy of a copy gets " copy" after its own name
+pick("x copy.txt")
+wm.key(d, "ctrl+c")
+wm.key(d, "ctrl+v")
+print(selected())
+# a gap is filled: with "x copy.txt" gone the next paste of x.txt takes it
+vfs.remove(fs, "/tmp/a/x copy.txt")
+pick("x.txt")
+wm.key(d, "ctrl+c")
+wm.key(d, "ctrl+v")
+print(selected())

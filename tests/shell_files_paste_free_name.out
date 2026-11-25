@@ -1,0 +1,8 @@
+x.txt -> x copy.txt then x copy 2.txt
+b -> b copy then b copy 2
+README -> README copy then README copy 2
+.profile -> .profile copy then .profile copy 2
+data.tar.gz -> data.tar copy.gz then data.tar copy 2.gz
+x in ["in.txt"]
+x copy copy.txt
+x copy.txt

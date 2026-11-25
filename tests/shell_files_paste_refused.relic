@@ -1,0 +1,47 @@
+# Files Ctrl+V pastes nothing, and says why in the title, when the clipboard
+# has no path, the path is gone, or a folder would go into itself or a folder
+# inside it. Any key after puts the title back.
+use ../shell/wm
+use std/vfs
+let d = wm.new_desktop(640, 480, wm.default_apps())
+let f = wm.launch(d, wm.files_app)
+let fs = f.state.fs
+vfs.make_dir(fs, "/tmp/a/b")
+vfs.write(fs, "/tmp/a/x.txt", "x")
+fun title() = wm.visible_lines(f)[0]
+fun go(path)
+    f.state.path = path
+    wm.visible_lines(f)
+# what Notes copies is the clipboard text
+fun clip(text)
+    let n = wm.launch(d, wm.notes)
+    for ch in text
+        if ch == " "
+            wm.key(d, "space")
+        else
+            wm.key(d, ch)
+    wm.key(d, "ctrl+c")
+    wm.close(d, n.id)
+    wm.restore(d, f.id)
+go("/tmp/a")
+wm.key(d, "ctrl+v")
+print(title())
+clip("plain words")
+wm.key(d, "ctrl+v")
+print(title())
+clip("/tmp/missing.txt")
+wm.key(d, "ctrl+v")
+print(title())
+clip("/tmp/a")
+wm.key(d, "ctrl+v")
+print(title())
+go("/tmp/a/b")
+wm.key(d, "ctrl+v")
+print(title())
+clip("/")
+wm.key(d, "ctrl+v")
+print(title())
+go("/tmp/a")
+wm.key(d, "down")
+print(title())
+print(vfs.list(fs, "/tmp/a"), vfs.list(fs, "/tmp/a/b"))

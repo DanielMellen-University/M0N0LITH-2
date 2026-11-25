@@ -51,7 +51,7 @@ usage: cd [path]
 /home> ls /tmp /home
 usage: ls [path]
 /home> mv a.txt b.txt c.txt
-usage: mv <from> <to>
+mv: not found: /home/c.txt
 /home> ls
 new/  p  q  sub/  welcome.txt  x/
 y/

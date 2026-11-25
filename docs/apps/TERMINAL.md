@@ -27,7 +27,7 @@ Commands split on spaces. A part in double or single quotes is one word with its
 | `cd [path]` | changes folder; without a path, goes to `/home` |
 | `ls [path]` | lists a folder (the current one without a path), folders with a `/` after them, packed into lines that fit the window; for a file, prints its name |
 | `cat path...` | prints a file, or several one after another (only the last 200 lines are kept, like any output); a missing one is an error and the rest still print |
-| `cp from to` | copies a file or a folder to a new name, or into `to` when it is a folder; what is inside a folder is copied too. A name already there is not written over, and a folder is not copied into itself |
+| `cp from... to` | copies a file or a folder to a new name, or into `to` when it is a folder; what is inside a folder is copied too. With several paths, `to` must be a folder that is there, and each is copied into it in turn; an error for one does not stop the rest. A name already there is not written over, and a folder is not copied into itself (`/` is in everything, so it is never copied) |
 | `wc path...` | each file's lines (its newlines, as Unix counts them), words and characters, then the path (in quotes when it has a space, as `ls` shows names). A folder counts every file under it, in the order `ls` gives, and a total line follows, as it does for more than one path. An empty folder is `0 0 0 total`. One file on its own has no total line. An error for one path does not stop the rest |
 | `head path [lines]` | the first 10 lines of a file, or as many as `lines` says (a whole number in digits; 0 prints nothing). A shorter file prints only the lines it has: a final newline is not an extra blank line |
 | `tail path [lines]` | the last 10 lines of a file, or as many as `lines` says |
@@ -44,19 +44,21 @@ Commands split on spaces. A part in double or single quotes is one word with its
 | `uniq path` | the lines of a file, leaving out a line the same as the one just before it (so a repeat further on stays, as in Unix) |
 | `nl path` | the lines of a file, each after its number from 1, as `history` numbers commands |
 | `tac path` | the lines of a file, last to first. A final newline is not an extra blank line. A file that is only a newline prints one blank line. A long file keeps its end, the last lines of the file |
+| `rev path` | each line of a file with its characters in the other order (whole characters, so `é` stays `é`), the lines in their own order. A final newline is not an extra blank line, as for `tac`. The file is not changed |
 | `mkdir path...` | makes each folder, and any missing folders above it |
 | `touch path...` | makes each an empty file; an existing file or folder is left as it is |
 | `write path text` | replaces the file with the text and a newline |
 | `rm path...` | removes each file or empty folder; an error for one (not found, not empty) does not stop the rest |
-| `mv from to` | renames, or moves into `to` when it is a folder; the file the next Editor opens goes along with it, and so does the Terminal when it is in the folder moved |
+| `rmdir path...` | removes each empty folder, and only that: a file is `not a folder`, and a folder with anything in it is `folder not empty`. An error for one does not stop the rest. A Terminal in a folder that goes moves up to the nearest one left |
+| `mv from... to` | renames, or moves into `to` when it is a folder. With several paths, `to` must be a folder that is there, and each is moved into it in turn; an error for one does not stop the rest. the file the next Editor opens goes along with it, and so does the Terminal when it is in the folder moved |
 
-`clear`, `history`, `apps`, `date`, `workspace` and `pwd` take no words, and a word too many is an error for every command but `cat`, `rm`, `mkdir` and `touch`, which take several paths and do each in turn (`rm a b` removes both); `head` and `tail` take a count after the path.
+`clear`, `history`, `apps`, `date`, `workspace` and `pwd` take no words, and a word too many is an error for every command but `cat`, `rm`, `rmdir`, `mkdir` and `touch`, which take several paths and do each in turn (`rm a b` removes both), and `cp` and `mv`, which take several paths before a folder; `head` and `tail` take a count after the path.
 
 `workspace` reads the store state and notice without changing either. A finished command still gets the usual desktop snapshot.
 
 ## Rules for paths
 
-- No command has options. `cd`, `ls`, `cat`, `head`, `tail`, `wc`, `grep`, `sort`, `uniq`, `nl`, `tree`, `du`, `diff`, `cmp`, `stat`, `basename`, `dirname`, `tac`, `mkdir`, `touch`, `rm`, `mv` and `cp` refuse any word starting with `-`, and so do the paths of `write` and `echo >`. To name such a file, write `./-x`.
+- No command has options. `cd`, `ls`, `cat`, `head`, `tail`, `wc`, `grep`, `sort`, `uniq`, `nl`, `tree`, `du`, `diff`, `cmp`, `stat`, `basename`, `dirname`, `tac`, `rev`, `mkdir`, `touch`, `rm`, `rmdir`, `mv` and `cp` refuse any word starting with `-`, and so do the paths of `write` and `echo >`. To name such a file, write `./-x`.
 - A path ending in `/` must be a folder: `cat notes.txt/` and `rm notes.txt/` are errors, and `touch new/` makes nothing.
 - Errors say which part is wrong: `not found: /home/x`, `not a folder: /home/notes.txt` when a part of the path is a file, `no folder: /home/missing` when the folder to write into is not there.
 - If another app removes or moves the folder a Terminal is in, it moves up to the nearest folder that still exists.
@@ -67,4 +69,4 @@ The Terminal keeps the last 200 lines of output; older ones fall off the top. Pa
 
 ## In the code
 
-`terminal` in `shell/wm.relic`, with `_term_run` dispatching the commands to `_term_*` helpers (one each for `ls`, `cat`, `head`, `tail`, `grep`, `sort`, `uniq`, `nl`, `wc`, `cp` and the rest) and `_term_key` handling the keys, `!!` included. Tests: the `shell_terminal*` goldens, `shell_help`, `shell_date` and `shell_apps_fuzz` (see [the test list](../TESTING.md)).
+`terminal` in `shell/wm.relic`, with `_term_run` dispatching the commands to `_term_*` helpers (one each for `ls`, `cat`, `head`, `tail`, `grep`, `sort`, `uniq`, `nl`, `wc`, `cp` and the rest) and `_term_key` handling the keys, `!!` included. `cp` copies through `_copy_path`, which Files' paste and duplicate share. With several paths, `cp` and `mv` check the folder named last with `_term_into`, then do each path in turn. Tests: the `shell_terminal*` goldens, `shell_help`, `shell_date` and `shell_apps_fuzz` (see [the test list](../TESTING.md)).

@@ -1406,8 +1406,9 @@ fun _term_optional_path(s, parts, default)
     return default
 
 # True when the command got exactly n words after it, else prints usage. A word
-# too many is an error too: `mv a b c` must not quietly move only a (cat, rm,
-# mkdir and touch take several paths instead).
+# too many is an error too: `stat a b` must not quietly read only a (cat, rm,
+# rmdir, mkdir and touch take several paths instead, and cp and mv take
+# several before a folder).
 fun _term_args(s, parts, n, usage)
     if len(parts) - 1 == n
         return true
@@ -1659,6 +1660,26 @@ fun _term_rm(s, path)
         if saved != ""
             _term_reply(s, saved)
 
+# rmdir: removes an empty folder and nothing else. A file, or a folder with
+# anything in it, is an error, so it never takes more than it says.
+fun _term_rmdir(s, path)
+    let p = _term_path(s, path)
+    if not vfs.exists(s.fs, p)
+        _term_reply(s, "rmdir: " + _term_missing(s, p))
+    else if not vfs.is_dir(s.fs, p)
+        _term_reply(s, "rmdir: not a folder: " + p)
+    else if len(vfs.list(s.fs, p)) > 0
+        _term_reply(s, "rmdir: folder not empty: " + p)
+    else
+        try
+            vfs.remove(s.fs, p)
+        catch err
+            _term_reply(s, "rmdir: " + err.message)
+            return
+        let saved = _fs_commit()
+        if saved != ""
+            _term_reply(s, saved)
+
 # mv a b: rename a to b, or move a into b when b is a folder.
 fun _term_mv(s, a, b)
     # a folder may move to a new name ending in /, a file may not
@@ -1853,6 +1874,19 @@ fun _term_tac(s, path)
         i = i - 1
     for line in out
         _term_reply(s, line)
+
+# rev: each line of a file with its characters in the other order (whole
+# characters, past ASCII too), the lines in their own order. A final newline
+# is not an extra blank line, as for tac. As many as the output keeps, from
+# the end.
+fun _term_rev(s, path)
+    let lines = _term_file_lines(s, "rev", path)
+    if lines == none
+        return
+    if len(lines) > 1 and lines[len(lines) - 1] == ""
+        lines = slice(lines, 0, len(lines) - 1)
+    for line in slice(lines, math.max(0, len(lines) - term_history), len(lines))
+        _term_reply(s, strings.reverse(line))
 
 # nl: the lines of a file numbered from 1, the way history numbers commands;
 # as many as the output keeps, from the end, still with their own numbers.
@@ -2148,11 +2182,14 @@ fun _term_find(s, word)
         _term_reply(s, line)
 
 # True when path is parent or a file inside it. Used so a folder is not
-# copied into itself.
+# copied into itself. Every path is inside /, so `cp / /tmp/x` is refused
+# instead of copying /tmp/x into itself until the calls run out.
 fun _term_inside(parent, path)
+    if parent == "/"
+        return true
     return path == parent or strings.starts_with(path, parent + "/")
 
-fun _term_cp_tree(fs, src, dst)
+fun _copy_tree(fs, src, dst)
     try
         vfs.make_dir(fs, dst)
     catch err
@@ -2161,7 +2198,7 @@ fun _term_cp_tree(fs, src, dst)
         let from = paths.join(src, e[0])
         let to = paths.join(dst, e[0])
         if e[1]
-            let why = _term_cp_tree(fs, from, to)
+            let why = _copy_tree(fs, from, to)
             if why != none
                 return why
         else
@@ -2170,6 +2207,37 @@ fun _term_cp_tree(fs, src, dst)
             catch err
                 return err.message
     return none
+
+# Copies the file or folder src to dst, which is not there yet; a folder
+# comes with everything in it. A copy that fails part way is removed again,
+# so nothing half made is left. Gives none, or why it failed. The Terminal's
+# cp and Files' paste and duplicate all copy through here.
+fun _copy_path(fs, src, dst)
+    if not vfs.is_dir(fs, src)
+        try
+            vfs.write(fs, dst, vfs.read(fs, src))
+        catch err
+            return err.message
+        return none
+    let why = _copy_tree(fs, src, dst)
+    if why != none
+        try
+            vfs.remove_tree(fs, dst)
+        catch err
+            none
+    return why
+
+# True when word is a folder that is there, as cp and mv need for their last
+# word when they take several paths; else says why and gives false.
+fun _term_into(s, cmd, word)
+    let p = _term_path(s, word)
+    if vfs.is_dir(s.fs, p)
+        return true
+    if vfs.exists(s.fs, p)
+        _term_reply(s, cmd + ": not a folder: " + p)
+    else
+        _term_reply(s, cmd + ": " + _term_missing(s, p))
+    return false
 
 # cp copies a file or a folder to a new name, or into a folder; like mv it
 # does not write over a name that is already there. A folder is not copied
@@ -2191,30 +2259,22 @@ fun _term_cp(s, a, b)
         else if _why_not_new(s.fs, dst) != none
             _term_reply(s, "cp: " + _why_not_new(s.fs, dst))
         else
-            let why = _term_cp_tree(s.fs, src, dst)
-            if why != none
-                try
-                    vfs.remove_tree(s.fs, dst)
-                catch err
-                    none
-                _term_reply(s, "cp: " + why)
-                return
-            let saved = _fs_commit()
-            if saved != ""
-                _term_reply(s, saved)
+            _term_cp_do(s, src, dst)
     else if vfs.exists(s.fs, dst)
         _term_reply(s, "cp: already there: " + dst)
     else if _why_not_new(s.fs, dst) != none
         _term_reply(s, "cp: " + _why_not_new(s.fs, dst))
     else
-        try
-            vfs.write(s.fs, dst, vfs.read(s.fs, src))
-        catch err
-            _term_reply(s, "cp: " + err.message)
-            return
-        let saved = _fs_commit()
-        if saved != ""
-            _term_reply(s, saved)
+        _term_cp_do(s, src, dst)
+
+fun _term_cp_do(s, src, dst)
+    let why = _copy_path(s.fs, src, dst)
+    if why != none
+        _term_reply(s, "cp: " + why)
+        return
+    let saved = _fs_commit()
+    if saved != ""
+        _term_reply(s, saved)
 
 # The words of a line; a run of spaces counts as one. A word in double or
 # single quotes keeps its spaces, so "my notes.txt" is one word, and the quotes
@@ -2258,7 +2318,7 @@ fun _split_words(line)
 
 
 # Commands whose words are all paths, so a word like -l or -r is a mistake, not a name.
-let _path_commands = ["cd", "ls", "cat", "mkdir", "touch", "rm", "mv", "cp", "wc", "head", "tail", "grep", "sort", "uniq", "nl", "tree", "du", "diff", "cmp", "stat", "basename", "dirname", "tac"]
+let _path_commands = ["cd", "ls", "cat", "mkdir", "touch", "rm", "rmdir", "mv", "cp", "wc", "head", "tail", "grep", "sort", "uniq", "nl", "tree", "du", "diff", "cmp", "stat", "basename", "dirname", "tac", "rev"]
 
 fun _term_run(s, line)
     s.cwd = _existing_dir(s.fs, s.cwd)
@@ -2288,9 +2348,9 @@ fun _term_run(s, line)
     if cmd == "help"
         _term_reply(s, "help clear history echo apps date")
         _term_reply(s, "workspace pwd cd ls cat head tail")
-        _term_reply(s, "mkdir touch write rm mv cp")
+        _term_reply(s, "mkdir touch write rm rmdir mv cp")
         _term_reply(s, "wc grep find sort uniq nl")
-        _term_reply(s, "tree du diff cmp stat tac")
+        _term_reply(s, "tree du diff cmp stat tac rev")
         _term_reply(s, "basename dirname")
         _term_reply(s, "echo text > file, >> adds")
         _term_reply(s, "\"my file\": quotes keep spaces")
@@ -2395,8 +2455,16 @@ fun _term_run(s, line)
         if _term_args(s, parts, 1, "find <text>")
             _term_find(s, parts[1])
     else if cmd == "cp"
-        if _term_args(s, parts, 2, "cp <from> <to>")
+        # cp a b, or several into a folder: cp a b c folder copies each in
+        # turn, and an error for one does not stop the rest
+        let n = len(parts)
+        if n < 3
+            _term_reply(s, "usage: cp <from>... <to>")
+        else if n == 3
             _term_cp(s, parts[1], parts[2])
+        else if _term_into(s, "cp", parts[n - 1])
+            for path in slice(parts, 1, n - 1)
+                _term_cp(s, path, parts[n - 1])
     else if cmd == "sort"
         if _term_args(s, parts, 1, "sort <path>")
             _term_sort(s, parts[1])
@@ -2409,6 +2477,9 @@ fun _term_run(s, line)
     else if cmd == "tac"
         if _term_args(s, parts, 1, "tac <path>")
             _term_tac(s, parts[1])
+    else if cmd == "rev"
+        if _term_args(s, parts, 1, "rev <path>")
+            _term_rev(s, parts[1])
     else if cmd == "tree"
         if len(parts) > 2
             _term_reply(s, "usage: tree [path]")
@@ -2459,9 +2530,22 @@ fun _term_run(s, line)
             _term_reply(s, "usage: rm <path>...")
         for path in slice(parts, 1, len(parts))
             _term_rm(s, path)
+    else if cmd == "rmdir"
+        # several paths, one after another as for rm
+        if len(parts) < 2
+            _term_reply(s, "usage: rmdir <path>...")
+        for path in slice(parts, 1, len(parts))
+            _term_rmdir(s, path)
     else if cmd == "mv"
-        if _term_args(s, parts, 2, "mv <from> <to>")
+        # mv a b, or several into a folder, each in turn as for cp
+        let n = len(parts)
+        if n < 3
+            _term_reply(s, "usage: mv <from>... <to>")
+        else if n == 3
             _term_mv(s, parts[1], parts[2])
+        else if _term_into(s, "mv", parts[n - 1])
+            for path in slice(parts, 1, n - 1)
+                _term_mv(s, path, parts[n - 1])
     else
         _term_reply(s, "unknown: " + cmd)
 
@@ -2475,7 +2559,7 @@ let _term_recall_keep = 50
 # with "/" after it, anything else with a space); several are taken as far as
 # they agree, and when that adds nothing they are listed. No match, or an
 # empty line: nothing.
-let _term_commands = ["apps", "basename", "cat", "cd", "clear", "cmp", "cp", "date", "diff", "dirname", "du", "echo", "find", "grep", "head", "help", "history", "ls", "mkdir", "mv", "nl", "pwd", "rm", "sort", "stat", "tac", "tail", "touch", "tree", "uniq", "wc", "workspace", "write"]
+let _term_commands = ["apps", "basename", "cat", "cd", "clear", "cmp", "cp", "date", "diff", "dirname", "du", "echo", "find", "grep", "head", "help", "history", "ls", "mkdir", "mv", "nl", "pwd", "rev", "rm", "rmdir", "sort", "stat", "tac", "tail", "touch", "tree", "uniq", "wc", "workspace", "write"]
 
 fun _common_start(names)
     let out = names[0]
@@ -2926,6 +3010,11 @@ fun _files_make(s, kind, text)
         return
     if kind == "file"
         _shell_open.path = full
+    _files_added(s, name)
+
+# After a new name is made in the folder shown: commit the workspace (a
+# failed commit is the title's note) and select the new row.
+fun _files_added(s, name)
     let saved = _fs_commit()
     if saved != ""
         s.note = saved
@@ -2934,6 +3023,71 @@ fun _files_make(s, kind, text)
         if names[i] == name
             s.sel = i
     s.stale = false
+
+# A name for a copy of name in dir that is not taken: "notes copy.txt", then
+# "notes copy 2.txt" and on. A folder, and a file whose only dot is its first
+# character (.profile), get the words at the end: "docs copy".
+fun _copy_name(fs, dir, name, folder)
+    let stem = name
+    let ext = ""
+    if not folder
+        let i = len(name) - 1
+        while i > 0 and name[i] != "."
+            i = i - 1
+        if i > 0
+            stem = slice(name, 0, i)
+            ext = slice(name, i, len(name))
+    let n = 1
+    while true
+        let words = " copy"
+        if n > 1
+            words = " copy " + str(n)
+        let candidate = stem + words + ext
+        if not vfs.exists(fs, paths.join(dir, candidate))
+            return candidate
+        n = n + 1
+
+# Ctrl+V pastes a copy of the file or folder whose full path is on the
+# desktop's clipboard (Files' Ctrl+C puts it there) into the folder shown,
+# and selects the new row. A folder comes with everything in it, and is not
+# pasted into itself or a folder inside it. When the name is taken (pasting
+# back into the same folder, say) the copy gets a free name from _copy_name.
+fun _files_paste(s)
+    let from = _clip_line()
+    if not strings.starts_with(from, "/")
+        s.note = "no path to paste"
+        return
+    _files_copy_in(s, paths.normalize(from))
+
+# Ctrl+D duplicates the selected row in the folder shown, under a free name,
+# and selects the copy; the clipboard is left as it is. Not on .., and not on
+# a row that changed since the last draw.
+fun _files_duplicate(s, names)
+    if len(names) == 0 or names[s.sel] == ".." or s.stale
+        return
+    _files_copy_in(s, _files_full(s, names[s.sel]))
+
+# A copy of from (a full path) in the folder shown, for paste and duplicate.
+fun _files_copy_in(s, from)
+    let name = paths.base(from)
+    if not vfs.exists(s.fs, from)
+        s.note = "not found: " + name
+        return
+    if not vfs.is_dir(s.fs, s.path)
+        s.note = "gone: " + s.path
+        return
+    if vfs.is_dir(s.fs, from) and _term_inside(from, s.path)
+        if from == "/"
+            name = "/"
+        s.note = "not into itself: " + name
+        return
+    if vfs.exists(s.fs, _files_full(s, name))
+        name = _copy_name(s.fs, s.path, name, vfs.is_dir(s.fs, from))
+    let why = _copy_path(s.fs, from, _files_full(s, name))
+    if why != none
+        s.note = why
+        return
+    _files_added(s, name)
 
 fun _files_rename_key(s, k)
     let r = s.renaming
@@ -3073,6 +3227,10 @@ fun _files_key(s, k)
         # the selected row's full path, to paste into the Terminal or a note
         if len(names) > 0 and names[s.sel] != ".."
             _clip.text = _files_full(s, names[s.sel])
+    else if k == "ctrl+v"
+        _files_paste(s)
+    else if k == "ctrl+d"
+        _files_duplicate(s, names)
     else if k == "home" or k == "ctrl+home"
         s.sel = 0
     else if k == "end" or k == "ctrl+end"

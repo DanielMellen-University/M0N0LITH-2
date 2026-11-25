@@ -1,0 +1,8 @@
+c comes as ctrl+c
+v comes as ctrl+v
+d comes as ctrl+d
+["Files: /home", "  ..", "  docs/", "> docs copy/", "  welcome copy.txt", "  welcome.txt"]
+d comes as ctrl+d
+a commit for it true
+["docs", "docs copy", "docs copy copy", "welcome copy.txt", "welcome.txt"]
+["Welcome to Relic.\n", "plan\n", "plan\n"]
