@@ -1,0 +1,34 @@
+# cp with several paths copies each into the folder named last, in turn. An
+# error for one (missing, already there, a folder into itself) does not stop
+# the rest. The last word must be a folder that is there; else nothing is
+# copied. With fewer than two paths it prints its usage.
+use ../shell/wm
+use std/vfs
+let t = wm.terminal.init()
+fun run(line)
+    t.buf = []
+    for c in line
+        if c == " "
+            wm.terminal.on_key(t, "space")
+        else
+            wm.terminal.on_key(t, c)
+    wm.terminal.on_key(t, "return")
+    print(t.buf)
+run("mkdir out docs/inner")
+run("write a.txt alpha")
+run("write \"b c.txt\" beta")
+run("write docs/inner/x.txt x")
+run("cp a.txt \"b c.txt\" docs out")
+run("tree out")
+run("cat out/a.txt \"out/b c.txt\" out/docs/inner/x.txt")
+run("write out/b.txt old")
+run("write b.txt new")
+run("cp missing.txt b.txt out out/ a.txt welcome.txt out")
+run("cat out/b.txt out/welcome.txt")
+run("cp a.txt b.txt nofolder")
+run("cp a.txt b.txt welcome.txt")
+run("cp a.txt b.txt welcome.txt/x")
+run("ls")
+run("cp")
+run("cp a.txt")
+run("cp a.txt b.txt -r")

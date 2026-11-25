@@ -27,7 +27,7 @@ Commands split on spaces. A part in double or single quotes is one word with its
 | `cd [path]` | changes folder; without a path, goes to `/home` |
 | `ls [path]` | lists a folder (the current one without a path), folders with a `/` after them, packed into lines that fit the window; for a file, prints its name |
 | `cat path...` | prints a file, or several one after another (only the last 200 lines are kept, like any output); a missing one is an error and the rest still print |
-| `cp from to` | copies a file or a folder to a new name, or into `to` when it is a folder; what is inside a folder is copied too. A name already there is not written over, and a folder is not copied into itself (`/` is in everything, so it is never copied) |
+| `cp from... to` | copies a file or a folder to a new name, or into `to` when it is a folder; what is inside a folder is copied too. With several paths, `to` must be a folder that is there, and each is copied into it in turn; an error for one does not stop the rest. A name already there is not written over, and a folder is not copied into itself (`/` is in everything, so it is never copied) |
 | `wc path...` | each file's lines (its newlines, as Unix counts them), words and characters, then the path (in quotes when it has a space, as `ls` shows names). A folder counts every file under it, in the order `ls` gives, and a total line follows, as it does for more than one path. An empty folder is `0 0 0 total`. One file on its own has no total line. An error for one path does not stop the rest |
 | `head path [lines]` | the first 10 lines of a file, or as many as `lines` says (a whole number in digits; 0 prints nothing). A shorter file prints only the lines it has: a final newline is not an extra blank line |
 | `tail path [lines]` | the last 10 lines of a file, or as many as `lines` says |
@@ -52,7 +52,7 @@ Commands split on spaces. A part in double or single quotes is one word with its
 | `rmdir path...` | removes each empty folder, and only that: a file is `not a folder`, and a folder with anything in it is `folder not empty`. An error for one does not stop the rest. A Terminal in a folder that goes moves up to the nearest one left |
 | `mv from to` | renames, or moves into `to` when it is a folder; the file the next Editor opens goes along with it, and so does the Terminal when it is in the folder moved |
 
-`clear`, `history`, `apps`, `date`, `workspace` and `pwd` take no words, and a word too many is an error for every command but `cat`, `rm`, `rmdir`, `mkdir` and `touch`, which take several paths and do each in turn (`rm a b` removes both); `head` and `tail` take a count after the path.
+`clear`, `history`, `apps`, `date`, `workspace` and `pwd` take no words, and a word too many is an error for every command but `cat`, `rm`, `rmdir`, `mkdir` and `touch`, which take several paths and do each in turn (`rm a b` removes both), and `cp`, which takes several paths before a folder; `head` and `tail` take a count after the path.
 
 `workspace` reads the store state and notice without changing either. A finished command still gets the usual desktop snapshot.
 
