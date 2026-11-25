@@ -50,9 +50,9 @@ Commands split on spaces. A part in double or single quotes is one word with its
 | `write path text` | replaces the file with the text and a newline |
 | `rm path...` | removes each file or empty folder; an error for one (not found, not empty) does not stop the rest |
 | `rmdir path...` | removes each empty folder, and only that: a file is `not a folder`, and a folder with anything in it is `folder not empty`. An error for one does not stop the rest. A Terminal in a folder that goes moves up to the nearest one left |
-| `mv from to` | renames, or moves into `to` when it is a folder; the file the next Editor opens goes along with it, and so does the Terminal when it is in the folder moved |
+| `mv from... to` | renames, or moves into `to` when it is a folder. With several paths, `to` must be a folder that is there, and each is moved into it in turn; an error for one does not stop the rest. the file the next Editor opens goes along with it, and so does the Terminal when it is in the folder moved |
 
-`clear`, `history`, `apps`, `date`, `workspace` and `pwd` take no words, and a word too many is an error for every command but `cat`, `rm`, `rmdir`, `mkdir` and `touch`, which take several paths and do each in turn (`rm a b` removes both), and `cp`, which takes several paths before a folder; `head` and `tail` take a count after the path.
+`clear`, `history`, `apps`, `date`, `workspace` and `pwd` take no words, and a word too many is an error for every command but `cat`, `rm`, `rmdir`, `mkdir` and `touch`, which take several paths and do each in turn (`rm a b` removes both), and `cp` and `mv`, which take several paths before a folder; `head` and `tail` take a count after the path.
 
 `workspace` reads the store state and notice without changing either. A finished command still gets the usual desktop snapshot.
 

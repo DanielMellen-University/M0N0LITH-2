@@ -42,7 +42,7 @@
 > touch
   usage: touch <path>...
 > mv x
-  usage: mv <from> <to>
+  usage: mv <from>... <to>
 > nope
   unknown: nope
 > echo one two > w.txt

@@ -1406,8 +1406,9 @@ fun _term_optional_path(s, parts, default)
     return default
 
 # True when the command got exactly n words after it, else prints usage. A word
-# too many is an error too: `mv a b c` must not quietly move only a (cat, rm,
-# mkdir and touch take several paths instead).
+# too many is an error too: `stat a b` must not quietly read only a (cat, rm,
+# rmdir, mkdir and touch take several paths instead, and cp and mv take
+# several before a folder).
 fun _term_args(s, parts, n, usage)
     if len(parts) - 1 == n
         return true
@@ -2536,8 +2537,15 @@ fun _term_run(s, line)
         for path in slice(parts, 1, len(parts))
             _term_rmdir(s, path)
     else if cmd == "mv"
-        if _term_args(s, parts, 2, "mv <from> <to>")
+        # mv a b, or several into a folder, each in turn as for cp
+        let n = len(parts)
+        if n < 3
+            _term_reply(s, "usage: mv <from>... <to>")
+        else if n == 3
             _term_mv(s, parts[1], parts[2])
+        else if _term_into(s, "mv", parts[n - 1])
+            for path in slice(parts, 1, n - 1)
+                _term_mv(s, path, parts[n - 1])
     else
         _term_reply(s, "unknown: " + cmd)
 

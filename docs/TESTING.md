@@ -15,7 +15,7 @@ One test: `ctest --test-dir build -C Release -R golden_shell_ide`. Or run it str
 
 ## How they are checked
 
-CMake finds every `tests/*.relic` and adds it as `golden_<name>`. `tools/run_golden.cmake` runs it from `tests/`, and it passes when it exits with 0 and its standard output matches `<name>.out` exactly (Windows line endings are ignored). A test with no `.out` file must print nothing. One more test, `check_shell`, runs `relic check` on `wm.relic`, `workspace.relic`, `desktop.relic` and `ide_diag.relic`, which catches syntax errors and undefined names in the drawing code no test runs. That is 534 tests in all, and CI runs them on Linux, macOS and Windows. The 35 `shell_workspace_*` golden programs, `workspace_restart`, and `workspace_kill` cover the store. `workspace_restart` runs four relic processes against one directory. `workspace_kill` kills a process after it has written a partial and before it publishes.
+CMake finds every `tests/*.relic` and adds it as `golden_<name>`. `tools/run_golden.cmake` runs it from `tests/`, and it passes when it exits with 0 and its standard output matches `<name>.out` exactly (Windows line endings are ignored). A test with no `.out` file must print nothing. One more test, `check_shell`, runs `relic check` on `wm.relic`, `workspace.relic`, `desktop.relic` and `ide_diag.relic`, which catches syntax errors and undefined names in the drawing code no test runs. That is 535 tests in all, and CI runs them on Linux, macOS and Windows. The 35 `shell_workspace_*` golden programs, `workspace_restart`, and `workspace_kill` cover the store. `workspace_restart` runs four relic processes against one directory. `workspace_kill` kills a process after it has written a partial and before it publishes.
 
 None of them opens the SDL window. A passing run does not prove what the desktop draws. The Linux GUI pass, and what it did not try, is in the [roadmap](ROADMAP.md#accepted-nov-7-2026).
 
@@ -118,7 +118,7 @@ Write `tests/shell_<topic>.relic`, run it, read its output, and save that as `te
 | `shell_terminal_recall` | Up and Down through earlier commands, the line being typed kept, blanks and repeats not kept, editing a recalled line, the last 50, and `history` listing them numbered |
 | `shell_terminal_keys` | Ctrl+C gives up the line (shown with ^C, not run or kept, ends a recall), Ctrl+L empties the output and keeps the line, Ctrl+Backspace takes off the last word there and in Notes, Ctrl+U empties the line, `!!` runs the command before (or says there is none) |
 | `shell_terminal_complete` | Tab: command names, names in the current folder and in a typed one (absolute, `..`, `.`), a folder gets `/`, several go as far as they agree or are listed, nothing for no match or a missing folder; every command `help` lists completes to itself, or is listed with the longer command it starts (`rm` and `rmdir`); a name with a space goes in quotes, and a word begun with a quote completes from inside it |
-| `shell_terminal_errors` | Terminal error messages (mv, mkdir, cat, paths through a file), and mv taking the Terminal along with the folder it is in; rm, mkdir and touch with several paths |
+| `shell_terminal_errors` | Terminal error messages (mv, mkdir, cat, paths through a file), and mv taking the Terminal along with the folder it is in; rm, mkdir and touch with several paths; mv with several paths and no folder last |
 | `shell_terminal_touch` | touch preserves existing entries and creates empty files |
 | `shell_terminal_write` | write replaces content and handles empty text |
 | `shell_terminal_cat_blank` | cat preserves blank lines in files |
@@ -158,6 +158,7 @@ Write `tests/shell_<topic>.relic`, run it, read its output, and save that as `te
 | `shell_terminal_echo_bare` | echo with no text, or an empty quoted word, prints an empty line |
 | `shell_terminal_cp_folder_collision` | cp into a folder that already holds the name refuses and leaves it untouched |
 | `shell_terminal_mv_folder_into` | mv moves a folder inside a folder, and refuses when the folder already holds that name |
+| `shell_terminal_mv_many` | mv of several files, a quoted name and a folder into the folder named last; errors for a missing path, a name already there and a folder into itself do not stop the rest; a last word that is missing or a file moves nothing; usage and an option; a Terminal in a folder moved goes with it |
 | `shell_terminal_multipath_errors` | rm, mkdir and touch with several paths keep going after an error for one |
 | `shell_terminal_sort_uniq_nl_errors` | sort, uniq and nl on a path ending in /, and nl on a missing file |
 | `shell_terminal_head_tail_counts` | head and tail counts: tail 0, leading zeros, over six digits, a letter, a dash count, and a bad count on a missing file |

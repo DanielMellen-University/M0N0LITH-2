@@ -100,7 +100,7 @@ mv: already there: /home/notes/todo.txt
 /home> cat
 usage: cat <path>...
 /home> mv a
-usage: mv <from> <to>
+usage: mv <from>... <to>
 /home> frob
 unknown: frob
 /home> rm notes/old/empty.txt
