@@ -1,0 +1,13 @@
+["/home> rev a.txt", "cba", "", "dlrow olleh"]
+["/home> rev b.txt", "eno", "owt"]
+["/home> rev u.txt", "roñes ,olléh"]
+["/home> rev empty.txt"]
+["/home> rev nl.txt", ""]
+["/home> rev \"my notes.txt\"", "dc ba"]
+same true
+["/home> rev /tmp", "rev: is a folder: /tmp"]
+["/home> rev missing.txt", "rev: not found: /home/missing.txt"]
+["/home> rev a.txt/", "rev: not a folder: /home/a.txt"]
+["/home> rev a.txt b.txt", "usage: rev <path>"]
+["/home> rev", "usage: rev <path>"]
+["/home> rev -x", "rev: no options, not even -x"]

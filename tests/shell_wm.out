@@ -45,7 +45,7 @@ help clear history echo apps date
 workspace pwd cd ls cat head tail
 mkdir touch write rm rmdir mv cp
 wc grep find sort uniq nl
-tree du diff cmp stat tac
+tree du diff cmp stat tac rev
 basename dirname
 echo text > file, >> adds
 "my file": quotes keep spaces

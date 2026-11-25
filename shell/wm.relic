@@ -1874,6 +1874,19 @@ fun _term_tac(s, path)
     for line in out
         _term_reply(s, line)
 
+# rev: each line of a file with its characters in the other order (whole
+# characters, past ASCII too), the lines in their own order. A final newline
+# is not an extra blank line, as for tac. As many as the output keeps, from
+# the end.
+fun _term_rev(s, path)
+    let lines = _term_file_lines(s, "rev", path)
+    if lines == none
+        return
+    if len(lines) > 1 and lines[len(lines) - 1] == ""
+        lines = slice(lines, 0, len(lines) - 1)
+    for line in slice(lines, math.max(0, len(lines) - term_history), len(lines))
+        _term_reply(s, strings.reverse(line))
+
 # nl: the lines of a file numbered from 1, the way history numbers commands;
 # as many as the output keeps, from the end, still with their own numbers.
 fun _term_nl(s, path)
@@ -2292,7 +2305,7 @@ fun _split_words(line)
 
 
 # Commands whose words are all paths, so a word like -l or -r is a mistake, not a name.
-let _path_commands = ["cd", "ls", "cat", "mkdir", "touch", "rm", "rmdir", "mv", "cp", "wc", "head", "tail", "grep", "sort", "uniq", "nl", "tree", "du", "diff", "cmp", "stat", "basename", "dirname", "tac"]
+let _path_commands = ["cd", "ls", "cat", "mkdir", "touch", "rm", "rmdir", "mv", "cp", "wc", "head", "tail", "grep", "sort", "uniq", "nl", "tree", "du", "diff", "cmp", "stat", "basename", "dirname", "tac", "rev"]
 
 fun _term_run(s, line)
     s.cwd = _existing_dir(s.fs, s.cwd)
@@ -2324,7 +2337,7 @@ fun _term_run(s, line)
         _term_reply(s, "workspace pwd cd ls cat head tail")
         _term_reply(s, "mkdir touch write rm rmdir mv cp")
         _term_reply(s, "wc grep find sort uniq nl")
-        _term_reply(s, "tree du diff cmp stat tac")
+        _term_reply(s, "tree du diff cmp stat tac rev")
         _term_reply(s, "basename dirname")
         _term_reply(s, "echo text > file, >> adds")
         _term_reply(s, "\"my file\": quotes keep spaces")
@@ -2443,6 +2456,9 @@ fun _term_run(s, line)
     else if cmd == "tac"
         if _term_args(s, parts, 1, "tac <path>")
             _term_tac(s, parts[1])
+    else if cmd == "rev"
+        if _term_args(s, parts, 1, "rev <path>")
+            _term_rev(s, parts[1])
     else if cmd == "tree"
         if len(parts) > 2
             _term_reply(s, "usage: tree [path]")
@@ -2515,7 +2531,7 @@ let _term_recall_keep = 50
 # with "/" after it, anything else with a space); several are taken as far as
 # they agree, and when that adds nothing they are listed. No match, or an
 # empty line: nothing.
-let _term_commands = ["apps", "basename", "cat", "cd", "clear", "cmp", "cp", "date", "diff", "dirname", "du", "echo", "find", "grep", "head", "help", "history", "ls", "mkdir", "mv", "nl", "pwd", "rm", "rmdir", "sort", "stat", "tac", "tail", "touch", "tree", "uniq", "wc", "workspace", "write"]
+let _term_commands = ["apps", "basename", "cat", "cd", "clear", "cmp", "cp", "date", "diff", "dirname", "du", "echo", "find", "grep", "head", "help", "history", "ls", "mkdir", "mv", "nl", "pwd", "rev", "rm", "rmdir", "sort", "stat", "tac", "tail", "touch", "tree", "uniq", "wc", "workspace", "write"]
 
 fun _common_start(names)
     let out = names[0]

@@ -1,0 +1,36 @@
+# rev prints each line of a file with its characters in the other order,
+# the lines in their own order: a blank line, a final newline that is not an
+# extra line, a last line with no newline, characters past ASCII, an empty
+# file and a file that is only a newline. The file is not changed. A folder,
+# a missing file, a file with /, two paths and an option are errors.
+use ../shell/wm
+use std/vfs
+let t = wm.terminal.init()
+fun run(line)
+    t.buf = []
+    for c in line
+        if c == " "
+            wm.terminal.on_key(t, "space")
+        else
+            wm.terminal.on_key(t, c)
+    wm.terminal.on_key(t, "return")
+    print(t.buf)
+vfs.write(t.fs, "/home/a.txt", "abc\n\nhello world\n")
+vfs.write(t.fs, "/home/b.txt", "one\ntwo")
+vfs.write(t.fs, "/home/u.txt", "héllo, señor\n")
+vfs.write(t.fs, "/home/empty.txt", "")
+vfs.write(t.fs, "/home/nl.txt", "\n")
+vfs.write(t.fs, "/home/my notes.txt", "ab cd\n")
+run("rev a.txt")
+run("rev b.txt")
+run("rev u.txt")
+run("rev empty.txt")
+run("rev nl.txt")
+run("rev \"my notes.txt\"")
+print("same", vfs.read(t.fs, "/home/a.txt") == "abc\n\nhello world\n")
+run("rev /tmp")
+run("rev missing.txt")
+run("rev a.txt/")
+run("rev a.txt b.txt")
+run("rev")
+run("rev -x")
