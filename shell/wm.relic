@@ -2940,6 +2940,11 @@ fun _files_make(s, kind, text)
         return
     if kind == "file"
         _shell_open.path = full
+    _files_added(s, name)
+
+# After a new name is made in the folder shown: commit the workspace (a
+# failed commit is the title's note) and select the new row.
+fun _files_added(s, name)
     let saved = _fs_commit()
     if saved != ""
         s.note = saved
@@ -2948,6 +2953,37 @@ fun _files_make(s, kind, text)
         if names[i] == name
             s.sel = i
     s.stale = false
+
+# Ctrl+V pastes a copy of the file or folder whose full path is on the
+# desktop's clipboard (Files' Ctrl+C puts it there) into the folder shown,
+# and selects the new row. A folder comes with everything in it, and is not
+# pasted into itself or a folder inside it.
+fun _files_paste(s)
+    let from = _clip_line()
+    if not strings.starts_with(from, "/")
+        s.note = "no path to paste"
+        return
+    from = paths.normalize(from)
+    let name = paths.base(from)
+    if not vfs.exists(s.fs, from)
+        s.note = "not found: " + name
+        return
+    if not vfs.is_dir(s.fs, s.path)
+        s.note = "gone: " + s.path
+        return
+    if vfs.is_dir(s.fs, from) and _term_inside(from, s.path)
+        if from == "/"
+            name = "/"
+        s.note = "not into itself: " + name
+        return
+    if vfs.exists(s.fs, _files_full(s, name))
+        s.note = "already there: " + name
+        return
+    let why = _copy_path(s.fs, from, _files_full(s, name))
+    if why != none
+        s.note = why
+        return
+    _files_added(s, name)
 
 fun _files_rename_key(s, k)
     let r = s.renaming
@@ -3087,6 +3123,8 @@ fun _files_key(s, k)
         # the selected row's full path, to paste into the Terminal or a note
         if len(names) > 0 and names[s.sel] != ".."
             _clip.text = _files_full(s, names[s.sel])
+    else if k == "ctrl+v"
+        _files_paste(s)
     else if k == "home" or k == "ctrl+home"
         s.sel = 0
     else if k == "end" or k == "ctrl+end"

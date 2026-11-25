@@ -1,0 +1,39 @@
+# Files Ctrl+V: a copy of the file or folder whose path Ctrl+C put on the
+# clipboard goes into the folder shown, and its row is selected. A folder
+# comes with what is inside it, and the original stays.
+use ../shell/wm
+use std/vfs
+let d = wm.new_desktop(640, 480, wm.default_apps())
+let f = wm.launch(d, wm.files_app)
+let fs = f.state.fs
+vfs.make_dir(fs, "/tmp/src")
+vfs.write(fs, "/tmp/src/doc.txt", "hello\n")
+vfs.make_dir(fs, "/tmp/src/docs/inner")
+vfs.write(fs, "/tmp/src/docs/inner/a.txt", "a\n")
+vfs.make_dir(fs, "/tmp/dst")
+fun pick(name)
+    wm.visible_lines(f)
+    for i in 0..len(f.state.names)
+        if f.state.names[i] == name
+            f.state.sel = i
+fun go(path)
+    f.state.path = path
+    wm.visible_lines(f)
+go("/tmp/src")
+pick("doc.txt")
+wm.key(d, "ctrl+c")
+go("/tmp/dst")
+wm.key(d, "ctrl+v")
+print(wm.visible_lines(f))
+print("copy", vfs.read(fs, "/tmp/dst/doc.txt"), "original", vfs.read(fs, "/tmp/src/doc.txt"))
+go("/tmp/src")
+pick("docs")
+wm.key(d, "ctrl+c")
+go("/tmp/dst")
+wm.key(d, "ctrl+v")
+print(wm.visible_lines(f))
+print("folder", vfs.read(fs, "/tmp/dst/docs/inner/a.txt"), vfs.exists(fs, "/tmp/src/docs/inner/a.txt"))
+# a folder pasted at /, another folder it is not inside
+go("/")
+wm.key(d, "ctrl+v")
+print(wm.visible_lines(f), vfs.is_dir(fs, "/docs/inner"))

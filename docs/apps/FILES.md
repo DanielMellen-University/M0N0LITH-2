@@ -1,6 +1,6 @@
 # Files
 
-A file browser over the desktop's filesystem, the same one the Terminal, the Editor and the IDE use. A new Files window opens `/home`. A rename, a new file or folder, or a delete is committed with the workspace when one is open. A failed commit replaces the title line until the next key, and the desktop notice stays up. See [Workspace recovery](../workspace-recovery.md).
+A file browser over the desktop's filesystem, the same one the Terminal, the Editor and the IDE use. A new Files window opens `/home`. A rename, a new file or folder, a paste, or a delete is committed with the workspace when one is open. A failed commit replaces the title line until the next key, and the desktop notice stays up. See [Workspace recovery](../workspace-recovery.md).
 
 ## What it shows
 
@@ -24,6 +24,7 @@ A long list scrolls just far enough to keep the selected row in view; the title 
 | Backspace or Left | goes up a folder, with the folder you were in selected, so going back down is one key (Right) |
 | Delete | asks first, in the title (`Delete notes.txt? Delete again`, a long name cut with `...`); a second Delete removes the file, or the folder if it is empty (a folder with anything in it says `not empty`), and any other key, Escape, or a click, gives up. `..` cannot be removed. After a removal the selection stays on its line, now the next name (the one before when it was the last) |
 | Ctrl+C | copies the selected row's full path, such as `/home/docs/plan.txt`, to the desktop's clipboard, to paste into the Terminal or Notes; on `..` it copies nothing |
+| Ctrl+V | pastes a copy of the file or folder whose full path is on the clipboard (what Ctrl+C copied here) into the folder shown, and selects the new row; a folder comes with everything in it and the original stays. The title says why when nothing is pasted: `no path to paste` (the clipboard does not start with `/`), `not found: name`, `not into itself: name` (a folder into itself or a folder inside it, `/` included), or `already there: name`. Cmd+V on macOS |
 | Right | goes into the selected folder, as in a folder tree; on a file or `..` it does nothing |
 | Click a row | selects and opens it |
 
