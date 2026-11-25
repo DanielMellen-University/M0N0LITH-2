@@ -48,15 +48,16 @@ Commands split on spaces. A part in double or single quotes is one word with its
 | `touch path...` | makes each an empty file; an existing file or folder is left as it is |
 | `write path text` | replaces the file with the text and a newline |
 | `rm path...` | removes each file or empty folder; an error for one (not found, not empty) does not stop the rest |
+| `rmdir path...` | removes each empty folder, and only that: a file is `not a folder`, and a folder with anything in it is `folder not empty`. An error for one does not stop the rest. A Terminal in a folder that goes moves up to the nearest one left |
 | `mv from to` | renames, or moves into `to` when it is a folder; the file the next Editor opens goes along with it, and so does the Terminal when it is in the folder moved |
 
-`clear`, `history`, `apps`, `date`, `workspace` and `pwd` take no words, and a word too many is an error for every command but `cat`, `rm`, `mkdir` and `touch`, which take several paths and do each in turn (`rm a b` removes both); `head` and `tail` take a count after the path.
+`clear`, `history`, `apps`, `date`, `workspace` and `pwd` take no words, and a word too many is an error for every command but `cat`, `rm`, `rmdir`, `mkdir` and `touch`, which take several paths and do each in turn (`rm a b` removes both); `head` and `tail` take a count after the path.
 
 `workspace` reads the store state and notice without changing either. A finished command still gets the usual desktop snapshot.
 
 ## Rules for paths
 
-- No command has options. `cd`, `ls`, `cat`, `head`, `tail`, `wc`, `grep`, `sort`, `uniq`, `nl`, `tree`, `du`, `diff`, `cmp`, `stat`, `basename`, `dirname`, `tac`, `mkdir`, `touch`, `rm`, `mv` and `cp` refuse any word starting with `-`, and so do the paths of `write` and `echo >`. To name such a file, write `./-x`.
+- No command has options. `cd`, `ls`, `cat`, `head`, `tail`, `wc`, `grep`, `sort`, `uniq`, `nl`, `tree`, `du`, `diff`, `cmp`, `stat`, `basename`, `dirname`, `tac`, `mkdir`, `touch`, `rm`, `rmdir`, `mv` and `cp` refuse any word starting with `-`, and so do the paths of `write` and `echo >`. To name such a file, write `./-x`.
 - A path ending in `/` must be a folder: `cat notes.txt/` and `rm notes.txt/` are errors, and `touch new/` makes nothing.
 - Errors say which part is wrong: `not found: /home/x`, `not a folder: /home/notes.txt` when a part of the path is a file, `no folder: /home/missing` when the folder to write into is not there.
 - If another app removes or moves the folder a Terminal is in, it moves up to the nearest folder that still exists.

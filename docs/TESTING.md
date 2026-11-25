@@ -15,7 +15,7 @@ One test: `ctest --test-dir build -C Release -R golden_shell_ide`. Or run it str
 
 ## How they are checked
 
-CMake finds every `tests/*.relic` and adds it as `golden_<name>`. `tools/run_golden.cmake` runs it from `tests/`, and it passes when it exits with 0 and its standard output matches `<name>.out` exactly (Windows line endings are ignored). A test with no `.out` file must print nothing. One more test, `check_shell`, runs `relic check` on `wm.relic`, `workspace.relic`, `desktop.relic` and `ide_diag.relic`, which catches syntax errors and undefined names in the drawing code no test runs. That is 531 tests in all, and CI runs them on Linux, macOS and Windows. The 35 `shell_workspace_*` golden programs, `workspace_restart`, and `workspace_kill` cover the store. `workspace_restart` runs four relic processes against one directory. `workspace_kill` kills a process after it has written a partial and before it publishes.
+CMake finds every `tests/*.relic` and adds it as `golden_<name>`. `tools/run_golden.cmake` runs it from `tests/`, and it passes when it exits with 0 and its standard output matches `<name>.out` exactly (Windows line endings are ignored). A test with no `.out` file must print nothing. One more test, `check_shell`, runs `relic check` on `wm.relic`, `workspace.relic`, `desktop.relic` and `ide_diag.relic`, which catches syntax errors and undefined names in the drawing code no test runs. That is 532 tests in all, and CI runs them on Linux, macOS and Windows. The 35 `shell_workspace_*` golden programs, `workspace_restart`, and `workspace_kill` cover the store. `workspace_restart` runs four relic processes against one directory. `workspace_kill` kills a process after it has written a partial and before it publishes.
 
 None of them opens the SDL window. A passing run does not prove what the desktop draws. The Linux GUI pass, and what it did not try, is in the [roadmap](ROADMAP.md#accepted-nov-7-2026).
 
@@ -117,7 +117,7 @@ Write `tests/shell_<topic>.relic`, run it, read its output, and save that as `te
 | `shell_terminal_history` | the Terminal keeps its last 200 lines; `!N` runs command N of history again, and says when there is none |
 | `shell_terminal_recall` | Up and Down through earlier commands, the line being typed kept, blanks and repeats not kept, editing a recalled line, the last 50, and `history` listing them numbered |
 | `shell_terminal_keys` | Ctrl+C gives up the line (shown with ^C, not run or kept, ends a recall), Ctrl+L empties the output and keeps the line, Ctrl+Backspace takes off the last word there and in Notes, Ctrl+U empties the line, `!!` runs the command before (or says there is none) |
-| `shell_terminal_complete` | Tab: command names, names in the current folder and in a typed one (absolute, `..`, `.`), a folder gets `/`, several go as far as they agree or are listed, nothing for no match or a missing folder; every command `help` lists completes to itself; a name with a space goes in quotes, and a word begun with a quote completes from inside it |
+| `shell_terminal_complete` | Tab: command names, names in the current folder and in a typed one (absolute, `..`, `.`), a folder gets `/`, several go as far as they agree or are listed, nothing for no match or a missing folder; every command `help` lists completes to itself, or is listed with the longer command it starts (`rm` and `rmdir`); a name with a space goes in quotes, and a word begun with a quote completes from inside it |
 | `shell_terminal_errors` | Terminal error messages (mv, mkdir, cat, paths through a file), and mv taking the Terminal along with the folder it is in; rm, mkdir and touch with several paths |
 | `shell_terminal_touch` | touch preserves existing entries and creates empty files |
 | `shell_terminal_write` | write replaces content and handles empty text |
@@ -174,6 +174,7 @@ Write `tests/shell_<topic>.relic`, run it, read its output, and save that as `te
 | `shell_terminal_cp_dir` | cp copies a folder and what is in it, including into another folder and an empty folder; it refuses a name that is already there, a copy into itself, a missing source and a missing parent |
 | `shell_terminal_cp_root` | cp of `/`, or of `..` from a folder under it, is a folder into itself: refused at once, and nothing is made |
 | `shell_terminal_rm_full` | rm refuses a folder that is not empty, then removes it once it is empty |
+| `shell_terminal_rmdir` | rmdir removes empty folders, several in turn and a quoted name; a file, a folder with something in it, a missing path and a path through a file are errors that do not stop the rest; usage, an option, `.` moving the Terminal up, and `/` and `..` refused as not empty |
 | `shell_terminal_mkdir_deep` | mkdir creates missing parent folders, and a second time says the folder is already there |
 | `shell_terminal_grep_dir` | grep of a folder, and grep with no path, searches the files under it and names each file; a file is still just its lines; a missing path, a file with /, too many words and an option are errors |
 | `shell_terminal_grep_dot` | grep matches characters as written: a dot is not a pattern, and case counts |

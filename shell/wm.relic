@@ -1659,6 +1659,26 @@ fun _term_rm(s, path)
         if saved != ""
             _term_reply(s, saved)
 
+# rmdir: removes an empty folder and nothing else. A file, or a folder with
+# anything in it, is an error, so it never takes more than it says.
+fun _term_rmdir(s, path)
+    let p = _term_path(s, path)
+    if not vfs.exists(s.fs, p)
+        _term_reply(s, "rmdir: " + _term_missing(s, p))
+    else if not vfs.is_dir(s.fs, p)
+        _term_reply(s, "rmdir: not a folder: " + p)
+    else if len(vfs.list(s.fs, p)) > 0
+        _term_reply(s, "rmdir: folder not empty: " + p)
+    else
+        try
+            vfs.remove(s.fs, p)
+        catch err
+            _term_reply(s, "rmdir: " + err.message)
+            return
+        let saved = _fs_commit()
+        if saved != ""
+            _term_reply(s, saved)
+
 # mv a b: rename a to b, or move a into b when b is a folder.
 fun _term_mv(s, a, b)
     # a folder may move to a new name ending in /, a file may not
@@ -2272,7 +2292,7 @@ fun _split_words(line)
 
 
 # Commands whose words are all paths, so a word like -l or -r is a mistake, not a name.
-let _path_commands = ["cd", "ls", "cat", "mkdir", "touch", "rm", "mv", "cp", "wc", "head", "tail", "grep", "sort", "uniq", "nl", "tree", "du", "diff", "cmp", "stat", "basename", "dirname", "tac"]
+let _path_commands = ["cd", "ls", "cat", "mkdir", "touch", "rm", "rmdir", "mv", "cp", "wc", "head", "tail", "grep", "sort", "uniq", "nl", "tree", "du", "diff", "cmp", "stat", "basename", "dirname", "tac"]
 
 fun _term_run(s, line)
     s.cwd = _existing_dir(s.fs, s.cwd)
@@ -2302,7 +2322,7 @@ fun _term_run(s, line)
     if cmd == "help"
         _term_reply(s, "help clear history echo apps date")
         _term_reply(s, "workspace pwd cd ls cat head tail")
-        _term_reply(s, "mkdir touch write rm mv cp")
+        _term_reply(s, "mkdir touch write rm rmdir mv cp")
         _term_reply(s, "wc grep find sort uniq nl")
         _term_reply(s, "tree du diff cmp stat tac")
         _term_reply(s, "basename dirname")
@@ -2473,6 +2493,12 @@ fun _term_run(s, line)
             _term_reply(s, "usage: rm <path>...")
         for path in slice(parts, 1, len(parts))
             _term_rm(s, path)
+    else if cmd == "rmdir"
+        # several paths, one after another as for rm
+        if len(parts) < 2
+            _term_reply(s, "usage: rmdir <path>...")
+        for path in slice(parts, 1, len(parts))
+            _term_rmdir(s, path)
     else if cmd == "mv"
         if _term_args(s, parts, 2, "mv <from> <to>")
             _term_mv(s, parts[1], parts[2])
@@ -2489,7 +2515,7 @@ let _term_recall_keep = 50
 # with "/" after it, anything else with a space); several are taken as far as
 # they agree, and when that adds nothing they are listed. No match, or an
 # empty line: nothing.
-let _term_commands = ["apps", "basename", "cat", "cd", "clear", "cmp", "cp", "date", "diff", "dirname", "du", "echo", "find", "grep", "head", "help", "history", "ls", "mkdir", "mv", "nl", "pwd", "rm", "sort", "stat", "tac", "tail", "touch", "tree", "uniq", "wc", "workspace", "write"]
+let _term_commands = ["apps", "basename", "cat", "cd", "clear", "cmp", "cp", "date", "diff", "dirname", "du", "echo", "find", "grep", "head", "help", "history", "ls", "mkdir", "mv", "nl", "pwd", "rm", "rmdir", "sort", "stat", "tac", "tail", "touch", "tree", "uniq", "wc", "workspace", "write"]
 
 fun _common_start(names)
     let out = names[0]
