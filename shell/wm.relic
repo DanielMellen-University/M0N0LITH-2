@@ -2152,7 +2152,7 @@ fun _term_find(s, word)
 fun _term_inside(parent, path)
     return path == parent or strings.starts_with(path, parent + "/")
 
-fun _term_cp_tree(fs, src, dst)
+fun _copy_tree(fs, src, dst)
     try
         vfs.make_dir(fs, dst)
     catch err
@@ -2161,7 +2161,7 @@ fun _term_cp_tree(fs, src, dst)
         let from = paths.join(src, e[0])
         let to = paths.join(dst, e[0])
         if e[1]
-            let why = _term_cp_tree(fs, from, to)
+            let why = _copy_tree(fs, from, to)
             if why != none
                 return why
         else
@@ -2170,6 +2170,25 @@ fun _term_cp_tree(fs, src, dst)
             catch err
                 return err.message
     return none
+
+# Copies the file or folder src to dst, which is not there yet; a folder
+# comes with everything in it. A copy that fails part way is removed again,
+# so nothing half made is left. Gives none, or why it failed. The Terminal's
+# cp and Files' paste and duplicate all copy through here.
+fun _copy_path(fs, src, dst)
+    if not vfs.is_dir(fs, src)
+        try
+            vfs.write(fs, dst, vfs.read(fs, src))
+        catch err
+            return err.message
+        return none
+    let why = _copy_tree(fs, src, dst)
+    if why != none
+        try
+            vfs.remove_tree(fs, dst)
+        catch err
+            none
+    return why
 
 # cp copies a file or a folder to a new name, or into a folder; like mv it
 # does not write over a name that is already there. A folder is not copied
@@ -2191,30 +2210,22 @@ fun _term_cp(s, a, b)
         else if _why_not_new(s.fs, dst) != none
             _term_reply(s, "cp: " + _why_not_new(s.fs, dst))
         else
-            let why = _term_cp_tree(s.fs, src, dst)
-            if why != none
-                try
-                    vfs.remove_tree(s.fs, dst)
-                catch err
-                    none
-                _term_reply(s, "cp: " + why)
-                return
-            let saved = _fs_commit()
-            if saved != ""
-                _term_reply(s, saved)
+            _term_cp_do(s, src, dst)
     else if vfs.exists(s.fs, dst)
         _term_reply(s, "cp: already there: " + dst)
     else if _why_not_new(s.fs, dst) != none
         _term_reply(s, "cp: " + _why_not_new(s.fs, dst))
     else
-        try
-            vfs.write(s.fs, dst, vfs.read(s.fs, src))
-        catch err
-            _term_reply(s, "cp: " + err.message)
-            return
-        let saved = _fs_commit()
-        if saved != ""
-            _term_reply(s, saved)
+        _term_cp_do(s, src, dst)
+
+fun _term_cp_do(s, src, dst)
+    let why = _copy_path(s.fs, src, dst)
+    if why != none
+        _term_reply(s, "cp: " + why)
+        return
+    let saved = _fs_commit()
+    if saved != ""
+        _term_reply(s, saved)
 
 # The words of a line; a run of spaces counts as one. A word in double or
 # single quotes keeps its spaces, so "my notes.txt" is one word, and the quotes
